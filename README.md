@@ -24,3 +24,12 @@ The app is implemented with Flutter (Dart) and should support the following plat
 * Android
 * IOS
 * Web
+
+## Screenshots
+<table>
+  <tr>
+    <td> 
+      <img src="doc/screenshots/login.png" alt="1" width="360px" >
+    </td>
+  </tr>
+</table>
