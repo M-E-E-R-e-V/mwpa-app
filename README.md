@@ -33,3 +33,7 @@ The app is implemented with Flutter (Dart) and should support the following plat
     </td>
   </tr>
 </table>
+
+
+## TODO 
+https://docs.flutter.dev/cookbook/persistence/sqlite

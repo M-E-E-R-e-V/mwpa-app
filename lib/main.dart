@@ -25,7 +25,7 @@ class NWPAApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: LoginPage()
+      home: const LoginPage()
     );
   }
 }
