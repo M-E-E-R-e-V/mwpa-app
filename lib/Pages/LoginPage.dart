@@ -1,7 +1,10 @@
 
 import 'package:flutter/material.dart';
-import 'package:mwpaapp/Setting/Preference.dart';
+import 'package:mwpaapp/Constants.dart';
+import 'package:mwpaapp/Settings/Preference.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../Mwpa/MwpaAPI.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -16,16 +19,29 @@ class _LoginPageState extends State<LoginPage> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  @override
+  void initState() {
+    super.initState();
+    _loadPref();
+  }
+
   Future signIn() async {
     var url = _urlController.text.trim();
     var username = _usernameController.text.trim();
     var password = _passwordController.text.trim();
 
-    if (true) {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(Preference.URL, url);
-      await prefs.setString(Preference.USERNAME, username);
-      await prefs.setString(Preference.PASSWORD, password);
+    var api = MwpaApi(url);
+
+    if (!await api.isLogin()) {
+      if (await api.login(username, password)) {
+        if (await api.isLogin()) {
+          final prefs = await SharedPreferences.getInstance();
+
+          await prefs.setString(Preference.URL, url);
+          await prefs.setString(Preference.USERNAME, username);
+          await prefs.setString(Preference.PASSWORD, password);
+        }
+      }
     }
 
     // https://www.youtube.com/watch?v=c09XiwOZKsI
@@ -35,10 +51,28 @@ class _LoginPageState extends State<LoginPage> {
     // https://www.youtube.com/watch?v=tKtYfuuVHlA
   }
 
+  Future<void> _loadPref() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    setState(() {
+      if (prefs.containsKey(Preference.URL)) {
+        _urlController.text = prefs.getString(Preference.URL)!;
+      }
+
+      if (prefs.containsKey(Preference.USERNAME)) {
+        _usernameController.text = prefs.getString(Preference.USERNAME)!;
+      }
+
+      if (prefs.containsKey(Preference.PASSWORD)) {
+        _passwordController.text = prefs.getString(Preference.PASSWORD)!;
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[300],
+      backgroundColor: kPrimaryBackgroundColor,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -48,7 +82,7 @@ class _LoginPageState extends State<LoginPage> {
                 SizedBox(
                   height: 120,
                   child: Image.asset(
-                      'lib/Icons/logo.png'
+                      'assets/images/logo.png'
                   ),
                 ),
 
@@ -56,7 +90,7 @@ class _LoginPageState extends State<LoginPage> {
 
                 // Title
                 const Text(
-                  'NWPA Login',
+                  'MWPA Login',
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 36
@@ -81,7 +115,7 @@ class _LoginPageState extends State<LoginPage> {
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.white70,
-                      border: Border.all(color: Colors.white),
+                      border: Border.all(color: kPrimaryColor),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Padding(
@@ -90,7 +124,7 @@ class _LoginPageState extends State<LoginPage> {
                         controller: _urlController,
                         decoration: const InputDecoration(
                             border: InputBorder.none,
-                            hintText: 'URL NWPA'
+                            hintText: 'URL MWPA'
                         ),
                       ),
                     ),
@@ -106,7 +140,7 @@ class _LoginPageState extends State<LoginPage> {
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.white70,
-                      border: Border.all(color: Colors.white),
+                      border: Border.all(color: kPrimaryColor),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Padding(
@@ -131,7 +165,7 @@ class _LoginPageState extends State<LoginPage> {
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.white70,
-                      border: Border.all(color: Colors.white),
+                      border: Border.all(color: kPrimaryColor),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Padding(
@@ -141,7 +175,7 @@ class _LoginPageState extends State<LoginPage> {
                         obscureText: true,
                         decoration: const InputDecoration(
                             border: InputBorder.none,
-                            hintText: 'Password'
+                            hintText: 'Password',
                         ),
                       ),
                     ),
@@ -159,7 +193,7 @@ class _LoginPageState extends State<LoginPage> {
                     child: Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: Colors.indigo,
+                        color: kPrimaryHeaderColor,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Center(
