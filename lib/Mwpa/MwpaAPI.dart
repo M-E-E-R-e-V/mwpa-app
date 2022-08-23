@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:mwpaapp/Mwpa/Models/IsLogin.dart';
 import 'package:mwpaapp/Mwpa/Models/LoginResponse.dart';
+import 'package:mwpaapp/Mwpa/MwpaException.dart';
 import 'package:path/path.dart' as p;
 
 class MwpaApi {
@@ -34,34 +35,48 @@ class MwpaApi {
 
     var isLogin = IsLogin.fromJson(jsonDecode(response.body));
 
+    _isLogin = isLogin.status;
     return isLogin.status;
   }
 
   Future<bool> login(String email, String password) async {
-    var url = getUrl(MwpaApi.URL_LOGIN);
+    try {
+      var url = getUrl(MwpaApi.URL_LOGIN);
+      var postBody = jsonEncode(<String, String>{
+        'email': email,
+        'password': password
+      });
 
-    var response = await http.post(
-      Uri.parse(url),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, String>{
-        email: email,
-        password: password
-      }),
-    );
+      var response = await http.post(
+        Uri.parse(url),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: postBody,
+      );
 
-    var lresponse = LoginResponse.fromJson(jsonDecode(response.body));
+      var lresponse = LoginResponse.fromJson(jsonDecode(response.body));
 
-    if (lresponse.success) {
-      if (response.headers.containsKey('set-cookie')) {
-        _cookie = response.headers['set-cookie']!;
+      if (lresponse.success) {
+        if (response.headers.containsKey('set-cookie')) {
+          _cookie = response.headers['set-cookie']!;
+        }
+
+        return true;
+      } else {
+        if (lresponse.error != null) {
+          throw MwpaException(lresponse.error!);
+        }
+
+        throw MwpaException('Response success false');
       }
-
-      return true;
     }
-
-    return false;
+    on MwpaException {
+      rethrow;
+    } catch(error) {
+      throw Exception('Connection error');
+    }
   }
+
 
 }

@@ -1,10 +1,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:mwpaapp/Constants.dart';
+import 'package:mwpaapp/Dialog/InfoDialog.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Mwpa/MwpaAPI.dart';
+import '../Mwpa/MwpaException.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -30,17 +32,28 @@ class _LoginPageState extends State<LoginPage> {
     var username = _usernameController.text.trim();
     var password = _passwordController.text.trim();
 
-    var api = MwpaApi(url);
+    try {
+      var api = MwpaApi(url);
 
-    if (!await api.isLogin()) {
-      if (await api.login(username, password)) {
-        if (await api.isLogin()) {
-          final prefs = await SharedPreferences.getInstance();
+      if (!await api.isLogin()) {
+        if (await api.login(username, password)) {
+          if (await api.isLogin()) {
+            final prefs = await SharedPreferences.getInstance();
 
-          await prefs.setString(Preference.URL, url);
-          await prefs.setString(Preference.USERNAME, username);
-          await prefs.setString(Preference.PASSWORD, password);
+            await prefs.setString(Preference.URL, url);
+            await prefs.setString(Preference.USERNAME, username);
+            await prefs.setString(Preference.PASSWORD, password);
+
+            if (!mounted) return;
+            await Navigator.pushNamed(context, '/List');
+          }
         }
+      }
+    } catch(error) {
+      if (error is MwpaException) {
+        InfoDialog.show(context, 'Error', error.toString());
+      } else {
+        InfoDialog.show(context, 'Internal Error', error.toString());
       }
     }
 

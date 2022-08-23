@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 // primary
 const kPrimaryColor = Color(0xff022b55);
@@ -10,3 +11,23 @@ const kPrimaryFontColor = Color(0xff333333);
 // button
 const kButtonBackgroundColor = Color(0xfff9901c);
 const kButtonFontColor = Color(0xffffffff);
+
+TextStyle get subHeadingStyle {
+  return GoogleFonts.lato(
+    textStyle: TextStyle(
+      fontSize: 24,
+      fontWeight: FontWeight.bold,
+      color: Colors.grey[400]
+    )
+  );
+}
+
+TextStyle get headingStyle {
+  return GoogleFonts.lato(
+    textStyle: const TextStyle(
+      fontSize: 30,
+      fontWeight: FontWeight.bold,
+      color: kPrimaryFontColor
+    )
+  );
+}

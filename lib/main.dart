@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:mwpaapp/Constants.dart';
+import 'package:mwpaapp/Pages/List/EditSightingPage.dart';
+import 'package:mwpaapp/Pages/ListPage.dart';
 import 'package:mwpaapp/Pages/LoginPage.dart';
-import 'package:mwpaapp/Pages/WelcomePage.dart';
 
 void main() {
   runApp(const MWPAApp());
@@ -20,7 +21,21 @@ class MWPAApp extends StatelessWidget {
           primaryColor: kPrimaryColor,
           scaffoldBackgroundColor: Colors.white,
       ),
-      home: const LoginPage()
+      builder: (context, widget) => Navigator(
+        onGenerateRoute: (RouteSettings settings) => MaterialPageRoute(
+          builder: (ctx) {
+            return Container(
+              child: widget,
+            );
+          },
+        ),
+      ),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const LoginPage(),
+        '/List': (context) => const ListPage(),
+        '/Edit': (context) => const EditSightingPage(),
+      }
     );
   }
 }
