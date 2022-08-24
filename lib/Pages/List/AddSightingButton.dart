@@ -12,7 +12,7 @@ class AddSightingButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTab,
       child: Container(
-        width: 130,
+        width: 150,
         height: 60,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
@@ -24,6 +24,7 @@ class AddSightingButton extends StatelessWidget {
             label,
             style: const TextStyle(
               color: kButtonFontColor,
+              fontWeight: FontWeight.bold
             ),
           ),
         )
