@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:mwpaapp/Constants.dart';
 
 enum DynInputType {
   text,
   date,
+  time,
+  select,
 }
 
-class DynInput extends StatelessWidget {
+class DynInput extends StatefulWidget {
   final BuildContext context;
   final String title;
   final String hint;
@@ -24,20 +27,54 @@ class DynInput extends StatelessWidget {
     this.widget
   }) : super(key: key);
 
+  @override
+  State<DynInput> createState() => _DynInputState();
+}
+
+class _DynInputState extends State<DynInput> {
+  String strValue = "";
+  DateTime dateValue = DateTime.now();
+  TimeOfDay timeValue = TimeOfDay.now();
+  int intValue = 0;
+
   _getDateFromUser() async {
-    DateTime? _pickeDate = await showDatePicker(
-      context: context,
+    DateTime? pickDate = await showDatePicker(
+      context: widget.context,
       initialDate: DateTime.now(),
       firstDate: DateTime(2015),
-      lastDate: DateTime(2120)
+      lastDate: DateTime(2040)
     );
+
+    if (pickDate != null) {
+      setState(() {
+        dateValue = pickDate;
+      });
+    }
+  }
+
+  _getTimeFromUser() async {
+    var picketTime = await showTimePicker(
+      initialEntryMode: TimePickerEntryMode.dial,
+      context: context,
+      initialTime: const TimeOfDay(
+        hour: 9,
+        minute: 10
+      )
+    );
+
+    if (picketTime != null) {
+      setState(() {
+        timeValue = picketTime;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    var tWidget = widget;
+    var tWidget = widget.widget;
+    var tHint = widget.hint;
 
-    switch (inputType) {
+    switch (widget.inputType) {
       case DynInputType.date:
         tWidget = IconButton(
           icon: const Icon(
@@ -48,6 +85,33 @@ class DynInput extends StatelessWidget {
             _getDateFromUser();
           },
         );
+
+        if (tHint == "") {
+          tHint = DateFormat.yMd().format(dateValue);
+        }
+        break;
+
+      case DynInputType.time:
+        tWidget = IconButton(
+          icon: const Icon(
+            Icons.access_time_rounded,
+            color: kPrimaryFontColor,
+          ),
+          onPressed: () {
+            _getTimeFromUser();
+          }
+        );
+
+        if (tHint == "") {
+          tHint = timeValue.format(context);
+        }
+        break;
+
+      case DynInputType.select:
+        /*tWidget = DropdownButton(
+            items: items,
+            onChanged: onChanged
+        );*/
         break;
     }
 
@@ -57,7 +121,7 @@ class DynInput extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            title,
+            widget.title,
             style: titleStyle,
           ),
           Container(
@@ -78,10 +142,10 @@ class DynInput extends StatelessWidget {
                     readOnly: tWidget == null ? false : true,
                     autofocus: false,
                     cursorColor: Colors.grey[700],
-                    controller: controller,
+                    controller: widget.controller,
                     style: subTitleStyle,
                     decoration: InputDecoration(
-                      hintText: hint,
+                      hintText: tHint,
                       hintStyle: subTitleStyle,
                       focusedBorder: UnderlineInputBorder(
                         borderSide: BorderSide(

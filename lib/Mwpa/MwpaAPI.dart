@@ -1,5 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:device_info/device_info.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:mwpaapp/Mwpa/Models/IsLogin.dart';
 import 'package:mwpaapp/Mwpa/Models/LoginResponse.dart';
@@ -39,12 +43,44 @@ class MwpaApi {
     return isLogin.status;
   }
 
+  Future<List<String>> _getDeviceDetails() async {
+    String deviceName = "";
+    String deviceVersion = "";
+    String identifier = "";
+
+    final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
+
+    try {
+      if (Platform.isAndroid) {
+        var build = await deviceInfoPlugin.androidInfo;
+        deviceName = build.model;
+        deviceVersion = build.version.toString();
+        identifier = build.androidId;  //UUID for Android
+      } else if (Platform.isIOS) {
+        var data = await deviceInfoPlugin.iosInfo;
+        deviceName = data.name;
+        deviceVersion = data.systemVersion;
+        identifier = data.identifierForVendor;  //UUID for iOS
+      }
+    } on PlatformException {
+      if (kDebugMode) {
+        print('Failed to get platform version');
+      }
+    }
+
+    return [deviceName, deviceVersion, identifier];
+  }
+
   Future<bool> login(String email, String password) async {
     try {
+      var deviceDetails = await _getDeviceDetails();
+
       var url = getUrl(MwpaApi.URL_LOGIN);
       var postBody = jsonEncode(<String, String>{
         'email': email,
-        'password': password
+        'password': password,
+        'deviceIdentity': deviceDetails[2],
+        'deviceDescription': "${deviceDetails[0]} - ${deviceDetails[1]}"
       });
 
       var response = await http.post(

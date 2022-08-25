@@ -12,7 +12,10 @@ class EditSightingPage extends StatefulWidget {
 
 class _EditSightingPageState extends State<EditSightingPage> {
   String title = "Add Sighting";
-  DateTime _selectedDate = DateTime.now();
+  late DynInput sightFrom;
+  late DynInput sightDate;
+  late DynInput sightTourStart;
+  late DynInput sightTourEnd;
 
   _appBar(BuildContext context) {
     return AppBar(
@@ -31,6 +34,34 @@ class _EditSightingPageState extends State<EditSightingPage> {
 
   @override
   Widget build(BuildContext context) {
+    sightFrom = DynInput(
+      context: context,
+      title: "Sighting from",
+      hint: "",
+      inputType: DynInputType.select,
+    );
+
+    sightDate = DynInput(
+      context: context,
+      title: "Date",
+      hint: "",
+      inputType: DynInputType.date,
+    );
+
+    sightTourStart = DynInput(
+      context: context,
+      title: "Start of trip",
+      hint: "",
+      inputType: DynInputType.time
+    );
+
+    sightTourEnd = DynInput(
+        context: context,
+        title: "End of trip",
+        hint: "",
+        inputType: DynInputType.time
+    );
+
      return Scaffold(
       appBar: _appBar(context),
       body: Container(
@@ -43,11 +74,18 @@ class _EditSightingPageState extends State<EditSightingPage> {
                 title,
                 style: headingStyle,
               ),
-              DynInput(
-                context: context,
-                title: "Date",
-                hint: DateFormat.yMd().format(_selectedDate),
-                inputType: DynInputType.date,
+              sightFrom,
+              sightDate,
+              Row(
+                children: [
+                  Expanded(
+                      child: sightTourStart
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                      child: sightTourEnd
+                  )
+                ],
               ),
               DynInput(
                 context: context,
