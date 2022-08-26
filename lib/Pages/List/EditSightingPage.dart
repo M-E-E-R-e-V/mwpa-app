@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Pages/List/DynInput.dart';
 
@@ -12,10 +11,14 @@ class EditSightingPage extends StatefulWidget {
 
 class _EditSightingPageState extends State<EditSightingPage> {
   String title = "Add Sighting";
-  late DynInput sightFrom;
+  late DynInput sightVehicle;
   late DynInput sightDate;
+  late DynInput sightVehicleDriver;
   late DynInput sightTourStart;
   late DynInput sightTourEnd;
+
+  late DynInput sightSpecies;
+  late DynInput sightSpeciesNum;
 
   _appBar(BuildContext context) {
     return AppBar(
@@ -34,7 +37,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
 
   @override
   Widget build(BuildContext context) {
-    sightFrom = DynInput(
+    sightVehicle = DynInput(
       context: context,
       title: "Sighting from",
       hint: "",
@@ -48,6 +51,13 @@ class _EditSightingPageState extends State<EditSightingPage> {
       inputType: DynInputType.date,
     );
 
+    sightVehicleDriver = DynInput(
+      context: context,
+      title: "Skipper",
+      hint: "",
+      inputType: DynInputType.select
+    );
+
     sightTourStart = DynInput(
       context: context,
       title: "Start of trip",
@@ -56,10 +66,24 @@ class _EditSightingPageState extends State<EditSightingPage> {
     );
 
     sightTourEnd = DynInput(
-        context: context,
-        title: "End of trip",
-        hint: "",
-        inputType: DynInputType.time
+      context: context,
+      title: "End of trip",
+      hint: "",
+      inputType: DynInputType.time
+    );
+
+    sightSpecies = DynInput(
+      context: context,
+      title: "Species",
+      hint: "",
+      inputType: DynInputType.select
+    );
+
+    sightSpeciesNum = DynInput(
+      context: context,
+      title: "Number of animals",
+      hint: "",
+      inputType: DynInputType.text,
     );
 
      return Scaffold(
@@ -74,7 +98,17 @@ class _EditSightingPageState extends State<EditSightingPage> {
                 title,
                 style: headingStyle,
               ),
-              sightFrom,
+              Row(
+                children: [
+                  Expanded(
+                    child: sightVehicle
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: sightVehicleDriver
+                  )
+                ],
+              ),
               sightDate,
               Row(
                 children: [
@@ -87,11 +121,16 @@ class _EditSightingPageState extends State<EditSightingPage> {
                   )
                 ],
               ),
-              DynInput(
-                context: context,
-                title: "Number of animals",
-                hint: "1",
-                inputType: DynInputType.text,
+              Row(
+                children: [
+                  Expanded(
+                    child: sightSpecies
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                      child: sightSpeciesNum
+                  )
+                ],
               )
             ],
           ),

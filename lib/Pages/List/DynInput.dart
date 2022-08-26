@@ -9,6 +9,13 @@ enum DynInputType {
   select,
 }
 
+class DynInputSelectItem {
+  String value = "";
+  String label = "";
+
+  DynInputSelectItem({required this.value, required this.label});
+}
+
 class DynInput extends StatefulWidget {
   final BuildContext context;
   final String title;
@@ -36,6 +43,7 @@ class _DynInputState extends State<DynInput> {
   DateTime dateValue = DateTime.now();
   TimeOfDay timeValue = TimeOfDay.now();
   int intValue = 0;
+  List<DynInputSelectItem> selectList = [];
 
   _getDateFromUser() async {
     DateTime? pickDate = await showDatePicker(
@@ -67,6 +75,10 @@ class _DynInputState extends State<DynInput> {
         timeValue = picketTime;
       });
     }
+  }
+
+  setSelectList(List<DynInputSelectItem> list) {
+    selectList = list;
   }
 
   @override
@@ -108,10 +120,36 @@ class _DynInputState extends State<DynInput> {
         break;
 
       case DynInputType.select:
-        /*tWidget = DropdownButton(
-            items: items,
-            onChanged: onChanged
-        );*/
+        tWidget = DropdownButton(
+          icon: const Icon(
+            Icons.keyboard_arrow_down,
+            color: kPrimaryFontColor,
+          ),
+          iconSize: 32,
+          elevation: 0,
+          style: subTitleStyle,
+          underline: Container(
+            height: 0,
+          ),
+          items: selectList.map<DropdownMenuItem<String>>((DynInputSelectItem value) {
+            return DropdownMenuItem<String>(
+              value: value.value,
+              child: Text(value.label),
+            );
+          }
+          ).toList(),
+          onChanged: (String? value) {
+            setState(() {
+              if (value != null) {
+                strValue = value;
+              }
+            });
+          },
+        );
+
+        if (tHint == "") {
+          tHint = strValue;
+        }
         break;
     }
 
