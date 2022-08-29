@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mwpaapp/Constants.dart';
-import 'package:mwpaapp/Pages/List/EditSightingPage.dart';
+import 'package:mwpaapp/Pages/EditSightingPage.dart';
 import 'package:mwpaapp/Pages/ListPage.dart';
 import 'package:mwpaapp/Pages/LoginPage.dart';
 
@@ -8,8 +8,14 @@ void main() {
   runApp(const MWPAApp());
 }
 
-class MWPAApp extends StatelessWidget {
+class MWPAApp extends StatefulWidget {
   const MWPAApp({Key? key}) : super(key: key);
+
+  @override
+  State<MWPAApp> createState() => _MWPAAppState();
+}
+
+class _MWPAAppState extends State<MWPAApp> {
 
   // This widget is the root of your application.
   @override
@@ -18,8 +24,8 @@ class MWPAApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Mammal watching. Processing. Analysing.',
       theme: ThemeData(
-          primaryColor: kPrimaryColor,
-          scaffoldBackgroundColor: Colors.white,
+        primaryColor: kPrimaryColor,
+        scaffoldBackgroundColor: Colors.white,
       ),
       builder: (context, widget) => Navigator(
         onGenerateRoute: (RouteSettings settings) => MaterialPageRoute(
@@ -30,9 +36,9 @@ class MWPAApp extends StatelessWidget {
           },
         ),
       ),
-      initialRoute: '/',
+      initialRoute: '/Login',
       routes: {
-        '/': (context) => const LoginPage(),
+        '/Login': (context) => const LoginPage(),
         '/List': (context) => const ListPage(),
         '/Edit': (context) => const EditSightingPage(),
       }

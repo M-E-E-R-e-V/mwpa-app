@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_map/plugin_api.dart';
 import 'package:intl/intl.dart';
 import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Pages/List/AddSightingButton.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
+
 
 class ListPage extends StatefulWidget {
   const ListPage({Key? key}) : super(key: key);
@@ -94,22 +92,7 @@ class _ListPageState extends State<ListPage> {
         decoration: const BoxDecoration(
             color: kButtonBackgroundColor
         ),
-        child: FlutterMap(
-          options: MapOptions(
-            center: LatLng(56.704173, 11.543808),
-            minZoom: 12,
-            maxZoom: 14,
-            zoom: 13,
-            swPanBoundary: LatLng(56.6877, 11.5089),
-            nePanBoundary: LatLng(56.7378, 11.6644),
-          ),
-          layers: [
-            TileLayerOptions(
-              urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-              userAgentPackageName: 'dev.fleaflet.flutter_map.example',
-            ),
-          ],
-        )
+        child: null
     );
   }
 

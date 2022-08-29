@@ -41,6 +41,7 @@ dependencies:
   google_fonts:
   flutter_map:
   device_info:
+  switcher: any
 
 dev_dependencies:
   flutter_launcher_icons: ^0.10.0

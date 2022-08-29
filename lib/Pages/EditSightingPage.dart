@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mwpaapp/Constants.dart';
-import 'package:mwpaapp/Pages/List/DynInput.dart';
+import 'package:mwpaapp/Pages/Edit/DynInput.dart';
 
 class EditSightingPage extends StatefulWidget {
   const EditSightingPage({Key? key}) : super(key: key);
@@ -19,6 +19,10 @@ class _EditSightingPageState extends State<EditSightingPage> {
 
   late DynInput sightSpecies;
   late DynInput sightSpeciesNum;
+
+  late DynInput sightJuveniles;
+  late DynInput sightCalves;
+  late DynInput sightNewborns;
 
   _appBar(BuildContext context) {
     return AppBar(
@@ -86,6 +90,27 @@ class _EditSightingPageState extends State<EditSightingPage> {
       inputType: DynInputType.text,
     );
 
+    sightJuveniles = DynInput(
+      context: context,
+      title: 'Juveniles',
+      hint: '',
+      inputType: DynInputType.switcher
+    );
+
+    sightCalves = DynInput(
+        context: context,
+        title: 'Calves',
+        hint: '',
+        inputType: DynInputType.switcher
+    );
+
+    sightNewborns = DynInput(
+        context: context,
+        title: 'Newborns',
+        hint: '',
+        inputType: DynInputType.switcher
+    );
+
      return Scaffold(
       appBar: _appBar(context),
       body: Container(
@@ -130,6 +155,21 @@ class _EditSightingPageState extends State<EditSightingPage> {
                   Expanded(
                       child: sightSpeciesNum
                   )
+                ],
+              ),
+              Row(
+                children: [
+                  Expanded(
+                      child: sightJuveniles
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                      child: sightCalves
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                      child: sightNewborns
+                  ),
                 ],
               )
             ],

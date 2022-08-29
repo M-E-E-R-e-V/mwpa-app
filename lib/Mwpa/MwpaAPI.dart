@@ -7,6 +7,9 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:mwpaapp/Mwpa/Models/IsLogin.dart';
 import 'package:mwpaapp/Mwpa/Models/LoginResponse.dart';
+import 'package:mwpaapp/Mwpa/Models/StatusCodes.dart';
+import 'package:mwpaapp/Mwpa/Models/User/UserInfoData.dart';
+import 'package:mwpaapp/Mwpa/Models/UserInfoResponse.dart';
 import 'package:mwpaapp/Mwpa/MwpaException.dart';
 import 'package:path/path.dart' as p;
 
@@ -14,6 +17,7 @@ class MwpaApi {
 
   static const URL_ISLOGIN = 'mobile/islogin';
   static const URL_LOGIN = 'mobile/login';
+  static const URL_USERINFO = 'mobile/user/info';
 
   String _url = "";
   String _cookie = "";
@@ -114,5 +118,38 @@ class MwpaApi {
     }
   }
 
+  Future<UserInfoData> getUserInfo() async {
+    if (!_isLogin) {
+      throw MwpaException('Please login first!');
+    }
 
+    try {
+      var url = getUrl(MwpaApi.URL_USERINFO);
+
+      var response = await http.get(
+        Uri.parse(url),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'cookie': _cookie
+        },
+      );
+
+      var lresponse = UserInfoResponse.fromJson(jsonDecode(response.body));
+
+      if (lresponse.statusCode == StatusCodes.OK) {
+        return lresponse.data!.user!;
+      } else {
+        if (lresponse.msg != null) {
+          throw MwpaException(lresponse.msg!);
+        }
+
+        throw MwpaException('Response success false');
+      }
+    }
+    on MwpaException {
+      rethrow;
+    } catch(error) {
+      throw Exception('Connection error');
+    }
+  }
 }

@@ -18,15 +18,17 @@ class AddSightingButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           color: kButtonBackgroundColor
         ),
-        child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-          child: Text(
-            label,
-            style: const TextStyle(
-              color: kButtonFontColor,
-              fontWeight: FontWeight.bold
-            ),
-          ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              label,
+              style: const TextStyle(
+                  color: kButtonFontColor,
+                  fontWeight: FontWeight.bold
+              ),
+            )
+          ],
         )
       ),
     );

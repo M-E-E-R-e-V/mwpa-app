@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mwpaapp/Constants.dart';
+import 'package:switcher/core/switcher_size.dart';
+import 'package:switcher/switcher.dart';
 
 enum DynInputType {
   text,
   date,
   time,
   select,
+  switcher,
 }
 
 class DynInputSelectItem {
@@ -83,6 +86,7 @@ class _DynInputState extends State<DynInput> {
 
   @override
   Widget build(BuildContext context) {
+    Widget? mainWidget;
     var tWidget = widget.widget;
     var tHint = widget.hint;
 
@@ -151,7 +155,71 @@ class _DynInputState extends State<DynInput> {
           tHint = strValue;
         }
         break;
+
+      case DynInputType.switcher:
+        mainWidget = Container(
+          margin: const EdgeInsets.only(top: 8.0),
+          padding: const EdgeInsets.only(left: 14),
+          child: Switcher(
+            value: false,
+            size: SwitcherSize.large,
+            switcherButtonRadius: 50,
+            enabledSwitcherButtonRotate: true,
+            iconOff: Icons.lock,
+            iconOn: Icons.lock_open,
+            colorOff: kPrimaryColor,
+            colorOn: kButtonBackgroundColor,
+            onChanged: (bool state) {
+
+            })
+        );
+        break;
     }
+
+    mainWidget ??= Container(
+        height: 52,
+        margin: const EdgeInsets.only(top: 8.0),
+        padding: const EdgeInsets.only(left: 14),
+        decoration: BoxDecoration(
+            border: Border.all(
+                color: kPrimaryColor,
+                width: 1.0
+            ),
+            borderRadius: BorderRadius.circular(12)
+        ),
+        child: Row(
+          children: [
+            Expanded(
+                child: TextFormField(
+                  readOnly: tWidget == null ? false : true,
+                  autofocus: false,
+                  cursorColor: Colors.grey[700],
+                  controller: widget.controller,
+                  style: subTitleStyle,
+                  decoration: InputDecoration(
+                      hintText: tHint,
+                      hintStyle: subTitleStyle,
+                      focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(
+                              color: Colors.redAccent.withOpacity(0.0),
+                              width: 0
+                          )
+                      ),
+                      enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(
+                              color: Colors.redAccent.withOpacity(0.0),
+                              width: 0
+                          )
+                      )
+                  ),
+                )
+            ),
+            tWidget == null ? Container() : Container(
+              child: tWidget,
+            )
+          ],
+        ),
+      );
 
     return Container(
       margin: const EdgeInsets.only(top: 16),
@@ -162,50 +230,7 @@ class _DynInputState extends State<DynInput> {
             widget.title,
             style: titleStyle,
           ),
-          Container(
-            height: 52,
-            margin: const EdgeInsets.only(top: 8.0),
-            padding: const EdgeInsets.only(left: 14),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: kPrimaryColor,
-                width: 1.0
-              ),
-              borderRadius: BorderRadius.circular(12)
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    readOnly: tWidget == null ? false : true,
-                    autofocus: false,
-                    cursorColor: Colors.grey[700],
-                    controller: widget.controller,
-                    style: subTitleStyle,
-                    decoration: InputDecoration(
-                      hintText: tHint,
-                      hintStyle: subTitleStyle,
-                      focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Colors.redAccent.withOpacity(0.0),
-                          width: 0
-                        )
-                      ),
-                      enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(
-                              color: Colors.redAccent.withOpacity(0.0),
-                              width: 0
-                          )
-                      )
-                    ),
-                  )
-                ),
-                tWidget == null ? Container() : Container(
-                  child: tWidget,
-                )
-              ],
-            ),
-          )
+          mainWidget
         ],
       ),
     );

@@ -24,6 +24,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
+    _isLogin();
     _loadPref();
   }
 
@@ -40,9 +41,12 @@ class _LoginPageState extends State<LoginPage> {
           if (await api.isLogin()) {
             final prefs = await SharedPreferences.getInstance();
 
+            var userdata = await api.getUserInfo();
+
             await prefs.setString(Preference.URL, url);
             await prefs.setString(Preference.USERNAME, username);
             await prefs.setString(Preference.PASSWORD, password);
+            await prefs.setInt(Preference.USERID, userdata.id);
 
             if (!mounted) return;
             await Navigator.pushNamed(context, '/List');
@@ -80,6 +84,16 @@ class _LoginPageState extends State<LoginPage> {
         _passwordController.text = prefs.getString(Preference.PASSWORD)!;
       }
     });
+  }
+
+  Future<void> _isLogin() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    if (prefs.containsKey(Preference.USERID)) {
+      await Navigator.pushNamed(context, '/List');
+    }
+
+    return;
   }
 
   @override
