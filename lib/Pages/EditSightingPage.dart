@@ -17,6 +17,16 @@ class _EditSightingPageState extends State<EditSightingPage> {
   late DynInput sightTourStart;
   late DynInput sightTourEnd;
 
+  late DynInput sightDurationFrom;
+  late DynInput sightDurationUntil;
+
+  late DynInput sightBeginLoc;
+  late DynInput sightEndLoc;
+
+  late DynInput sightPhotoTaken;
+  late DynInput sightDistanceCoast;
+  late DynInput sightDistanceCoastEstimationGps;
+
   late DynInput sightSpecies;
   late DynInput sightSpeciesNum;
 
@@ -74,6 +84,55 @@ class _EditSightingPageState extends State<EditSightingPage> {
       title: "End of trip",
       hint: "",
       inputType: DynInputType.time
+    );
+
+    sightDurationFrom = DynInput(
+        context: context,
+        title: "Sighting duration from",
+        hint: "",
+        inputType: DynInputType.time
+    );
+
+    sightDurationUntil = DynInput(
+        context: context,
+        title: "Sighting duration until",
+        hint: "",
+        inputType: DynInputType.time
+    );
+
+    sightBeginLoc = DynInput(
+      context: context,
+      title: "Position begin",
+      hint: "",
+      inputType: DynInputType.location
+    );
+
+    sightEndLoc = DynInput(
+        context: context,
+        title: "Position end",
+        hint: "",
+        inputType: DynInputType.location
+    );
+
+    sightPhotoTaken = DynInput(
+        context: context,
+        title: "Photos taken",
+        hint: "",
+        inputType: DynInputType.switcher
+    );
+
+    sightDistanceCoast = DynInput(
+        context: context,
+        title: "Distance to nearest coast",
+        hint: "",
+        inputType: DynInputType.text
+    );
+
+    sightDistanceCoastEstimationGps = DynInput(
+        context: context,
+        title: "Estimation without GPS",
+        hint: "",
+        inputType: DynInputType.switcher
     );
 
     sightSpecies = DynInput(
@@ -143,6 +202,34 @@ class _EditSightingPageState extends State<EditSightingPage> {
                   const SizedBox(width: 12),
                   Expanded(
                       child: sightTourEnd
+                  )
+                ],
+              ),
+              Row(
+                children: [
+                  Expanded(
+                      child: sightDurationFrom
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                      child: sightDurationUntil
+                  )
+                ],
+              ),
+              sightBeginLoc,
+              sightEndLoc,
+              Row(
+                children: [
+                  Expanded(
+                      child: sightPhotoTaken
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                      child: sightDistanceCoast
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                      child: sightDistanceCoastEstimationGps
                   )
                 ],
               ),

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:mwpaapp/Constants.dart';
 import 'package:switcher/core/switcher_size.dart';
 import 'package:switcher/switcher.dart';
+
+import '../../Location/LocationProvider.dart';
 
 enum DynInputType {
   text,
@@ -10,6 +13,7 @@ enum DynInputType {
   time,
   select,
   switcher,
+  location
 }
 
 class DynInputSelectItem {
@@ -47,6 +51,7 @@ class _DynInputState extends State<DynInput> {
   TimeOfDay timeValue = TimeOfDay.now();
   int intValue = 0;
   List<DynInputSelectItem> selectList = [];
+  Position? posValue;
 
   _getDateFromUser() async {
     DateTime? pickDate = await showDatePicker(
@@ -78,6 +83,14 @@ class _DynInputState extends State<DynInput> {
         timeValue = picketTime;
       });
     }
+  }
+
+  _getLocationFromUser() async {
+    var positon = await LocationProvider.getLocation();
+
+    setState(() {
+      posValue = positon;
+    });
   }
 
   setSelectList(List<DynInputSelectItem> list) {
@@ -165,14 +178,33 @@ class _DynInputState extends State<DynInput> {
             size: SwitcherSize.large,
             switcherButtonRadius: 50,
             enabledSwitcherButtonRotate: true,
-            iconOff: Icons.lock,
-            iconOn: Icons.lock_open,
+            iconOff: Icons.radio_button_unchecked,
+            iconOn: Icons.radio_button_checked,
             colorOff: kPrimaryColor,
             colorOn: kButtonBackgroundColor,
             onChanged: (bool state) {
 
             })
         );
+        break;
+
+      case DynInputType.location:
+        tWidget = IconButton(
+            icon: const Icon(
+              Icons.edit_location,
+              color: kPrimaryFontColor,
+            ),
+            onPressed: () async {
+              _getLocationFromUser();
+            }
+        );
+
+
+        if (posValue != null) {
+          if (tHint == "") {
+            tHint = "Lat: ${posValue?.latitude.toString()} - Lon: ${posValue?.longitude.toString()} ";
+          }
+        }
         break;
     }
 
