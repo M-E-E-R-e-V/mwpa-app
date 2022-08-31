@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mwpaapp/Constants.dart';
-import 'package:mwpaapp/Pages/List/AddSightingButton.dart';
+import 'package:mwpaapp/Components/DefaultButton.dart';
 
 
 class ListPage extends StatefulWidget {
@@ -16,12 +16,14 @@ class _ListPageState extends State<ListPage> {
   _appBar() {
     return AppBar(
       backgroundColor: kPrimaryHeaderColor,
-      leading: IconButton(
-        icon: Icon(
-          Icons.arrow_back,
-          color: Colors.white.withOpacity(0),
-        ),
-        onPressed: () {},
+      leading: GestureDetector(
+        onTap: () {
+
+        },
+        child: const Icon(
+          Icons.nightlight_round,
+          size: 20,
+        )
       ),
       actions: [
         PopupMenuButton(itemBuilder: (context) {
@@ -47,14 +49,14 @@ class _ListPageState extends State<ListPage> {
           );
           return list;
         },
-          icon: const Icon(
-            Icons.menu,
-            color: kButtonFontColor,
-          ),
-          initialValue: "0",
-          onSelected: (value) {
+        icon: const Icon(
+          Icons.person,
+          color: kButtonFontColor,
+        ),
+        initialValue: "0",
+        onSelected: (value) {
 
-          },
+        },
         )
       ],
     );
@@ -79,7 +81,10 @@ class _ListPageState extends State<ListPage> {
               )
             ],
           ),
-          AddSightingButton(onTab: () async => await Navigator.pushNamed(context, '/Edit')
+          DefaultButton(
+            label: "+ Add Sighting",
+            onTab: () async => await Navigator.pushNamed(context, '/Edit'
+            )
           )
         ],
       ),

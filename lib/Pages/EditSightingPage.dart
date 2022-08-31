@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:mwpaapp/Components/DefaultButton.dart';
 import 'package:mwpaapp/Constants.dart';
-import 'package:mwpaapp/Pages/Edit/DynInput.dart';
+import 'package:mwpaapp/Components/DynInput.dart';
 
 class EditSightingPage extends StatefulWidget {
   const EditSightingPage({Key? key}) : super(key: key);
@@ -33,6 +34,10 @@ class _EditSightingPageState extends State<EditSightingPage> {
   late DynInput sightJuveniles;
   late DynInput sightCalves;
   late DynInput sightNewborns;
+
+  late DynInput sightBehaviour;
+  late DynInput sightSubgroups;
+  late DynInput sightReaction;
 
   _appBar(BuildContext context) {
     return AppBar(
@@ -125,7 +130,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
         context: context,
         title: "Distance to nearest coast",
         hint: "",
-        inputType: DynInputType.text
+        inputType: DynInputType.numberdecimal
     );
 
     sightDistanceCoastEstimationGps = DynInput(
@@ -146,7 +151,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
       context: context,
       title: "Number of animals",
       hint: "",
-      inputType: DynInputType.text,
+      inputType: DynInputType.number,
     );
 
     sightJuveniles = DynInput(
@@ -168,6 +173,27 @@ class _EditSightingPageState extends State<EditSightingPage> {
         title: 'Newborns',
         hint: '',
         inputType: DynInputType.switcher
+    );
+
+    sightBehaviour = DynInput(
+        context: context,
+        title: 'Behaviour',
+        hint: '',
+        inputType: DynInputType.select
+    );
+
+    sightSubgroups = DynInput(
+        context: context,
+        title: 'Subgroups',
+        hint: '',
+        inputType: DynInputType.switcher
+    );
+
+    sightReaction = DynInput(
+        context: context,
+        title: 'Reaction',
+        hint: '',
+        inputType: DynInputType.select
     );
 
      return Scaffold(
@@ -218,14 +244,11 @@ class _EditSightingPageState extends State<EditSightingPage> {
               ),
               sightBeginLoc,
               sightEndLoc,
+              sightDistanceCoast,
               Row(
                 children: [
                   Expanded(
                       child: sightPhotoTaken
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                      child: sightDistanceCoast
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -258,8 +281,25 @@ class _EditSightingPageState extends State<EditSightingPage> {
                       child: sightNewborns
                   ),
                 ],
-              )
-            ],
+              ),
+              sightBehaviour,
+              sightSubgroups,
+              sightReaction,
+              const SizedBox(height: 18),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(),
+                  DefaultButton(
+                    label: "+ Add Sighting",
+                    onTab: () async => {
+
+                    }
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+            ]
           ),
         ),
       ),

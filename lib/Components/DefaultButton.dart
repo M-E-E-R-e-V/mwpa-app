@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:mwpaapp/Constants.dart';
 
-class AddSightingButton extends StatelessWidget {
-  final String label = "+ Add Sighting";
+class DefaultButton extends StatelessWidget {
+  final String label;
   final Function()? onTab;
 
-  const AddSightingButton({Key? key, required this.onTab}) : super(key: key);
+  const DefaultButton({Key? key, required this.label, required this.onTab}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

@@ -3,6 +3,8 @@ import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Pages/EditSightingPage.dart';
 import 'package:mwpaapp/Pages/ListPage.dart';
 import 'package:mwpaapp/Pages/LoginPage.dart';
+import 'package:mwpaapp/Services/ThemeService.dart';
+import 'package:mwpaapp/Ui/Themes.dart';
 
 void main() {
   runApp(const MWPAApp());
@@ -23,10 +25,9 @@ class _MWPAAppState extends State<MWPAApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Mammal watching. Processing. Analysing.',
-      theme: ThemeData(
-        primaryColor: kPrimaryColor,
-        scaffoldBackgroundColor: Colors.white,
-      ),
+      theme: Themes.light,
+      darkTheme: Themes.dark,
+      themeMode: ThemeService().theme,
       builder: (context, widget) => Navigator(
         onGenerateRoute: (RouteSettings settings) => MaterialPageRoute(
           builder: (ctx) {

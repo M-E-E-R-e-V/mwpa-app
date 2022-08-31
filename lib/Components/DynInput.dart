@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
+import 'package:latlong_to_osgrid/latlong_to_osgrid.dart';
 import 'package:mwpaapp/Constants.dart';
 import 'package:switcher/core/switcher_size.dart';
 import 'package:switcher/switcher.dart';
 
-import '../../Location/LocationProvider.dart';
+import '../Location/LocationProvider.dart';
 
 enum DynInputType {
   text,
+  number,
+  numberdecimal,
   date,
   time,
   select,
@@ -100,8 +103,10 @@ class _DynInputState extends State<DynInput> {
   @override
   Widget build(BuildContext context) {
     Widget? mainWidget;
+    var ttitle = widget.title;
     var tWidget = widget.widget;
     var tHint = widget.hint;
+    var textInputType = TextInputType.text;
 
     switch (widget.inputType) {
       case DynInputType.date:
@@ -202,9 +207,34 @@ class _DynInputState extends State<DynInput> {
 
         if (posValue != null) {
           if (tHint == "") {
-            tHint = "Lat: ${posValue?.latitude.toString()} - Lon: ${posValue?.longitude.toString()} ";
+            LatLongConverter converter = LatLongConverter();
+            var latDms = converter.getDegreeFromDecimal(posValue!.latitude);
+            var longDms = converter.getDegreeFromDecimal(posValue!.longitude);
+
+            var keyLong = "E";
+            var keyLat = "N";
+
+            if (longDms[0] < 0) {
+              keyLong = "W";
+            }
+
+            if (latDms[0] < 0) {
+              keyLat = "S";
+            }
+
+            ttitle += " (accuracy: ${posValue!.accuracy.toInt().toString()} m)";
+
+            tHint = "$keyLat: ${latDms[0]}° ${latDms[1]}' ${latDms[2]}\" - $keyLong: ${longDms[0]}° ${longDms[1]}' ${longDms[2]}\" ";
           }
         }
+        break;
+
+      case DynInputType.number:
+        textInputType = TextInputType.number;
+        break;
+
+      case DynInputType.numberdecimal:
+        textInputType = const TextInputType.numberWithOptions(decimal: true);
         break;
     }
 
@@ -228,6 +258,7 @@ class _DynInputState extends State<DynInput> {
                   cursorColor: Colors.grey[700],
                   controller: widget.controller,
                   style: subTitleStyle,
+                  keyboardType: textInputType,
                   decoration: InputDecoration(
                       hintText: tHint,
                       hintStyle: subTitleStyle,
@@ -259,7 +290,7 @@ class _DynInputState extends State<DynInput> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            widget.title,
+            ttitle,
             style: titleStyle,
           ),
           mainWidget
