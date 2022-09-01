@@ -1,12 +1,15 @@
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 // primary
 const kPrimaryColor = Color(0xff022b55);
 const kPrimaryBackgroundColor = Color(0xffffffff);
+const kPrimaryDarkBackgroundColor = Colors.black38;
 const kPrimaryHeaderColor = Color(0xff0b4297);
 const kPrimaryFontColor = Color(0xff333333);
+const kPrimaryDarkFontColor = Color(0xffffffff);
 
 // button
 const kButtonBackgroundColor = Color(0xfff9901c);
@@ -24,30 +27,30 @@ TextStyle get subHeadingStyle {
 
 TextStyle get headingStyle {
   return GoogleFonts.lato(
-    textStyle: const TextStyle(
+    textStyle: TextStyle(
       fontSize: 30,
       fontWeight: FontWeight.bold,
-      color: kPrimaryFontColor
+      color: Get.isDarkMode ? kPrimaryDarkFontColor : kPrimaryFontColor
     )
   );
 }
 
 TextStyle get titleStyle {
   return GoogleFonts.lato(
-    textStyle: const TextStyle(
+    textStyle: TextStyle(
       fontSize: 16,
       fontWeight: FontWeight.w400,
-      color: kPrimaryFontColor
+      color: Get.isDarkMode ? kPrimaryDarkFontColor : kPrimaryFontColor
     )
   );
 }
 
 TextStyle get subTitleStyle {
   return GoogleFonts.lato(
-      textStyle: const TextStyle(
+      textStyle: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w400,
-          color: kPrimaryFontColor,
+          color: Get.isDarkMode ? kPrimaryDarkFontColor : kPrimaryFontColor,
       )
   );
 }

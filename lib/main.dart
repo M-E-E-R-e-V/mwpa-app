@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:mwpaapp/Constants.dart';
+import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:mwpaapp/Pages/EditSightingPage.dart';
 import 'package:mwpaapp/Pages/ListPage.dart';
 import 'package:mwpaapp/Pages/LoginPage.dart';
 import 'package:mwpaapp/Services/ThemeService.dart';
 import 'package:mwpaapp/Ui/Themes.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await GetStorage.init();
   runApp(const MWPAApp());
 }
 
@@ -22,7 +25,7 @@ class _MWPAAppState extends State<MWPAApp> {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Mammal watching. Processing. Analysing.',
       theme: Themes.light,

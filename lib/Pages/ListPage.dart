@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Components/DefaultButton.dart';
+import 'package:mwpaapp/Services/ThemeService.dart';
 
 
 class ListPage extends StatefulWidget {
@@ -15,13 +17,15 @@ class _ListPageState extends State<ListPage> {
 
   _appBar() {
     return AppBar(
-      backgroundColor: kPrimaryHeaderColor,
-      leading: GestureDetector(
-        onTap: () {
-
+      backgroundColor: kPrimaryColor,
+      leading: IconButton(
+        onPressed: () {
+          setState(() {
+            ThemeService().switchTheme();
+          });
         },
-        child: const Icon(
-          Icons.nightlight_round,
+        icon: Icon(
+          Get.isDarkMode ? Icons.wb_sunny_outlined : Icons.nightlight_round,
           size: 20,
         )
       ),
@@ -104,7 +108,6 @@ class _ListPageState extends State<ListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kPrimaryBackgroundColor,
       appBar: _appBar(),
       body: Column(
         children: [

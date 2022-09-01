@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Dialog/InfoDialog.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
@@ -99,7 +100,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kPrimaryBackgroundColor,
+      backgroundColor: Get.isDarkMode ? kPrimaryDarkBackgroundColor : kPrimaryBackgroundColor,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -109,28 +110,23 @@ class _LoginPageState extends State<LoginPage> {
                 SizedBox(
                   height: 120,
                   child: Image.asset(
-                      'assets/images/logo.png'
+                    'assets/images/logo.png',
                   ),
                 ),
 
                 const SizedBox(height: 75),
 
                 // Title
-                const Text(
+                Text(
                   'MWPA Login',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 36
-                  ),
+                  style: headingStyle,
                 ),
 
                 const SizedBox(height: 10),
 
-                const Text(
+                Text(
                   'Mammal watching. Processing. Analysing.',
-                  style: TextStyle(
-                      fontSize: 16
-                  ),
+                  style: titleStyle,
                 ),
 
                 const SizedBox(height: 50),

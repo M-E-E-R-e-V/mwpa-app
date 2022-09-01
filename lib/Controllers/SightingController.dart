@@ -1,5 +1,14 @@
-import 'package:get/get_state_manager/src/rx_flutter/rx_getx_widget.dart';
+import 'package:get/get.dart';
+import 'package:mwpaapp/Models/Sighting.dart';
 
-class SightingController extends GetXController {
+class SightingController extends GetxController {
 
+  @override
+  void onReady() {
+    super.onReady();
+  }
+
+  Future<void> addSighting({Sighting sighting}) {
+
+  }
 }

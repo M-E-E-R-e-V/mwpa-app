@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong_to_osgrid/latlong_to_osgrid.dart';
 import 'package:mwpaapp/Constants.dart';
@@ -111,9 +112,9 @@ class _DynInputState extends State<DynInput> {
     switch (widget.inputType) {
       case DynInputType.date:
         tWidget = IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.calendar_today_outlined,
-            color: kPrimaryFontColor,
+            color: Get.isDarkMode ? kPrimaryDarkFontColor :  kPrimaryFontColor,
           ),
           onPressed: () {
             _getDateFromUser();
@@ -127,9 +128,9 @@ class _DynInputState extends State<DynInput> {
 
       case DynInputType.time:
         tWidget = IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.access_time_rounded,
-            color: kPrimaryFontColor,
+            color: Get.isDarkMode ? kPrimaryDarkFontColor :  kPrimaryFontColor,
           ),
           onPressed: () {
             _getTimeFromUser();
@@ -143,9 +144,9 @@ class _DynInputState extends State<DynInput> {
 
       case DynInputType.select:
         tWidget = DropdownButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.keyboard_arrow_down,
-            color: kPrimaryFontColor,
+            color: Get.isDarkMode ? kPrimaryDarkFontColor :  kPrimaryFontColor,
           ),
           iconSize: 32,
           elevation: 0,
@@ -195,9 +196,9 @@ class _DynInputState extends State<DynInput> {
 
       case DynInputType.location:
         tWidget = IconButton(
-            icon: const Icon(
+            icon: Icon(
               Icons.edit_location,
-              color: kPrimaryFontColor,
+              color: Get.isDarkMode ? kPrimaryDarkFontColor :  kPrimaryFontColor,
             ),
             onPressed: () async {
               _getLocationFromUser();

@@ -5,12 +5,14 @@ class Themes {
   static final light = ThemeData(
     primaryColor: kPrimaryColor,
     brightness: Brightness.light,
-    scaffoldBackgroundColor: Colors.white
+    backgroundColor: kPrimaryBackgroundColor,
+    scaffoldBackgroundColor: kPrimaryBackgroundColor
   );
 
   static final dark = ThemeData(
-      primaryColor: kPrimaryColor,
-      brightness: Brightness.dark,
-      scaffoldBackgroundColor: Colors.black38
+    primaryColor: kPrimaryColor,
+    brightness: Brightness.dark,
+    backgroundColor: kPrimaryDarkBackgroundColor,
+    scaffoldBackgroundColor: kPrimaryDarkBackgroundColor
   );
 }

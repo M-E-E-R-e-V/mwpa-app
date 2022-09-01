@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:mwpaapp/Components/DefaultButton.dart';
 import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Components/DynInput.dart';
+import 'package:mwpaapp/Controllers/SightingController.dart';
+import 'package:mwpaapp/Models/Sighting.dart';
 
 class EditSightingPage extends StatefulWidget {
   const EditSightingPage({Key? key}) : super(key: key);
@@ -11,7 +14,9 @@ class EditSightingPage extends StatefulWidget {
 }
 
 class _EditSightingPageState extends State<EditSightingPage> {
+  final SightingController _sightingController = Get.put(SightingController());
   String title = "Add Sighting";
+
   late DynInput sightVehicle;
   late DynInput sightDate;
   late DynInput sightVehicleDriver;
@@ -51,6 +56,14 @@ class _EditSightingPageState extends State<EditSightingPage> {
           await Navigator.pushNamed(context, '/List');
         },
       ),
+    );
+  }
+
+  _addSightingToDb() {
+    _sightingController.addSighting(
+      sighting: Sighting(
+        uid: "uid"
+      )
     );
   }
 
@@ -292,8 +305,8 @@ class _EditSightingPageState extends State<EditSightingPage> {
                   Container(),
                   DefaultButton(
                     label: "+ Add Sighting",
-                    onTab: () async => {
-
+                    onTab: () {
+                      _addSightingToDb();
                     }
                   ),
                 ],
