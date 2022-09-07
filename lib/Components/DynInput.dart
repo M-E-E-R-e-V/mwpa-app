@@ -34,6 +34,7 @@ class DynInput extends StatefulWidget {
   final DynInputType inputType;
   final TextEditingController? controller;
   final Widget? widget;
+  final List<DynInputSelectItem>? selectList;
 
   const DynInput({
     Key? key,
@@ -42,11 +43,14 @@ class DynInput extends StatefulWidget {
     required this.hint,
     required this.inputType,
     this.controller,
-    this.widget
+    this.widget,
+    this.selectList
   }) : super(key: key);
 
   @override
   State<DynInput> createState() => _DynInputState();
+
+  void setSelectList() {}
 }
 
 class _DynInputState extends State<DynInput> {
@@ -54,7 +58,6 @@ class _DynInputState extends State<DynInput> {
   DateTime dateValue = DateTime.now();
   TimeOfDay timeValue = TimeOfDay.now();
   int intValue = 0;
-  List<DynInputSelectItem> selectList = [];
   Position? posValue;
 
   _getDateFromUser() async {
@@ -95,10 +98,6 @@ class _DynInputState extends State<DynInput> {
     setState(() {
       posValue = positon;
     });
-  }
-
-  setSelectList(List<DynInputSelectItem> list) {
-    selectList = list;
   }
 
   @override
@@ -143,6 +142,12 @@ class _DynInputState extends State<DynInput> {
         break;
 
       case DynInputType.select:
+        List<DynInputSelectItem> selectList = [];
+
+        if (widget.selectList != null) {
+          selectList = widget.selectList!;
+        }
+
         tWidget = DropdownButton(
           icon: Icon(
             Icons.keyboard_arrow_down,
@@ -154,6 +159,7 @@ class _DynInputState extends State<DynInput> {
           underline: Container(
             height: 0,
           ),
+          value: strValue,
           items: selectList.map<DropdownMenuItem<String>>((DynInputSelectItem value) {
             return DropdownMenuItem<String>(
               value: value.value,
@@ -171,7 +177,21 @@ class _DynInputState extends State<DynInput> {
         );
 
         if (tHint == "") {
-          tHint = strValue;
+          var selectIndex = selectList.indexWhere((element) {
+            if (element.value == strValue) {
+              return true;
+            }
+
+            return false;
+          });
+
+          if (selectIndex >= 0) {
+            tHint = selectList.elementAt(selectIndex).label;
+          } else {
+            if (strValue != "") {
+              tHint = "unknow";
+            }
+          }
         }
         break;
 

@@ -3,6 +3,10 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Components/DefaultButton.dart';
+import 'package:mwpaapp/Controllers/SightingController.dart';
+import 'package:mwpaapp/Controllers/VehicleController.dart';
+import 'package:mwpaapp/Controllers/VehicleDriverController.dart';
+import 'package:mwpaapp/Services/SyncMwpaService.dart';
 import 'package:mwpaapp/Services/ThemeService.dart';
 
 
@@ -14,6 +18,14 @@ class ListPage extends StatefulWidget {
 }
 
 class _ListPageState extends State<ListPage> {
+  final SightingController _sightingController = Get.put(SightingController());
+  final VehicleController _vehicleController = Get.put(VehicleController());
+  final VehicleDriverController _vehicleDriverController = Get.put(VehicleDriverController());
+
+  _syncMwpa() async {
+    SyncMwpaService service = SyncMwpaService();
+    await service.sync();
+  }
 
   _appBar() {
     return AppBar(
@@ -59,7 +71,14 @@ class _ListPageState extends State<ListPage> {
         ),
         initialValue: "0",
         onSelected: (value) {
+          switch (value) {
+            case "sync":
+              _syncMwpa();
+              break;
 
+            case "logout":
+              break;
+          }
         },
         )
       ],
@@ -87,8 +106,7 @@ class _ListPageState extends State<ListPage> {
           ),
           DefaultButton(
             label: "+ Add Sighting",
-            onTab: () async => await Navigator.pushNamed(context, '/Edit'
-            )
+            onTab: () async => await Navigator.pushNamed(context, '/Edit')
           )
         ],
       ),
@@ -105,6 +123,24 @@ class _ListPageState extends State<ListPage> {
     );
   }
 
+  _showSighting() {
+    return Expanded(
+      child: Obx(() {
+        return ListView.builder(
+          itemCount: _sightingController.sightingList.length,
+          itemBuilder: (_, context) {
+            return Container(
+              width: 100,
+              height: 50,
+              color: Colors.green,
+              margin: const EdgeInsets.only(bottom: 10),
+            );
+          }
+        );
+      })
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -114,7 +150,7 @@ class _ListPageState extends State<ListPage> {
           _addTaskBar(),
           const SizedBox(height: 20),
           // _addMapBar(),
-
+          _showSighting(),
         ],
       ),
     );

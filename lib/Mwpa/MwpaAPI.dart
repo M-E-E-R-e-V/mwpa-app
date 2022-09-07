@@ -5,11 +5,15 @@ import 'package:device_info/device_info.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:mwpaapp/Models/Vehicle.dart';
+import 'package:mwpaapp/Models/VehicleDriver.dart';
 import 'package:mwpaapp/Mwpa/Models/IsLogin.dart';
 import 'package:mwpaapp/Mwpa/Models/LoginResponse.dart';
 import 'package:mwpaapp/Mwpa/Models/StatusCodes.dart';
 import 'package:mwpaapp/Mwpa/Models/User/UserInfoData.dart';
 import 'package:mwpaapp/Mwpa/Models/UserInfoResponse.dart';
+import 'package:mwpaapp/Mwpa/Models/VehicleDriverResponse.dart';
+import 'package:mwpaapp/Mwpa/Models/VehicleResponse.dart';
 import 'package:mwpaapp/Mwpa/MwpaException.dart';
 import 'package:path/path.dart' as p;
 
@@ -18,6 +22,9 @@ class MwpaApi {
   static const URL_ISLOGIN = 'mobile/islogin';
   static const URL_LOGIN = 'mobile/login';
   static const URL_USERINFO = 'mobile/user/info';
+  static const URL_VEHICLE = 'mobile/vehicle/list';
+  static const URL_VEHICLE_DRIVER = 'mobile/vehicledriver/list';
+  static const URL_SPECIES = 'mobile/species/list';
 
   String _url = "";
   String _cookie = "";
@@ -95,17 +102,17 @@ class MwpaApi {
         body: postBody,
       );
 
-      var lresponse = LoginResponse.fromJson(jsonDecode(response.body));
+      var objResponse = LoginResponse.fromJson(jsonDecode(response.body));
 
-      if (lresponse.success) {
+      if (objResponse.success) {
         if (response.headers.containsKey('set-cookie')) {
           _cookie = response.headers['set-cookie']!;
         }
 
         return true;
       } else {
-        if (lresponse.error != null) {
-          throw MwpaException(lresponse.error!);
+        if (objResponse.error != null) {
+          throw MwpaException(objResponse.error!);
         }
 
         throw MwpaException('Response success false');
@@ -134,13 +141,13 @@ class MwpaApi {
         },
       );
 
-      var lresponse = UserInfoResponse.fromJson(jsonDecode(response.body));
+      var objResponse = UserInfoResponse.fromJson(jsonDecode(response.body));
 
-      if (lresponse.statusCode == StatusCodes.OK) {
-        return lresponse.data!.user!;
+      if (objResponse.statusCode == StatusCodes.OK) {
+        return objResponse.data!.user!;
       } else {
-        if (lresponse.msg != null) {
-          throw MwpaException(lresponse.msg!);
+        if (objResponse.msg != null) {
+          throw MwpaException(objResponse.msg!);
         }
 
         throw MwpaException('Response success false');
@@ -149,6 +156,78 @@ class MwpaApi {
     on MwpaException {
       rethrow;
     } catch(error) {
+      throw Exception('Connection error');
+    }
+  }
+
+  Future<List<Vehicle>> getVehicleList() async {
+    if (!_isLogin) {
+      throw MwpaException('Please login first!');
+    }
+
+    try {
+      var url = getUrl(MwpaApi.URL_VEHICLE);
+
+      var response = await http.get(
+        Uri.parse(url),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'cookie': _cookie
+        },
+      );
+
+      var objResponse = VehicleResponse.fromJson(jsonDecode(response.body));
+
+      if (objResponse.statusCode == StatusCodes.OK) {
+        return objResponse.list!;
+      } else {
+        if (objResponse.msg != null) {
+          throw MwpaException(objResponse.msg!);
+        }
+
+        throw MwpaException('Response success false');
+      }
+    }
+    on MwpaException {
+      rethrow;
+    } catch(error) {
+      print(error);
+      throw Exception('Connection error');
+    }
+  }
+
+  Future<List<VehicleDriver>> getVehicleDriverList() async {
+    if (!_isLogin) {
+      throw MwpaException('Please login first!');
+    }
+
+    try {
+      var url = getUrl(MwpaApi.URL_VEHICLE_DRIVER);
+
+      var response = await http.get(
+        Uri.parse(url),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'cookie': _cookie
+        },
+      );
+
+      var objResponse = VehicleDriverResponse.fromJson(jsonDecode(response.body));
+
+      if (objResponse.statusCode == StatusCodes.OK) {
+        return objResponse.list!;
+      } else {
+        if (objResponse.msg != null) {
+          throw MwpaException(objResponse.msg!);
+        }
+
+        throw MwpaException('Response success false');
+      }
+    }
+    on MwpaException {
+      rethrow;
+    } catch(error) {
+      print(error);
       throw Exception('Connection error');
     }
   }
