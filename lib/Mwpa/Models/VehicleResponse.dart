@@ -1,6 +1,5 @@
 import 'package:mwpaapp/Models/Vehicle.dart';
 import 'package:mwpaapp/Mwpa/Models/DefaultReturn.dart';
-import 'package:mwpaapp/Mwpa/Models/StatusCodes.dart';
 
 class VehicleResponse extends DefaultReturn {
   final List<Vehicle>? list;
@@ -32,7 +31,7 @@ class VehicleResponse extends DefaultReturn {
     }
 
     return VehicleResponse(
-      statusCode: json['status'] == 'ok' ? StatusCodes.OK : StatusCodes.INTERNAL_ERROR,
+      statusCode: json['statusCode'],
       msg: msg,
       list: list
     );

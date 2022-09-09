@@ -46,7 +46,6 @@ class _MWPAAppState extends State<MWPAApp> {
       routes: {
         '/Login': (context) => const LoginPage(),
         '/List': (context) => const ListPage(),
-        '/Edit': (context) => const EditSightingPage(),
       }
     );
   }

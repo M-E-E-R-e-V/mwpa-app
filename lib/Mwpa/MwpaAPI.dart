@@ -5,10 +5,12 @@ import 'package:device_info/device_info.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:mwpaapp/Models/Species.dart';
 import 'package:mwpaapp/Models/Vehicle.dart';
 import 'package:mwpaapp/Models/VehicleDriver.dart';
 import 'package:mwpaapp/Mwpa/Models/IsLogin.dart';
 import 'package:mwpaapp/Mwpa/Models/LoginResponse.dart';
+import 'package:mwpaapp/Mwpa/Models/SpeciesListResponse.dart';
 import 'package:mwpaapp/Mwpa/Models/StatusCodes.dart';
 import 'package:mwpaapp/Mwpa/Models/User/UserInfoData.dart';
 import 'package:mwpaapp/Mwpa/Models/UserInfoResponse.dart';
@@ -213,6 +215,42 @@ class MwpaApi {
       );
 
       var objResponse = VehicleDriverResponse.fromJson(jsonDecode(response.body));
+
+      if (objResponse.statusCode == StatusCodes.OK) {
+        return objResponse.list!;
+      } else {
+        if (objResponse.msg != null) {
+          throw MwpaException(objResponse.msg!);
+        }
+
+        throw MwpaException('Response success false');
+      }
+    }
+    on MwpaException {
+      rethrow;
+    } catch(error) {
+      print(error);
+      throw Exception('Connection error');
+    }
+  }
+
+  Future<List<Species>> getSpeciesList() async {
+    if (!_isLogin) {
+      throw MwpaException('Please login first!');
+    }
+
+    try {
+      var url = getUrl(MwpaApi.URL_SPECIES);
+
+      var response = await http.get(
+        Uri.parse(url),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'cookie': _cookie
+        },
+      );
+
+      var objResponse = SpeciesListResponse.fromJson(jsonDecode(response.body));
 
       if (objResponse.statusCode == StatusCodes.OK) {
         return objResponse.list!;

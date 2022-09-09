@@ -1,6 +1,5 @@
 import 'package:mwpaapp/Models/VehicleDriver.dart';
 import 'package:mwpaapp/Mwpa/Models/DefaultReturn.dart';
-import 'package:mwpaapp/Mwpa/Models/StatusCodes.dart';
 
 class VehicleDriverResponse extends DefaultReturn {
   final List<VehicleDriver>? list;
@@ -24,8 +23,9 @@ class VehicleDriverResponse extends DefaultReturn {
       for (var element in vlist) {
         tlist.add(VehicleDriver(
           id: element['id'],
-          user_id: element['user_id'],
-          description: element['description']
+          user_id: element['user']['user_id'],
+          description: element['description'],
+          username: element['user']['name']
         ));
       }
 

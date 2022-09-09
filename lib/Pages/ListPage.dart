@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Components/DefaultButton.dart';
 import 'package:mwpaapp/Controllers/SightingController.dart';
+import 'package:mwpaapp/Controllers/SpeciesController.dart';
 import 'package:mwpaapp/Controllers/VehicleController.dart';
 import 'package:mwpaapp/Controllers/VehicleDriverController.dart';
+import 'package:mwpaapp/Models/Sighting.dart';
+import 'package:mwpaapp/Pages/EditSightingPage.dart';
+import 'package:mwpaapp/Pages/List/ListSightingTile.dart';
 import 'package:mwpaapp/Services/SyncMwpaService.dart';
 import 'package:mwpaapp/Services/ThemeService.dart';
 
@@ -21,15 +26,19 @@ class _ListPageState extends State<ListPage> {
   final SightingController _sightingController = Get.put(SightingController());
   final VehicleController _vehicleController = Get.put(VehicleController());
   final VehicleDriverController _vehicleDriverController = Get.put(VehicleDriverController());
+  final SpeciesController _speciesController = Get.put(SpeciesController());
 
   _syncMwpa() async {
     SyncMwpaService service = SyncMwpaService();
     await service.sync();
+    await _vehicleController.getVehicle();
+    await _vehicleDriverController.getVehicleDriver();
+    await _speciesController.getSpecies();
   }
 
   _appBar() {
     return AppBar(
-      backgroundColor: kPrimaryColor,
+      backgroundColor: kPrimaryHeaderColor,
       leading: IconButton(
         onPressed: () {
           setState(() {
@@ -106,7 +115,11 @@ class _ListPageState extends State<ListPage> {
           ),
           DefaultButton(
             label: "+ Add Sighting",
-            onTab: () async => await Navigator.pushNamed(context, '/Edit')
+            onTab: () async {
+              //await Navigator.pushNamed(context, '/Edit')
+              await Get.to(() => const EditSightingPage());
+              _sightingController.getSightings();
+            }
           )
         ],
       ),
@@ -128,12 +141,23 @@ class _ListPageState extends State<ListPage> {
       child: Obx(() {
         return ListView.builder(
           itemCount: _sightingController.sightingList.length,
-          itemBuilder: (_, context) {
-            return Container(
-              width: 100,
-              height: 50,
-              color: Colors.green,
-              margin: const EdgeInsets.only(bottom: 10),
+          itemBuilder: (_, index) {
+            return AnimationConfiguration.staggeredList(
+                position: index,
+                child: SlideAnimation(
+                  child: FadeInAnimation(
+                    child: Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+
+                          },
+                          child: ListSightingTile(_sightingController.sightingList[index]),
+                        )
+                      ],
+                    ),
+                  ),
+                )
             );
           }
         );

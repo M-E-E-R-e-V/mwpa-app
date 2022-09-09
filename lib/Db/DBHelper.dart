@@ -1,3 +1,4 @@
+import 'package:mwpaapp/Models/Sighting.dart';
 import 'package:mwpaapp/Models/Species.dart';
 import 'package:mwpaapp/Models/Vehicle.dart';
 import 'package:mwpaapp/Models/VehicleDriver.dart';
@@ -25,7 +26,12 @@ class DBHelper {
           db.execute(
             "CREATE TABLE IF NOT EXISTS $_tableNameSighting("
               "id INTEGER PRIMARY KEY AUTOINCREMENT,"
-              "unid STRING"
+              "unid STRING,"
+              "vehicle_id INTEGER,"
+              "vehicle_driver_id INTEGER,"
+              "date STRING,"
+              "species_id INTEGER"
+              ")"
           );
 
           db.execute(
@@ -38,7 +44,14 @@ class DBHelper {
             "CREATE TABLE IF NOT EXISTS $_tableNameVehicleDriver("
               "id INTEGER PRIMARY KEY AUTOINCREMENT, "
               "user_id INTEGER,"
-              "description STRING)"
+              "description STRING,"
+              "username STRING)"
+          );
+
+          db.execute(
+            "CREATE TABLE IF NOT EXISTS $_tableNameSpecies("
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                "name STRING)"
           );
 
           return;
@@ -47,6 +60,10 @@ class DBHelper {
     } catch (e) {
       print(e);
     }
+  }
+
+  static Future<int> insertSighting(Sighting newSighting) async {
+    return await _db?.insert(_tableNameSighting, newSighting.toJson())??1;
   }
 
   static Future<List<Map<String, dynamic>>> querySighting() async {
@@ -113,5 +130,30 @@ class DBHelper {
 
   static Future<int> insertSpecies(Species species) async {
     return await _db?.insert(_tableNameSpecies, species.toJson())??1;
+  }
+
+  static Future<List<Map<String, dynamic>>> querySpecies() async {
+    return await _db!.query(_tableNameSpecies);
+  }
+
+  static Future<Map<String, dynamic>> readSpecies(int id) async {
+    List<Map<String, dynamic>> list = await _db!.query(
+        _tableNameSpecies,
+        where: 'id = ?',
+        whereArgs: [id]
+    );
+
+    if (list.isNotEmpty) {
+      return list[0];
+    }
+
+    return {};
+  }
+
+  static Future<int> updateSpecies(Species species) async {
+    return await _db!.update(
+        _tableNameSpecies,
+        species.toJson()
+    );
   }
 }

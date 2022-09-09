@@ -7,13 +7,14 @@ class SightingController extends GetxController {
   @override
   void onReady() {
     super.onReady();
+    getSightings();
   }
 
   var sightingList = <Sighting>[].obs;
 
-  /*Future<void> addSighting({Sighting sighting}) {
-
-  }*/
+  Future<int> addSighting({required Sighting newSighting}) async {
+    return await DBHelper.insertSighting(newSighting);
+  }
 
   void getSightings() async {
     List<Map<String, dynamic>> sightings = await DBHelper.querySighting();

@@ -6,7 +6,6 @@ import 'package:latlong_to_osgrid/latlong_to_osgrid.dart';
 import 'package:mwpaapp/Constants.dart';
 import 'package:switcher/core/switcher_size.dart';
 import 'package:switcher/switcher.dart';
-
 import '../Location/LocationProvider.dart';
 
 enum DynInputType {
@@ -27,6 +26,30 @@ class DynInputSelectItem {
   DynInputSelectItem({required this.value, required this.label});
 }
 
+class DynInputValue {
+  String strValue = "";
+  DateTime dateValue = DateTime.now();
+  TimeOfDay timeValue = TimeOfDay.now();
+  int intValue = 0;
+  Position? posValue;
+
+  setValue(String newValue) {
+    strValue = newValue;
+  }
+
+  String getValue() {
+    return strValue;
+  }
+
+  int getStrValueAsInt() {
+    return int.parse(strValue);
+  }
+
+  String getDateTime() {
+    return dateValue.toUtc().toString();
+  }
+}
+
 class DynInput extends StatefulWidget {
   final BuildContext context;
   final String title;
@@ -35,6 +58,7 @@ class DynInput extends StatefulWidget {
   final TextEditingController? controller;
   final Widget? widget;
   final List<DynInputSelectItem>? selectList;
+  final DynInputValue? dynValue;
 
   const DynInput({
     Key? key,
@@ -44,21 +68,16 @@ class DynInput extends StatefulWidget {
     required this.inputType,
     this.controller,
     this.widget,
-    this.selectList
+    this.selectList,
+    this.dynValue
   }) : super(key: key);
 
   @override
   State<DynInput> createState() => _DynInputState();
-
-  void setSelectList() {}
 }
 
 class _DynInputState extends State<DynInput> {
-  String strValue = "";
-  DateTime dateValue = DateTime.now();
-  TimeOfDay timeValue = TimeOfDay.now();
-  int intValue = 0;
-  Position? posValue;
+  DynInputValue? dynValue;
 
   _getDateFromUser() async {
     DateTime? pickDate = await showDatePicker(
@@ -70,7 +89,7 @@ class _DynInputState extends State<DynInput> {
 
     if (pickDate != null) {
       setState(() {
-        dateValue = pickDate;
+        dynValue!.dateValue = pickDate;
       });
     }
   }
@@ -87,16 +106,16 @@ class _DynInputState extends State<DynInput> {
 
     if (picketTime != null) {
       setState(() {
-        timeValue = picketTime;
+        dynValue!.timeValue = picketTime;
       });
     }
   }
 
   _getLocationFromUser() async {
-    var positon = await LocationProvider.getLocation();
+    var position = await LocationProvider.getLocation();
 
     setState(() {
-      posValue = positon;
+      dynValue!.posValue = position;
     });
   }
 
@@ -107,6 +126,9 @@ class _DynInputState extends State<DynInput> {
     var tWidget = widget.widget;
     var tHint = widget.hint;
     var textInputType = TextInputType.text;
+    dynValue = widget.dynValue;
+
+    dynValue ??= DynInputValue();
 
     switch (widget.inputType) {
       case DynInputType.date:
@@ -121,7 +143,7 @@ class _DynInputState extends State<DynInput> {
         );
 
         if (tHint == "") {
-          tHint = DateFormat.yMd().format(dateValue);
+          tHint = DateFormat.yMd().format(dynValue!.dateValue);
         }
         break;
 
@@ -137,7 +159,7 @@ class _DynInputState extends State<DynInput> {
         );
 
         if (tHint == "") {
-          tHint = timeValue.format(context);
+          tHint = dynValue!.timeValue.format(context);
         }
         break;
 
@@ -159,7 +181,6 @@ class _DynInputState extends State<DynInput> {
           underline: Container(
             height: 0,
           ),
-          value: strValue,
           items: selectList.map<DropdownMenuItem<String>>((DynInputSelectItem value) {
             return DropdownMenuItem<String>(
               value: value.value,
@@ -170,7 +191,7 @@ class _DynInputState extends State<DynInput> {
           onChanged: (String? value) {
             setState(() {
               if (value != null) {
-                strValue = value;
+                dynValue!.strValue = value;
               }
             });
           },
@@ -178,7 +199,7 @@ class _DynInputState extends State<DynInput> {
 
         if (tHint == "") {
           var selectIndex = selectList.indexWhere((element) {
-            if (element.value == strValue) {
+            if (element.value == dynValue!.strValue) {
               return true;
             }
 
@@ -188,9 +209,15 @@ class _DynInputState extends State<DynInput> {
           if (selectIndex >= 0) {
             tHint = selectList.elementAt(selectIndex).label;
           } else {
-            if (strValue != "") {
-              tHint = "unknow";
+            if (dynValue!.strValue != "") {
+              tHint = "unknown by id: ${dynValue!.strValue}";
+            } else {
+              tHint = "<please select>";
             }
+          }
+
+          if (selectList.isEmpty) {
+            tHint = "<empty list>";
           }
         }
         break;
@@ -226,11 +253,11 @@ class _DynInputState extends State<DynInput> {
         );
 
 
-        if (posValue != null) {
+        if (dynValue!.posValue != null) {
           if (tHint == "") {
             LatLongConverter converter = LatLongConverter();
-            var latDms = converter.getDegreeFromDecimal(posValue!.latitude);
-            var longDms = converter.getDegreeFromDecimal(posValue!.longitude);
+            var latDms = converter.getDegreeFromDecimal(dynValue!.posValue!.latitude);
+            var longDms = converter.getDegreeFromDecimal(dynValue!.posValue!.longitude);
 
             var keyLong = "E";
             var keyLat = "N";
@@ -243,7 +270,7 @@ class _DynInputState extends State<DynInput> {
               keyLat = "S";
             }
 
-            ttitle += " (accuracy: ${posValue!.accuracy.toInt().toString()} m)";
+            ttitle += " (accuracy: ${dynValue!.posValue!.accuracy.toInt().toString()} m)";
 
             tHint = "$keyLat: ${latDms[0]}° ${latDms[1]}' ${latDms[2]}\" - $keyLong: ${longDms[0]}° ${longDms[1]}' ${longDms[2]}\" ";
           }
