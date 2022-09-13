@@ -51,6 +51,14 @@ class _EditSightingPageState extends State<EditSightingPage> {
   late DynInput sightSubgroups;
   late DynInput sightReaction;
 
+  late DynInput sightFreqBehaviour;
+  late DynInput sightRecAnimals;
+  late DynInput sightOtherSpecies;
+  late DynInput sightOther;
+  late DynInput sightOtherVehicle;
+  late DynInput sightNote;
+
+
   _appBar(BuildContext context) {
     return AppBar(
       backgroundColor: kPrimaryHeaderColor,
@@ -74,7 +82,29 @@ class _EditSightingPageState extends State<EditSightingPage> {
         vehicle_id: sightVehicle.dynValue?.getStrValueAsInt(),
         vehicle_driver_id: sightVehicleDriver.dynValue?.getStrValueAsInt(),
         date: sightDate.dynValue?.getDateTime(),
-        species_id: sightSpecies.dynValue?.getStrValueAsInt()
+        tour_start: sightTourStart.dynValue?.getTimeOfDay(),
+        tour_end: sightTourEnd.dynValue?.getTimeOfDay(),
+        duration_from: sightDurationFrom.dynValue?.getTimeOfDay(),
+        duration_until: sightDurationUntil.dynValue?.getTimeOfDay(),
+        location_begin: sightLocationBegin.dynValue?.getPosition(),
+        location_end: sightLocationEnd.dynValue?.getPosition(),
+        photo_taken: sightPhotoTaken.dynValue?.getIntValue(),
+        distance_coast: sightDistanceCoast.dynValue?.getValue(),
+        distance_coast_estimation_gps: sightDistanceCoastEstimationGps.dynValue?.getIntValue(),
+        species_id: sightSpecies.dynValue?.getStrValueAsInt(),
+        species_count: sightSpeciesNum.dynValue?.getStrValueAsInt(),
+        juveniles: sightJuveniles.dynValue?.getIntValue(),
+        calves: sightCalves.dynValue?.getIntValue(),
+        newborns: sightNewborns.dynValue?.getIntValue(),
+        behaviour_id: sightBehaviour.dynValue?.getStrValueAsInt(),
+        subgroups: sightSubgroups.dynValue?.getIntValue(),
+        reaction_id: sightBehaviour.dynValue?.getStrValueAsInt(),
+        freq_behaviour: sightFreqBehaviour.dynValue?.getValue(),
+        recognizable_animals: sightRecAnimals.dynValue?.getValue(),
+        other_species: sightOtherSpecies.dynValue?.getMultiValue(),
+        other: sightOther.dynValue?.getValue(),
+        other_vehicle: sightOtherVehicle.dynValue?.getValue(),
+        note: sightNote.dynValue?.getValue()
       )
     );
 
@@ -242,7 +272,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
            context: context,
            title: 'Behaviour',
            hint: '',
-           inputType: DynInputType.select,
+           inputType: DynInputType.multiselect,
            dynValue: DynInputValue(),
          );
 
@@ -255,12 +285,66 @@ class _EditSightingPageState extends State<EditSightingPage> {
          );
 
          sightReaction = DynInput(
-           context: context,
-           title: 'Reaction',
-           hint: '',
-           inputType: DynInputType.select,
-           dynValue: DynInputValue(),
+          context: context,
+          title: 'Reaction',
+          hint: '',
+          inputType: DynInputType.select,
+          dynValue: DynInputValue(),
          );
+
+        sightFreqBehaviour = DynInput(
+          context: context,
+          title: "Frequent behaviours of individuals",
+          hint: "",
+          inputType: DynInputType.textarea,
+          dynValue: DynInputValue(),
+        );
+
+        sightRecAnimals = DynInput(
+          context: context,
+          title: "Recognizable animals",
+          hint: "",
+          inputType: DynInputType.textarea,
+          dynValue: DynInputValue(),
+        );
+
+        sightOtherSpecies = DynInput(
+          context: context,
+          title: 'Other Species',
+          hint: '',
+          inputType: DynInputType.multiselect,
+          selectList: _speciesController.speciesList.map((element) {
+            return DynInputSelectItem(
+                value: element.id!.toString(),
+                label: element.name!
+            );
+          }).toList(),
+          dynValue: DynInputValue(),
+        );
+
+        sightOther = DynInput(
+          context: context,
+          title: "Other",
+          hint: "",
+          inputType: DynInputType.textarea,
+          dynValue: DynInputValue(),
+        );
+
+        sightOtherVehicle = DynInput(
+          context: context,
+          title: "Other Vehicle",
+          hint: "",
+          inputType: DynInputType.textarea,
+          dynValue: DynInputValue(),
+        );
+
+        sightNote = DynInput(
+          context: context,
+          title: "Note",
+          hint: "",
+          inputType: DynInputType.textarea,
+          dynValue: DynInputValue(),
+        );
 
          return Scaffold(
            appBar: _appBar(context),
@@ -333,6 +417,12 @@ class _EditSightingPageState extends State<EditSightingPage> {
                      sightBehaviour,
                      sightSubgroups,
                      sightReaction,
+                     sightFreqBehaviour,
+                     sightRecAnimals,
+                     sightOtherSpecies,
+                     sightOther,
+                     sightOtherVehicle,
+                     sightNote,
                      const SizedBox(height: 18),
                      Row(
                        mainAxisAlignment: MainAxisAlignment.spaceBetween,

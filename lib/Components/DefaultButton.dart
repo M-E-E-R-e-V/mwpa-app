@@ -4,15 +4,22 @@ import 'package:mwpaapp/Constants.dart';
 class DefaultButton extends StatelessWidget {
   final String label;
   final Function()? onTab;
+  final double? width;
 
-  const DefaultButton({Key? key, required this.label, required this.onTab}) : super(key: key);
+  const DefaultButton({Key? key, required this.label, this.onTab, this.width}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    var newWidth = 150.0;
+
+    if (width != null) {
+      newWidth = width!;
+    }
+
     return GestureDetector(
       onTap: onTab,
       child: Container(
-        width: 150,
+        width: newWidth,
         height: 60,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),

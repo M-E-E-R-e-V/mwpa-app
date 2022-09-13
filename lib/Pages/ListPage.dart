@@ -150,7 +150,10 @@ class _ListPageState extends State<ListPage> {
                       children: [
                         GestureDetector(
                           onTap: () {
-
+                            _showBottomSheet(
+                              context,
+                              _sightingController.sightingList[index]
+                            );
                           },
                           child: ListSightingTile(_sightingController.sightingList[index]),
                         )
@@ -162,6 +165,91 @@ class _ListPageState extends State<ListPage> {
           }
         );
       })
+    );
+  }
+
+  _bottomSheetButton({
+    required String label,
+    required Function()? onTab,
+    required Color clr,
+    required BuildContext context
+  }) {
+    return GestureDetector(
+      onTap: onTab,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        height: 55,
+        width: MediaQuery.of(context).size.width * 0.9,
+        decoration: BoxDecoration(
+          border: Border.all(
+            width: 2,
+            color: clr
+          ),
+          borderRadius: BorderRadius.circular(20),
+          color: clr
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: clr == Colors.white ? titleStyle : titleStyle.copyWith(
+              color: Colors.white
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  _showBottomSheet(BuildContext context, Sighting sighting) {
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.only(top: 4),
+        height: MediaQuery.of(context).size.height * 0.32,
+        color: Get.isDarkMode ? kPrimaryDarkBackgroundColor : kPrimaryBackgroundColor,
+        child: Column(
+          children: [
+            Container(
+              height: 6,
+              width: 120,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: Get.isDarkMode ? Colors.grey[600] : Colors.grey[300]
+              ),
+            ),
+            const Spacer(),
+            _bottomSheetButton(
+              label: 'Edit',
+              onTab: () {
+
+                Get.back();
+              },
+              clr: kPrimaryHeaderColor,
+              context: context
+            ),
+            const SizedBox(height: 20),
+            _bottomSheetButton(
+                label: 'Delete',
+                onTab: () {
+
+                  Get.back();
+                },
+                clr: Colors.red[300]!,
+                context: context
+            ),
+            const SizedBox(height: 20),
+            _bottomSheetButton(
+                label: 'Close',
+                onTab: () {
+
+                  Get.back();
+                },
+                clr: Colors.white,
+                context: context
+            ),
+            const SizedBox(height: 10),
+          ],
+        ),
+      )
     );
   }
 

@@ -1,10 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Controllers/SpeciesController.dart';
 import 'package:mwpaapp/Models/Sighting.dart';
+import 'package:mwpaapp/Util/UtilPosition.dart';
 
 class ListSightingTile extends StatelessWidget {
 
@@ -17,12 +20,24 @@ class ListSightingTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String timeString = "";
+    String timeString = "not set!";
+    String locationString = "not set!";
 
     if (sighting.date != null) {
       DateTime tDate = DateTime.parse(sighting.date!);
-      timeString += DateFormat.yMd().format(tDate);
+      timeString = "${DateFormat.yMd().format(tDate)} - ${sighting.duration_from!}";
     }
+
+    if (sighting.location_begin != null) {
+      try {
+        Position tpos = Position.fromMap(jsonDecode(sighting.location_begin!));
+        locationString = UtilPosition.getStr(tpos);
+      }
+      catch(loce) {
+        print(loce);
+      }
+    }
+
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -32,7 +47,7 @@ class ListSightingTile extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          color: kPrimaryHeaderColor
+          color: sighting.validateColor()
         ),
         child: Row(
           children: [
@@ -74,7 +89,26 @@ class ListSightingTile extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    // todo
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.location_pin,
+                          color: Colors.grey[200],
+                          size: 18,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          locationString,
+                          style: GoogleFonts.lato(
+                              textStyle: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey[100]
+                              )
+                          ),
+                        )
+                      ],
+                    ),
                   ]
                 )
             ),
