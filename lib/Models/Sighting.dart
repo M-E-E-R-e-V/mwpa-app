@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mwpaapp/Constants.dart';
+import 'package:mwpaapp/Util/UtilCheckJson.dart';
 
 class Sighting {
 
@@ -22,7 +23,7 @@ class Sighting {
   int? juveniles;
   int? calves;
   int? newborns;
-  int? behaviour_id;
+  String? behaviours;
   int? subgroups;
   int? reaction_id;
   String? freq_behaviour;
@@ -52,7 +53,7 @@ class Sighting {
     this.juveniles,
     this.calves,
     this.newborns,
-    this.behaviour_id,
+    this.behaviours,
     this.subgroups,
     this.reaction_id,
     this.freq_behaviour,
@@ -64,34 +65,34 @@ class Sighting {
   });
 
   Sighting.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    unid = json['unid'];
-    vehicle_id = json['vehicle_id'];
-    vehicle_driver_id = json['vehicle_driver_id'];
-    date = json['date'];
-    tour_start = json['tour_start'];
-    tour_end = json['tour_end'];
-    duration_from = json['duration_from'];
-    duration_until = json['duration_until'];
-    location_begin = json['location_begin'];
-    location_end = json['location_end'];
-    photo_taken = json['photo_taken'];
-    distance_coast = json['distance_coast'];
-    distance_coast_estimation_gps = json['distance_coast_estimation_gps'];
-    species_id = json['species_id'];
-    species_count = json['species_count'];
-    juveniles = json['juveniles'];
-    calves = json['calves'];
-    newborns = json['newborns'];
-    behaviour_id = json['behaviour_id'];
-    subgroups = json['subgroups'];
-    reaction_id = json['reaction_id'];
-    freq_behaviour = json['freq_behaviour'];
-    recognizable_animals = json['recognizable_animals'];
-    other_species = json['other_species'];
-    other = json['other'];
-    other_vehicle = json['other_vehicle'];
-    note = json['note'];
+    id = UtilCheckJson.checkValue(json['id'], UtilCheckJsonTypes.int);
+    unid = UtilCheckJson.checkValue(json['unid'], UtilCheckJsonTypes.string);
+    vehicle_id = UtilCheckJson.checkValue(json['vehicle_id'], UtilCheckJsonTypes.int);
+    vehicle_driver_id = UtilCheckJson.checkValue(json['vehicle_driver_id'], UtilCheckJsonTypes.int);
+    date = UtilCheckJson.checkValue(json['date'], UtilCheckJsonTypes.string);
+    tour_start = UtilCheckJson.checkValue(json['tour_start'], UtilCheckJsonTypes.string);
+    tour_end = UtilCheckJson.checkValue(json['tour_end'], UtilCheckJsonTypes.string);
+    duration_from = UtilCheckJson.checkValue(json['duration_from'], UtilCheckJsonTypes.string);
+    duration_until = UtilCheckJson.checkValue(json['duration_until'], UtilCheckJsonTypes.string);
+    location_begin = UtilCheckJson.checkValue(json['location_begin'], UtilCheckJsonTypes.string);
+    location_end = UtilCheckJson.checkValue(json['location_end'], UtilCheckJsonTypes.string);
+    photo_taken = UtilCheckJson.checkValue(json['photo_taken'], UtilCheckJsonTypes.int);
+    distance_coast = UtilCheckJson.checkValue(json['distance_coast'], UtilCheckJsonTypes.string);
+    distance_coast_estimation_gps = UtilCheckJson.checkValue(json['distance_coast_estimation_gps'], UtilCheckJsonTypes.int);
+    species_id = UtilCheckJson.checkValue(json['species_id'], UtilCheckJsonTypes.int);
+    species_count = UtilCheckJson.checkValue(json['species_count'], UtilCheckJsonTypes.int);
+    juveniles = UtilCheckJson.checkValue(json['juveniles'], UtilCheckJsonTypes.int);
+    calves = UtilCheckJson.checkValue(json['calves'], UtilCheckJsonTypes.int);
+    newborns = UtilCheckJson.checkValue(json['newborns'], UtilCheckJsonTypes.int);
+    behaviours = UtilCheckJson.checkValue(json['behaviour_id'], UtilCheckJsonTypes.string);
+    subgroups = UtilCheckJson.checkValue(json['subgroups'], UtilCheckJsonTypes.int);
+    reaction_id = UtilCheckJson.checkValue(json['reaction_id'], UtilCheckJsonTypes.int);
+    freq_behaviour = UtilCheckJson.checkValue(json['freq_behaviour'], UtilCheckJsonTypes.string);
+    recognizable_animals = UtilCheckJson.checkValue(json['recognizable_animals'], UtilCheckJsonTypes.string);
+    other_species = UtilCheckJson.checkValue(json['other_species'], UtilCheckJsonTypes.string);
+    other = UtilCheckJson.checkValue(json['other'], UtilCheckJsonTypes.string);
+    other_vehicle = UtilCheckJson.checkValue(json['other_vehicle'], UtilCheckJsonTypes.string);
+    note = UtilCheckJson.checkValue(json['note'], UtilCheckJsonTypes.string);
   }
 
   Map<String, dynamic> toJson() {
@@ -115,7 +116,7 @@ class Sighting {
     data['species_count'] = species_count;
     data['juveniles'] = juveniles;
     data['newborns'] = newborns;
-    data['behaviour_id'] = behaviour_id;
+    data['behaviours'] = behaviours;
     data['subgroups'] = subgroups;
     data['reaction_id'] = reaction_id;
     data['freq_behaviour'] = freq_behaviour;
@@ -133,19 +134,25 @@ class Sighting {
       return Colors.red;
     }
 
-    if (tour_start == null || tour_start == "") {
+    if (tour_start == null || tour_start == "" || tour_start == "null") {
       return Colors.red;
     }
 
-    if (tour_end == null || tour_end == "") {
+    if (tour_end == null || tour_end == "" || tour_end == "null") {
       return Colors.yellow;
     }
 
-    if (duration_from == null || duration_from == "") {
+    if (duration_from == null || duration_from == "" || duration_from == "null") {
       return Colors.red;
     }
 
+    if (location_begin == null || location_begin == "" || location_begin == "null") {
+      return Colors.red;
+    }
 
+    if (location_end == null || location_end == "" || location_end == "null") {
+      return Colors.yellow;
+    }
 
     return kPrimaryHeaderColor;
   }

@@ -36,6 +36,11 @@ class _ListPageState extends State<ListPage> {
     await _speciesController.getSpecies();
   }
 
+  _loadController() async {
+    await _speciesController.getSpecies();
+    _sightingController.getSightings();
+  }
+
   _appBar() {
     return AppBar(
       backgroundColor: kPrimaryHeaderColor,
@@ -142,6 +147,8 @@ class _ListPageState extends State<ListPage> {
         return ListView.builder(
           itemCount: _sightingController.sightingList.length,
           itemBuilder: (_, index) {
+            Sighting sighting = _sightingController.sightingList[index];
+
             return AnimationConfiguration.staggeredList(
                 position: index,
                 child: SlideAnimation(
@@ -152,10 +159,10 @@ class _ListPageState extends State<ListPage> {
                           onTap: () {
                             _showBottomSheet(
                               context,
-                              _sightingController.sightingList[index]
+                              sighting
                             );
                           },
-                          child: ListSightingTile(_sightingController.sightingList[index]),
+                          child: ListSightingTile(sighting),
                         )
                       ],
                     ),
@@ -183,7 +190,7 @@ class _ListPageState extends State<ListPage> {
         decoration: BoxDecoration(
           border: Border.all(
             width: 2,
-            color: clr
+            color: Colors.grey[600]!
           ),
           borderRadius: BorderRadius.circular(20),
           color: clr
@@ -219,7 +226,9 @@ class _ListPageState extends State<ListPage> {
             const Spacer(),
             _bottomSheetButton(
               label: 'Edit',
-              onTab: () {
+              onTab: () async {
+                await Get.to(() => EditSightingPage(sighting: sighting));
+                _sightingController.getSightings();
 
                 Get.back();
               },
@@ -229,8 +238,9 @@ class _ListPageState extends State<ListPage> {
             const SizedBox(height: 20),
             _bottomSheetButton(
                 label: 'Delete',
-                onTab: () {
-
+                onTab: () async {
+                  await _sightingController.delete(sighting);
+                  _sightingController.getSightings();
                   Get.back();
                 },
                 clr: Colors.red[300]!,
@@ -255,6 +265,8 @@ class _ListPageState extends State<ListPage> {
 
   @override
   Widget build(BuildContext context) {
+    _loadController();
+
     return Scaffold(
       appBar: _appBar(),
       body: Column(

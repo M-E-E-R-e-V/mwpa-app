@@ -10,7 +10,9 @@ import 'package:mwpaapp/Controllers/VehicleDriverController.dart';
 import 'package:mwpaapp/Models/Sighting.dart';
 
 class EditSightingPage extends StatefulWidget {
-  const EditSightingPage({Key? key}) : super(key: key);
+  final Sighting? sighting;
+
+  const EditSightingPage({Key? key, this.sighting}) : super(key: key);
 
   @override
   State<EditSightingPage> createState() => _EditSightingPageState();
@@ -22,42 +24,86 @@ class _EditSightingPageState extends State<EditSightingPage> {
   final VehicleDriverController _vehicleDriverController = Get.find<VehicleDriverController>();
   final SpeciesController _speciesController = Get.find<SpeciesController>();
 
-  String title = "Add Sighting";
+  String title = "";
+  bool isInit = false;
 
   late DynInput sightVehicle;
-  late DynInput sightDate;
+  DynInputValue sightVehicleValue = DynInputValue();
+
   late DynInput sightVehicleDriver;
+  DynInputValue sightVehicleDriverValue = DynInputValue();
+
+  late DynInput sightDate;
+  DynInputValue sightDateValue = DynInputValue();
+
   late DynInput sightTourStart;
+  DynInputValue sightTourStartValue = DynInputValue();
+
   late DynInput sightTourEnd;
+  DynInputValue sightTourEndValue = DynInputValue();
 
   late DynInput sightDurationFrom;
+  DynInputValue sightDurationFromValue = DynInputValue();
+
   late DynInput sightDurationUntil;
+  DynInputValue sightDurationUntilValue = DynInputValue();
 
   late DynInput sightLocationBegin;
+  DynInputValue sightLocationBeginValue = DynInputValue();
+
   late DynInput sightLocationEnd;
+  DynInputValue sightLocationEndValue = DynInputValue();
 
   late DynInput sightPhotoTaken;
+  DynInputValue sightPhotoTakenValue = DynInputValue();
+
   late DynInput sightDistanceCoast;
+  DynInputValue sightDistanceCoastValue = DynInputValue();
+
   late DynInput sightDistanceCoastEstimationGps;
+  DynInputValue sightDistanceCoastEstimationGpsValue = DynInputValue();
 
   late DynInput sightSpecies;
+  DynInputValue sightSpeciesValue = DynInputValue();
+
   late DynInput sightSpeciesNum;
+  DynInputValue sightSpeciesNumValue = DynInputValue();
 
   late DynInput sightJuveniles;
+  DynInputValue sightJuvenilesValue = DynInputValue();
+
   late DynInput sightCalves;
+  DynInputValue sightCalvesValue = DynInputValue();
+
   late DynInput sightNewborns;
+  DynInputValue sightNewbornsValue = DynInputValue();
 
   late DynInput sightBehaviour;
+  DynInputValue sightBehaviourValue = DynInputValue();
+
   late DynInput sightSubgroups;
+  DynInputValue sightSubgroupsValue = DynInputValue();
+
   late DynInput sightReaction;
+  DynInputValue sightReactionValue = DynInputValue();
 
   late DynInput sightFreqBehaviour;
-  late DynInput sightRecAnimals;
-  late DynInput sightOtherSpecies;
-  late DynInput sightOther;
-  late DynInput sightOtherVehicle;
-  late DynInput sightNote;
+  DynInputValue sightFreqBehaviourValue = DynInputValue();
 
+  late DynInput sightRecAnimals;
+  DynInputValue sightRecAnimalsValue = DynInputValue();
+
+  late DynInput sightOtherSpecies;
+  DynInputValue sightOtherSpeciesValue = DynInputValue();
+
+  late DynInput sightOther;
+  DynInputValue sightOtherValue = DynInputValue();
+
+  late DynInput sightOtherVehicle;
+  DynInputValue sightOtherVehicleValue = DynInputValue();
+
+  late DynInput sightNote;
+  DynInputValue sightNoteValue = DynInputValue();
 
   _appBar(BuildContext context) {
     return AppBar(
@@ -75,12 +121,12 @@ class _EditSightingPageState extends State<EditSightingPage> {
     );
   }
 
-  _addSightingToDb() async {
-    await _sightingController.addSighting(
-      newSighting: Sighting(
+  _saveSightingToDb() async {
+    Sighting tsigh = Sighting(
         unid: "",
         vehicle_id: sightVehicle.dynValue?.getStrValueAsInt(),
-        vehicle_driver_id: sightVehicleDriver.dynValue?.getStrValueAsInt(),
+        vehicle_driver_id: sightVehicleDriver.dynValue
+            ?.getStrValueAsInt(),
         date: sightDate.dynValue?.getDateTime(),
         tour_start: sightTourStart.dynValue?.getTimeOfDay(),
         tour_end: sightTourEnd.dynValue?.getTimeOfDay(),
@@ -90,13 +136,14 @@ class _EditSightingPageState extends State<EditSightingPage> {
         location_end: sightLocationEnd.dynValue?.getPosition(),
         photo_taken: sightPhotoTaken.dynValue?.getIntValue(),
         distance_coast: sightDistanceCoast.dynValue?.getValue(),
-        distance_coast_estimation_gps: sightDistanceCoastEstimationGps.dynValue?.getIntValue(),
+        distance_coast_estimation_gps: sightDistanceCoastEstimationGps
+            .dynValue?.getIntValue(),
         species_id: sightSpecies.dynValue?.getStrValueAsInt(),
         species_count: sightSpeciesNum.dynValue?.getStrValueAsInt(),
         juveniles: sightJuveniles.dynValue?.getIntValue(),
         calves: sightCalves.dynValue?.getIntValue(),
         newborns: sightNewborns.dynValue?.getIntValue(),
-        behaviour_id: sightBehaviour.dynValue?.getStrValueAsInt(),
+        behaviours: sightBehaviour.dynValue?.getMultiValue(),
         subgroups: sightSubgroups.dynValue?.getIntValue(),
         reaction_id: sightBehaviour.dynValue?.getStrValueAsInt(),
         freq_behaviour: sightFreqBehaviour.dynValue?.getValue(),
@@ -105,21 +152,66 @@ class _EditSightingPageState extends State<EditSightingPage> {
         other: sightOther.dynValue?.getValue(),
         other_vehicle: sightOtherVehicle.dynValue?.getValue(),
         note: sightNote.dynValue?.getValue()
-      )
     );
+
+    if (widget.sighting != null) {
+      tsigh.id = widget.sighting?.id!;
+
+      await _sightingController.updateSighting(tSighting: tsigh);
+    } else {
+      await _sightingController.addSighting(newSighting: tsigh);
+    }
 
     Get.back();
   }
 
   @override
   Widget build(BuildContext context) {
+    Sighting? sighting = widget.sighting;
+
+    if (!isInit) {
+      title = "Add Sighting";
+
+      if (sighting != null) {
+        title = "Edit Sighting";
+        sightVehicleValue.setStrValueByInt(sighting.vehicle_id!);
+        sightVehicleDriverValue.setStrValueByInt(sighting.vehicle_driver_id!);
+        sightDateValue.setDateTime(sighting.date!);
+        sightTourStartValue.setTimeOfDy(sighting.tour_start!);
+        sightTourEndValue.setTimeOfDy(sighting.tour_end!);
+        sightDurationFromValue.setTimeOfDy(sighting.duration_from!);
+        sightDurationUntilValue.setTimeOfDy(sighting.duration_until!);
+        sightLocationBeginValue.setPosition(sighting.location_begin!);
+        sightLocationEndValue.setPosition(sighting.location_end!);
+        sightPhotoTakenValue.setIntValue(sighting.photo_taken!);
+        sightDistanceCoastValue.setValue(sighting.distance_coast!);
+        sightDistanceCoastEstimationGpsValue.setIntValue(sighting.distance_coast_estimation_gps!);
+        sightSpeciesValue.setStrValueByInt(sighting.species_id!);
+        sightSpeciesNumValue.setStrValueByInt(sighting.species_count!);
+        sightJuvenilesValue.setIntValue(sighting.juveniles!);
+        sightCalvesValue.setIntValue(sighting.calves!);
+        sightNewbornsValue.setIntValue(sighting.newborns!);
+        sightBehaviourValue.setMultiValue(sighting.behaviours!);
+        sightSubgroupsValue.setIntValue(sighting.subgroups!);
+        sightReactionValue.setStrValueByInt(sighting.reaction_id!);
+        sightFreqBehaviourValue.setValue(sighting.freq_behaviour!);
+        sightRecAnimalsValue.setValue(sighting.recognizable_animals!);
+        sightOtherSpeciesValue.setMultiValue(sighting.other_species!);
+        sightOtherValue.setValue(sighting.other!);
+        sightOtherVehicleValue.setValue(sighting.other_vehicle!);
+        sightNoteValue.setValue(sighting.note!);
+      }
+
+      isInit = true;
+    }
+
     return Obx(() {
         sightVehicle = DynInput(
            context: context,
            title: "Sighting from",
            hint: "",
            inputType: DynInputType.select,
-           dynValue: DynInputValue(),
+           dynValue: sightVehicleValue,
            selectList: _vehicleController.vehicleList.map((element) {
              return DynInputSelectItem(
                  value: element.id!.toString(),
@@ -128,20 +220,12 @@ class _EditSightingPageState extends State<EditSightingPage> {
            }).toList(),
          );
 
-         sightDate = DynInput(
-           context: context,
-           title: "Date",
-           hint: "",
-           inputType: DynInputType.date,
-           dynValue: DynInputValue(),
-         );
-
          sightVehicleDriver = DynInput(
            context: context,
            title: "Skipper",
            hint: "",
            inputType: DynInputType.select,
-           dynValue: DynInputValue(),
+           dynValue: sightVehicleDriverValue,
            selectList: _vehicleDriverController.vehicleDriverList.map((element) {
              return DynInputSelectItem(
                  value: element.id!.toString(),
@@ -150,12 +234,20 @@ class _EditSightingPageState extends State<EditSightingPage> {
            }).toList(),
          );
 
+        sightDate = DynInput(
+          context: context,
+          title: "Date",
+          hint: "",
+          inputType: DynInputType.date,
+          dynValue: sightDateValue,
+        );
+
          sightTourStart = DynInput(
            context: context,
            title: "Start of trip",
            hint: "",
            inputType: DynInputType.time,
-           dynValue: DynInputValue(),
+           dynValue: sightTourStartValue,
          );
 
          sightTourEnd = DynInput(
@@ -163,7 +255,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
            title: "End of trip",
            hint: "",
            inputType: DynInputType.time,
-           dynValue: DynInputValue(),
+           dynValue: sightTourEndValue,
          );
 
          sightDurationFrom = DynInput(
@@ -171,7 +263,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
            title: "Sighting duration from",
            hint: "",
            inputType: DynInputType.time,
-           dynValue: DynInputValue(),
+           dynValue: sightDurationFromValue,
          );
 
          sightDurationUntil = DynInput(
@@ -179,7 +271,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
            title: "Sighting duration until",
            hint: "",
            inputType: DynInputType.time,
-           dynValue: DynInputValue(),
+           dynValue: sightDurationUntilValue,
          );
 
          sightLocationBegin = DynInput(
@@ -187,7 +279,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
            title: "Position begin",
            hint: "",
            inputType: DynInputType.location,
-           dynValue: DynInputValue(),
+           dynValue: sightLocationBeginValue,
          );
 
          sightLocationEnd = DynInput(
@@ -195,7 +287,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
            title: "Position end",
            hint: "",
            inputType: DynInputType.location,
-           dynValue: DynInputValue(),
+           dynValue: sightLocationEndValue,
          );
 
          sightPhotoTaken = DynInput(
@@ -203,7 +295,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
            title: "Photos taken",
            hint: "",
            inputType: DynInputType.switcher,
-           dynValue: DynInputValue(),
+           dynValue: sightPhotoTakenValue,
          );
 
          sightDistanceCoast = DynInput(
@@ -211,7 +303,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
            title: "Distance to nearest coast",
            hint: "",
            inputType: DynInputType.numberdecimal,
-           dynValue: DynInputValue(),
+           dynValue: sightDistanceCoastValue,
          );
 
          sightDistanceCoastEstimationGps = DynInput(
@@ -219,7 +311,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
            title: "Estimation without GPS",
            hint: "",
            inputType: DynInputType.switcher,
-           dynValue: DynInputValue(),
+           dynValue: sightDistanceCoastEstimationGpsValue,
          );
 
          sightSpecies = DynInput(
@@ -227,7 +319,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
            title: "Species",
            hint: "",
            inputType: DynInputType.select,
-           dynValue: DynInputValue(),
+           dynValue: sightSpeciesValue,
            selectList: _speciesController.speciesList.map((element) {
              return DynInputSelectItem(
                  value: element.id!.toString(),
@@ -241,7 +333,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
            title: "Number of animals",
            hint: "",
            inputType: DynInputType.number,
-           dynValue: DynInputValue(),
+           dynValue: sightSpeciesNumValue,
          );
 
          sightJuveniles = DynInput(
@@ -249,7 +341,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
            title: 'Juveniles',
            hint: '',
            inputType: DynInputType.switcher,
-           dynValue: DynInputValue(),
+           dynValue: sightJuvenilesValue,
          );
 
          sightCalves = DynInput(
@@ -257,7 +349,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
            title: 'Calves',
            hint: '',
            inputType: DynInputType.switcher,
-           dynValue: DynInputValue(),
+           dynValue: sightCalvesValue,
          );
 
          sightNewborns = DynInput(
@@ -265,7 +357,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
            title: 'Newborns',
            hint: '',
            inputType: DynInputType.switcher,
-           dynValue: DynInputValue(),
+           dynValue: sightNewbornsValue,
          );
 
          sightBehaviour = DynInput(
@@ -273,7 +365,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
            title: 'Behaviour',
            hint: '',
            inputType: DynInputType.multiselect,
-           dynValue: DynInputValue(),
+           dynValue: sightBehaviourValue,
          );
 
          sightSubgroups = DynInput(
@@ -281,7 +373,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
            title: 'Subgroups',
            hint: '',
            inputType: DynInputType.switcher,
-           dynValue: DynInputValue(),
+           dynValue: sightSubgroupsValue,
          );
 
          sightReaction = DynInput(
@@ -289,7 +381,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
           title: 'Reaction',
           hint: '',
           inputType: DynInputType.select,
-          dynValue: DynInputValue(),
+          dynValue: sightReactionValue,
          );
 
         sightFreqBehaviour = DynInput(
@@ -297,7 +389,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
           title: "Frequent behaviours of individuals",
           hint: "",
           inputType: DynInputType.textarea,
-          dynValue: DynInputValue(),
+          dynValue: sightFreqBehaviourValue,
         );
 
         sightRecAnimals = DynInput(
@@ -305,7 +397,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
           title: "Recognizable animals",
           hint: "",
           inputType: DynInputType.textarea,
-          dynValue: DynInputValue(),
+          dynValue: sightRecAnimalsValue,
         );
 
         sightOtherSpecies = DynInput(
@@ -319,7 +411,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
                 label: element.name!
             );
           }).toList(),
-          dynValue: DynInputValue(),
+          dynValue: sightOtherSpeciesValue,
         );
 
         sightOther = DynInput(
@@ -327,7 +419,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
           title: "Other",
           hint: "",
           inputType: DynInputType.textarea,
-          dynValue: DynInputValue(),
+          dynValue: sightOtherValue,
         );
 
         sightOtherVehicle = DynInput(
@@ -335,7 +427,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
           title: "Other Vehicle",
           hint: "",
           inputType: DynInputType.textarea,
-          dynValue: DynInputValue(),
+          dynValue: sightOtherVehicleValue,
         );
 
         sightNote = DynInput(
@@ -343,7 +435,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
           title: "Note",
           hint: "",
           inputType: DynInputType.textarea,
-          dynValue: DynInputValue(),
+          dynValue: sightNoteValue,
         );
 
          return Scaffold(
@@ -429,9 +521,9 @@ class _EditSightingPageState extends State<EditSightingPage> {
                        children: [
                          Container(),
                          DefaultButton(
-                             label: "+ Add Sighting",
+                             label: sighting != null ? "Update Sighting" : "Add Sighting",
                              onTab: () {
-                               _addSightingToDb();
+                               _saveSightingToDb();
                              }
                          ),
                        ],

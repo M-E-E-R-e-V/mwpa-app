@@ -59,8 +59,20 @@ class DynInputValue {
     return 0;
   }
 
+  void setStrValueByInt(int val) {
+    strValue = "$val";
+  }
+
   String getDateTime() {
     return dateValue.toUtc().toString();
+  }
+
+  void setDateTime(String date) {
+    try {
+      dateValue = DateTime.parse(date);
+    } catch(e) {
+      print(e);
+    }
   }
 
   String getTimeOfDay() {
@@ -78,20 +90,64 @@ class DynInputValue {
     return "$hour:$min";
   }
 
+  void setTimeOfDy(String time) {
+    try {
+      var parts = time.split(":");
+
+      timeValue =
+          TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+    }
+    catch(e) {
+      print(e);
+    }
+  }
+
   String getPosition() {
     return jsonEncode(posValue?.toJson());
+  }
+
+  void setPosition(String pos) {
+    try {
+      posValue = Position.fromMap(jsonDecode(pos));
+    } catch(e) {
+      print(e);
+    }
   }
 
   int getIntValue() {
     return intValue;
   }
 
+  void setIntValue(int val) {
+    intValue = val;
+  }
+
   String getMultiValue() {
-    final Map<int, dynamic> data = <int, dynamic>{};
+    Map<String, dynamic> data = {};
 
-    multiValue.mapIndexed((index, dynValue) => data[index] = dynValue.strValue);
+    var index = 0;
 
-    return jsonEncode(data);
+    multiValue.forEach((element) {
+      data["$index"] = element.strValue;
+      index++;
+    });
+
+    return JsonEncoder().convert(data);
+  }
+
+  void setMultiValue(String val) {
+    try {
+      Map<String, dynamic> data = jsonDecode(val);
+
+      data.forEach((key, value) {
+        DynInputValue tval = DynInputValue();
+        tval.setValue(value);
+
+        multiValue.add(tval);
+      });
+    } catch(e) {
+      print(e);
+    }
   }
 }
 

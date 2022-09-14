@@ -20,4 +20,13 @@ class SightingController extends GetxController {
     List<Map<String, dynamic>> sightings = await DBHelper.querySighting();
     sightingList.assignAll(sightings.map((data) => Sighting.fromJson(data)).toList());
   }
+
+  Future<void> delete(Sighting oldSighting) async {
+    var val = await DBHelper.deleteSighting(oldSighting);
+    print(val);
+  }
+
+  Future<int> updateSighting({required Sighting tSighting}) async {
+    return await DBHelper.updateSighting(tSighting);
+  }
 }

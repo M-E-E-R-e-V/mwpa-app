@@ -44,7 +44,7 @@ class DBHelper {
               "juveniles INTEGER,"
               "calves INTEGER,"
               "newborns INTEGER,"
-              "behaviour_id INTEGER,"
+              "behaviours STRING,"
               "subgroups INTEGER,"
               "reaction_id INTEGER,"
               "freq_behaviour STRING,"
@@ -89,7 +89,21 @@ class DBHelper {
   }
 
   static Future<List<Map<String, dynamic>>> querySighting() async {
-    return await _db!.query(_tableNameSighting);
+    return await _db!.query(
+      _tableNameSighting,
+      orderBy: "date DESC"
+    );
+  }
+
+  static Future<int> deleteSighting(Sighting oldSighting) async {
+    return await _db!.delete(_tableNameSighting, where: 'id=?', whereArgs: [oldSighting.id]);
+  }
+
+  static Future<int> updateSighting(Sighting uSighting) async {
+    return await _db!.update(
+        _tableNameSighting,
+        uSighting.toJson()
+    );
   }
 
   static Future<int> insertVehicle(Vehicle vehicle) async {
