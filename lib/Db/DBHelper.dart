@@ -1,3 +1,5 @@
+import 'package:mwpaapp/Models/BehaviouralState.dart';
+import 'package:mwpaapp/Models/EncounterCategorie.dart';
 import 'package:mwpaapp/Models/Sighting.dart';
 import 'package:mwpaapp/Models/Species.dart';
 import 'package:mwpaapp/Models/Vehicle.dart';
@@ -11,6 +13,8 @@ class DBHelper {
   static final String _tableNameVehicle = "vehicle";
   static final String _tableNameVehicleDriver = "vehicle_driver";
   static final String _tableNameSpecies = "species";
+  static final String _tableNameEncCate = "encounter_categories";
+  static final String _tableNameBehState = "behavioural_state";
 
   static Future<void> initDb() async {
     if (_db != null) {
@@ -20,64 +24,76 @@ class DBHelper {
     try {
       String path = '${await getDatabasesPath()}mwpa.db';
       _db = await openDatabase(
-        path,
-        version: _version,
-        onCreate: (db, version) {
-          db.execute(
-            "CREATE TABLE IF NOT EXISTS $_tableNameSighting("
-              "id INTEGER PRIMARY KEY AUTOINCREMENT,"
-              "unid STRING,"
-              "vehicle_id INTEGER,"
-              "vehicle_driver_id INTEGER,"
-              "date STRING,"
-              "tour_start STRING,"
-              "tour_end STRING,"
-              "duration_from STRING,"
-              "duration_until STRING,"
-              "location_begin STRING,"
-              "location_end STRING,"
-              "photo_taken INTEGER,"
-              "distance_coast STRING,"
-              "distance_coast_estimation_gps INTEGER,"
-              "species_id INTEGER,"
-              "species_count INTEGER,"
-              "juveniles INTEGER,"
-              "calves INTEGER,"
-              "newborns INTEGER,"
-              "behaviours STRING,"
-              "subgroups INTEGER,"
-              "reaction_id INTEGER,"
-              "freq_behaviour STRING,"
-              "recognizable_animals STRING,"
-              "other_species STRING,"
-              "other STRING,"
-              "other_vehicle STRING,"
-              "note STRING"
-              ")"
-          );
+          path,
+          version: _version,
+          onCreate: (db, version) {
+            db.execute(
+                "CREATE TABLE IF NOT EXISTS $_tableNameSighting("
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                    "unid STRING,"
+                    "vehicle_id INTEGER,"
+                    "vehicle_driver_id INTEGER,"
+                    "date STRING,"
+                    "tour_start STRING,"
+                    "tour_end STRING,"
+                    "duration_from STRING,"
+                    "duration_until STRING,"
+                    "location_begin STRING,"
+                    "location_end STRING,"
+                    "photo_taken INTEGER,"
+                    "distance_coast STRING,"
+                    "distance_coast_estimation_gps INTEGER,"
+                    "species_id INTEGER,"
+                    "species_count INTEGER,"
+                    "juveniles INTEGER,"
+                    "calves INTEGER,"
+                    "newborns INTEGER,"
+                    "behaviours STRING,"
+                    "subgroups INTEGER,"
+                    "reaction_id INTEGER,"
+                    "freq_behaviour STRING,"
+                    "recognizable_animals STRING,"
+                    "other_species STRING,"
+                    "other STRING,"
+                    "other_vehicle STRING,"
+                    "note STRING"
+                    ")"
+            );
 
-          db.execute(
-            "CREATE TABLE IF NOT EXISTS $_tableNameVehicle("
-              "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-              "name STRING)"
-          );
+            db.execute(
+                "CREATE TABLE IF NOT EXISTS $_tableNameVehicle("
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                    "name STRING)"
+            );
 
-          db.execute(
-            "CREATE TABLE IF NOT EXISTS $_tableNameVehicleDriver("
-              "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-              "user_id INTEGER,"
-              "description STRING,"
-              "username STRING)"
-          );
+            db.execute(
+                "CREATE TABLE IF NOT EXISTS $_tableNameVehicleDriver("
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                    "user_id INTEGER,"
+                    "description STRING,"
+                    "username STRING)"
+            );
 
-          db.execute(
-            "CREATE TABLE IF NOT EXISTS $_tableNameSpecies("
-                "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                "name STRING)"
-          );
+            db.execute(
+                "CREATE TABLE IF NOT EXISTS $_tableNameSpecies("
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                    "name STRING)"
+            );
 
-          return;
-        }
+            db.execute(
+                "CREATE TABLE IF NOT EXISTS $_tableNameEncCate("
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                    "name STRING)"
+            );
+
+            db.execute(
+                "CREATE TABLE IF NOT EXISTS $_tableNameBehState("
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                    "name STRING,"
+                    "description STRING)"
+            );
+            return;
+          }
       );
     } catch (e) {
       print(e);
@@ -85,18 +101,19 @@ class DBHelper {
   }
 
   static Future<int> insertSighting(Sighting newSighting) async {
-    return await _db?.insert(_tableNameSighting, newSighting.toJson())??1;
+    return await _db?.insert(_tableNameSighting, newSighting.toJson()) ?? 1;
   }
 
   static Future<List<Map<String, dynamic>>> querySighting() async {
     return await _db!.query(
-      _tableNameSighting,
-      orderBy: "date DESC"
+        _tableNameSighting,
+        orderBy: "date DESC"
     );
   }
 
   static Future<int> deleteSighting(Sighting oldSighting) async {
-    return await _db!.delete(_tableNameSighting, where: 'id=?', whereArgs: [oldSighting.id]);
+    return await _db!.delete(
+        _tableNameSighting, where: 'id=?', whereArgs: [oldSighting.id]);
   }
 
   static Future<int> updateSighting(Sighting uSighting) async {
@@ -107,7 +124,7 @@ class DBHelper {
   }
 
   static Future<int> insertVehicle(Vehicle vehicle) async {
-    return await _db?.insert(_tableNameVehicle, vehicle.toJson())??1;
+    return await _db?.insert(_tableNameVehicle, vehicle.toJson()) ?? 1;
   }
 
   static Future<List<Map<String, dynamic>>> queryVehicle() async {
@@ -116,9 +133,9 @@ class DBHelper {
 
   static Future<Map<String, dynamic>> readVehicle(int id) async {
     List<Map<String, dynamic>> list = await _db!.query(
-      _tableNameVehicle,
-      where: 'id = ?',
-      whereArgs: [id]
+        _tableNameVehicle,
+        where: 'id = ?',
+        whereArgs: [id]
     );
 
     if (list.isNotEmpty) {
@@ -136,7 +153,7 @@ class DBHelper {
   }
 
   static Future<int> insertVehicleDriver(VehicleDriver driver) async {
-    return await _db?.insert(_tableNameVehicleDriver, driver.toJson())??1;
+    return await _db?.insert(_tableNameVehicleDriver, driver.toJson()) ?? 1;
   }
 
   static Future<List<Map<String, dynamic>>> queryVehicleDriver() async {
@@ -165,7 +182,7 @@ class DBHelper {
   }
 
   static Future<int> insertSpecies(Species species) async {
-    return await _db?.insert(_tableNameSpecies, species.toJson())??1;
+    return await _db?.insert(_tableNameSpecies, species.toJson()) ?? 1;
   }
 
   static Future<List<Map<String, dynamic>>> querySpecies() async {
@@ -190,6 +207,64 @@ class DBHelper {
     return await _db!.update(
         _tableNameSpecies,
         species.toJson()
+    );
+  }
+
+  static Future<int> insertEncounterCategorie(EncounterCategorie encCat) async {
+    return await _db?.insert(_tableNameEncCate, encCat.toJson()) ?? 1;
+  }
+
+  static Future<List<Map<String, dynamic>>> queryEncounterCategorie() async {
+    return await _db!.query(_tableNameEncCate);
+  }
+
+  static Future<Map<String, dynamic>> readEncounterCategorie(int id) async {
+    List<Map<String, dynamic>> list = await _db!.query(
+        _tableNameEncCate,
+        where: 'id = ?',
+        whereArgs: [id]
+    );
+
+    if (list.isNotEmpty) {
+      return list[0];
+    }
+
+    return {};
+  }
+
+  static Future<int> updateEncounterCategorie(EncounterCategorie encCat) async {
+    return await _db!.update(
+        _tableNameEncCate,
+        encCat.toJson()
+    );
+  }
+
+  static Future<int> insertBehaviouralState(BehaviouralState behState) async {
+    return await _db?.insert(_tableNameBehState, behState.toJson()) ?? 1;
+  }
+
+  static Future<List<Map<String, dynamic>>> queryBehaviouralState() async {
+    return await _db!.query(_tableNameBehState);
+  }
+
+  static Future<Map<String, dynamic>> readBehaviouralState(int id) async {
+    List<Map<String, dynamic>> list = await _db!.query(
+        _tableNameBehState,
+        where: 'id = ?',
+        whereArgs: [id]
+    );
+
+    if (list.isNotEmpty) {
+      return list[0];
+    }
+
+    return {};
+  }
+
+  static Future<int> updateBehaviouralState(BehaviouralState behState) async {
+    return await _db!.update(
+        _tableNameBehState,
+        behState.toJson()
     );
   }
 }

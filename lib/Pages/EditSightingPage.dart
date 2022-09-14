@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:mwpaapp/Components/DefaultButton.dart';
 import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Components/DynInput.dart';
+import 'package:mwpaapp/Controllers/BehaviouralStateController.dart';
+import 'package:mwpaapp/Controllers/EncounterCategoriesController.dart';
 import 'package:mwpaapp/Controllers/SightingController.dart';
 import 'package:mwpaapp/Controllers/SpeciesController.dart';
 import 'package:mwpaapp/Controllers/VehicleController.dart';
@@ -23,6 +25,8 @@ class _EditSightingPageState extends State<EditSightingPage> {
   final VehicleController _vehicleController = Get.find<VehicleController>();
   final VehicleDriverController _vehicleDriverController = Get.find<VehicleDriverController>();
   final SpeciesController _speciesController = Get.find<SpeciesController>();
+  final EncounterCategoriesController _encounterCategoriesController = Get.find<EncounterCategoriesController>();
+  final BehaviouralStateController _behaviouralStateController = Get.find<BehaviouralStateController>();
 
   String title = "";
   bool isInit = false;
@@ -145,7 +149,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
         newborns: sightNewborns.dynValue?.getIntValue(),
         behaviours: sightBehaviour.dynValue?.getMultiValue(),
         subgroups: sightSubgroups.dynValue?.getIntValue(),
-        reaction_id: sightBehaviour.dynValue?.getStrValueAsInt(),
+        reaction_id: sightReaction.dynValue?.getStrValueAsInt(),
         freq_behaviour: sightFreqBehaviour.dynValue?.getValue(),
         recognizable_animals: sightRecAnimals.dynValue?.getValue(),
         other_species: sightOtherSpecies.dynValue?.getMultiValue(),
@@ -366,6 +370,12 @@ class _EditSightingPageState extends State<EditSightingPage> {
            hint: '',
            inputType: DynInputType.multiselect,
            dynValue: sightBehaviourValue,
+           selectList: _behaviouralStateController.behaviouralStateList.map((element) {
+             return DynInputSelectItem(
+                 value: element.id!.toString(),
+                 label: element.name!
+             );
+           }).toList()
          );
 
          sightSubgroups = DynInput(
@@ -382,6 +392,12 @@ class _EditSightingPageState extends State<EditSightingPage> {
           hint: '',
           inputType: DynInputType.select,
           dynValue: sightReactionValue,
+          selectList: _encounterCategoriesController.encounterCategorieList.map((element) {
+            return DynInputSelectItem(
+              value: element.id!.toString(),
+             label: element.name!
+            );
+          }).toList()
          );
 
         sightFreqBehaviour = DynInput(

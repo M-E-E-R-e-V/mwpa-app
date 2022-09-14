@@ -1,4 +1,6 @@
 import 'package:mwpaapp/Db/DBHelper.dart';
+import 'package:mwpaapp/Models/BehaviouralState.dart';
+import 'package:mwpaapp/Models/EncounterCategorie.dart';
 import 'package:mwpaapp/Models/Species.dart';
 import 'package:mwpaapp/Models/Vehicle.dart';
 import 'package:mwpaapp/Models/VehicleDriver.dart';
@@ -103,6 +105,48 @@ class SyncMwpaService {
           await DBHelper.insertSpecies(species);
         } else {
           await DBHelper.updateSpecies(species);
+        }
+      }
+    } catch(e) {
+      print(e);
+
+      //rethrow;
+    }
+
+    // encounter categories
+    // -------------------------------------------------------------------------
+
+    try {
+      List<EncounterCategorie> encCatList = await api.getEncounterCategorieList();
+
+      for (var encCat in encCatList) {
+        var tEncCat = await DBHelper.readEncounterCategorie(encCat.id!);
+
+        if (tEncCat.isEmpty) {
+          await DBHelper.insertEncounterCategorie(encCat);
+        } else {
+          await DBHelper.updateEncounterCategorie(encCat);
+        }
+      }
+    } catch(e) {
+      print(e);
+
+      //rethrow;
+    }
+
+    // behavioural state
+    // -------------------------------------------------------------------------
+
+    try {
+      List<BehaviouralState> behStateList = await api.getBehaviouralStateList();
+
+      for (var behState in behStateList) {
+        var tBehState= await DBHelper.readBehaviouralState(behState.id!);
+
+        if (tBehState.isEmpty) {
+          await DBHelper.insertBehaviouralState(behState);
+        } else {
+          await DBHelper.updateBehaviouralState(behState);
         }
       }
     } catch(e) {

@@ -5,9 +5,13 @@ import 'package:device_info/device_info.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:mwpaapp/Models/BehaviouralState.dart';
+import 'package:mwpaapp/Models/EncounterCategorie.dart';
 import 'package:mwpaapp/Models/Species.dart';
 import 'package:mwpaapp/Models/Vehicle.dart';
 import 'package:mwpaapp/Models/VehicleDriver.dart';
+import 'package:mwpaapp/Mwpa/Models/BehaviouralStatesResponse.dart';
+import 'package:mwpaapp/Mwpa/Models/EncounterCategoriesResponse.dart';
 import 'package:mwpaapp/Mwpa/Models/IsLogin.dart';
 import 'package:mwpaapp/Mwpa/Models/LoginResponse.dart';
 import 'package:mwpaapp/Mwpa/Models/SpeciesListResponse.dart';
@@ -27,6 +31,8 @@ class MwpaApi {
   static const URL_VEHICLE = 'mobile/vehicle/list';
   static const URL_VEHICLE_DRIVER = 'mobile/vehicledriver/list';
   static const URL_SPECIES = 'mobile/species/list';
+  static const URL_ENC_CATE = 'mobile/encountercategories/list';
+  static const URL_BEH_STATE = 'mobile/behaviouralstates/list';
 
   String _url = "";
   String _cookie = "";
@@ -251,6 +257,78 @@ class MwpaApi {
       );
 
       var objResponse = SpeciesListResponse.fromJson(jsonDecode(response.body));
+
+      if (objResponse.statusCode == StatusCodes.OK) {
+        return objResponse.list!;
+      } else {
+        if (objResponse.msg != null) {
+          throw MwpaException(objResponse.msg!);
+        }
+
+        throw MwpaException('Response success false');
+      }
+    }
+    on MwpaException {
+      rethrow;
+    } catch(error) {
+      print(error);
+      throw Exception('Connection error');
+    }
+  }
+
+  Future<List<EncounterCategorie>> getEncounterCategorieList() async {
+    if (!_isLogin) {
+      throw MwpaException('Please login first!');
+    }
+
+    try {
+      var url = getUrl(MwpaApi.URL_ENC_CATE);
+
+      var response = await http.get(
+        Uri.parse(url),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'cookie': _cookie
+        },
+      );
+
+      var objResponse = EncounterCategoriesResponse.fromJson(jsonDecode(response.body));
+
+      if (objResponse.statusCode == StatusCodes.OK) {
+        return objResponse.list!;
+      } else {
+        if (objResponse.msg != null) {
+          throw MwpaException(objResponse.msg!);
+        }
+
+        throw MwpaException('Response success false');
+      }
+    }
+    on MwpaException {
+      rethrow;
+    } catch(error) {
+      print(error);
+      throw Exception('Connection error');
+    }
+  }
+
+  Future<List<BehaviouralState>> getBehaviouralStateList() async {
+    if (!_isLogin) {
+      throw MwpaException('Please login first!');
+    }
+
+    try {
+      var url = getUrl(MwpaApi.URL_BEH_STATE);
+
+      var response = await http.get(
+        Uri.parse(url),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'cookie': _cookie
+        },
+      );
+
+      var objResponse = BehaviouralStatesResponse.fromJson(jsonDecode(response.body));
 
       if (objResponse.statusCode == StatusCodes.OK) {
         return objResponse.list!;

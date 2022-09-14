@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Components/DefaultButton.dart';
+import 'package:mwpaapp/Controllers/BehaviouralStateController.dart';
+import 'package:mwpaapp/Controllers/EncounterCategoriesController.dart';
 import 'package:mwpaapp/Controllers/SightingController.dart';
 import 'package:mwpaapp/Controllers/SpeciesController.dart';
 import 'package:mwpaapp/Controllers/VehicleController.dart';
@@ -27,6 +29,8 @@ class _ListPageState extends State<ListPage> {
   final VehicleController _vehicleController = Get.put(VehicleController());
   final VehicleDriverController _vehicleDriverController = Get.put(VehicleDriverController());
   final SpeciesController _speciesController = Get.put(SpeciesController());
+  final EncounterCategoriesController _encounterCategoriesController = Get.put(EncounterCategoriesController());
+  final BehaviouralStateController _behaviouralStateController = Get.put(BehaviouralStateController());
 
   _syncMwpa() async {
     SyncMwpaService service = SyncMwpaService();
@@ -34,10 +38,16 @@ class _ListPageState extends State<ListPage> {
     await _vehicleController.getVehicle();
     await _vehicleDriverController.getVehicleDriver();
     await _speciesController.getSpecies();
+    await _encounterCategoriesController.getEncounterCategorie();
+    await _behaviouralStateController.getBehaviouralStates();
   }
 
   _loadController() async {
     await _speciesController.getSpecies();
+    await _vehicleController.getVehicle();
+    await _vehicleDriverController.getVehicleDriver();
+    await _encounterCategoriesController.getEncounterCategorie();
+    await _behaviouralStateController.getBehaviouralStates();
     _sightingController.getSightings();
   }
 
