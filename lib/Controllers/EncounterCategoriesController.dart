@@ -17,7 +17,7 @@ class EncounterCategoriesController extends GetxController {
   }
 
   Future<void> getEncounterCategorie() async {
-    List<Map<String, dynamic>> encCats = await DBHelper.queryEncounterCategorie();
+    List<Map<String, dynamic>> encCats = await DBHelper.queryEncounterCategorie(false);
     encounterCategorieList.assignAll(encCats.map((data) => EncounterCategorie.fromJson(data)).toList());
   }
 }

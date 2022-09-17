@@ -22,7 +22,7 @@ class UtilCheckJson {
           return "";
         }
 
-        if (val is int) {
+        if (val is int || val is double) {
           return "$val";
         }
 

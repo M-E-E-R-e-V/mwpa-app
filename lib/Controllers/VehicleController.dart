@@ -17,7 +17,7 @@ class VehicleController extends GetxController {
   }
 
   Future<void> getVehicle() async {
-    List<Map<String, dynamic>> vehicles = await DBHelper.queryVehicle();
+    List<Map<String, dynamic>> vehicles = await DBHelper.queryVehicle(false);
     vehicleList.assignAll(vehicles.map((data) => Vehicle.fromJson(data)).toList());
   }
 }

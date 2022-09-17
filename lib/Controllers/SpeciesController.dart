@@ -17,7 +17,7 @@ class SpeciesController extends GetxController {
   }
 
   Future<void> getSpecies() async {
-    List<Map<String, dynamic>> species = await DBHelper.querySpecies();
+    List<Map<String, dynamic>> species = await DBHelper.querySpecies(false);
     speciesList.assignAll(species.map((data) => Species.fromJson(data)).toList());
   }
 

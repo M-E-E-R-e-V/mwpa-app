@@ -84,7 +84,7 @@ class Sighting {
     juveniles = UtilCheckJson.checkValue(json['juveniles'], UtilCheckJsonTypes.int);
     calves = UtilCheckJson.checkValue(json['calves'], UtilCheckJsonTypes.int);
     newborns = UtilCheckJson.checkValue(json['newborns'], UtilCheckJsonTypes.int);
-    behaviours = UtilCheckJson.checkValue(json['behaviour_id'], UtilCheckJsonTypes.string);
+    behaviours = UtilCheckJson.checkValue(json['behaviours'], UtilCheckJsonTypes.string);
     subgroups = UtilCheckJson.checkValue(json['subgroups'], UtilCheckJsonTypes.int);
     reaction_id = UtilCheckJson.checkValue(json['reaction_id'], UtilCheckJsonTypes.int);
     freq_behaviour = UtilCheckJson.checkValue(json['freq_behaviour'], UtilCheckJsonTypes.string);
@@ -95,10 +95,13 @@ class Sighting {
     note = UtilCheckJson.checkValue(json['note'], UtilCheckJsonTypes.string);
   }
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toJson(bool withId) {
     final Map<String, dynamic> data = <String, dynamic>{};
 
-    data['id'] = id;
+    if (withId) {
+      data['id'] = id;
+    }
+
     data['unid'] = unid;
     data['vehicle_id'] = vehicle_id;
     data['vehicle_driver_id'] = vehicle_driver_id;

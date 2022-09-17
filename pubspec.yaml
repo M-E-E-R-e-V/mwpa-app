@@ -47,6 +47,7 @@ dependencies:
   uuid: ^3.0.6
   flutter_native_timezone:
   flutter_staggered_animations:
+  gpx:
 
 dev_dependencies:
   flutter_launcher_icons: ^0.10.0

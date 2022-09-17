@@ -24,7 +24,8 @@ class BehaviouralStatesResponse extends DefaultReturn {
         tlist.add(BehaviouralState(
           id: element['id'],
           name: element['name'],
-          description: element['description']
+          description: element['description'],
+          isdeleted: element['isdeleted'] ? 1 : 0
         ));
       }
 

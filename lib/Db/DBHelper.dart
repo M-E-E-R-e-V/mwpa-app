@@ -63,7 +63,8 @@ class DBHelper {
             db.execute(
                 "CREATE TABLE IF NOT EXISTS $_tableNameVehicle("
                     "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                    "name STRING)"
+                    "name STRING,"
+                    "isdeleted INTEGER)"
             );
 
             db.execute(
@@ -71,26 +72,30 @@ class DBHelper {
                     "id INTEGER PRIMARY KEY AUTOINCREMENT, "
                     "user_id INTEGER,"
                     "description STRING,"
-                    "username STRING)"
+                    "username STRING,"
+                    "isdeleted INTEGER)"
             );
 
             db.execute(
                 "CREATE TABLE IF NOT EXISTS $_tableNameSpecies("
                     "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                    "name STRING)"
+                    "name STRING,"
+                    "isdeleted INTEGER)"
             );
 
             db.execute(
                 "CREATE TABLE IF NOT EXISTS $_tableNameEncCate("
                     "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                    "name STRING)"
+                    "name STRING,"
+                    "isdeleted INTEGER)"
             );
 
             db.execute(
                 "CREATE TABLE IF NOT EXISTS $_tableNameBehState("
                     "id INTEGER PRIMARY KEY AUTOINCREMENT, "
                     "name STRING,"
-                    "description STRING)"
+                    "description STRING,"
+                    "isdeleted INTEGER)"
             );
             return;
           }
@@ -101,7 +106,7 @@ class DBHelper {
   }
 
   static Future<int> insertSighting(Sighting newSighting) async {
-    return await _db?.insert(_tableNameSighting, newSighting.toJson()) ?? 1;
+    return await _db?.insert(_tableNameSighting, newSighting.toJson(false)) ?? 1;
   }
 
   static Future<List<Map<String, dynamic>>> querySighting() async {
@@ -119,16 +124,27 @@ class DBHelper {
   static Future<int> updateSighting(Sighting uSighting) async {
     return await _db!.update(
         _tableNameSighting,
-        uSighting.toJson()
+        uSighting.toJson(false),
+        where: 'id=?',
+        whereArgs: [uSighting.id]
     );
   }
 
   static Future<int> insertVehicle(Vehicle vehicle) async {
-    return await _db?.insert(_tableNameVehicle, vehicle.toJson()) ?? 1;
+    return await _db?.insert(_tableNameVehicle, vehicle.toJson(false)) ?? 1;
   }
 
-  static Future<List<Map<String, dynamic>>> queryVehicle() async {
-    return await _db!.query(_tableNameVehicle);
+  static Future<List<Map<String, dynamic>>> queryVehicle(bool withDelete) async {
+    if (withDelete) {
+      return await _db!.query(_tableNameVehicle);
+    } else {
+      return await _db!.query(
+        _tableNameVehicle,
+        where: "isdeleted = ?",
+        whereArgs: [0],
+        orderBy: "name ASC"
+      );
+    }
   }
 
   static Future<Map<String, dynamic>> readVehicle(int id) async {
@@ -147,17 +163,28 @@ class DBHelper {
 
   static Future<int> updateVehicle(Vehicle vehicle) async {
     return await _db!.update(
-        _tableNameVehicle,
-        vehicle.toJson()
+      _tableNameVehicle,
+      vehicle.toJson(false),
+      where: 'id = ?',
+      whereArgs: [vehicle.id]
     );
   }
 
   static Future<int> insertVehicleDriver(VehicleDriver driver) async {
-    return await _db?.insert(_tableNameVehicleDriver, driver.toJson()) ?? 1;
+    return await _db?.insert(_tableNameVehicleDriver, driver.toJson(false)) ?? 1;
   }
 
-  static Future<List<Map<String, dynamic>>> queryVehicleDriver() async {
-    return await _db!.query(_tableNameVehicleDriver);
+  static Future<List<Map<String, dynamic>>> queryVehicleDriver(bool withDelete) async {
+    if (withDelete) {
+      return await _db!.query(_tableNameVehicleDriver);
+    } else {
+      return await _db!.query(
+        _tableNameVehicleDriver,
+        where: "isdeleted = ?",
+        whereArgs: [0],
+        orderBy: 'username ASC'
+      );
+    }
   }
 
   static Future<Map<String, dynamic>> readVehicleDriver(int id) async {
@@ -176,17 +203,28 @@ class DBHelper {
 
   static Future<int> updateVehicleDriver(VehicleDriver driver) async {
     return await _db!.update(
-        _tableNameVehicleDriver,
-        driver.toJson()
+      _tableNameVehicleDriver,
+      driver.toJson(false),
+      where: 'id = ?',
+      whereArgs: [driver.id]
     );
   }
 
   static Future<int> insertSpecies(Species species) async {
-    return await _db?.insert(_tableNameSpecies, species.toJson()) ?? 1;
+    return await _db?.insert(_tableNameSpecies, species.toJson(false)) ?? 1;
   }
 
-  static Future<List<Map<String, dynamic>>> querySpecies() async {
-    return await _db!.query(_tableNameSpecies);
+  static Future<List<Map<String, dynamic>>> querySpecies(bool withDelete) async {
+    if (withDelete) {
+      return await _db!.query(_tableNameSpecies);
+    } else {
+      return await _db!.query(
+        _tableNameSpecies,
+        where: "isdeleted = ?",
+        whereArgs: [0],
+        orderBy: 'name ASC'
+      );
+    }
   }
 
   static Future<Map<String, dynamic>> readSpecies(int id) async {
@@ -205,17 +243,28 @@ class DBHelper {
 
   static Future<int> updateSpecies(Species species) async {
     return await _db!.update(
-        _tableNameSpecies,
-        species.toJson()
+      _tableNameSpecies,
+      species.toJson(false),
+      where: 'id = ?',
+      whereArgs: [species.id]
     );
   }
 
   static Future<int> insertEncounterCategorie(EncounterCategorie encCat) async {
-    return await _db?.insert(_tableNameEncCate, encCat.toJson()) ?? 1;
+    return await _db?.insert(_tableNameEncCate, encCat.toJson(false)) ?? 1;
   }
 
-  static Future<List<Map<String, dynamic>>> queryEncounterCategorie() async {
-    return await _db!.query(_tableNameEncCate);
+  static Future<List<Map<String, dynamic>>> queryEncounterCategorie(bool withDelete) async {
+    if (withDelete) {
+      return await _db!.query(_tableNameEncCate);
+    } else {
+      return await _db!.query(
+        _tableNameEncCate,
+        where: "isdeleted = ?",
+        whereArgs: [0],
+        orderBy: 'name ASC'
+      );
+    }
   }
 
   static Future<Map<String, dynamic>> readEncounterCategorie(int id) async {
@@ -234,17 +283,28 @@ class DBHelper {
 
   static Future<int> updateEncounterCategorie(EncounterCategorie encCat) async {
     return await _db!.update(
-        _tableNameEncCate,
-        encCat.toJson()
+      _tableNameEncCate,
+      encCat.toJson(false),
+      where: 'id = ?',
+      whereArgs: [encCat.id]
     );
   }
 
   static Future<int> insertBehaviouralState(BehaviouralState behState) async {
-    return await _db?.insert(_tableNameBehState, behState.toJson()) ?? 1;
+    return await _db?.insert(_tableNameBehState, behState.toJson(false)) ?? 1;
   }
 
-  static Future<List<Map<String, dynamic>>> queryBehaviouralState() async {
-    return await _db!.query(_tableNameBehState);
+  static Future<List<Map<String, dynamic>>> queryBehaviouralState(bool withDelete) async {
+    if (withDelete) {
+      return await _db!.query(_tableNameBehState);
+    } else {
+      return await _db!.query(
+        _tableNameBehState,
+        where: "isdeleted = ?",
+        whereArgs: [0],
+        orderBy: 'name ASC'
+      );
+    }
   }
 
   static Future<Map<String, dynamic>> readBehaviouralState(int id) async {
@@ -263,8 +323,10 @@ class DBHelper {
 
   static Future<int> updateBehaviouralState(BehaviouralState behState) async {
     return await _db!.update(
-        _tableNameBehState,
-        behState.toJson()
+      _tableNameBehState,
+      behState.toJson(false),
+      where: 'id = ?',
+      whereArgs: [behState.id]
     );
   }
 }

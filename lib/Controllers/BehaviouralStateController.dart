@@ -17,7 +17,7 @@ class BehaviouralStateController extends GetxController {
   }
 
   Future<void> getBehaviouralStates() async {
-    List<Map<String, dynamic>> behStates = await DBHelper.queryBehaviouralState();
+    List<Map<String, dynamic>> behStates = await DBHelper.queryBehaviouralState(false);
     behaviouralStateList.assignAll(behStates.map((data) => BehaviouralState.fromJson(data)).toList());
   }
 }

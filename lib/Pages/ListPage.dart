@@ -6,6 +6,7 @@ import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Components/DefaultButton.dart';
 import 'package:mwpaapp/Controllers/BehaviouralStateController.dart';
 import 'package:mwpaapp/Controllers/EncounterCategoriesController.dart';
+import 'package:mwpaapp/Controllers/LocationController.dart';
 import 'package:mwpaapp/Controllers/SightingController.dart';
 import 'package:mwpaapp/Controllers/SpeciesController.dart';
 import 'package:mwpaapp/Controllers/VehicleController.dart';
@@ -25,6 +26,7 @@ class ListPage extends StatefulWidget {
 }
 
 class _ListPageState extends State<ListPage> {
+  final LocationController _locationController = Get.put(LocationController());
   final SightingController _sightingController = Get.put(SightingController());
   final VehicleController _vehicleController = Get.put(VehicleController());
   final VehicleDriverController _vehicleDriverController = Get.put(VehicleDriverController());

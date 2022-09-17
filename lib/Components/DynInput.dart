@@ -4,14 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:latlong_to_osgrid/latlong_to_osgrid.dart';
 import 'package:mwpaapp/Components/DefaultButton.dart';
 import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Util/UtilPosition.dart';
 import 'package:switcher/core/switcher_size.dart';
 import 'package:switcher/switcher.dart';
 import '../Location/LocationProvider.dart';
-import 'package:collection/collection.dart';
 
 enum DynInputType {
   text,
@@ -36,7 +34,7 @@ class DynInputSelectItem {
 class DynInputValue {
   String strValue = "";
   DateTime dateValue = DateTime.now();
-  TimeOfDay timeValue = TimeOfDay.now();
+  TimeOfDay? timeValue;
   int intValue = 0;
   Position? posValue;
   List<DynInputValue> multiValue = [];
@@ -76,15 +74,19 @@ class DynInputValue {
   }
 
   String getTimeOfDay() {
-    var hour = "${timeValue.hour}";
-    var min = "${timeValue.minute}";
-
-    if (timeValue.hour < 10) {
-      hour = "0${timeValue.hour}";
+    if (timeValue == null) {
+      return "";
     }
 
-    if (timeValue.minute < 10) {
-      min = "0${timeValue.minute}";
+    var hour = "${timeValue!.hour}";
+    var min = "${timeValue!.minute}";
+
+    if (timeValue!.hour < 10) {
+      hour = "0${timeValue!.hour}";
+    }
+
+    if (timeValue!.minute < 10) {
+      min = "0${timeValue!.minute}";
     }
 
     return "$hour:$min";
@@ -102,16 +104,24 @@ class DynInputValue {
     }
   }
 
+  void setTimeof(TimeOfDay atime) {
+    timeValue = atime;
+  }
+
   String getPosition() {
     return jsonEncode(posValue?.toJson());
   }
 
-  void setPosition(String pos) {
+  void setPositionStr(String pos) {
     try {
       posValue = Position.fromMap(jsonDecode(pos));
     } catch(e) {
       print(e);
     }
+  }
+
+  void setPosition(Position pos) {
+    posValue = pos;
   }
 
   int getIntValue() {
@@ -195,13 +205,16 @@ class _DynInputState extends State<DynInput> {
   }
 
   _getTimeFromUser() async {
+    var initialTime = TimeOfDay.now();
+
+    if (dynValue!.timeValue != null) {
+      initialTime = dynValue!.timeValue!;
+    }
+
     var picketTime = await showTimePicker(
       initialEntryMode: TimePickerEntryMode.dial,
       context: context,
-      initialTime: const TimeOfDay(
-        hour: 9,
-        minute: 10
-      )
+      initialTime: initialTime
     );
 
     if (picketTime != null) {
@@ -257,7 +270,9 @@ class _DynInputState extends State<DynInput> {
         );
 
         if (tHint == "") {
-          tHint = dynValue!.timeValue.format(context);
+          if (dynValue!.timeValue != null) {
+            tHint = dynValue!.timeValue!.format(context);
+          }
         }
         break;
 
@@ -275,14 +290,19 @@ class _DynInputState extends State<DynInput> {
           ),
           iconSize: 32,
           elevation: 0,
+          isExpanded: true,
           style: subTitleStyle,
+          itemHeight: null,
           underline: Container(
             height: 0,
           ),
           items: selectList.map<DropdownMenuItem<String>>((DynInputSelectItem value) {
             return DropdownMenuItem<String>(
               value: value.value,
-              child: Text(value.label),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(value.label),
+              ),
             );
           }
           ).toList(),
@@ -305,9 +325,11 @@ class _DynInputState extends State<DynInput> {
           });
 
           if (selectIndex >= 0) {
-            tHint = selectList.elementAt(selectIndex).label;
+            var element = selectList.elementAt(selectIndex);
+
+            tHint = element.label;
           } else {
-            if (dynValue!.strValue != "") {
+            if (dynValue!.strValue != "" && dynValue!.strValue != "0") {
               tHint = "unknown by id: ${dynValue!.strValue}";
             } else {
               tHint = "<please select>";
@@ -408,6 +430,7 @@ class _DynInputState extends State<DynInput> {
       child: Row(
         children: [
           Expanded(
+              flex: 3,
               child: TextFormField(
                 readOnly: tWidget == null ? false : true,
                 autofocus: false,
@@ -437,8 +460,14 @@ class _DynInputState extends State<DynInput> {
                 ),
               )
           ),
-          tWidget == null ? Container() : Container(
-            child: tWidget,
+          Expanded(
+            child: tWidget == null ? Container() : Container(
+              alignment: AlignmentDirectional.topEnd,
+              child: Align(
+                alignment: Alignment.topRight,
+                child: tWidget
+              ),
+            )
           )
         ],
       ),

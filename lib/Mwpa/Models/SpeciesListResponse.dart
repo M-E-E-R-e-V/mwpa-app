@@ -23,7 +23,8 @@ class SpeciesListResponse extends DefaultReturn {
       for (var element in vlist) {
         tlist.add(Species(
           id: element['id'],
-          name: element['name']
+          name: element['name'],
+          isdeleted: element['isdeleted'] ? 1 : 0
         ));
       }
 

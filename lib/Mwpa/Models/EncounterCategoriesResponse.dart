@@ -23,7 +23,8 @@ class EncounterCategoriesResponse extends DefaultReturn {
       for (var element in vlist) {
         tlist.add(EncounterCategorie(
             id: element['id'],
-            name: element['name']
+            name: element['name'],
+            isdeleted: element['isdeleted'] ? 1 : 0
         ));
       }
 

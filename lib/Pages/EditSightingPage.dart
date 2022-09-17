@@ -5,11 +5,13 @@ import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Components/DynInput.dart';
 import 'package:mwpaapp/Controllers/BehaviouralStateController.dart';
 import 'package:mwpaapp/Controllers/EncounterCategoriesController.dart';
+import 'package:mwpaapp/Controllers/LocationController.dart';
 import 'package:mwpaapp/Controllers/SightingController.dart';
 import 'package:mwpaapp/Controllers/SpeciesController.dart';
 import 'package:mwpaapp/Controllers/VehicleController.dart';
 import 'package:mwpaapp/Controllers/VehicleDriverController.dart';
 import 'package:mwpaapp/Models/Sighting.dart';
+import 'package:mwpaapp/Util/UtilDistanceCoast.dart';
 
 class EditSightingPage extends StatefulWidget {
   final Sighting? sighting;
@@ -21,6 +23,7 @@ class EditSightingPage extends StatefulWidget {
 }
 
 class _EditSightingPageState extends State<EditSightingPage> {
+  final LocationController _locationController = Get.find<LocationController>();
   final SightingController _sightingController = Get.find<SightingController>();
   final VehicleController _vehicleController = Get.find<VehicleController>();
   final VehicleDriverController _vehicleDriverController = Get.find<VehicleDriverController>();
@@ -161,7 +164,8 @@ class _EditSightingPageState extends State<EditSightingPage> {
     if (widget.sighting != null) {
       tsigh.id = widget.sighting?.id!;
 
-      await _sightingController.updateSighting(tSighting: tsigh);
+      var result = await _sightingController.updateSighting(tSighting: tsigh);
+      print(result);
     } else {
       await _sightingController.addSighting(newSighting: tsigh);
     }
@@ -185,8 +189,8 @@ class _EditSightingPageState extends State<EditSightingPage> {
         sightTourEndValue.setTimeOfDy(sighting.tour_end!);
         sightDurationFromValue.setTimeOfDy(sighting.duration_from!);
         sightDurationUntilValue.setTimeOfDy(sighting.duration_until!);
-        sightLocationBeginValue.setPosition(sighting.location_begin!);
-        sightLocationEndValue.setPosition(sighting.location_end!);
+        sightLocationBeginValue.setPositionStr(sighting.location_begin!);
+        sightLocationEndValue.setPositionStr(sighting.location_end!);
         sightPhotoTakenValue.setIntValue(sighting.photo_taken!);
         sightDistanceCoastValue.setValue(sighting.distance_coast!);
         sightDistanceCoastEstimationGpsValue.setIntValue(sighting.distance_coast_estimation_gps!);
@@ -204,6 +208,15 @@ class _EditSightingPageState extends State<EditSightingPage> {
         sightOtherValue.setValue(sighting.other!);
         sightOtherVehicleValue.setValue(sighting.other_vehicle!);
         sightNoteValue.setValue(sighting.note!);
+      } else {
+        sightDurationFromValue.setTimeof(TimeOfDay.now());
+
+        if (_locationController.currentPosition != null) {
+          sightLocationBeginValue.setPosition(_locationController.currentPosition!);
+
+          var distance = UtilDistanceCoast.getDistance(_locationController.currentPosition!);
+          sightDistanceCoastValue.setValue("$distance");
+        }
       }
 
       isInit = true;
@@ -212,7 +225,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
     return Obx(() {
         sightVehicle = DynInput(
            context: context,
-           title: "Sighting from",
+           title: "Boat",
            hint: "",
            inputType: DynInputType.select,
            dynValue: sightVehicleValue,
@@ -264,7 +277,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
 
          sightDurationFrom = DynInput(
            context: context,
-           title: "Sighting duration from",
+           title: "Sighting duration: from",
            hint: "",
            inputType: DynInputType.time,
            dynValue: sightDurationFromValue,
@@ -272,7 +285,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
 
          sightDurationUntil = DynInput(
            context: context,
-           title: "Sighting duration until",
+           title: "until",
            hint: "",
            inputType: DynInputType.time,
            dynValue: sightDurationUntilValue,
@@ -304,7 +317,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
 
          sightDistanceCoast = DynInput(
            context: context,
-           title: "Distance to nearest coast",
+           title: "Distance to nearest coast (m)",
            hint: "",
            inputType: DynInputType.numberdecimal,
            dynValue: sightDistanceCoastValue,
@@ -325,9 +338,15 @@ class _EditSightingPageState extends State<EditSightingPage> {
            inputType: DynInputType.select,
            dynValue: sightSpeciesValue,
            selectList: _speciesController.speciesList.map((element) {
+             var labelName = element.name!;
+
+             if (element.name!.indexOf(',') > 0) {
+               labelName = element.name!.split(",")[0];
+             }
+
              return DynInputSelectItem(
                  value: element.id!.toString(),
-                 label: element.name!
+                 label: labelName
              );
            }).toList(),
          );
@@ -422,9 +441,15 @@ class _EditSightingPageState extends State<EditSightingPage> {
           hint: '',
           inputType: DynInputType.multiselect,
           selectList: _speciesController.speciesList.map((element) {
+            var labelName = element.name!;
+
+            if (element.name!.indexOf(',') > 0) {
+              labelName = element.name!.split(",")[0];
+            }
+
             return DynInputSelectItem(
                 value: element.id!.toString(),
-                label: element.name!
+                label: labelName
             );
           }).toList(),
           dynValue: sightOtherSpeciesValue,
@@ -440,7 +465,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
 
         sightOtherVehicle = DynInput(
           context: context,
-          title: "Other Vehicle",
+          title: "Other boats present",
           hint: "",
           inputType: DynInputType.textarea,
           dynValue: sightOtherVehicleValue,

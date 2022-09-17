@@ -25,7 +25,8 @@ class VehicleDriverResponse extends DefaultReturn {
           id: element['id'],
           user_id: element['user']['user_id'],
           description: element['description'],
-          username: element['user']['name']
+          username: element['user']['name'],
+          isdeleted: element['isdeleted'] ? 1 : 0
         ));
       }
 
