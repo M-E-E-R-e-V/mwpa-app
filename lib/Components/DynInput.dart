@@ -237,6 +237,7 @@ class _DynInputState extends State<DynInput> {
     var tWidget = widget.widget;
     var tHint = widget.hint;
     var textInputType = TextInputType.text;
+    var inputHeight = 52.0;
     dynValue = widget.dynValue;
 
     dynValue ??= DynInputValue();
@@ -408,6 +409,7 @@ class _DynInputState extends State<DynInput> {
         if (tHint == "") {
           tHint = dynValue!.strValue;
         }
+
         break;
 
       default:
@@ -416,62 +418,75 @@ class _DynInputState extends State<DynInput> {
         }
     }
 
-    mainWidget ??= Container(
-      height: 52,
-      margin: const EdgeInsets.only(top: 8.0),
-      padding: const EdgeInsets.only(left: 14),
-      decoration: BoxDecoration(
-          border: Border.all(
-              color: kPrimaryColor,
-              width: 1.0
-          ),
-          borderRadius: BorderRadius.circular(12)
-      ),
-      child: Row(
-        children: [
-          Expanded(
-              flex: 3,
-              child: TextFormField(
-                readOnly: tWidget == null ? false : true,
-                autofocus: false,
-                cursorColor: Colors.grey[700],
-                onChanged: (text) {
-                  setState(() {
-                    dynValue?.strValue = text;
-                  });
-                },
-                style: subTitleStyle,
-                keyboardType: textInputType,
-                decoration: InputDecoration(
-                    hintText: tHint,
-                    hintStyle: subTitleStyle,
-                    focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(
-                            color: Colors.redAccent.withOpacity(0.0),
-                            width: 0
-                        )
-                    ),
-                    enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(
-                            color: Colors.redAccent.withOpacity(0.0),
-                            width: 0
-                        )
-                    )
-                ),
-              )
-          ),
-          Expanded(
-            child: tWidget == null ? Container() : Container(
-              alignment: AlignmentDirectional.topEnd,
-              child: Align(
-                alignment: Alignment.topRight,
-                child: tWidget
-              ),
+    var inContainer = Container(
+        height: inputHeight,
+        margin: const EdgeInsets.only(top: 8.0),
+        padding: const EdgeInsets.only(left: 14),
+        decoration: BoxDecoration(
+            border: Border.all(
+                color: kPrimaryColor,
+                width: 1.0
+            ),
+            borderRadius: BorderRadius.circular(12)
+        ),
+        child: Row(
+          children: [
+            Expanded(
+                flex: 3,
+                child: TextFormField(
+                  readOnly: tWidget == null ? false : true,
+                  autofocus: false,
+                  cursorColor: Colors.grey[700],
+                  onChanged: (text) {
+                    setState(() {
+                      dynValue?.strValue = text;
+                    });
+                  },
+                  initialValue: widget.inputType == DynInputType.textarea ? tHint : null,
+                  style: subTitleStyle,
+                  keyboardType: textInputType,
+                  textInputAction: widget.inputType == DynInputType.textarea ? TextInputAction.newline : null,
+                  minLines: widget.inputType == DynInputType.textarea ? 20 : null,
+                  maxLines: widget.inputType == DynInputType.textarea ? 20 : null,
+                  decoration: InputDecoration(
+                      counterText: widget.inputType == DynInputType.textarea ? '' : null,
+                      hintText: tHint,
+                      hintStyle: subTitleStyle,
+                      focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(
+                              color: Colors.redAccent.withOpacity(0.0),
+                              width: 0
+                          )
+                      ),
+                      enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(
+                              color: Colors.redAccent.withOpacity(0.0),
+                              width: 0
+                          )
+                      )
+                  ),
+                )
+            ),
+            Expanded(
+                child: tWidget == null ? Container() : Container(
+                  alignment: AlignmentDirectional.topEnd,
+                  child: Align(
+                      alignment: Alignment.topRight,
+                      child: tWidget
+                  ),
+                )
             )
-          )
-        ],
-      ),
+          ],
+        )
     );
+
+    if (widget.inputType == DynInputType.textarea) {
+      mainWidget ??= IntrinsicHeight(
+        child: inContainer
+      );
+    } else {
+      mainWidget ??= inContainer;
+    }
 
     return mainWidget;
   }
