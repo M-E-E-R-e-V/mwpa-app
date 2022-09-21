@@ -1,5 +1,6 @@
 import 'package:mwpaapp/Models/VehicleDriver.dart';
 import 'package:mwpaapp/Mwpa/Models/DefaultReturn.dart';
+import 'package:mwpaapp/Util/UtilCheckJson.dart';
 
 class VehicleDriverResponse extends DefaultReturn {
   final List<VehicleDriver>? list;
@@ -22,11 +23,11 @@ class VehicleDriverResponse extends DefaultReturn {
 
       for (var element in vlist) {
         tlist.add(VehicleDriver(
-          id: element['id'],
-          user_id: element['user']['user_id'],
-          description: element['description'],
-          username: element['user']['name'],
-          isdeleted: element['isdeleted'] ? 1 : 0
+          id: UtilCheckJson.checkValue(element['id'], UtilCheckJsonTypes.int),
+          user_id: UtilCheckJson.checkValue(element['user']['user_id'], UtilCheckJsonTypes.int),
+          description: UtilCheckJson.checkValue(element['description'], UtilCheckJsonTypes.string),
+          username: UtilCheckJson.checkValue(element['user']['name'], UtilCheckJsonTypes.string),
+          isdeleted: UtilCheckJson.checkValue(element['isdeleted'], UtilCheckJsonTypes.int)
         ));
       }
 

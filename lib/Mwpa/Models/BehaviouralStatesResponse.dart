@@ -1,5 +1,6 @@
 import 'package:mwpaapp/Models/BehaviouralState.dart';
 import 'package:mwpaapp/Mwpa/Models/DefaultReturn.dart';
+import 'package:mwpaapp/Util/UtilCheckJson.dart';
 
 class BehaviouralStatesResponse extends DefaultReturn {
   final List<BehaviouralState>? list;
@@ -22,10 +23,10 @@ class BehaviouralStatesResponse extends DefaultReturn {
 
       for (var element in vlist) {
         tlist.add(BehaviouralState(
-          id: element['id'],
-          name: element['name'],
-          description: element['description'],
-          isdeleted: element['isdeleted'] ? 1 : 0
+          id: UtilCheckJson.checkValue(element['id'], UtilCheckJsonTypes.int),
+          name: UtilCheckJson.checkValue(element['name'], UtilCheckJsonTypes.string),
+          description: UtilCheckJson.checkValue(element['description'], UtilCheckJsonTypes.string),
+          isdeleted: UtilCheckJson.checkValue(element['isdeleted'], UtilCheckJsonTypes.int)
         ));
       }
 

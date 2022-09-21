@@ -40,6 +40,9 @@ class _EditSightingPageState extends State<EditSightingPage> {
   late DynInput sightVehicleDriver;
   DynInputValue sightVehicleDriverValue = DynInputValue();
 
+  late DynInput sightBeaufort;
+  DynInputValue sightBeaufortValue = DynInputValue();
+
   late DynInput sightDate;
   DynInputValue sightDateValue = DynInputValue();
 
@@ -134,6 +137,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
         vehicle_id: sightVehicle.dynValue?.getStrValueAsInt(),
         vehicle_driver_id: sightVehicleDriver.dynValue
             ?.getStrValueAsInt(),
+        beaufort_wind: sightBeaufort.dynValue?.getStrValueAsInt(),
         date: sightDate.dynValue?.getDateTime(),
         tour_start: sightTourStart.dynValue?.getTimeOfDay(),
         tour_end: sightTourEnd.dynValue?.getTimeOfDay(),
@@ -184,6 +188,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
         title = "Edit Sighting";
         sightVehicleValue.setStrValueByInt(sighting.vehicle_id!);
         sightVehicleDriverValue.setStrValueByInt(sighting.vehicle_driver_id!);
+        sightBeaufortValue.setStrValueByInt(sighting.beaufort_wind!);
         sightDateValue.setDateTime(sighting.date!);
         sightTourStartValue.setTimeOfDy(sighting.tour_start!);
         sightTourEndValue.setTimeOfDy(sighting.tour_end!);
@@ -251,6 +256,29 @@ class _EditSightingPageState extends State<EditSightingPage> {
            }).toList(),
          );
 
+        sightBeaufort = DynInput(
+          context: context,
+          title: "Wind/sastate (Befaufort)",
+          hint: "",
+          inputType: DynInputType.select,
+          dynValue: sightBeaufortValue,
+          selectList: [
+            DynInputSelectItem(value: "0", label: "0"),
+            DynInputSelectItem(value: "1", label: "1"),
+            DynInputSelectItem(value: "2", label: "2"),
+            DynInputSelectItem(value: "3", label: "3"),
+            DynInputSelectItem(value: "4", label: "4"),
+            DynInputSelectItem(value: "5", label: "5"),
+            DynInputSelectItem(value: "6", label: "6"),
+            DynInputSelectItem(value: "7", label: "7"),
+            DynInputSelectItem(value: "8", label: "8"),
+            DynInputSelectItem(value: "9", label: "9"),
+            DynInputSelectItem(value: "10", label: "10"),
+            DynInputSelectItem(value: "11", label: "11"),
+            DynInputSelectItem(value: "12", label: "12"),
+          ]
+        );
+
         sightDate = DynInput(
           context: context,
           title: "Date",
@@ -281,6 +309,13 @@ class _EditSightingPageState extends State<EditSightingPage> {
            hint: "",
            inputType: DynInputType.time,
            dynValue: sightDurationFromValue,
+           onChange: () {
+             if (sightLocationBeginValue.posValue == null) {
+               setState(() {
+                 sightLocationBeginValue.posValue = _locationController.currentPosition!;
+               });
+             }
+           },
          );
 
          sightDurationUntil = DynInput(
@@ -493,6 +528,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
                      ),
                      sightVehicle,
                      sightVehicleDriver,
+                     sightBeaufort,
                      sightDate,
                      Row(
                        children: [

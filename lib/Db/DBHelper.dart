@@ -33,6 +33,7 @@ class DBHelper {
                     "unid STRING,"
                     "vehicle_id INTEGER,"
                     "vehicle_driver_id INTEGER,"
+                    "beaufort_wind INTEGER,"
                     "date STRING,"
                     "tour_start STRING,"
                     "tour_end STRING,"

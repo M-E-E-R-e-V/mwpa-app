@@ -6,10 +6,10 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:mwpaapp/Components/DefaultButton.dart';
 import 'package:mwpaapp/Constants.dart';
+import 'package:mwpaapp/Controllers/LocationController.dart';
 import 'package:mwpaapp/Util/UtilPosition.dart';
 import 'package:switcher/core/switcher_size.dart';
 import 'package:switcher/switcher.dart';
-import '../Location/LocationProvider.dart';
 
 enum DynInputType {
   text,
@@ -169,6 +169,7 @@ class DynInput extends StatefulWidget {
   final Widget? widget;
   final List<DynInputSelectItem>? selectList;
   final DynInputValue? dynValue;
+  final Function? onChange;
 
   const DynInput({
     Key? key,
@@ -178,7 +179,8 @@ class DynInput extends StatefulWidget {
     this.title,
     this.widget,
     this.selectList,
-    this.dynValue
+    this.dynValue,
+    this.onChange
   }) : super(key: key);
 
   @override
@@ -186,6 +188,7 @@ class DynInput extends StatefulWidget {
 }
 
 class _DynInputState extends State<DynInput> {
+  final LocationController _locationController = Get.find<LocationController>();
   String title = "";
   DynInputValue? dynValue;
 
@@ -201,6 +204,10 @@ class _DynInputState extends State<DynInput> {
       setState(() {
         dynValue!.dateValue = pickDate;
       });
+
+      if (widget.onChange != null) {
+        widget.onChange!();
+      }
     }
   }
 
@@ -221,15 +228,23 @@ class _DynInputState extends State<DynInput> {
       setState(() {
         dynValue!.timeValue = picketTime;
       });
+
+      if (widget.onChange != null) {
+        widget.onChange!();
+      }
     }
   }
 
   _getLocationFromUser() async {
-    var position = await LocationProvider.getLocation();
+    var position = _locationController.currentPosition!;
 
     setState(() {
       dynValue!.posValue = position;
     });
+
+    if (widget.onChange != null) {
+      widget.onChange!();
+    }
   }
 
   Widget buildSingle(BuildContext context) {
@@ -300,10 +315,21 @@ class _DynInputState extends State<DynInput> {
           items: selectList.map<DropdownMenuItem<String>>((DynInputSelectItem value) {
             return DropdownMenuItem<String>(
               value: value.value,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(value.label),
-              ),
+              child: IntrinsicWidth(
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                    color: kPrimaryColor,
+                        width: 1.0
+                    ),
+                      borderRadius: BorderRadius.circular(12)
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(value.label),
+                  )
+                ),
+              )
             );
           }
           ).toList(),
@@ -313,6 +339,10 @@ class _DynInputState extends State<DynInput> {
                 dynValue!.strValue = value;
               }
             });
+
+            if (widget.onChange != null) {
+              widget.onChange!();
+            }
           },
         );
 
@@ -361,6 +391,10 @@ class _DynInputState extends State<DynInput> {
                     dynValue!.intValue = 1;
                   } else {
                     dynValue!.intValue = 0;
+                  }
+
+                  if (widget.onChange != null) {
+                    widget.onChange!();
                   }
                 })
         );
@@ -441,6 +475,10 @@ class _DynInputState extends State<DynInput> {
                     setState(() {
                       dynValue?.strValue = text;
                     });
+
+                    if (widget.onChange != null) {
+                      widget.onChange!();
+                    }
                   },
                   initialValue: widget.inputType == DynInputType.textarea ? tHint : null,
                   style: subTitleStyle,

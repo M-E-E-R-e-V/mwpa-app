@@ -13,6 +13,8 @@ class UtilCheckJson {
 
         if (val is String) {
           return int.parse(val);
+        } else if (val is bool) {
+          return val ? 1 : 0;
         }
 
         return val;

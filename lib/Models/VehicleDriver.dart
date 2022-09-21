@@ -18,7 +18,7 @@ class VehicleDriver {
       username = "${json['username']}";
     }
 
-    this.isdeleted = json['isdeleted'];
+    isdeleted = json['isdeleted'];
   }
 
   Map<String, dynamic> toJson(bool withId) {
