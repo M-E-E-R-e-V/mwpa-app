@@ -74,6 +74,19 @@ class _ListPageState extends State<ListPage> {
           var list = <PopupMenuEntry<Object>>[];
           list.add(
             const PopupMenuItem(
+                value: "settour",
+                child: Text("Set Tour")
+            ),
+          );
+
+          list.add(
+              const PopupMenuDivider(
+                height: 10,
+              )
+          );
+
+          list.add(
+            const PopupMenuItem(
                 value: "sync",
                 child: Text("Sync with Server")
             ),
@@ -98,8 +111,13 @@ class _ListPageState extends State<ListPage> {
           color: kButtonFontColor,
         ),
         initialValue: "0",
-        onSelected: (value) {
+        onSelected: (value) async {
           switch (value) {
+            case "settour":
+              await Get.toNamed('/setTour');
+              _sightingController.getSightings();
+              break;
+
             case "sync":
               _syncMwpa();
               break;

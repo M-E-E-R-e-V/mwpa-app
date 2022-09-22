@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:mwpaapp/Db/DBHelper.dart';
 import 'package:mwpaapp/Pages/EditSightingPage.dart';
+import 'package:mwpaapp/Pages/EditTourPage.dart';
 import 'package:mwpaapp/Pages/ListPage.dart';
 import 'package:mwpaapp/Pages/LoginPage.dart';
 import 'package:mwpaapp/Services/ThemeService.dart';
@@ -48,6 +49,10 @@ class _MWPAAppState extends State<MWPAApp> {
         GetPage(
           name: '/Edit',
           page: () => const EditSightingPage()
+        ),
+        GetPage(
+          name: "/setTour",
+          page: () => const EditTourPage()
         )
       ]
     );

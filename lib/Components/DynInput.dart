@@ -10,6 +10,7 @@ import 'package:mwpaapp/Controllers/LocationController.dart';
 import 'package:mwpaapp/Util/UtilPosition.dart';
 import 'package:switcher/core/switcher_size.dart';
 import 'package:switcher/switcher.dart';
+import 'package:textfield_tags/textfield_tags.dart';
 
 enum DynInputType {
   text,
@@ -22,6 +23,7 @@ enum DynInputType {
   switcher,
   location,
   multiselect,
+  tags,
 }
 
 class DynInputSelectItem {
@@ -67,7 +69,7 @@ class DynInputValue {
 
   void setDateTime(String date) {
     try {
-      dateValue = DateTime.parse(date);
+      dateValue = DateTime.parse(date).toLocal();
     } catch(e) {
       print(e);
     }
@@ -170,6 +172,8 @@ class DynInput extends StatefulWidget {
   final List<DynInputSelectItem>? selectList;
   final DynInputValue? dynValue;
   final Function? onChange;
+  final Function(DynInputValue?)? onFormat;
+  final List<String>? supportedTagList;
 
   const DynInput({
     Key? key,
@@ -180,7 +184,9 @@ class DynInput extends StatefulWidget {
     this.widget,
     this.selectList,
     this.dynValue,
-    this.onChange
+    this.onChange,
+    this.onFormat,
+    this.supportedTagList
   }) : super(key: key);
 
   @override
@@ -189,6 +195,8 @@ class DynInput extends StatefulWidget {
 
 class _DynInputState extends State<DynInput> {
   final LocationController _locationController = Get.find<LocationController>();
+  TextfieldTagsController? _tagController;
+
   String title = "";
   DynInputValue? dynValue;
 
@@ -247,15 +255,36 @@ class _DynInputState extends State<DynInput> {
     }
   }
 
+  @override
+  void initState() {
+    super.initState();
+
+    dynValue = widget.dynValue;
+    dynValue ??= DynInputValue();
+
+    switch (widget.inputType) {
+      case DynInputType.tags:
+        _tagController = TextfieldTagsController();
+        break;
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+
+    if (_tagController != null) {
+      _tagController!.dispose();
+    }
+  }
+
   Widget buildSingle(BuildContext context) {
     Widget? mainWidget;
     var tWidget = widget.widget;
     var tHint = widget.hint;
     var textInputType = TextInputType.text;
     var inputHeight = 52.0;
-    dynValue = widget.dynValue;
-
-    dynValue ??= DynInputValue();
+    Widget? inContainer;
 
     switch (widget.inputType) {
       case DynInputType.date:
@@ -321,8 +350,8 @@ class _DynInputState extends State<DynInput> {
                   margin: const EdgeInsets.only(bottom: 10),
                   decoration: BoxDecoration(
                     border: Border.all(
-                    color: kPrimaryColor,
-                        width: 1.0
+                      color: kPrimaryColor,
+                      width: 1.0
                     ),
                     borderRadius: BorderRadius.circular(12)
                   ),
@@ -427,7 +456,11 @@ class _DynInputState extends State<DynInput> {
         textInputType = TextInputType.number;
 
         if (tHint == "") {
-          tHint = dynValue!.strValue;
+          if (widget.onFormat != null) {
+            tHint = widget.onFormat!(widget.dynValue);
+          } else {
+            tHint = dynValue!.strValue;
+          }
         }
         break;
 
@@ -435,7 +468,11 @@ class _DynInputState extends State<DynInput> {
         textInputType = const TextInputType.numberWithOptions(decimal: true);
 
         if (tHint == "") {
-          tHint = dynValue!.strValue;
+          if (widget.onFormat != null) {
+            tHint = widget.onFormat!(widget.dynValue);
+          } else {
+            tHint = dynValue!.strValue;
+          }
         }
         break;
 
@@ -443,18 +480,213 @@ class _DynInputState extends State<DynInput> {
         textInputType = TextInputType.multiline;
 
         if (tHint == "") {
-          tHint = dynValue!.strValue;
+          if (widget.onFormat != null) {
+            tHint = widget.onFormat!(widget.dynValue);
+          } else {
+            tHint = dynValue!.strValue;
+          }
         }
 
         break;
 
+      case DynInputType.tags:
+        List<String> initTagList = [];
+
+        if (dynValue!.strValue != "") {
+          try {
+            var list = jsonDecode(dynValue!.strValue);
+
+            for (var element in (list as List<dynamic>)) {
+              initTagList.add(element);
+            }
+          } catch(e) {
+            print(e);
+
+            initTagList = dynValue!.strValue.split(" ");
+
+          }
+        }
+
+        inContainer = Container(
+            height: inputHeight,
+            margin: const EdgeInsets.only(top: 8.0),
+            padding: const EdgeInsets.only(left: 14),
+            decoration: BoxDecoration(
+                border: Border.all(
+                    color: kPrimaryColor,
+                    width: 1.0
+                ),
+                borderRadius: BorderRadius.circular(12)
+            ),
+            child: Row(
+                children: [
+                Expanded(
+                flex: 3,
+                child: Autocomplete<String>(
+                    optionsViewBuilder: (context, onSelected, options) {
+                      return Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+                        child: Align(
+                          alignment: Alignment.topCenter,
+                          child: Material(
+                            elevation: 4.0,
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(maxHeight: 200),
+                              child: ListView.builder(
+                                shrinkWrap: true,
+                                itemCount: options.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  final dynamic option = options.elementAt(index);
+                                  return TextButton(
+                                    onPressed: () {
+                                      onSelected(option);
+                                    },
+                                    child: Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 15.0),
+                                        child: Text(
+                                          '#$option',
+                                          textAlign: TextAlign.left,
+                                          style: const TextStyle(
+                                            color: Color.fromARGB(255, 74, 137, 92),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                    optionsBuilder: (TextEditingValue textEditingValue) {
+                      if (textEditingValue.text == '') {
+                        return const Iterable<String>.empty();
+                      }
+
+                      return widget.supportedTagList!.where((String option) {
+                        return option.contains(textEditingValue.text.toLowerCase());
+                      });
+                    },
+                    onSelected: (String selectedTag) {
+                      _tagController!.addTag = selectedTag;
+                    },
+                    fieldViewBuilder: (context, ttec, tfn, onFieldSubmitted) {
+                      return TextFieldTags(
+                        textfieldTagsController: _tagController,
+                        initialTags: initTagList,
+                        inputfieldBuilder: (context, tec, fn, error, onChanged, onSubmitted) {
+                          return ((context, sc, tags, onTagDelete) {
+                            return TextField(
+                              controller: tec,
+                              focusNode: fn,
+                              decoration: InputDecoration(
+                                isDense: true,
+                                focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: Colors.redAccent.withOpacity(0.0),
+                                        width: 0
+                                    )
+                                ),
+                                enabledBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: Colors.redAccent.withOpacity(0.0),
+                                        width: 0
+                                    )
+                                ),
+                                hintText: _tagController!.hasTags ? '' : "Enter ...",
+                                errorText: error,
+                                prefixIconConstraints:
+                                BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.74),
+                                prefixIcon: tags.isNotEmpty
+                                    ? SingleChildScrollView(
+                                  controller: sc,
+                                  scrollDirection: Axis.horizontal,
+                                  child: Row(
+                                      children: tags.map((String tag) {
+                                        return Container(
+                                          decoration: const BoxDecoration(
+                                            borderRadius: BorderRadius.all(Radius.circular(12.0)),
+                                            color: kPrimaryColor,
+                                          ),
+                                          margin: const EdgeInsets.symmetric(horizontal: 5.0),
+                                          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              InkWell(
+                                                child: Text(
+                                                  '#$tag',
+                                                  style: const TextStyle(color: Colors.white),
+                                                ),
+                                                onTap: () {
+                                                  print("$tag selected");
+                                                },
+                                              ),
+                                              const SizedBox(width: 4.0),
+                                              InkWell(
+                                                child: const Icon(
+                                                  Icons.cancel,
+                                                  size: 14.0,
+                                                  color: Color.fromARGB(255, 233, 233, 233),
+                                                ),
+                                                onTap: () {
+                                                  onTagDelete(tag);
+
+                                                  try {
+                                                    dynValue!.strValue =
+                                                        jsonEncode(_tagController!.getTags);
+                                                  } catch(e) {
+                                                    print(e);
+                                                  }
+                                                },
+                                              )
+                                            ],
+                                          ),
+                                        );
+                                      }).toList()),
+                                )
+                                    : null,
+                              ),
+                              onChanged: onChanged,
+                              onSubmitted: (value) {
+                                onSubmitted!(value);
+
+                                try {
+                                  dynValue!.strValue =
+                                      jsonEncode(_tagController!.getTags);
+                                } catch(e) {
+                                  print(e);
+                                }
+                              },
+                            );
+                          });
+                        }
+                      );
+                    },
+                  )
+                  )
+                ],
+            )
+        );
+        break;
+
       default:
         if (tHint == "") {
-          tHint = dynValue!.strValue;
+          if (widget.onFormat != null) {
+            tHint = widget.onFormat!(widget.dynValue);
+          } else {
+            tHint = dynValue!.strValue;
+          }
         }
     }
 
-    var inContainer = Container(
+    inContainer ??= Container(
         height: inputHeight,
         margin: const EdgeInsets.only(top: 8.0),
         padding: const EdgeInsets.only(left: 14),

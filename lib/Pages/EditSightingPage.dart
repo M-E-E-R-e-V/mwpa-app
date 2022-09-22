@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mwpaapp/Components/DefaultButton.dart';
@@ -10,8 +12,12 @@ import 'package:mwpaapp/Controllers/SightingController.dart';
 import 'package:mwpaapp/Controllers/SpeciesController.dart';
 import 'package:mwpaapp/Controllers/VehicleController.dart';
 import 'package:mwpaapp/Controllers/VehicleDriverController.dart';
+import 'package:mwpaapp/Dialog/ConfirmDialog.dart';
 import 'package:mwpaapp/Models/Sighting.dart';
+import 'package:mwpaapp/Models/TourPref.dart';
+import 'package:mwpaapp/Settings/Preference.dart';
 import 'package:mwpaapp/Util/UtilDistanceCoast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class EditSightingPage extends StatefulWidget {
   final Sighting? sighting;
@@ -32,7 +38,6 @@ class _EditSightingPageState extends State<EditSightingPage> {
   final BehaviouralStateController _behaviouralStateController = Get.find<BehaviouralStateController>();
 
   String title = "";
-  bool isInit = false;
 
   late DynInput sightVehicle;
   DynInputValue sightVehicleValue = DynInputValue();
@@ -124,8 +129,18 @@ class _EditSightingPageState extends State<EditSightingPage> {
           color: kButtonFontColor,
         ),
         onPressed: () async {
+          ConfirmDialog.show(
+            context,
+            "Sighting close",
+            "Close sighting without saving? All changes will be lost!",
+            (value) {
+              if (value != null) {
+                if (value == 'ok') {
+                  Get.back();
+                }
+              }
+            });
           //await Navigator.pushNamed(context, '/List');
-          Get.back();
         },
       ),
     );
@@ -177,55 +192,82 @@ class _EditSightingPageState extends State<EditSightingPage> {
     Get.back();
   }
 
+  Future<void> _loadPref() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      setState(() {
+        if (prefs.containsKey(Preference.TOUR)) {
+          TourPref tour = TourPref.fromJson(
+              jsonDecode(prefs.getString(Preference.TOUR)!));
+
+          sightVehicleValue.setStrValueByInt(tour.vehicle_id!);
+          sightVehicleDriverValue.setStrValueByInt(tour.vehicle_driver_id!);
+          sightBeaufortValue.setStrValueByInt(tour.beaufort_wind!);
+          sightDateValue.setDateTime(tour.date!);
+          sightTourStartValue.setTimeOfDy(tour.tour_start!);
+          sightTourEndValue.setTimeOfDy(tour.tour_end!);
+        }
+      });
+    } catch(e) {
+      print(e);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    Sighting? sighting = widget.sighting;
+
+    title = "Add Sighting";
+
+    if (sighting != null) {
+      title = "Edit Sighting";
+      sightVehicleValue.setStrValueByInt(sighting.vehicle_id!);
+      sightVehicleDriverValue.setStrValueByInt(sighting.vehicle_driver_id!);
+      sightBeaufortValue.setStrValueByInt(sighting.beaufort_wind!);
+      sightDateValue.setDateTime(sighting.date!);
+      sightTourStartValue.setTimeOfDy(sighting.tour_start!);
+      sightTourEndValue.setTimeOfDy(sighting.tour_end!);
+      sightDurationFromValue.setTimeOfDy(sighting.duration_from!);
+      sightDurationUntilValue.setTimeOfDy(sighting.duration_until!);
+      sightLocationBeginValue.setPositionStr(sighting.location_begin!);
+      sightLocationEndValue.setPositionStr(sighting.location_end!);
+      sightPhotoTakenValue.setIntValue(sighting.photo_taken!);
+      sightDistanceCoastValue.setValue(sighting.distance_coast!);
+      sightDistanceCoastEstimationGpsValue.setIntValue(sighting.distance_coast_estimation_gps!);
+      sightSpeciesValue.setStrValueByInt(sighting.species_id!);
+      sightSpeciesNumValue.setStrValueByInt(sighting.species_count!);
+      sightJuvenilesValue.setIntValue(sighting.juveniles!);
+      sightCalvesValue.setIntValue(sighting.calves!);
+      sightNewbornsValue.setIntValue(sighting.newborns!);
+      sightBehaviourValue.setMultiValue(sighting.behaviours!);
+      sightSubgroupsValue.setIntValue(sighting.subgroups!);
+      sightReactionValue.setStrValueByInt(sighting.reaction_id!);
+      sightFreqBehaviourValue.setValue(sighting.freq_behaviour!);
+      sightRecAnimalsValue.setValue(sighting.recognizable_animals!);
+      sightOtherSpeciesValue.setMultiValue(sighting.other_species!);
+      sightOtherValue.setValue(sighting.other!);
+      sightOtherVehicleValue.setValue(sighting.other_vehicle!);
+      sightNoteValue.setValue(sighting.note!);
+    } else {
+      _loadPref();
+
+      sightDurationFromValue.setTimeof(TimeOfDay.now());
+
+      if (_locationController.currentPosition != null) {
+        sightLocationBeginValue.setPosition(_locationController.currentPosition!);
+
+        var distance = UtilDistanceCoast.getDistance(_locationController.currentPosition!);
+        sightDistanceCoastValue.setValue("$distance");
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     Sighting? sighting = widget.sighting;
-
-    if (!isInit) {
-      title = "Add Sighting";
-
-      if (sighting != null) {
-        title = "Edit Sighting";
-        sightVehicleValue.setStrValueByInt(sighting.vehicle_id!);
-        sightVehicleDriverValue.setStrValueByInt(sighting.vehicle_driver_id!);
-        sightBeaufortValue.setStrValueByInt(sighting.beaufort_wind!);
-        sightDateValue.setDateTime(sighting.date!);
-        sightTourStartValue.setTimeOfDy(sighting.tour_start!);
-        sightTourEndValue.setTimeOfDy(sighting.tour_end!);
-        sightDurationFromValue.setTimeOfDy(sighting.duration_from!);
-        sightDurationUntilValue.setTimeOfDy(sighting.duration_until!);
-        sightLocationBeginValue.setPositionStr(sighting.location_begin!);
-        sightLocationEndValue.setPositionStr(sighting.location_end!);
-        sightPhotoTakenValue.setIntValue(sighting.photo_taken!);
-        sightDistanceCoastValue.setValue(sighting.distance_coast!);
-        sightDistanceCoastEstimationGpsValue.setIntValue(sighting.distance_coast_estimation_gps!);
-        sightSpeciesValue.setStrValueByInt(sighting.species_id!);
-        sightSpeciesNumValue.setStrValueByInt(sighting.species_count!);
-        sightJuvenilesValue.setIntValue(sighting.juveniles!);
-        sightCalvesValue.setIntValue(sighting.calves!);
-        sightNewbornsValue.setIntValue(sighting.newborns!);
-        sightBehaviourValue.setMultiValue(sighting.behaviours!);
-        sightSubgroupsValue.setIntValue(sighting.subgroups!);
-        sightReactionValue.setStrValueByInt(sighting.reaction_id!);
-        sightFreqBehaviourValue.setValue(sighting.freq_behaviour!);
-        sightRecAnimalsValue.setValue(sighting.recognizable_animals!);
-        sightOtherSpeciesValue.setMultiValue(sighting.other_species!);
-        sightOtherValue.setValue(sighting.other!);
-        sightOtherVehicleValue.setValue(sighting.other_vehicle!);
-        sightNoteValue.setValue(sighting.note!);
-      } else {
-        sightDurationFromValue.setTimeof(TimeOfDay.now());
-
-        if (_locationController.currentPosition != null) {
-          sightLocationBeginValue.setPosition(_locationController.currentPosition!);
-
-          var distance = UtilDistanceCoast.getDistance(_locationController.currentPosition!);
-          sightDistanceCoastValue.setValue("$distance");
-        }
-      }
-
-      isInit = true;
-    }
 
     return Obx(() {
         sightVehicle = DynInput(
@@ -258,7 +300,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
 
         sightBeaufort = DynInput(
           context: context,
-          title: "Wind/sastate (Befaufort)",
+          title: "Wind/Seastate (Beaufort)",
           hint: "",
           inputType: DynInputType.select,
           dynValue: sightBeaufortValue,
@@ -332,6 +374,12 @@ class _EditSightingPageState extends State<EditSightingPage> {
            hint: "",
            inputType: DynInputType.location,
            dynValue: sightLocationBeginValue,
+           onChange: () {
+             if (sightLocationBeginValue.posValue != null) {
+               var distance = UtilDistanceCoast.getDistance(sightLocationBeginValue.posValue!);
+               sightDistanceCoastValue.setValue("$distance");
+             }
+           },
          );
 
          sightLocationEnd = DynInput(
@@ -352,10 +400,24 @@ class _EditSightingPageState extends State<EditSightingPage> {
 
          sightDistanceCoast = DynInput(
            context: context,
-           title: "Distance to nearest coast (m)",
+           title: "Distance to nearest coast (nm)",
            hint: "",
            inputType: DynInputType.numberdecimal,
            dynValue: sightDistanceCoastValue,
+           onFormat: (value) {
+             try {
+               if (value != null) {
+                 var fvalue = double.parse(value.strValue);
+                 fvalue = 0.5399568035 * (fvalue / 1000);
+
+                 return "${fvalue.toPrecision(2)}";
+               }
+             } catch(e) {
+               print(e);
+             }
+
+             return "0.0";
+           },
          );
 
          sightDistanceCoastEstimationGps = DynInput(
@@ -449,7 +511,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
           selectList: _encounterCategoriesController.encounterCategorieList.map((element) {
             return DynInputSelectItem(
               value: element.id!.toString(),
-             label: element.name!
+              label: element.name!
             );
           }).toList()
          );
@@ -458,8 +520,9 @@ class _EditSightingPageState extends State<EditSightingPage> {
           context: context,
           title: "Frequent behaviours of individuals",
           hint: "",
-          inputType: DynInputType.textarea,
+          inputType: DynInputType.tags,
           dynValue: sightFreqBehaviourValue,
+          supportedTagList: ['Test', 'SLP', 'SPY'],
         );
 
         sightRecAnimals = DynInput(
