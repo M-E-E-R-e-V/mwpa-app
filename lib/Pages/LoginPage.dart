@@ -49,8 +49,7 @@ class _LoginPageState extends State<LoginPage> {
             await prefs.setString(Preference.PASSWORD, password);
             await prefs.setInt(Preference.USERID, userdata.id);
 
-            if (!mounted) return;
-            await Navigator.pushNamed(context, '/List');
+            Get.toNamed('/List');
           }
         }
       }
@@ -91,7 +90,7 @@ class _LoginPageState extends State<LoginPage> {
     final prefs = await SharedPreferences.getInstance();
 
     if (prefs.containsKey(Preference.USERID)) {
-      await Navigator.pushNamed(context, '/List');
+      Get.toNamed('/List');
     }
 
     return;

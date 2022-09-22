@@ -317,12 +317,14 @@ class _DynInputState extends State<DynInput> {
               value: value.value,
               child: IntrinsicWidth(
                 child: Container(
+                  width: MediaQuery.of(context).size.width,
+                  margin: const EdgeInsets.only(bottom: 10),
                   decoration: BoxDecoration(
                     border: Border.all(
                     color: kPrimaryColor,
                         width: 1.0
                     ),
-                      borderRadius: BorderRadius.circular(12)
+                    borderRadius: BorderRadius.circular(12)
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),

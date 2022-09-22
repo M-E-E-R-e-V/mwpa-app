@@ -38,6 +38,16 @@ class ListSightingTile extends StatelessWidget {
       }
     }
 
+    Color backgroundColor = sighting.validateColor();
+    String? speciesName = _speciesController.getSpeciesName(sighting.species_id!);
+
+    if (sighting.other != null && sighting.other!.trim() != "") {
+      speciesName = sighting.other;
+    } else if(sighting.note != null && sighting.note!.trim() != "") {
+      speciesName = sighting.note;
+    } else {
+      speciesName ??= "Specie not found";
+    }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -47,7 +57,7 @@ class ListSightingTile extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          color: sighting.validateColor()
+          color: backgroundColor
         ),
         child: Row(
           children: [
@@ -56,12 +66,12 @@ class ListSightingTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _speciesController.getSpeciesName(sighting.species_id!),
+                      speciesName!,
                       style: GoogleFonts.lato(
-                        textStyle: const TextStyle(
+                        textStyle: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white
+                          color: backgroundColor.computeLuminance() < 0.5 ? Colors.white : Colors.black
                         )
                       ),
                     ),
@@ -73,7 +83,7 @@ class ListSightingTile extends StatelessWidget {
                       children: [
                         Icon(
                           Icons.access_time_rounded,
-                          color: Colors.grey[200],
+                          color: backgroundColor.computeLuminance() < 0.5 ? Colors.grey[200] : Colors.grey[700],
                           size: 18,
                         ),
                         const SizedBox(width: 4),
@@ -82,7 +92,7 @@ class ListSightingTile extends StatelessWidget {
                           style: GoogleFonts.lato(
                             textStyle: TextStyle(
                               fontSize: 13,
-                              color: Colors.grey[100]
+                              color: backgroundColor.computeLuminance() < 0.5 ? Colors.grey[100] : Colors.grey[700]
                             )
                           ),
                         )
@@ -94,7 +104,7 @@ class ListSightingTile extends StatelessWidget {
                       children: [
                         Icon(
                           Icons.location_pin,
-                          color: Colors.grey[200],
+                          color: backgroundColor.computeLuminance() < 0.5 ? Colors.grey[200] : Colors.grey[700],
                           size: 18,
                         ),
                         const SizedBox(width: 4),
@@ -103,7 +113,7 @@ class ListSightingTile extends StatelessWidget {
                           style: GoogleFonts.lato(
                               textStyle: TextStyle(
                                   fontSize: 13,
-                                  color: Colors.grey[100]
+                                  color: backgroundColor.computeLuminance() < 0.5 ? Colors.grey[100] : Colors.grey[700]
                               )
                           ),
                         )
@@ -123,10 +133,10 @@ class ListSightingTile extends StatelessWidget {
               child: Text(
                 "TODO",
                 style: GoogleFonts.lato(
-                  textStyle: const TextStyle(
+                  textStyle:  TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white
+                    color: backgroundColor.computeLuminance() < 0.5 ? Colors.grey[100] : Colors.grey[700]
                   )
                 ),
               ),

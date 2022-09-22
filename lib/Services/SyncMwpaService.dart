@@ -10,7 +10,7 @@ import '../Mwpa/MwpaAPI.dart';
 
 class SyncMwpaService {
 
-  Future<void> sync() async {
+  Future<void> sync(Function(int)? update) async {
     MwpaApi api;
 
     // load userdata and login
@@ -71,6 +71,11 @@ class SyncMwpaService {
       //rethrow;
     }
 
+
+    if (update != null) {
+      await update(10);
+    }
+
     // vehicle driver sync
     // -------------------------------------------------------------------------
 
@@ -90,6 +95,10 @@ class SyncMwpaService {
       print(e);
 
       //rethrow;
+    }
+
+    if (update != null) {
+      await update(20);
     }
 
     // species
@@ -113,6 +122,10 @@ class SyncMwpaService {
       //rethrow;
     }
 
+    if (update != null) {
+      await update(30);
+    }
+
     // encounter categories
     // -------------------------------------------------------------------------
 
@@ -134,6 +147,10 @@ class SyncMwpaService {
       //rethrow;
     }
 
+    if (update != null) {
+      await update(40);
+    }
+
     // behavioural state
     // -------------------------------------------------------------------------
 
@@ -153,6 +170,10 @@ class SyncMwpaService {
       print(e);
 
       //rethrow;
+    }
+
+    if (update != null) {
+      await update(100);
     }
   }
 }

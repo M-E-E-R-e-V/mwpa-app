@@ -48,6 +48,7 @@ dependencies:
   flutter_native_timezone:
   flutter_staggered_animations:
   gpx:
+  flutter_easyloading:
 
 dev_dependencies:
   flutter_launcher_icons: ^0.10.0

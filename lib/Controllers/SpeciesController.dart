@@ -21,13 +21,13 @@ class SpeciesController extends GetxController {
     speciesList.assignAll(species.map((data) => Species.fromJson(data)).toList());
   }
 
-  getSpeciesName(int id) {
+  String? getSpeciesName(int id) {
     for (var specie in speciesList) {
       if (specie.id == id) {
         return specie.name;
       }
     }
 
-    return "Specie not found";
+    return null;
   }
 }

@@ -35,8 +35,10 @@ class _ListPageState extends State<ListPage> {
   final BehaviouralStateController _behaviouralStateController = Get.put(BehaviouralStateController());
 
   _syncMwpa() async {
+
     SyncMwpaService service = SyncMwpaService();
-    await service.sync();
+    await service.sync((p0) async {});
+
     await _vehicleController.getVehicle();
     await _vehicleDriverController.getVehicleDriver();
     await _speciesController.getSpecies();
@@ -133,8 +135,7 @@ class _ListPageState extends State<ListPage> {
           DefaultButton(
             label: "+ Add Sighting",
             onTab: () async {
-              //await Navigator.pushNamed(context, '/Edit')
-              await Get.to(() => const EditSightingPage());
+              await Get.toNamed('/Edit');
               _sightingController.getSightings();
             }
           )

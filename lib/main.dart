@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:mwpaapp/Db/DBHelper.dart';
@@ -27,26 +28,28 @@ class _MWPAAppState extends State<MWPAApp> {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    EasyLoading.init();
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Mammal watching. Processing. Analysing.',
       theme: Themes.light,
       darkTheme: Themes.dark,
       themeMode: ThemeService().theme,
-      builder: (context, widget) => Navigator(
-        onGenerateRoute: (RouteSettings settings) => MaterialPageRoute(
-          builder: (ctx) {
-            return Container(
-              child: widget,
-            );
-          },
-        ),
-      ),
       initialRoute: '/Login',
-      routes: {
-        '/Login': (context) => const LoginPage(),
-        '/List': (context) => const ListPage(),
-      }
+      getPages: [
+        GetPage(
+          name: '/Login',
+          page: () => const LoginPage()
+        ),
+        GetPage(
+          name: '/List',
+          page: () => const ListPage()
+        ),
+        GetPage(
+          name: '/Edit',
+          page: () => const EditSightingPage()
+        )
+      ]
     );
   }
 }
