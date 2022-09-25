@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:flutter_map/plugin_api.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -14,7 +13,9 @@ import 'package:mwpaapp/Controllers/SpeciesController.dart';
 import 'package:mwpaapp/Controllers/VehicleController.dart';
 import 'package:mwpaapp/Controllers/VehicleDriverController.dart';
 import 'package:mwpaapp/Dialog/ConfirmDialog.dart';
+import 'package:mwpaapp/Dialog/InfoDialog.dart';
 import 'package:mwpaapp/Models/Sighting.dart';
+import 'package:mwpaapp/Mwpa/MwpaException.dart';
 import 'package:mwpaapp/Pages/EditSightingPage.dart';
 import 'package:mwpaapp/Pages/List/ListSightingTile.dart';
 import 'package:mwpaapp/Services/SyncMwpaService.dart';
@@ -46,17 +47,28 @@ class _ListPageState extends State<ListPage> {
     EasyLoading.instance.maskType = EasyLoadingMaskType.black;
 
     SyncMwpaService service = SyncMwpaService();
-    await service.sync((p0) async {
-      EasyLoading.showProgress(p0/100, status: 'sync...');
-    });
 
-    await _vehicleController.getVehicle();
-    await _vehicleDriverController.getVehicleDriver();
-    await _speciesController.getSpecies();
-    await _encounterCategoriesController.getEncounterCategorie();
-    await _behaviouralStateController.getBehaviouralStates();
+    try {
+      await service.sync((p0) async {
+        EasyLoading.showProgress(p0 / 100, status: 'sync...');
+      });
 
-    EasyLoading.dismiss();
+      await _vehicleController.getVehicle();
+      await _vehicleDriverController.getVehicleDriver();
+      await _speciesController.getSpecies();
+      await _encounterCategoriesController.getEncounterCategorie();
+      await _behaviouralStateController.getBehaviouralStates();
+
+      EasyLoading.dismiss();
+    } catch(error) {
+      EasyLoading.dismiss();
+
+      if (error is MwpaException) {
+        InfoDialog.show(context, 'Error', error.toString());
+      } else {
+        InfoDialog.show(context, 'Internal Error', error.toString());
+      }
+    }
   }
 
   _loadController() async {
@@ -286,7 +298,6 @@ class _ListPageState extends State<ListPage> {
               onTab: () async {
                 await Get.to(() => EditSightingPage(sighting: sighting));
                 _sightingController.getSightings();
-
                 Get.back();
               },
               clr: kPrimaryHeaderColor,
@@ -307,7 +318,6 @@ class _ListPageState extends State<ListPage> {
             _bottomSheetButton(
                 label: 'Close',
                 onTab: () {
-
                   Get.back();
                 },
                 clr: Colors.white,

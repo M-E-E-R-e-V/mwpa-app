@@ -1,6 +1,7 @@
 import 'package:mwpaapp/Db/DBHelper.dart';
 import 'package:mwpaapp/Models/BehaviouralState.dart';
 import 'package:mwpaapp/Models/EncounterCategorie.dart';
+import 'package:mwpaapp/Models/Sighting.dart';
 import 'package:mwpaapp/Models/Species.dart';
 import 'package:mwpaapp/Models/Vehicle.dart';
 import 'package:mwpaapp/Models/VehicleDriver.dart';
@@ -68,7 +69,7 @@ class SyncMwpaService {
     } catch(e) {
       print(e);
 
-      //rethrow;
+      rethrow;
     }
 
 
@@ -94,7 +95,7 @@ class SyncMwpaService {
     } catch(e) {
       print(e);
 
-      //rethrow;
+      rethrow;
     }
 
     if (update != null) {
@@ -119,7 +120,7 @@ class SyncMwpaService {
     } catch(e) {
       print(e);
 
-      //rethrow;
+      rethrow;
     }
 
     if (update != null) {
@@ -144,7 +145,7 @@ class SyncMwpaService {
     } catch(e) {
       print(e);
 
-      //rethrow;
+      rethrow;
     }
 
     if (update != null) {
@@ -169,8 +170,29 @@ class SyncMwpaService {
     } catch(e) {
       print(e);
 
-      //rethrow;
+      rethrow;
     }
+
+    // sightings
+    // -------------------------------------------------------------------------
+
+    List<Sighting> sightingList = [];
+    List<Map<String, dynamic>> sightings = await DBHelper.querySighting();
+    sightingList = sightings.map((data) => Sighting.fromJson(data)).toList();
+
+    try {
+      for (var sighting in sightingList) {
+        if (await api.saveSighting(sighting)) {
+          // delete sighting is send to portal
+        }
+      }
+    } catch(e) {
+      print(e);
+
+      rethrow;
+    }
+
+    // -------------------------------------------------------------------------
 
     if (update != null) {
       await update(100);

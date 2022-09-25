@@ -5,7 +5,12 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:mwpaapp/Components/DefaultButton.dart';
+import 'package:mwpaapp/Controllers/LocationController.dart';
+import 'package:mwpaapp/Controllers/SightingController.dart';
 import 'package:mwpaapp/Controllers/SpeciesController.dart';
+import 'package:mwpaapp/Db/DBHelper.dart';
+import 'package:mwpaapp/Dialog/InfoDialog.dart';
 import 'package:mwpaapp/Models/Sighting.dart';
 import 'package:mwpaapp/Util/UtilPosition.dart';
 
@@ -17,8 +22,9 @@ class ListSightingTile extends StatelessWidget {
 
   ListSightingTile(this.sighting, {Key? key}) : super(key: key);
 
-
+  final LocationController _locationController = Get.find<LocationController>();
   final SpeciesController _speciesController = Get.find<SpeciesController>();
+  final SightingController _sightingController = Get.find<SightingController>();
 
   @override
   Widget build(BuildContext context) {
@@ -47,8 +53,11 @@ class ListSightingTile extends StatelessWidget {
       speciesName = sighting.other?.trim();
     } else if(speciesName == null && sighting.note != null && sighting.note!.trim() != "") {
       speciesName = sighting.note?.trim();
-    } else {
-      speciesName ??= "Specie not found";
+    }
+
+    if (speciesName == null) {
+      backgroundColor = Colors.yellow;
+      speciesName = "Specie not found";
     }
 
     List<Widget> symbols = [];
@@ -78,19 +87,27 @@ class ListSightingTile extends StatelessWidget {
     }
 
     if (symbols.isEmpty) {
-      if (backgroundColor == kPrimaryColor) {
+      if (backgroundColor == kPrimaryHeaderColor) {
         symbols.add(Icon(
           Icons.done,
           color: backgroundColor.computeLuminance() < 0.5 ? Colors.grey[200] : Colors.grey[700],
           size: 18,
         ));
-      } else {
-        symbols.add(Icon(
-          Icons.warning,
-          color: backgroundColor.computeLuminance() < 0.5 ? Colors.grey[200] : Colors.grey[700],
-          size: 18,
-        ));
       }
+    }
+
+    if (backgroundColor != kPrimaryHeaderColor) {
+      symbols.add(Icon(
+        Icons.warning,
+        color: backgroundColor.computeLuminance() < 0.5 ? Colors.grey[200] : Colors.grey[700],
+        size: 18,
+      ));
+    }
+
+    var endLocationEmpty = false;
+
+    if (sighting.location_end == null || sighting.location_end == "" || sighting.location_end == "null" ) {
+      endLocationEmpty = true;
     }
 
     return Container(
@@ -110,7 +127,7 @@ class ListSightingTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      speciesName!,
+                      speciesName,
                       style: GoogleFonts.lato(
                         textStyle: TextStyle(
                           fontSize: 16,
@@ -173,7 +190,38 @@ class ListSightingTile extends StatelessWidget {
               color: backgroundColor.computeLuminance() < 0.5 ? Colors.grey[200]!.withOpacity(0.7) : Colors.grey[800]!.withOpacity(0.7),
             ),
             Column(
-              children: symbols,
+              children: !endLocationEmpty ? symbols : [
+                DefaultButton(
+                  buttonIcon: Icons.add_location_alt,
+                  width: 22,
+                  onTab: () {
+                    if (_locationController.currentPosition == null) {
+                      InfoDialog.show(context, 'Info', "Please wait for the GPS signal.");
+                    } else {
+                      sighting.location_end = jsonEncode(_locationController.currentPosition?.toJson());
+
+                      if ( sighting.duration_until == null || sighting.duration_until == 'null' || sighting.duration_until == '') {
+                        var timeValue = TimeOfDay.now();
+                        var hour = "${timeValue.hour}";
+                        var min = "${timeValue.minute}";
+
+                        if (timeValue.hour < 10) {
+                          hour = "0${timeValue.hour}";
+                        }
+
+                        if (timeValue.minute < 10) {
+                          min = "0${timeValue.minute}";
+                        }
+
+                        sighting.duration_until = "$hour:$min";
+                      }
+
+                      _sightingController.updateSighting(tSighting: sighting);
+                      _sightingController.getSightings();
+                    }
+                  },
+                )
+              ],
             )
           ],
         ),

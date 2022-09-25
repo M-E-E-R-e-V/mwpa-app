@@ -27,6 +27,8 @@ class SightingController extends GetxController {
   }
 
   Future<int> updateSighting({required Sighting tSighting}) async {
-    return await DBHelper.updateSighting(tSighting);
+    var result = await DBHelper.updateSighting(tSighting);
+    update();
+    return result;
   }
 }

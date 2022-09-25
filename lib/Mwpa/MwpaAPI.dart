@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:mwpaapp/Models/BehaviouralState.dart';
 import 'package:mwpaapp/Models/EncounterCategorie.dart';
+import 'package:mwpaapp/Models/Sighting.dart';
 import 'package:mwpaapp/Models/Species.dart';
 import 'package:mwpaapp/Models/Vehicle.dart';
 import 'package:mwpaapp/Models/VehicleDriver.dart';
@@ -14,6 +15,7 @@ import 'package:mwpaapp/Mwpa/Models/BehaviouralStatesResponse.dart';
 import 'package:mwpaapp/Mwpa/Models/EncounterCategoriesResponse.dart';
 import 'package:mwpaapp/Mwpa/Models/IsLogin.dart';
 import 'package:mwpaapp/Mwpa/Models/LoginResponse.dart';
+import 'package:mwpaapp/Mwpa/Models/SightingSaveResponse.dart';
 import 'package:mwpaapp/Mwpa/Models/SpeciesListResponse.dart';
 import 'package:mwpaapp/Mwpa/Models/StatusCodes.dart';
 import 'package:mwpaapp/Mwpa/Models/User/UserInfoData.dart';
@@ -33,6 +35,7 @@ class MwpaApi {
   static const URL_SPECIES = 'mobile/species/list';
   static const URL_ENC_CATE = 'mobile/encountercategories/list';
   static const URL_BEH_STATE = 'mobile/behaviouralstates/list';
+  static const URL_SIGHTING_SAVE = 'mobile/sighting/save';
 
   String _url = "";
   String _cookie = "";
@@ -346,5 +349,35 @@ class MwpaApi {
       print(error);
       throw Exception('Connection error');
     }
+  }
+
+  Future<bool> saveSighting(Sighting sigh) async {
+    try {
+      var url = getUrl(MwpaApi.URL_SIGHTING_SAVE);
+
+      var postBody = jsonEncode(sigh.toJson(false));
+
+      var response = await http.post(
+        Uri.parse(url),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: postBody,
+      );
+
+      var objResponse = SightingSaveResponse.fromJson(jsonDecode(response.body));
+
+      if (objResponse.statusCode == StatusCodes.OK) {
+        return true;
+      }
+    }
+    on MwpaException {
+      rethrow;
+    } catch(error) {
+      print(error);
+      throw Exception('Connection error');
+    }
+
+    return false;
   }
 }

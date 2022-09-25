@@ -113,7 +113,7 @@ class DBHelper {
   static Future<List<Map<String, dynamic>>> querySighting() async {
     return await _db!.query(
         _tableNameSighting,
-        orderBy: "date DESC"
+        orderBy: "id DESC"
     );
   }
 

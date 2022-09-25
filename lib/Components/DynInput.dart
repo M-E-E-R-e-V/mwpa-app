@@ -23,6 +23,7 @@ enum DynInputType {
   switcher,
   location,
   multiselect,
+  multiselectmixed,
   tags,
 }
 
