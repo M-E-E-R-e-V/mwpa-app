@@ -22,6 +22,7 @@ class LocationController extends GetxController {
     try {
       var position = await LocationProvider.getLocation();
       currentPosition = position;
+      update();
     } catch(e) {
       print(e);
     }

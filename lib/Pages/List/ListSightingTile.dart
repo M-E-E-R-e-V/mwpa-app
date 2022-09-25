@@ -42,9 +42,9 @@ class ListSightingTile extends StatelessWidget {
     String? speciesName = _speciesController.getSpeciesName(sighting.species_id!);
 
     if (speciesName == null && sighting.other != null && sighting.other!.trim() != "") {
-      speciesName = sighting.other;
+      speciesName = sighting.other?.trim();
     } else if(speciesName == null && sighting.note != null && sighting.note!.trim() != "") {
-      speciesName = sighting.note;
+      speciesName = sighting.note?.trim();
     } else {
       speciesName ??= "Specie not found";
     }

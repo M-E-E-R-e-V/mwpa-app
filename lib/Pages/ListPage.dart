@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/plugin_api.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -16,6 +17,8 @@ import 'package:mwpaapp/Pages/EditSightingPage.dart';
 import 'package:mwpaapp/Pages/List/ListSightingTile.dart';
 import 'package:mwpaapp/Services/SyncMwpaService.dart';
 import 'package:mwpaapp/Services/ThemeService.dart';
+
+import 'List/ListMap.dart';
 
 
 class ListPage extends StatefulWidget {
@@ -168,7 +171,7 @@ class _ListPageState extends State<ListPage> {
         decoration: const BoxDecoration(
             color: kButtonBackgroundColor
         ),
-        child: null
+        child: ListMap()
     );
   }
 
@@ -304,7 +307,8 @@ class _ListPageState extends State<ListPage> {
         children: [
           _addTaskBar(),
           const SizedBox(height: 20),
-          // _addMapBar(),
+          _addMapBar(),
+          const SizedBox(height: 20),
           _showSighting(),
         ],
       ),
