@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:mwpaapp/Db/DBHelper.dart';
 import 'package:mwpaapp/Models/BehaviouralState.dart';
 import 'package:mwpaapp/Models/EncounterCategorie.dart';
@@ -46,7 +47,9 @@ class SyncMwpaService {
         }
       }
     } catch(e) {
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
 
       rethrow;
     }
@@ -67,7 +70,9 @@ class SyncMwpaService {
         }
       }
     } catch(e) {
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
 
       rethrow;
     }
@@ -93,7 +98,9 @@ class SyncMwpaService {
         }
       }
     } catch(e) {
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
 
       rethrow;
     }
@@ -109,16 +116,18 @@ class SyncMwpaService {
       List<Species> speciesList = await api.getSpeciesList();
 
       for (var species in speciesList) {
-        var tspecie = await DBHelper.readSpecies(species.id!);
+        var tSpecie = await DBHelper.readSpecies(species.id!);
 
-        if (tspecie.isEmpty) {
+        if (tSpecie.isEmpty) {
           await DBHelper.insertSpecies(species);
         } else {
           await DBHelper.updateSpecies(species);
         }
       }
     } catch(e) {
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
 
       rethrow;
     }
@@ -143,7 +152,9 @@ class SyncMwpaService {
         }
       }
     } catch(e) {
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
 
       rethrow;
     }
@@ -168,7 +179,9 @@ class SyncMwpaService {
         }
       }
     } catch(e) {
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
 
       rethrow;
     }
@@ -187,7 +200,9 @@ class SyncMwpaService {
         }
       }
     } catch(e) {
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
 
       rethrow;
     }

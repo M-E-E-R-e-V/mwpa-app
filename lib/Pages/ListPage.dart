@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
@@ -22,7 +24,7 @@ import 'package:mwpaapp/Services/SyncMwpaService.dart';
 import 'package:mwpaapp/Services/ThemeService.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:connectivity/connectivity.dart';
 import 'List/ListMap.dart';
 
 
@@ -41,6 +43,34 @@ class _ListPageState extends State<ListPage> {
   final SpeciesController _speciesController = Get.put(SpeciesController());
   final EncounterCategoriesController _encounterCategoriesController = Get.put(EncounterCategoriesController());
   final BehaviouralStateController _behaviouralStateController = Get.put(BehaviouralStateController());
+
+  late StreamSubscription subscription;
+
+  @override
+  void initState() {
+    super.initState();
+
+    subscription = Connectivity().onConnectivityChanged.listen(
+        _syncCheckConnectivity
+    );
+  }
+
+  @override
+  void dispose() {
+    subscription.cancel();
+
+    super.dispose();
+  }
+
+  _syncCheckConnectivity(ConnectivityResult result) async {
+    final hasInternet = result != ConnectivityResult.none;
+
+    if (hasInternet) {
+      if (_sightingController.sightingList.isNotEmpty) {
+        _syncMwpa();
+      }
+    }
+  }
 
   _syncMwpa() async {
     EasyLoading.instance.dismissOnTap = false;

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mwpaapp/Components/DefaultButton.dart';
@@ -147,7 +148,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
   }
 
   _saveSightingToDb() async {
-    Sighting tsigh = Sighting(
+    Sighting tSigh = Sighting(
         unid: "",
         vehicle_id: sightVehicle.dynValue?.getStrValueAsInt(),
         vehicle_driver_id: sightVehicleDriver.dynValue
@@ -181,12 +182,15 @@ class _EditSightingPageState extends State<EditSightingPage> {
     );
 
     if (widget.sighting != null) {
-      tsigh.id = widget.sighting?.id!;
+      tSigh.id = widget.sighting?.id!;
 
-      var result = await _sightingController.updateSighting(tSighting: tsigh);
-      print(result);
+      var result = await _sightingController.updateSighting(tSighting: tSigh);
+
+      if (kDebugMode) {
+        print(result);
+      }
     } else {
-      await _sightingController.addSighting(newSighting: tsigh);
+      await _sightingController.addSighting(newSighting: tSigh);
     }
 
     Get.back();
@@ -210,7 +214,9 @@ class _EditSightingPageState extends State<EditSightingPage> {
         }
       });
     } catch(e) {
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
     }
   }
 
@@ -407,13 +413,15 @@ class _EditSightingPageState extends State<EditSightingPage> {
            onFormat: (value) {
              try {
                if (value != null) {
-                 var fvalue = double.parse(value.strValue);
-                 fvalue = 0.5399568035 * (fvalue / 1000);
+                 var fValue = double.parse(value.strValue);
+                 fValue = 0.5399568035 * (fValue / 1000);
 
-                 return "${fvalue.toPrecision(2)}";
+                 return "${fValue.toPrecision(2)}";
                }
              } catch(e) {
-               print(e);
+               if (kDebugMode) {
+                 print(e);
+               }
              }
 
              return "0.0";
@@ -522,7 +530,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
           hint: "",
           inputType: DynInputType.tags,
           dynValue: sightFreqBehaviourValue,
-          supportedTagList: ['Test', 'SLP', 'SPY'],
+          supportedTagList: const ['Test', 'SLP', 'SPY'],
         );
 
         sightRecAnimals = DynInput(
