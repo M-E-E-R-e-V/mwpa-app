@@ -9,6 +9,8 @@ import 'package:mwpaapp/Controllers/SpeciesController.dart';
 import 'package:mwpaapp/Models/Sighting.dart';
 import 'package:mwpaapp/Util/UtilPosition.dart';
 
+import '../../Constants.dart';
+
 class ListSightingTile extends StatelessWidget {
 
   final Sighting sighting;
@@ -25,7 +27,7 @@ class ListSightingTile extends StatelessWidget {
 
     if (sighting.date != null) {
       DateTime tDate = DateTime.parse(sighting.date!);
-      timeString = "${DateFormat.yMd().format(tDate)} - ${sighting.duration_from!}";
+      timeString = "${DateFormat.yMd().format(tDate.toLocal())} - ${sighting.duration_from!}";
     }
 
     if (sighting.location_begin != null) {
@@ -47,6 +49,48 @@ class ListSightingTile extends StatelessWidget {
       speciesName = sighting.note?.trim();
     } else {
       speciesName ??= "Specie not found";
+    }
+
+    List<Widget> symbols = [];
+
+    if (sighting.subgroups != null && sighting.subgroups! > 0) {
+      symbols.add(Icon(
+        Icons.groups,
+        color: backgroundColor.computeLuminance() < 0.5 ? Colors.grey[200] : Colors.grey[700],
+        size: 18,
+      ));
+    }
+
+    if ( (sighting.calves != null && sighting.calves! > 0) || (sighting.newborns != null && sighting.newborns! > 0)) {
+      symbols.add(Icon(
+        Icons.child_care,
+        color: backgroundColor.computeLuminance() < 0.5 ? Colors.grey[200] : Colors.grey[700],
+        size: 18,
+      ));
+    }
+
+    if (sighting.note != null && sighting.note! != "") {
+      symbols.add(Icon(
+        Icons.notes,
+        color: backgroundColor.computeLuminance() < 0.5 ? Colors.grey[200] : Colors.grey[700],
+        size: 18,
+      ));
+    }
+
+    if (symbols.isEmpty) {
+      if (backgroundColor == kPrimaryColor) {
+        symbols.add(Icon(
+          Icons.done,
+          color: backgroundColor.computeLuminance() < 0.5 ? Colors.grey[200] : Colors.grey[700],
+          size: 18,
+        ));
+      } else {
+        symbols.add(Icon(
+          Icons.warning,
+          color: backgroundColor.computeLuminance() < 0.5 ? Colors.grey[200] : Colors.grey[700],
+          size: 18,
+        ));
+      }
     }
 
     return Container(
@@ -126,20 +170,10 @@ class ListSightingTile extends StatelessWidget {
               margin: const EdgeInsets.symmetric(horizontal: 10),
               height: 60,
               width: 0.5,
-              color: Colors.grey[200]!.withOpacity(0.7),
+              color: backgroundColor.computeLuminance() < 0.5 ? Colors.grey[200]!.withOpacity(0.7) : Colors.grey[800]!.withOpacity(0.7),
             ),
-            RotatedBox(
-              quarterTurns: 3,
-              child: Text(
-                "TODO",
-                style: GoogleFonts.lato(
-                  textStyle:  TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: backgroundColor.computeLuminance() < 0.5 ? Colors.grey[100] : Colors.grey[700]
-                  )
-                ),
-              ),
+            Column(
+              children: symbols,
             )
           ],
         ),

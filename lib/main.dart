@@ -29,7 +29,6 @@ class _MWPAAppState extends State<MWPAApp> {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    EasyLoading.init();
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Mammal watching. Processing. Analysing.',
@@ -54,7 +53,8 @@ class _MWPAAppState extends State<MWPAApp> {
           name: "/setTour",
           page: () => const EditTourPage()
         )
-      ]
+      ],
+      builder: EasyLoading.init(),
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_map/plugin_api.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:get/get.dart';
@@ -12,11 +13,14 @@ import 'package:mwpaapp/Controllers/SightingController.dart';
 import 'package:mwpaapp/Controllers/SpeciesController.dart';
 import 'package:mwpaapp/Controllers/VehicleController.dart';
 import 'package:mwpaapp/Controllers/VehicleDriverController.dart';
+import 'package:mwpaapp/Dialog/ConfirmDialog.dart';
 import 'package:mwpaapp/Models/Sighting.dart';
 import 'package:mwpaapp/Pages/EditSightingPage.dart';
 import 'package:mwpaapp/Pages/List/ListSightingTile.dart';
 import 'package:mwpaapp/Services/SyncMwpaService.dart';
 import 'package:mwpaapp/Services/ThemeService.dart';
+import 'package:mwpaapp/Settings/Preference.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'List/ListMap.dart';
 
@@ -38,15 +42,21 @@ class _ListPageState extends State<ListPage> {
   final BehaviouralStateController _behaviouralStateController = Get.put(BehaviouralStateController());
 
   _syncMwpa() async {
+    EasyLoading.instance.dismissOnTap = false;
+    EasyLoading.instance.maskType = EasyLoadingMaskType.black;
 
     SyncMwpaService service = SyncMwpaService();
-    await service.sync((p0) async {});
+    await service.sync((p0) async {
+      EasyLoading.showProgress(p0/100, status: 'sync...');
+    });
 
     await _vehicleController.getVehicle();
     await _vehicleDriverController.getVehicleDriver();
     await _speciesController.getSpecies();
     await _encounterCategoriesController.getEncounterCategorie();
     await _behaviouralStateController.getBehaviouralStates();
+
+    EasyLoading.dismiss();
   }
 
   _loadController() async {
@@ -56,6 +66,18 @@ class _ListPageState extends State<ListPage> {
     await _encounterCategoriesController.getEncounterCategorie();
     await _behaviouralStateController.getBehaviouralStates();
     _sightingController.getSightings();
+  }
+
+  _logout() async {
+    ConfirmDialog.show(context, "Logout", "Do you want to log out?", (p0) async {
+      if (p0 == "ok") {
+        final prefs = await SharedPreferences.getInstance();
+        prefs.remove(Preference.PASSWORD);
+        prefs.remove(Preference.USERID);
+
+        await Get.toNamed('/Login');
+      }
+    });
   }
 
   _appBar() {
@@ -126,6 +148,7 @@ class _ListPageState extends State<ListPage> {
               break;
 
             case "logout":
+              _logout();
               break;
           }
         },
