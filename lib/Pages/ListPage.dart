@@ -236,7 +236,7 @@ class _ListPageState extends State<ListPage> {
         decoration: const BoxDecoration(
             color: kButtonBackgroundColor
         ),
-        child: ListMap()
+        child: const ListMap()
     );
   }
 

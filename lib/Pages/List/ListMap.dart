@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -9,10 +10,12 @@ import 'package:latlng/latlng.dart';
 import 'package:map/map.dart';
 import 'package:mwpaapp/Controllers/LocationController.dart';
 import 'package:mwpaapp/Controllers/SightingController.dart';
-import 'package:mwpaapp/Util/UtilPosition.dart';
 import 'package:mwpaapp/Util/UtilTileServer.dart';
 
 class ListMap extends StatefulWidget {
+
+  const ListMap({Key? key}) : super(key: key);
+
 
   @override
   State<ListMap> createState() => _ListMapState();
@@ -92,15 +95,15 @@ class _ListMapState extends State<ListMap> {
     Offset pos = transformer.toOffset(location);
 
     return Positioned(
-      left: pos.dx - 24,
-      top: pos.dy - 24,
-      width: 48,
-      height: 48,
+      left: pos.dx - 12,
+      top: pos.dy - 12,
+      width: 24,
+      height: 24,
       child: GestureDetector(
         child: Icon(
           icon,
           color: color,
-          size: 48,
+          size: 24,
         ),
         onTap: () {
           /*showDialog(
@@ -128,26 +131,41 @@ class _ListMapState extends State<ListMap> {
         builder: (context, transformer) {
           List<Widget> markerWidgets = [];
 
-          _sightingController.sightingList.forEach((sighting) {
+          for (var sighting in _sightingController.sightingList) {
             if (sighting.location_begin != null) {
               try {
-                Position tpos = Position.fromMap(jsonDecode(sighting.location_begin!));
+                Position tPos = Position.fromMap(jsonDecode(sighting.location_begin!));
                 Color backgroundColor = sighting.validateColor();
 
                 markerWidgets.add(
                     _buildMarkerWidget(
                         transformer,
-                        LatLng(tpos.latitude, tpos.longitude),
+                        LatLng(tPos.latitude, tPos.longitude),
                         backgroundColor
                     )
                 );
               }
               catch(loce) {
-                print(loce);
+                if (kDebugMode) {
+                  print(loce);
+                }
               }
             }
-          });
+          }
 
+          if (position != null) {
+            markerWidgets.add(
+              _buildMarkerWidget(
+                transformer,
+                LatLng(
+                  position.latitude,
+                  position.longitude
+                ),
+                Colors.red,
+                Icons.my_location
+              )
+            );
+          }
 
           return GestureDetector(
             behavior: HitTestBehavior.opaque,

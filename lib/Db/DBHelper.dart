@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:mwpaapp/Models/BehaviouralState.dart';
 import 'package:mwpaapp/Models/EncounterCategorie.dart';
 import 'package:mwpaapp/Models/Sighting.dart';
@@ -8,13 +9,14 @@ import 'package:sqflite/sqflite.dart';
 
 class DBHelper {
   static Database? _db;
-  static final int _version = 1;
-  static final String _tableNameSighting = "sighting";
-  static final String _tableNameVehicle = "vehicle";
-  static final String _tableNameVehicleDriver = "vehicle_driver";
-  static final String _tableNameSpecies = "species";
-  static final String _tableNameEncCate = "encounter_categories";
-  static final String _tableNameBehState = "behavioural_state";
+  static const int _version = 1;
+  static const String _tableNameSighting = "sighting";
+  static const String _tableNameTourTracking = "tour_tracking";
+  static const String _tableNameVehicle = "vehicle";
+  static const String _tableNameVehicleDriver = "vehicle_driver";
+  static const String _tableNameSpecies = "species";
+  static const String _tableNameEncCate = "encounter_categories";
+  static const String _tableNameBehState = "behavioural_state";
 
   static Future<void> initDb() async {
     if (_db != null) {
@@ -102,7 +104,9 @@ class DBHelper {
           }
       );
     } catch (e) {
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
     }
   }
 

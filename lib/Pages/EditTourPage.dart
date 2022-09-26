@@ -1,12 +1,12 @@
 import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mwpaapp/Components/DefaultButton.dart';
 import 'package:mwpaapp/Components/DynInput.dart';
 import 'package:mwpaapp/Constants.dart';
-import 'package:mwpaapp/Controllers/SightingController.dart';
 import 'package:mwpaapp/Controllers/VehicleController.dart';
 import 'package:mwpaapp/Controllers/VehicleDriverController.dart';
 import 'package:mwpaapp/Dialog/ConfirmDialog.dart';
@@ -23,7 +23,6 @@ class EditTourPage extends StatefulWidget {
 }
 
 class _EditTourPageState extends State<EditTourPage> {
-  final SightingController _sightingController = Get.find<SightingController>();
   final VehicleController _vehicleController = Get.find<VehicleController>();
   final VehicleDriverController _vehicleDriverController = Get.find<VehicleDriverController>();
 
@@ -88,7 +87,9 @@ class _EditTourPageState extends State<EditTourPage> {
         }
       });
     } catch(e) {
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
     }
   }
 
@@ -113,7 +114,9 @@ class _EditTourPageState extends State<EditTourPage> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(Preference.TOUR, jsonEncode(tour.toJson()));
     } catch(e) {
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
     }
 
     Get.back();

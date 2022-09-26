@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
@@ -9,7 +10,7 @@ import 'package:mwpaapp/Components/DefaultButton.dart';
 import 'package:mwpaapp/Controllers/LocationController.dart';
 import 'package:mwpaapp/Controllers/SightingController.dart';
 import 'package:mwpaapp/Controllers/SpeciesController.dart';
-import 'package:mwpaapp/Db/DBHelper.dart';
+import 'package:mwpaapp/Dialog/ConfirmDialog.dart';
 import 'package:mwpaapp/Dialog/InfoDialog.dart';
 import 'package:mwpaapp/Models/Sighting.dart';
 import 'package:mwpaapp/Util/UtilPosition.dart';
@@ -25,6 +26,41 @@ class ListSightingTile extends StatelessWidget {
   final LocationController _locationController = Get.find<LocationController>();
   final SpeciesController _speciesController = Get.find<SpeciesController>();
   final SightingController _sightingController = Get.find<SightingController>();
+
+  _setEndLocation(BuildContext context) {
+    if (_locationController.currentPosition == null) {
+      InfoDialog.show(context, 'Info', "Please wait for the GPS signal.");
+    } else {
+      ConfirmDialog.show(
+        context,
+        "Set end location/duration",
+        "Do you want to set the end location/duration time for this sighting?",
+        (p0) {
+          if (p0 == 'ok') {
+            sighting.location_end = jsonEncode(_locationController.currentPosition?.toJson());
+
+            if ( sighting.duration_until == null || sighting.duration_until == 'null' || sighting.duration_until == '') {
+              var timeValue = TimeOfDay.now();
+              var hour = "${timeValue.hour}";
+              var min = "${timeValue.minute}";
+
+              if (timeValue.hour < 10) {
+                hour = "0${timeValue.hour}";
+              }
+
+              if (timeValue.minute < 10) {
+                min = "0${timeValue.minute}";
+              }
+
+              sighting.duration_until = "$hour:$min";
+            }
+
+            _sightingController.updateSighting(tSighting: sighting);
+            _sightingController.getSightings();
+          }
+        });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +78,9 @@ class ListSightingTile extends StatelessWidget {
         locationString = UtilPosition.getStr(tpos);
       }
       catch(loce) {
-        print(loce);
+        if (kDebugMode) {
+          print(loce);
+        }
       }
     }
 
@@ -195,30 +233,7 @@ class ListSightingTile extends StatelessWidget {
                   buttonIcon: Icons.add_location_alt,
                   width: 22,
                   onTab: () {
-                    if (_locationController.currentPosition == null) {
-                      InfoDialog.show(context, 'Info', "Please wait for the GPS signal.");
-                    } else {
-                      sighting.location_end = jsonEncode(_locationController.currentPosition?.toJson());
-
-                      if ( sighting.duration_until == null || sighting.duration_until == 'null' || sighting.duration_until == '') {
-                        var timeValue = TimeOfDay.now();
-                        var hour = "${timeValue.hour}";
-                        var min = "${timeValue.minute}";
-
-                        if (timeValue.hour < 10) {
-                          hour = "0${timeValue.hour}";
-                        }
-
-                        if (timeValue.minute < 10) {
-                          min = "0${timeValue.minute}";
-                        }
-
-                        sighting.duration_until = "$hour:$min";
-                      }
-
-                      _sightingController.updateSighting(tSighting: sighting);
-                      _sightingController.getSightings();
-                    }
+                    _setEndLocation(context);
                   },
                 )
               ],
