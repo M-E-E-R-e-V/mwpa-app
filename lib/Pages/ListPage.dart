@@ -1,5 +1,5 @@
 import 'dart:async';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
@@ -10,6 +10,7 @@ import 'package:mwpaapp/Components/DefaultButton.dart';
 import 'package:mwpaapp/Controllers/BehaviouralStateController.dart';
 import 'package:mwpaapp/Controllers/EncounterCategoriesController.dart';
 import 'package:mwpaapp/Controllers/LocationController.dart';
+import 'package:mwpaapp/Controllers/PrefController.dart';
 import 'package:mwpaapp/Controllers/SightingController.dart';
 import 'package:mwpaapp/Controllers/SpeciesController.dart';
 import 'package:mwpaapp/Controllers/VehicleController.dart';
@@ -23,6 +24,7 @@ import 'package:mwpaapp/Pages/List/ListSightingTile.dart';
 import 'package:mwpaapp/Services/SyncMwpaService.dart';
 import 'package:mwpaapp/Services/ThemeService.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
+import 'package:mwpaapp/Util/UtilTourFId.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:connectivity/connectivity.dart';
 import 'List/ListMap.dart';
@@ -36,7 +38,8 @@ class ListPage extends StatefulWidget {
 }
 
 class _ListPageState extends State<ListPage> {
-  final LocationController _locationController = Get.put(LocationController());
+  final PrefController _prefController = Get.find<PrefController>();
+  final LocationController _locationController = Get.find<LocationController>();
   final SightingController _sightingController = Get.put(SightingController());
   final VehicleController _vehicleController = Get.put(VehicleController());
   final VehicleDriverController _vehicleDriverController = Get.put(VehicleDriverController());
@@ -80,7 +83,7 @@ class _ListPageState extends State<ListPage> {
 
     try {
       await service.sync((p0) async {
-        EasyLoading.showProgress(p0 / 100, status: 'sync...');
+        EasyLoading.showProgress(p0 / 100, status: 'sync to server ...');
       });
 
       await _vehicleController.getVehicle();
@@ -122,6 +125,44 @@ class _ListPageState extends State<ListPage> {
     });
   }
 
+  _setEndTour(BuildContext context) {
+    ConfirmDialog.show(
+      context,
+      "Tour End",
+      "Update the tour end time for all sighting entries from the current tour?",
+      (value) async {
+        if (value == "ok") {
+          if (_prefController.prefToru != null) {
+            TimeOfDay timeValue = TimeOfDay.now();
+            var hour = "${timeValue.hour}";
+            var min = "${timeValue.minute}";
+
+            if (timeValue.hour < 10) {
+              hour = "0${timeValue.hour}";
+            }
+
+            if (timeValue.minute < 10) {
+              min = "0${timeValue.minute}";
+            }
+
+            var tourEndTime = "$hour:$min";
+
+            await _sightingController.updateSightingEndtour(
+              UtilTourFid.createTTourFId(_prefController.prefToru!),
+              tourEndTime
+            );
+
+            _loadController();
+          } else {
+            if (kDebugMode) {
+              print("_ListPageState:_setEndTour - prefToru is empty!");
+            }
+          }
+        }
+      }
+    );
+  }
+
   _appBar() {
     return AppBar(
       backgroundColor: kPrimaryHeaderColor,
@@ -142,7 +183,7 @@ class _ListPageState extends State<ListPage> {
           list.add(
             const PopupMenuItem(
                 value: "settour",
-                child: Text("Set Tour")
+                child: Text("Set default Tour")
             ),
           );
 
@@ -200,26 +241,43 @@ class _ListPageState extends State<ListPage> {
   }
 
   _addTaskBar() {
+    List<Widget> columnList = [
+      Text(
+        DateFormat.yMMMMd().format(DateTime.now()),
+        style: subHeadingStyle,
+      ),
+      const SizedBox(height: 5),
+    ];
+
+    columnList.add(GetBuilder<PrefController>(builder: (prefController) {
+      if (prefController.prefToru!.set_end_tour != null && prefController.prefToru!.set_end_tour! >= 1) {
+        return DefaultButton(
+            buttonIcon: Icons.tour,
+            label: 'Tour End',
+            height: 40,
+            width: 90,
+            onTab: () async {
+              _setEndTour(context);
+            }
+        );
+      }
+
+      return Container();
+    }));
+
     return Container(
       margin: const EdgeInsets.only(left: 20, right: 20, top: 15),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                DateFormat.yMMMMd().format(DateTime.now()),
-                style: subHeadingStyle,
-              ),
-              Text(
-                "Tour",
-                style: headingStyle,
-              )
-            ],
+            children: columnList,
           ),
           DefaultButton(
-            label: "+ Add Sighting",
+            buttonIcon: Icons.post_add,
+            label: 'Add Sighting',
             onTab: () async {
               await Get.toNamed('/Edit');
               _sightingController.getSightings();
@@ -364,16 +422,19 @@ class _ListPageState extends State<ListPage> {
   Widget build(BuildContext context) {
     _loadController();
 
-    return Scaffold(
-      appBar: _appBar(),
-      body: Column(
-        children: [
-          _addTaskBar(),
-          const SizedBox(height: 20),
-          _addMapBar(),
-          const SizedBox(height: 20),
-          _showSighting(),
-        ],
+    return WillPopScope(
+      onWillPop: () async => false,
+      child: Scaffold(
+        appBar: _appBar(),
+        body: Column(
+          children: [
+            _addTaskBar(),
+            const SizedBox(height: 20),
+            _addMapBar(),
+            const SizedBox(height: 20),
+            _showSighting(),
+          ],
+        ),
       ),
     );
   }

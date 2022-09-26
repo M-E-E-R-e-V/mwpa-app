@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:mwpaapp/Controllers/LocationController.dart';
+import 'package:mwpaapp/Controllers/PrefController.dart';
 import 'package:mwpaapp/Db/DBHelper.dart';
 import 'package:mwpaapp/Pages/EditSightingPage.dart';
 import 'package:mwpaapp/Pages/EditTourPage.dart';
@@ -25,6 +27,8 @@ class MWPAApp extends StatefulWidget {
 }
 
 class _MWPAAppState extends State<MWPAApp> {
+  final PrefController _prefController = Get.put(PrefController());
+  final LocationController _locationController = Get.put(LocationController());
 
   // This widget is the root of your application.
   @override

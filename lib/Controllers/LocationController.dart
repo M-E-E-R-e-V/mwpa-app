@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:mwpaapp/Location/LocationProvider.dart';
@@ -24,7 +25,10 @@ class LocationController extends GetxController {
       currentPosition = position;
       update();
     } catch(e) {
-      print(e);
+      if (kDebugMode) {
+        print("LocationController:callLocation");
+        print(e);
+      }
     }
   }
 }

@@ -8,24 +8,25 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:latlng/latlng.dart';
 import 'package:map/map.dart';
+import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Controllers/LocationController.dart';
 import 'package:mwpaapp/Controllers/SightingController.dart';
+import 'package:mwpaapp/Util/UtilPosition.dart';
 import 'package:mwpaapp/Util/UtilTileServer.dart';
 
 class ListMap extends StatefulWidget {
 
   const ListMap({Key? key}) : super(key: key);
 
-
   @override
   State<ListMap> createState() => _ListMapState();
 }
 
 class _ListMapState extends State<ListMap> {
+  final LocationController _locationController = Get.put(LocationController());
   final SightingController _sightingController = Get.find<SightingController>();
 
-  final controller = MapController(location: const LatLng(0, 0), zoom: 11,);
-
+  final controller = MapController(location: const LatLng(0, 0), zoom: 6);
 
   double _clamp(double x, double min, double max) {
     if (x < min) x = min;
@@ -117,6 +118,17 @@ class _ListMapState extends State<ListMap> {
     );
   }
 
+  void _gotoDefault() {
+    var position = _locationController.currentPosition;
+
+    if (position != null) {
+      controller.center = LatLng(position.latitude, position.longitude);
+    }
+
+    controller.zoom = 14;
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return GetBuilder<LocationController>(builder: (locationController) {
@@ -126,94 +138,117 @@ class _ListMapState extends State<ListMap> {
         controller.center = LatLng(position.latitude, position.longitude);
       }
 
-      return MapLayout(
-        controller: controller,
-        builder: (context, transformer) {
-          List<Widget> markerWidgets = [];
+      return Scaffold(
+        body: MapLayout(
+          controller: controller,
+          builder: (context, transformer) {
+            List<Widget> markerWidgets = [];
 
-          for (var sighting in _sightingController.sightingList) {
-            if (sighting.location_begin != null) {
-              try {
-                Position tPos = Position.fromMap(jsonDecode(sighting.location_begin!));
-                Color backgroundColor = sighting.validateColor();
+            for (var sighting in _sightingController.sightingList) {
+              if (sighting.location_begin != null) {
+                try {
+                  Position tPos = Position.fromMap(jsonDecode(sighting.location_begin!));
+                  Color backgroundColor = sighting.validateColor();
 
-                markerWidgets.add(
-                    _buildMarkerWidget(
-                        transformer,
-                        LatLng(tPos.latitude, tPos.longitude),
-                        backgroundColor
-                    )
-                );
-              }
-              catch(loce) {
-                if (kDebugMode) {
-                  print(loce);
+                  markerWidgets.add(
+                      _buildMarkerWidget(
+                          transformer,
+                          LatLng(tPos.latitude, tPos.longitude),
+                          backgroundColor
+                      )
+                  );
+                }
+                catch(locExcept) {
+                  if (kDebugMode) {
+                    print(locExcept);
+                  }
                 }
               }
             }
-          }
 
-          if (position != null) {
-            markerWidgets.add(
-              _buildMarkerWidget(
-                transformer,
-                LatLng(
-                  position.latitude,
-                  position.longitude
-                ),
-                Colors.red,
-                Icons.my_location
-              )
-            );
-          }
-
-          return GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onDoubleTapDown: (details) => _onDoubleTap(
-              transformer,
-              details.localPosition,
-            ),
-            onScaleStart: _onScaleStart,
-            onScaleUpdate: (details) => _onScaleUpdate(details, transformer),
-            child: Listener(
-              behavior: HitTestBehavior.opaque,
-              onPointerSignal: (event) {
-                if (event is PointerScrollEvent) {
-                  final delta = event.scrollDelta.dy / -1000.0;
-                  final zoom = _clamp(controller.zoom + delta, 2, 18);
-
-                  transformer.setZoomInPlace(zoom, event.localPosition);
-                  setState(() {});
-                }
-              },
-              child: Stack(
-                children: [
-                  TileLayer(
-                    builder: (context, x, y, z) {
-                      final tilesInZoom = pow(2.0, z).floor();
-
-                      while (x < 0) {
-                        x += tilesInZoom;
-                      }
-                      while (y < 0) {
-                        y += tilesInZoom;
-                      }
-
-                      x %= tilesInZoom;
-                      y %= tilesInZoom;
-
-                      return CachedNetworkImage(
-                        imageUrl: UtilTileServer.openstreetmap(z, x, y),
-                        fit: BoxFit.cover,
-                      );
-                    },
+            if (position != null) {
+              markerWidgets.add(
+                _buildMarkerWidget(
+                  transformer,
+                  LatLng(
+                    position.latitude,
+                    position.longitude
                   ),
-                  ...markerWidgets
-                ],
+                  Colors.red,
+                  Icons.my_location
+                )
+              );
+            }
+
+            return GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onDoubleTapDown: (details) => _onDoubleTap(
+                transformer,
+                details.localPosition,
               ),
-            ),
-          );
-        },
+              onScaleStart: _onScaleStart,
+              onScaleUpdate: (details) => _onScaleUpdate(details, transformer),
+              child: Listener(
+                behavior: HitTestBehavior.opaque,
+                onPointerSignal: (event) {
+                  if (event is PointerScrollEvent) {
+                    final delta = event.scrollDelta.dy / -1000.0;
+                    final zoom = _clamp(controller.zoom + delta, 2, 18);
+
+                    transformer.setZoomInPlace(zoom, event.localPosition);
+                    setState(() {});
+                  }
+                },
+                child: Stack(
+                  children: [
+                    TileLayer(
+                      builder: (context, x, y, z) {
+                        final tilesInZoom = pow(2.0, z).floor();
+
+                        while (x < 0) {
+                          x += tilesInZoom;
+                        }
+                        while (y < 0) {
+                          y += tilesInZoom;
+                        }
+
+                        x %= tilesInZoom;
+                        y %= tilesInZoom;
+
+                        return CachedNetworkImage(
+                          imageUrl: UtilTileServer.openstreetmap(z, x, y),
+                          fit: BoxFit.cover,
+                        );
+                      },
+                    ),
+                    ...markerWidgets,
+                    /*PositionedDirectional(
+                      bottom: 5,
+                      start: 5,
+                      child: Container(
+                        padding: const EdgeInsets.only(left: 4, right: 4),
+                        decoration: const BoxDecoration(
+                          color: kPrimaryHeaderColor,
+                          borderRadius: BorderRadius.all(Radius.circular(8)),
+                        ),
+                        child: Text(
+                          position == null ? "wait for GPS ..." : UtilPosition.getStr(position),
+                          style: subTitleStyle.copyWith(color: kButtonFontColor),
+                        )
+                      )
+                    )*/
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+        /*floatingActionButton: FloatingActionButton(
+          onPressed: _gotoDefault,
+          tooltip: 'My Location',
+          backgroundColor: kButtonBackgroundColor,
+          child: const Icon(Icons.my_location),
+        ),*/
       );
     });
   }

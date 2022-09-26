@@ -1,12 +1,12 @@
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mwpaapp/Components/DefaultButton.dart';
 import 'package:mwpaapp/Components/DynInput.dart';
 import 'package:mwpaapp/Constants.dart';
+import 'package:mwpaapp/Controllers/PrefController.dart';
 import 'package:mwpaapp/Controllers/VehicleController.dart';
 import 'package:mwpaapp/Controllers/VehicleDriverController.dart';
 import 'package:mwpaapp/Dialog/ConfirmDialog.dart';
@@ -23,6 +23,7 @@ class EditTourPage extends StatefulWidget {
 }
 
 class _EditTourPageState extends State<EditTourPage> {
+  final PrefController _prefController = Get.find<PrefController>();
   final VehicleController _vehicleController = Get.find<VehicleController>();
   final VehicleDriverController _vehicleDriverController = Get.find<VehicleDriverController>();
 
@@ -43,6 +44,9 @@ class _EditTourPageState extends State<EditTourPage> {
 
   late DynInput sightTourEnd;
   DynInputValue sightTourEndValue = DynInputValue();
+
+  late DynInput sightSetEndTour;
+  DynInputValue sightSetEndTourValue = DynInputValue();
 
   _appBar(BuildContext context) {
     return AppBar(
@@ -69,34 +73,19 @@ class _EditTourPageState extends State<EditTourPage> {
     );
   }
 
-  Future<void> _loadPref() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-
-      setState(() {
-        if (prefs.containsKey(Preference.TOUR)) {
-          TourPref tour = TourPref.fromJson(
-              jsonDecode(prefs.getString(Preference.TOUR)!));
-
-          sightVehicleValue.setStrValueByInt(tour.vehicle_id!);
-          sightVehicleDriverValue.setStrValueByInt(tour.vehicle_driver_id!);
-          sightBeaufortValue.setStrValueByInt(tour.beaufort_wind!);
-          sightDateValue.setDateTime(tour.date!);
-          sightTourStartValue.setTimeOfDy(tour.tour_start!);
-          sightTourEndValue.setTimeOfDy(tour.tour_end!);
-        }
-      });
-    } catch(e) {
-      if (kDebugMode) {
-        print(e);
-      }
-    }
-  }
-
   @override
   void initState() {
     super.initState();
-    _loadPref();
+
+    if (_prefController.prefToru != null) {
+      sightVehicleValue.setStrValueByInt(_prefController.prefToru!.vehicle_id!);
+      sightVehicleDriverValue.setStrValueByInt(_prefController.prefToru!.vehicle_driver_id!);
+      sightBeaufortValue.setStrValueByInt(_prefController.prefToru!.beaufort_wind!);
+      sightDateValue.setDateTime(_prefController.prefToru!.date!);
+      sightTourStartValue.setTimeOfDy(_prefController.prefToru!.tour_start!);
+      sightTourEndValue.setTimeOfDy(_prefController.prefToru!.tour_end!);
+      sightSetEndTourValue.setIntValue(_prefController.prefToru!.set_end_tour!);
+    }
   }
 
   _saveTourToPref() async {
@@ -107,17 +96,11 @@ class _EditTourPageState extends State<EditTourPage> {
         beaufort_wind: sightBeaufort.dynValue?.getStrValueAsInt(),
         date: sightDate.dynValue?.getDateTime(),
         tour_start: sightTourStart.dynValue?.getTimeOfDay(),
-        tour_end: sightTourEnd.dynValue?.getTimeOfDay()
+        tour_end: sightTourEnd.dynValue?.getTimeOfDay(),
+        set_end_tour: sightSetEndTour.dynValue?.getIntValue()
     );
 
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(Preference.TOUR, jsonEncode(tour.toJson()));
-    } catch(e) {
-      if (kDebugMode) {
-        print(e);
-      }
-    }
+    await _prefController.saveTour(tour);
 
     Get.back();
   }
@@ -200,47 +183,61 @@ class _EditTourPageState extends State<EditTourPage> {
         dynValue: sightTourEndValue,
       );
 
-      return Scaffold(
-        appBar: _appBar(context),
-        body: Container(
-          padding: const EdgeInsets.only(left: 20, right: 20, top: 15),
-          child: SingleChildScrollView(
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Set Tour Setting",
-                    style: headingStyle,
-                  ),
-                  sightVehicle,
-                  sightVehicleDriver,
-                  sightBeaufort,
-                  sightDate,
-                  Row(
-                    children: [
-                      Expanded(
-                          child: sightTourStart
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                          child: sightTourEnd
-                      )
-                    ],
-                  ),
-                  const SizedBox(height: 18),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(),
-                      DefaultButton(
-                          label: "Set Tour",
+      sightSetEndTour = DynInput(
+        context: context,
+        hint: "",
+        inputType: DynInputType.switcher,
+        title: 'Allow tour end time button for all sightings',
+        dynValue: sightSetEndTourValue,
+      );
+
+      return WillPopScope(
+        onWillPop: () async => false,
+        child: Scaffold(
+          appBar: _appBar(context),
+          body: Container(
+            padding: const EdgeInsets.only(left: 20, right: 20, top: 15),
+            child: SingleChildScrollView(
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Set default Tour",
+                      style: headingStyle,
+                    ),
+                    sightVehicle,
+                    sightVehicleDriver,
+                    sightBeaufort,
+                    sightDate,
+                    Row(
+                      children: [
+                        Expanded(
+                            child: sightTourStart
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                            child: sightTourEnd
+                        )
+                      ],
+                    ),
+                    sightSetEndTour,
+                    const SizedBox(height: 30),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(),
+                        DefaultButton(
+                          buttonIcon: Icons.save_alt,
+                          label: "Save default Tour",
                           onTab: () {
                             _saveTourToPref();
                           }
-                      ),
-                    ],
-                  ),
-                ]
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 30),
+                  ]
+              ),
             ),
           ),
         ),

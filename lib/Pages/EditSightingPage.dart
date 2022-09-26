@@ -18,6 +18,7 @@ import 'package:mwpaapp/Models/Sighting.dart';
 import 'package:mwpaapp/Models/TourPref.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
 import 'package:mwpaapp/Util/UtilDistanceCoast.dart';
+import 'package:mwpaapp/Util/UtilTourFId.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class EditSightingPage extends StatefulWidget {
@@ -121,6 +122,9 @@ class _EditSightingPageState extends State<EditSightingPage> {
   late DynInput sightNote;
   DynInputValue sightNoteValue = DynInputValue();
 
+  late DynInput sightImage;
+  DynInputValue sightImageValue = DynInputValue();
+
   _appBar(BuildContext context) {
     return AppBar(
       backgroundColor: kPrimaryHeaderColor,
@@ -178,8 +182,11 @@ class _EditSightingPageState extends State<EditSightingPage> {
         other_species: sightOtherSpecies.dynValue?.getMultiValue(),
         other: sightOther.dynValue?.getValue(),
         other_vehicle: sightOtherVehicle.dynValue?.getValue(),
-        note: sightNote.dynValue?.getValue()
+        note: sightNote.dynValue?.getValue(),
+        image: sightImage.dynValue?.getImagePath()
     );
+
+    tSigh.tour_fid = UtilTourFid.createSTourFId(tSigh);
 
     if (widget.sighting != null) {
       tSigh.id = widget.sighting?.id!;
@@ -257,6 +264,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
       sightOtherValue.setValue(sighting.other!);
       sightOtherVehicleValue.setValue(sighting.other_vehicle!);
       sightNoteValue.setValue(sighting.note!);
+      sightImageValue.setImagePath(sighting.image!);
     } else {
       _loadPref();
 
@@ -273,8 +281,6 @@ class _EditSightingPageState extends State<EditSightingPage> {
 
   @override
   Widget build(BuildContext context) {
-    Sighting? sighting = widget.sighting;
-
     return Obx(() {
         sightVehicle = DynInput(
            context: context,
@@ -585,99 +591,112 @@ class _EditSightingPageState extends State<EditSightingPage> {
           dynValue: sightNoteValue,
         );
 
-         return Scaffold(
-           appBar: _appBar(context),
-           body: Container(
-             padding: const EdgeInsets.only(left: 20, right: 20, top: 15),
-             child: SingleChildScrollView(
-               child: Column(
-                   crossAxisAlignment: CrossAxisAlignment.start,
-                   children: [
-                     Text(
-                       title,
-                       style: headingStyle,
-                     ),
-                     sightVehicle,
-                     sightVehicleDriver,
-                     sightBeaufort,
-                     sightDate,
-                     Row(
-                       children: [
-                         Expanded(
-                             child: sightTourStart
-                         ),
-                         const SizedBox(width: 12),
-                         Expanded(
-                             child: sightTourEnd
-                         )
-                       ],
-                     ),
-                     Row(
-                       children: [
-                         Expanded(
-                             child: sightDurationFrom
-                         ),
-                         const SizedBox(width: 12),
-                         Expanded(
-                             child: sightDurationUntil
-                         )
-                       ],
-                     ),
-                     sightLocationBegin,
-                     sightLocationEnd,
-                     sightDistanceCoast,
-                     Row(
-                       children: [
-                         Expanded(
-                             child: sightPhotoTaken
-                         ),
-                         const SizedBox(width: 12),
-                         Expanded(
-                             child: sightDistanceCoastEstimationGps
-                         )
-                       ],
-                     ),
-                     sightSpecies,
-                     sightSpeciesNum,
-                     Row(
-                       children: [
-                         Expanded(
-                             child: sightJuveniles
-                         ),
-                         const SizedBox(width: 12),
-                         Expanded(
-                             child: sightCalves
-                         ),
-                         const SizedBox(width: 12),
-                         Expanded(
-                             child: sightNewborns
-                         ),
-                       ],
-                     ),
-                     sightBehaviour,
-                     sightSubgroups,
-                     sightReaction,
-                     sightFreqBehaviour,
-                     sightRecAnimals,
-                     sightOtherSpecies,
-                     sightOther,
-                     sightOtherVehicle,
-                     sightNote,
-                     const SizedBox(height: 18),
-                     Row(
-                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                       children: [
-                         Container(),
-                         DefaultButton(
-                             label: sighting != null ? "Update Sighting" : "Add Sighting",
+        sightImage = DynInput(
+          context: context,
+          title: "Picture",
+          hint: "",
+          inputType: DynInputType.image,
+          dynValue: sightImageValue,
+        );
+
+         return WillPopScope(
+           onWillPop: () async => false,
+           child: Scaffold(
+             appBar: _appBar(context),
+             body: Container(
+               padding: const EdgeInsets.only(left: 20, right: 20, top: 15),
+               child: SingleChildScrollView(
+                 child: Column(
+                     crossAxisAlignment: CrossAxisAlignment.start,
+                     children: [
+                       Text(
+                         title,
+                         style: headingStyle,
+                       ),
+                       sightVehicle,
+                       sightVehicleDriver,
+                       sightBeaufort,
+                       sightDate,
+                       Row(
+                         children: [
+                           Expanded(
+                               child: sightTourStart
+                           ),
+                           const SizedBox(width: 12),
+                           Expanded(
+                               child: sightTourEnd
+                           )
+                         ],
+                       ),
+                       Row(
+                         children: [
+                           Expanded(
+                               child: sightDurationFrom
+                           ),
+                           const SizedBox(width: 12),
+                           Expanded(
+                               child: sightDurationUntil
+                           )
+                         ],
+                       ),
+                       sightLocationBegin,
+                       sightLocationEnd,
+                       sightDistanceCoast,
+                       Row(
+                         children: [
+                           Expanded(
+                               child: sightPhotoTaken
+                           ),
+                           const SizedBox(width: 12),
+                           Expanded(
+                               child: sightDistanceCoastEstimationGps
+                           )
+                         ],
+                       ),
+                       sightSpecies,
+                       sightSpeciesNum,
+                       Row(
+                         children: [
+                           Expanded(
+                               child: sightJuveniles
+                           ),
+                           const SizedBox(width: 12),
+                           Expanded(
+                               child: sightCalves
+                           ),
+                           const SizedBox(width: 12),
+                           Expanded(
+                               child: sightNewborns
+                           ),
+                         ],
+                       ),
+                       sightBehaviour,
+                       sightSubgroups,
+                       sightReaction,
+                       sightFreqBehaviour,
+                       sightRecAnimals,
+                       sightOtherSpecies,
+                       sightOther,
+                       sightOtherVehicle,
+                       sightNote,
+                       sightImage,
+                       const SizedBox(height: 30),
+                       Row(
+                         mainAxisAlignment: MainAxisAlignment.center,
+                         children: [
+                           Container(),
+                           DefaultButton(
+                             buttonIcon: Icons.save_alt,
+                             label: "Save Sighting",
                              onTab: () {
                                _saveSightingToDb();
                              }
-                         ),
-                       ],
-                     ),
-                     const SizedBox(height: 18),
-                   ]
+                           ),
+                         ],
+                       ),
+                       const SizedBox(height: 30),
+                     ]
+                 ),
                ),
              ),
            ),

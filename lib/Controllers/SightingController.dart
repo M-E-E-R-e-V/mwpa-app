@@ -31,4 +31,10 @@ class SightingController extends GetxController {
     update();
     return result;
   }
+
+  Future<int> updateSightingEndtour(String tourFid, String tourend) async {
+    var result = await DBHelper.updateSightingEndTour(tourFid, tourend);
+    update();
+    return result;
+  }
 }

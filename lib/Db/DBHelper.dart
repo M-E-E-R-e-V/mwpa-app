@@ -37,6 +37,7 @@ class DBHelper {
                     "vehicle_driver_id INTEGER,"
                     "beaufort_wind INTEGER,"
                     "date STRING,"
+                    "tour_fid,"
                     "tour_start STRING,"
                     "tour_end STRING,"
                     "duration_from STRING,"
@@ -59,7 +60,8 @@ class DBHelper {
                     "other_species STRING,"
                     "other STRING,"
                     "other_vehicle STRING,"
-                    "note STRING"
+                    "note STRING,"
+                    "image STRING"
                     ")"
             );
 
@@ -132,6 +134,17 @@ class DBHelper {
         uSighting.toJson(false),
         where: 'id=?',
         whereArgs: [uSighting.id]
+    );
+  }
+
+  static Future<int> updateSightingEndTour(String tourFid, String tourend) async {
+    return await _db!.update(
+      _tableNameSighting,
+      {
+        'tour_end': tourend
+      },
+      where: 'tour_fid=?',
+      whereArgs: [tourFid]
     );
   }
 

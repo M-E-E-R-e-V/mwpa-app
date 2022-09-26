@@ -10,6 +10,7 @@ class Sighting {
   int? vehicle_driver_id;
   int? beaufort_wind;
   String? date;
+  String? tour_fid;
   String? tour_start;
   String? tour_end;
   String? duration_from;
@@ -33,6 +34,7 @@ class Sighting {
   String? other;
   String? other_vehicle;
   String? note;
+  String? image;
 
   Sighting({
     this.id,
@@ -41,6 +43,7 @@ class Sighting {
     this.vehicle_driver_id,
     this.date,
     this.beaufort_wind,
+    this.tour_fid,
     this.tour_start,
     this.tour_end,
     this.duration_from,
@@ -63,7 +66,8 @@ class Sighting {
     this.other_species,
     this.other,
     this.other_vehicle,
-    this.note
+    this.note,
+    this.image
   });
 
   Sighting.fromJson(Map<String, dynamic> json) {
@@ -73,6 +77,7 @@ class Sighting {
     vehicle_driver_id = UtilCheckJson.checkValue(json['vehicle_driver_id'], UtilCheckJsonTypes.int);
     beaufort_wind = UtilCheckJson.checkValue(json['beaufort_wind'], UtilCheckJsonTypes.int);
     date = UtilCheckJson.checkValue(json['date'], UtilCheckJsonTypes.string);
+    tour_fid = UtilCheckJson.checkValue(json['tour_fid'], UtilCheckJsonTypes.string);
     tour_start = UtilCheckJson.checkValue(json['tour_start'], UtilCheckJsonTypes.string);
     tour_end = UtilCheckJson.checkValue(json['tour_end'], UtilCheckJsonTypes.string);
     duration_from = UtilCheckJson.checkValue(json['duration_from'], UtilCheckJsonTypes.string);
@@ -96,6 +101,7 @@ class Sighting {
     other = UtilCheckJson.checkValue(json['other'], UtilCheckJsonTypes.string);
     other_vehicle = UtilCheckJson.checkValue(json['other_vehicle'], UtilCheckJsonTypes.string);
     note = UtilCheckJson.checkValue(json['note'], UtilCheckJsonTypes.string);
+    image = UtilCheckJson.checkValue(json['image'], UtilCheckJsonTypes.string);
   }
 
   Map<String, dynamic> toJson(bool withId) {
@@ -110,6 +116,7 @@ class Sighting {
     data['vehicle_driver_id'] = vehicle_driver_id;
     data['beaufort_wind'] = beaufort_wind;
     data['date'] = date;
+    data['tour_fid'] = tour_fid ?? "";
     data['tour_start'] = tour_start;
     data['tour_end'] = tour_end;
     data['duration_from'] = duration_from;
@@ -132,6 +139,7 @@ class Sighting {
     data['other'] = other;
     data['other_vehicle'] = other_vehicle;
     data['note'] = note;
+    data['image'] = image;
 
     return data;
   }

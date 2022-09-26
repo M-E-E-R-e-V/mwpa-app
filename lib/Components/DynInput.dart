@@ -1,5 +1,6 @@
 import 'dart:convert';
-
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
@@ -25,6 +26,7 @@ enum DynInputType {
   multiselect,
   multiselectmixed,
   tags,
+  image
 }
 
 class DynInputSelectItem {
@@ -41,6 +43,7 @@ class DynInputValue {
   int intValue = 0;
   Position? posValue;
   List<DynInputValue> multiValue = [];
+  String imgPath = "";
 
   setValue(String newValue) {
     strValue = newValue;
@@ -140,12 +143,12 @@ class DynInputValue {
 
     var index = 0;
 
-    multiValue.forEach((element) {
+    for (var element in multiValue) {
       data["$index"] = element.strValue;
       index++;
-    });
+    }
 
-    return JsonEncoder().convert(data);
+    return const JsonEncoder().convert(data);
   }
 
   void setMultiValue(String val) {
@@ -161,6 +164,14 @@ class DynInputValue {
     } catch(e) {
       print(e);
     }
+  }
+
+  String getImagePath() {
+    return imgPath;
+  }
+
+  void setImagePath(String imagePath) {
+    imgPath = imagePath;
   }
 }
 
@@ -198,6 +209,8 @@ class _DynInputState extends State<DynInput> {
   final LocationController _locationController = Get.find<LocationController>();
   TextfieldTagsController? _tagController;
 
+  File? _image;
+  ImagePicker? picker;
   String title = "";
   DynInputValue? dynValue;
 
@@ -256,6 +269,21 @@ class _DynInputState extends State<DynInput> {
     }
   }
 
+  _getImage(ImageSource imageSource) async {
+    PickedFile? imageFile = await picker!.getImage(source: imageSource);
+    //if user doesn't take any image, just return.
+    if (imageFile == null) return;
+
+    setState(() {
+        _image = File(imageFile.path);
+
+        if (_image != null) {
+          dynValue!.imgPath = _image!.path;
+        }
+      },
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -266,6 +294,10 @@ class _DynInputState extends State<DynInput> {
     switch (widget.inputType) {
       case DynInputType.tags:
         _tagController = TextfieldTagsController();
+        break;
+
+      case DynInputType.image:
+        picker = ImagePicker();
         break;
     }
   }
@@ -677,6 +709,66 @@ class _DynInputState extends State<DynInput> {
         );
         break;
 
+      case DynInputType.image:
+        if (widget.dynValue!.imgPath != "") {
+          _image = File(widget.dynValue!.imgPath);
+        }
+
+        inContainer = Container(
+          margin: const EdgeInsets.only(top: 8.0),
+          padding: const EdgeInsets.only(left: 14),
+          decoration: BoxDecoration(
+              border: Border.all(
+                  color: kPrimaryColor,
+                  width: 1.0
+              ),
+              borderRadius: BorderRadius.circular(12)
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Center(
+                child: _image != null
+                    ? Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: SizedBox(
+                    width: 300,
+                    height: 300,
+                    child: Image.file(
+                      _image!,
+                    ),
+                  ),
+                )
+                    : const Padding(
+                  padding: EdgeInsets.all(18.0),
+                  child: Text('No image selected'),
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  DefaultButton(
+                    buttonIcon: Icons.image,
+                    width: 44,
+                    onTab: () {
+                      _getImage(ImageSource.gallery);
+                    },
+                  ),
+                  DefaultButton(
+                    buttonIcon: Icons.camera,
+                    width: 44,
+                    onTab: () {
+                      _getImage(ImageSource.camera);
+                    },
+                  )
+                ],
+              ),
+              const SizedBox(height: 10,)
+            ],
+          ),
+        );
+        break;
+
       default:
         if (tHint == "") {
           if (widget.onFormat != null) {
@@ -798,7 +890,7 @@ class _DynInputState extends State<DynInput> {
               margin: const EdgeInsets.only(top: 8.0),
               padding: const EdgeInsets.only(left: 14),
               child: DefaultButton(
-                label: '+',
+                buttonIcon: Icons.add_circle,
                 width: 50,
                 onTab: () {
                   setState(() {

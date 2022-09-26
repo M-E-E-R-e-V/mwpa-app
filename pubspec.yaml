@@ -53,6 +53,7 @@ dependencies:
   map: ^1.3.3
   cached_network_image: ^3.2.0
   connectivity:
+  image_picker:
 
 dev_dependencies:
   flutter_launcher_icons: ^0.10.0

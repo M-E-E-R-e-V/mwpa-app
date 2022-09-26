@@ -6,40 +6,48 @@ class DefaultButton extends StatelessWidget {
   final IconData? buttonIcon;
   final Function()? onTab;
   final double? width;
+  final double? height;
 
-  const DefaultButton({Key? key, this.label, this.buttonIcon, this.onTab, this.width}) : super(key: key);
+  const DefaultButton({Key? key, this.label, this.buttonIcon, this.onTab, this.width, this.height}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     var newWidth = 150.0;
+    var newHeight = 60.0;
 
     if (width != null) {
       newWidth = width!;
     }
 
-    Widget? innert;
+    if (height != null) {
+      newHeight = height!;
+    }
+
+    List<Widget> inner = [];
+
+    if(buttonIcon != null) {
+      inner.add(Icon(
+        buttonIcon,
+        color: kButtonFontColor,
+        size: 18,
+      ));
+    }
 
     if (label != null) {
-      innert = Text(
+      inner.add(Text(
         label!,
         style: const TextStyle(
             color: kButtonFontColor,
             fontWeight: FontWeight.bold
         ),
-      );
-    } else if(buttonIcon != null) {
-      innert = Icon(
-        buttonIcon,
-        color: kButtonFontColor,
-        size: 18,
-      );
+      ));
     }
 
     return GestureDetector(
       onTap: onTab,
       child: Container(
         width: newWidth,
-        height: 60,
+        height: newHeight,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           color: kButtonBackgroundColor
@@ -47,7 +55,10 @@ class DefaultButton extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            innert ?? Container()
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: inner,
+            )
           ],
         )
       ),
