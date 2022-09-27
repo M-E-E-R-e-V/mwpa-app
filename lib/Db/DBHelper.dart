@@ -3,6 +3,7 @@ import 'package:mwpaapp/Models/BehaviouralState.dart';
 import 'package:mwpaapp/Models/EncounterCategorie.dart';
 import 'package:mwpaapp/Models/Sighting.dart';
 import 'package:mwpaapp/Models/Species.dart';
+import 'package:mwpaapp/Models/TourTracking.dart';
 import 'package:mwpaapp/Models/Vehicle.dart';
 import 'package:mwpaapp/Models/VehicleDriver.dart';
 import 'package:sqflite/sqflite.dart';
@@ -63,6 +64,15 @@ class DBHelper {
                     "note STRING,"
                     "image STRING"
                     ")"
+            );
+
+            db.execute(
+              "CREATE TABLE IF NOT EXISTS $_tableNameTourTracking("
+              "uuid STRING PRIMARY KEY,"
+              "tour_fid STRING,"
+              "location STRING,"
+              "date STRING"
+              ")"
             );
 
             db.execute(
@@ -346,5 +356,23 @@ class DBHelper {
       where: 'id = ?',
       whereArgs: [behState.id]
     );
+  }
+
+  static Future<int> insertTourTracking(TourTracking behState) async {
+    return await _db?.insert(_tableNameTourTracking, behState.toJson()) ?? 1;
+  }
+
+  static Future<Map<String, dynamic>> readTourTracking(String tourFId, String searchDate) async {
+    List<Map<String, dynamic>> list = await _db!.query(
+        _tableNameTourTracking,
+        where: "tour_fid = ? AND date LIKE ?",
+        whereArgs: [tourFId, "${searchDate}%"]
+    );
+
+    if (list.isNotEmpty) {
+      return list[0];
+    }
+
+    return {};
   }
 }

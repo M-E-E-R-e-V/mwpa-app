@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:mwpaapp/Components/DefaultButton.dart';
 import 'package:mwpaapp/Constants.dart';
@@ -9,6 +10,7 @@ import 'package:mwpaapp/Components/DynInput.dart';
 import 'package:mwpaapp/Controllers/BehaviouralStateController.dart';
 import 'package:mwpaapp/Controllers/EncounterCategoriesController.dart';
 import 'package:mwpaapp/Controllers/LocationController.dart';
+import 'package:mwpaapp/Controllers/PrefController.dart';
 import 'package:mwpaapp/Controllers/SightingController.dart';
 import 'package:mwpaapp/Controllers/SpeciesController.dart';
 import 'package:mwpaapp/Controllers/VehicleController.dart';
@@ -31,6 +33,7 @@ class EditSightingPage extends StatefulWidget {
 }
 
 class _EditSightingPageState extends State<EditSightingPage> {
+  final PrefController _prefController = Get.find<PrefController>();
   final LocationController _locationController = Get.find<LocationController>();
   final SightingController _sightingController = Get.find<SightingController>();
   final VehicleController _vehicleController = Get.find<VehicleController>();
@@ -227,6 +230,38 @@ class _EditSightingPageState extends State<EditSightingPage> {
     }
   }
 
+  _setLocationByTime(BuildContext context, TimeOfDay aTimeOfDay, Function onSet) async {
+    if (widget.sighting == null) {
+      return;
+    }
+
+    if (_prefController.prefToru != null) {
+      DateTime tDate = DateTime(
+          sightDateValue.dateValue.year,
+          sightDateValue.dateValue.month,
+          sightDateValue.dateValue.day,
+          aTimeOfDay.hour,
+          aTimeOfDay.minute
+      );
+
+      Position? aPos = await _locationController.getLocationBy(
+          UtilTourFid.createTTourFId(_prefController.prefToru!),
+          tDate
+      );
+
+      if (aPos != null) {
+        ConfirmDialog.show(
+          context,
+          "Position is found", "At this time a position was found for the current tour. Should this be used as the position?",
+              (p0) {
+            if (p0 == "ok") {
+              onSet(aPos);
+            }
+          });
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -368,6 +403,16 @@ class _EditSightingPageState extends State<EditSightingPage> {
                setState(() {
                  sightLocationBeginValue.posValue = _locationController.currentPosition!;
                });
+             } else {
+               _setLocationByTime(
+                   context,
+                   sightDurationFromValue.timeValue!,
+                       (Position aPos) {
+                     setState(() {
+                       sightLocationBeginValue.setPosition(aPos);
+                     });
+                   }
+               );
              }
            },
          );
@@ -378,6 +423,17 @@ class _EditSightingPageState extends State<EditSightingPage> {
            hint: "",
            inputType: DynInputType.time,
            dynValue: sightDurationUntilValue,
+           onChange: () async {
+             _setLocationByTime(
+                 context,
+                 sightDurationUntilValue.timeValue!,
+                 (Position aPos) {
+                   setState(() {
+                     sightLocationEndValue.setPosition(aPos);
+                   });
+                 }
+               );
+           },
          );
 
          sightLocationBegin = DynInput(
