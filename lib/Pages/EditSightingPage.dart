@@ -104,6 +104,9 @@ class _EditSightingPageState extends State<EditSightingPage> {
   late DynInput sightSubgroups;
   DynInputValue sightSubgroupsValue = DynInputValue();
 
+  late DynInput sightGroupStructure;
+  DynInputValue sightGroupStructureValue = DynInputValue();
+
   late DynInput sightReaction;
   DynInputValue sightReactionValue = DynInputValue();
 
@@ -131,26 +134,34 @@ class _EditSightingPageState extends State<EditSightingPage> {
   _appBar(BuildContext context) {
     return AppBar(
       backgroundColor: kPrimaryHeaderColor,
-      leading: IconButton(
-        icon: const Icon(
-          Icons.arrow_back,
-          color: kButtonFontColor,
-        ),
-        onPressed: () async {
+      leading: DefaultButton(
+        buttonIcon: Icons.arrow_back,
+        height: 40,
+        onTab: () async {
           ConfirmDialog.show(
-            context,
-            "Sighting close",
-            "Close sighting without saving? All changes will be lost!",
-            (value) {
-              if (value != null) {
-                if (value == 'ok') {
-                  Get.back();
+              context,
+              "Sighting close",
+              "Close sighting without saving? All changes will be lost!",
+                  (value) {
+                if (value != null) {
+                  if (value == 'ok') {
+                    Get.back();
+                  }
                 }
-              }
-            });
+              });
           //await Navigator.pushNamed(context, '/List');
         },
       ),
+      actions: [
+        DefaultButton(
+            buttonIcon: Icons.save_alt,
+            height: 40,
+            label: "Save Sighting",
+            onTab: () {
+              _saveSightingToDb();
+            }
+        )
+      ],
     );
   }
 
@@ -179,6 +190,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
         newborns: sightNewborns.dynValue?.getIntValue(),
         behaviours: sightBehaviour.dynValue?.getMultiValue(),
         subgroups: sightSubgroups.dynValue?.getIntValue(),
+        group_structure_id: sightGroupStructure.dynValue?.getStrValueAsInt(),
         reaction_id: sightReaction.dynValue?.getStrValueAsInt(),
         freq_behaviour: sightFreqBehaviour.dynValue?.getValue(),
         recognizable_animals: sightRecAnimals.dynValue?.getValue(),
@@ -292,6 +304,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
       sightNewbornsValue.setIntValue(sighting.newborns!);
       sightBehaviourValue.setMultiValue(sighting.behaviours!);
       sightSubgroupsValue.setIntValue(sighting.subgroups!);
+      sightGroupStructureValue.setStrValueByInt(sighting.group_structure_id!);
       sightReactionValue.setStrValueByInt(sighting.reaction_id!);
       sightFreqBehaviourValue.setValue(sighting.freq_behaviour!);
       sightRecAnimalsValue.setValue(sighting.recognizable_animals!);
@@ -572,6 +585,20 @@ class _EditSightingPageState extends State<EditSightingPage> {
            dynValue: sightSubgroupsValue,
          );
 
+        sightGroupStructure = DynInput(
+          context: context,
+          title: 'Group Structure',
+          hint: '',
+          inputType: DynInputType.select,
+          dynValue:sightGroupStructureValue,
+          selectList: [
+            DynInputSelectItem(value: "1", label: "widely dispersed"),
+            DynInputSelectItem(value: "2", label: "dispersed"),
+            DynInputSelectItem(value: "3", label: "loose"),
+            DynInputSelectItem(value: "4", label: "tight"),
+          ],
+        );
+
          sightReaction = DynInput(
           context: context,
           title: 'Reaction',
@@ -728,6 +755,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
                        ),
                        sightBehaviour,
                        sightSubgroups,
+                       sightGroupStructure,
                        sightReaction,
                        sightFreqBehaviour,
                        sightRecAnimals,

@@ -54,6 +54,8 @@ dependencies:
   cached_network_image: ^3.2.0
   connectivity:
   image_picker:
+  background_locator_2:
+  location_permissions:
 
 dev_dependencies:
   flutter_launcher_icons: ^0.10.0

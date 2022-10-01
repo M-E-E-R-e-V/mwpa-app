@@ -7,13 +7,15 @@ class DefaultButton extends StatelessWidget {
   final Function()? onTab;
   final double? width;
   final double? height;
+  final Color? bgColor;
 
-  const DefaultButton({Key? key, this.label, this.buttonIcon, this.onTab, this.width, this.height}) : super(key: key);
+  const DefaultButton({Key? key, this.label, this.buttonIcon, this.onTab, this.width, this.height, this.bgColor}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     var newWidth = 150.0;
     var newHeight = 60.0;
+    var newBgColor = kButtonBackgroundColor;
 
     if (width != null) {
       newWidth = width!;
@@ -21,6 +23,10 @@ class DefaultButton extends StatelessWidget {
 
     if (height != null) {
       newHeight = height!;
+    }
+
+    if (bgColor != null) {
+      newBgColor = bgColor!;
     }
 
     List<Widget> inner = [];
@@ -50,7 +56,7 @@ class DefaultButton extends StatelessWidget {
         height: newHeight,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          color: kButtonBackgroundColor
+          color: newBgColor
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

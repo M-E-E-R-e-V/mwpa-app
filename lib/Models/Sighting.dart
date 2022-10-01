@@ -27,6 +27,7 @@ class Sighting {
   int? newborns;
   String? behaviours;
   int? subgroups;
+  int? group_structure_id;
   int? reaction_id;
   String? freq_behaviour;
   String? recognizable_animals;
@@ -60,6 +61,7 @@ class Sighting {
     this.newborns,
     this.behaviours,
     this.subgroups,
+    this.group_structure_id,
     this.reaction_id,
     this.freq_behaviour,
     this.recognizable_animals,
@@ -94,6 +96,7 @@ class Sighting {
     newborns = UtilCheckJson.checkValue(json['newborns'], UtilCheckJsonTypes.int);
     behaviours = UtilCheckJson.checkValue(json['behaviours'], UtilCheckJsonTypes.string);
     subgroups = UtilCheckJson.checkValue(json['subgroups'], UtilCheckJsonTypes.int);
+    group_structure_id = UtilCheckJson.checkValue(json['group_structure_id'], UtilCheckJsonTypes.int);
     reaction_id = UtilCheckJson.checkValue(json['reaction_id'], UtilCheckJsonTypes.int);
     freq_behaviour = UtilCheckJson.checkValue(json['freq_behaviour'], UtilCheckJsonTypes.string);
     recognizable_animals = UtilCheckJson.checkValue(json['recognizable_animals'], UtilCheckJsonTypes.string);
@@ -132,6 +135,7 @@ class Sighting {
     data['newborns'] = newborns;
     data['behaviours'] = behaviours;
     data['subgroups'] = subgroups;
+    data['group_structure_id'] = group_structure_id;
     data['reaction_id'] = reaction_id;
     data['freq_behaviour'] = freq_behaviour;
     data['recognizable_animals'] = recognizable_animals;
@@ -167,6 +171,19 @@ class Sighting {
 
     if (location_end == null || location_end == "" || location_end == "null") {
       return Colors.yellow;
+    }
+
+    if (other != null) {
+      List<String> tortoiseList = [
+        'Caretta caretta',
+        'Dermochelys coriacea',
+        'Chelonia mydas',
+        'Eretmochelys imbricata'
+      ];
+
+      if (tortoiseList.indexOf(other!) > -1) {
+        return Colors.green;
+      }
     }
 
     return kPrimaryHeaderColor;

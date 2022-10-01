@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:mwpaapp/Components/DynInput.dart';
 import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Components/DefaultButton.dart';
 import 'package:mwpaapp/Controllers/BehaviouralStateController.dart';
@@ -24,6 +27,7 @@ import 'package:mwpaapp/Pages/List/ListSightingTile.dart';
 import 'package:mwpaapp/Services/SyncMwpaService.dart';
 import 'package:mwpaapp/Services/ThemeService.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
+import 'package:mwpaapp/Util/UtilDistanceCoast.dart';
 import 'package:mwpaapp/Util/UtilTourFId.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:connectivity/connectivity.dart';
@@ -240,6 +244,34 @@ class _ListPageState extends State<ListPage> {
     );
   }
 
+  _addShortSighting(String otherName) async {
+    DynInputValue tOD = DynInputValue();
+    tOD.timeValue = TimeOfDay.now();
+    Position pos = _locationController.currentPosition!;
+    String location = jsonEncode(pos.toJson());
+    var distance = UtilDistanceCoast.getDistance(pos);
+
+    await _sightingController.addSighting(newSighting: Sighting(
+      unid: '',
+      tour_fid: UtilTourFid.createTTourFId(_prefController.prefToru!),
+      vehicle_id: _prefController.prefToru!.vehicle_id!,
+      vehicle_driver_id: _prefController.prefToru!.vehicle_driver_id,
+      tour_start: _prefController.prefToru!.tour_start,
+      tour_end: _prefController.prefToru!.tour_end,
+      beaufort_wind: _prefController.prefToru!.beaufort_wind,
+      date: _prefController.prefToru!.date,
+      duration_from: tOD.getTimeOfDay(),
+      duration_until: tOD.getTimeOfDay(),
+      location_begin: location,
+      location_end: location,
+      distance_coast: "$distance",
+      other: otherName,
+      note: "Short insert"
+    ));
+
+    _loadController();
+  }
+
   _addTaskBar() {
     List<Widget> columnList = [
       Text(
@@ -249,7 +281,9 @@ class _ListPageState extends State<ListPage> {
       const SizedBox(height: 5),
     ];
 
-    columnList.add(GetBuilder<PrefController>(builder: (prefController) {
+    List<Widget> btnList = [];
+
+    btnList.add(GetBuilder<PrefController>(builder: (prefController) {
       if (prefController.prefToru!.set_end_tour != null && prefController.prefToru!.set_end_tour! >= 1) {
         return DefaultButton(
             buttonIcon: Icons.tour,
@@ -264,6 +298,97 @@ class _ListPageState extends State<ListPage> {
 
       return Container();
     }));
+
+    if (btnList.isNotEmpty) {
+      btnList.add(const SizedBox(width: 5));
+    }
+
+    btnList.add(DefaultButton(
+      buttonIcon: Icons.switch_access_shortcut_add,
+      label: 'Add Tortoise',
+      height: 40,
+      width: 120,
+      bgColor: Colors.green,
+      onTab: () async {
+        showDialog<void>(
+            context: context,
+            barrierDismissible: false, // user must tap button!
+            builder: (BuildContext context) {
+              return Dialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius:BorderRadius.circular(30.0)),
+              child: Container(
+                  height: 300,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("Please select"),
+                      const SizedBox(height: 15),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          DefaultButton(
+                            label: 'Caretta caretta',
+                            bgColor: Colors.green,
+                            onTab: () {
+                              _addShortSighting('Caretta caretta');
+                              Navigator.of(context).pop();
+                            }
+                          ),
+                          const SizedBox(width: 15),
+                          DefaultButton(
+                            label: 'Dermochelys coriacea',
+                            bgColor: Colors.green,
+                            onTab: () {
+                              _addShortSighting('Dermochelys coriacea');
+                              Navigator.of(context).pop();
+                            }
+                          )
+                        ],
+                      ),
+                      const SizedBox(height: 15),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          DefaultButton(
+                            label: 'Chelonia mydas',
+                            bgColor: Colors.green,
+                            onTab: () {
+                              _addShortSighting('Chelonia mydas');
+                              Navigator.of(context).pop();
+                            }
+                          ),
+                          const SizedBox(width: 15),
+                          DefaultButton(
+                            label: 'Eretmochelys imbricata',
+                            bgColor: Colors.green,
+                            onTab: () {
+                              _addShortSighting('Eretmochelys imbricata');
+                              Navigator.of(context).pop();
+                            }
+                          )
+                        ],
+                      ),
+                      const SizedBox(height: 15),
+                      DefaultButton(label: 'Cancel', onTab: () {
+                        Navigator.of(context).pop();
+                      }),
+                    ],
+                  )
+              )
+          );
+            },
+        );
+      }
+    ));
+
+    columnList.add(Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: btnList,
+    ));
 
     return Container(
       margin: const EdgeInsets.only(left: 20, right: 20, top: 15),

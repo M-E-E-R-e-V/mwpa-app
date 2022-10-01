@@ -10,7 +10,7 @@ import 'package:sqflite/sqflite.dart';
 
 class DBHelper {
   static Database? _db;
-  static const int _version = 1;
+  static const int _version = 2;
   static const String _tableNameSighting = "sighting";
   static const String _tableNameTourTracking = "tour_tracking";
   static const String _tableNameVehicle = "vehicle";
@@ -29,6 +29,15 @@ class DBHelper {
       _db = await openDatabase(
           path,
           version: _version,
+          onUpgrade: (db, oldVersion, newVersion) async {
+            var batch = db.batch();
+
+            if (oldVersion == 1) {
+              _updateTableSightingV1toV2(batch);
+            }
+
+            await batch.commit();
+          },
           onCreate: (db, version) {
             db.execute(
                 "CREATE TABLE IF NOT EXISTS $_tableNameSighting("
@@ -120,6 +129,10 @@ class DBHelper {
         print(e);
       }
     }
+  }
+
+  static void _updateTableSightingV1toV2(Batch batch) {
+    batch.execute('ALTER TABLE $_tableNameSighting ADD group_structure_id INTEGER');
   }
 
   static Future<int> insertSighting(Sighting newSighting) async {

@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:device_info/device_info.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -12,6 +11,7 @@ import 'package:mwpaapp/Models/Species.dart';
 import 'package:mwpaapp/Models/Vehicle.dart';
 import 'package:mwpaapp/Models/VehicleDriver.dart';
 import 'package:mwpaapp/Mwpa/Models/BehaviouralStatesResponse.dart';
+import 'package:mwpaapp/Mwpa/Models/DefaultReturn.dart';
 import 'package:mwpaapp/Mwpa/Models/EncounterCategoriesResponse.dart';
 import 'package:mwpaapp/Mwpa/Models/IsLogin.dart';
 import 'package:mwpaapp/Mwpa/Models/LoginResponse.dart';
@@ -36,6 +36,7 @@ class MwpaApi {
   static const URL_ENC_CATE = 'mobile/encountercategories/list';
   static const URL_BEH_STATE = 'mobile/behaviouralstates/list';
   static const URL_SIGHTING_SAVE = 'mobile/sighting/save';
+  static const URL_SIGHTING_IMAGE_SAVE = 'mobile/sighting/image/save';
 
   String _url = "";
   String _cookie = "";
@@ -351,7 +352,7 @@ class MwpaApi {
     }
   }
 
-  Future<bool> saveSighting(Sighting sigh) async {
+  Future<String?> saveSighting(Sighting sigh) async {
     try {
       var url = getUrl(MwpaApi.URL_SIGHTING_SAVE);
 
@@ -361,6 +362,7 @@ class MwpaApi {
         Uri.parse(url),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
+          'cookie': _cookie
         },
         body: postBody,
       );
@@ -368,7 +370,76 @@ class MwpaApi {
       var objResponse = SightingSaveResponse.fromJson(jsonDecode(response.body));
 
       if (objResponse.statusCode == StatusCodes.OK) {
-        return true;
+        return objResponse.unid;
+      }
+    }
+    on MwpaException {
+      rethrow;
+    } catch(error) {
+      print(error);
+      throw Exception('Connection error');
+    }
+
+    return null;
+  }
+
+  Future<bool> saveSightingImage(String unid, String imgFile) async {
+    try {
+      if ( File(imgFile).existsSync()) {
+        String filename = p.basename(imgFile);
+
+        try {
+
+          final file = await File(imgFile).open(mode: FileMode.read);
+          var byte;
+
+          var filesize = file.lengthSync();
+          var offset = 0;
+
+          while (byte != -1) {
+            List<int> buffer = [];
+
+            for(var i=0; i<50000; i++) {
+              byte = await file.readByte();
+
+              if (byte != -1) {
+                buffer.add(byte);
+              }
+
+              offset++;
+            }
+
+            var url = getUrl(MwpaApi.URL_SIGHTING_IMAGE_SAVE);
+            var postBody = jsonEncode(<String, dynamic>{
+              'unid': unid,
+              'filename': filename,
+              'size': filesize,
+              'offset': offset,
+              'data': base64Encode(buffer)
+            });
+
+            var response = await http.post(
+              Uri.parse(url),
+              headers: <String, String>{
+                'Content-Type': 'application/json; charset=UTF-8',
+                'cookie': _cookie
+              },
+              body: postBody,
+            );
+
+            var objResponse = DefaultReturn.fromJson(jsonDecode(response.body));
+
+            if (objResponse.statusCode != StatusCodes.OK) {
+              throw Exception('Image can not update!');
+            }
+          }
+
+          return true;
+        } catch(te) {
+          if (kDebugMode) {
+            print(te);
+          }
+        }
       }
     }
     on MwpaException {

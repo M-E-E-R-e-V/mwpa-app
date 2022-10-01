@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:mwpaapp/Db/DBHelper.dart';
 import 'package:mwpaapp/Models/BehaviouralState.dart';
@@ -7,6 +9,7 @@ import 'package:mwpaapp/Models/Species.dart';
 import 'package:mwpaapp/Models/Vehicle.dart';
 import 'package:mwpaapp/Models/VehicleDriver.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
+import 'package:mwpaapp/Util/UtilDate.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Mwpa/MwpaAPI.dart';
 
@@ -195,8 +198,24 @@ class SyncMwpaService {
 
     try {
       for (var sighting in sightingList) {
-        if (await api.saveSighting(sighting)) {
-          // delete sighting is send to portal
+        String? unid = await api.saveSighting(sighting);
+
+        if (unid != null) {
+          sighting.unid = unid;
+          await DBHelper.updateSighting(sighting);
+        }
+
+        if (sighting.image != null && sighting.image != "") {
+          await api.saveSightingImage(sighting.unid!, sighting.image!);
+        }
+
+        if (UtilDate.isOverDays(DateTime.parse(sighting.date!).toLocal(), 7)) {
+          // todo later for a update
+          /*if (sighting.image != null && sighting.image != "") {
+            File(sighting.image!).delete();
+          }
+
+          DBHelper.deleteSighting(sighting);*/
         }
       }
     } catch(e) {
