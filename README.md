@@ -29,7 +29,23 @@ The app is implemented with Flutter (Dart) and should support the following plat
 <table>
   <tr>
     <td> 
-      <img src="doc/screenshots/login.png" alt="1" width="360px" >
+      <img src="doc/screenshots/login.jpeg" alt="1" width="360px" >
+    </td>
+    <td> 
+      <img src="doc/screenshots/main_tablet.jpeg" alt="1" width="360px" >
+    </td>
+  </tr>
+  <tr>
+    <td> 
+      <img src="doc/screenshots/add_sighting.jpeg" alt="1" width="360px" >
+    </td>
+    <td> 
+      <img src="doc/screenshots/set_default.jpeg" alt="1" width="360px" >
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2">
+        <img src="doc/screenshots/add_short.jpeg" alt="1" width="360px" >
     </td>
   </tr>
 </table>
