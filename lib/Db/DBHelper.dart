@@ -67,6 +67,7 @@ class DBHelper {
                     "reaction_id INTEGER,"
                     "freq_behaviour STRING,"
                     "recognizable_animals STRING,"
+                    "group_structure_id INTEGER,"
                     "other_species STRING,"
                     "other STRING,"
                     "other_vehicle STRING,"

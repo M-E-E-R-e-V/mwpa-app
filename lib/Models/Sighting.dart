@@ -132,6 +132,7 @@ class Sighting {
     data['species_id'] = species_id;
     data['species_count'] = species_count;
     data['juveniles'] = juveniles;
+    data['calves'] = calves;
     data['newborns'] = newborns;
     data['behaviours'] = behaviours;
     data['subgroups'] = subgroups;

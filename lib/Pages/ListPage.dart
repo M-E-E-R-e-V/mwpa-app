@@ -284,16 +284,18 @@ class _ListPageState extends State<ListPage> {
     List<Widget> btnList = [];
 
     btnList.add(GetBuilder<PrefController>(builder: (prefController) {
-      if (prefController.prefToru!.set_end_tour != null && prefController.prefToru!.set_end_tour! >= 1) {
-        return DefaultButton(
-            buttonIcon: Icons.tour,
-            label: 'Tour End',
-            height: 40,
-            width: 90,
-            onTab: () async {
-              _setEndTour(context);
-            }
-        );
+      if (prefController.prefToru != null) {
+        if (prefController.prefToru!.set_end_tour != null && prefController.prefToru!.set_end_tour! >= 1) {
+          return DefaultButton(
+              buttonIcon: Icons.tour,
+              label: 'Tour End',
+              height: 40,
+              width: 90,
+              onTab: () async {
+                _setEndTour(context);
+              }
+          );
+        }
       }
 
       return Container();
