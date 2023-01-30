@@ -13,9 +13,9 @@ App for MWPA
 
 ## Information
 
-More information about the project can be found here: [NWPA](https://github.com/M-E-E-R-e-V/mwpa)
+More information about the project can be found here: [MWPA](https://github.com/M-E-E-R-e-V/mwpa)
 
-This part of NWPA is for the end devices. The software synchronizes data, new data can be recorded (also offline) and transferred back to the NWPA.
+This part of MWPA is for the end devices. The software synchronizes data, new data can be recorded (also offline) and transferred back to the MWPA.
 
 
 
