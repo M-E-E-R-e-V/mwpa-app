@@ -9,6 +9,7 @@ import 'package:mwpaapp/Pages/EditSightingPage.dart';
 import 'package:mwpaapp/Pages/EditTourPage.dart';
 import 'package:mwpaapp/Pages/ListPage.dart';
 import 'package:mwpaapp/Pages/LoginPage.dart';
+import 'package:mwpaapp/Pages/ProminentDisclosurePage.dart';
 import 'package:mwpaapp/Services/ThemeService.dart';
 import 'package:mwpaapp/Ui/Themes.dart';
 
@@ -39,8 +40,12 @@ class _MWPAAppState extends State<MWPAApp> {
       theme: Themes.light,
       darkTheme: Themes.dark,
       themeMode: ThemeService().theme,
-      initialRoute: '/Login',
+      initialRoute: '/ProminentDisclosure',
       getPages: [
+        GetPage(
+            name: '/ProminentDisclosure',
+            page: () => const ProminentDisclosurePage()
+        ),
         GetPage(
           name: '/Login',
           page: () => const LoginPage()

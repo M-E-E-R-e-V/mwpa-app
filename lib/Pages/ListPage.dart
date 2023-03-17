@@ -33,7 +33,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:connectivity/connectivity.dart';
 import 'List/ListMap.dart';
 
-
+/// ListPage
 class ListPage extends StatefulWidget {
   const ListPage({Key? key}) : super(key: key);
 
@@ -41,6 +41,7 @@ class ListPage extends StatefulWidget {
   State<ListPage> createState() => _ListPageState();
 }
 
+/// _ListPageState
 class _ListPageState extends State<ListPage> {
   final PrefController _prefController = Get.find<PrefController>();
   final LocationController _locationController = Get.find<LocationController>();
@@ -53,6 +54,7 @@ class _ListPageState extends State<ListPage> {
 
   late StreamSubscription subscription;
 
+  /// initState
   @override
   void initState() {
     super.initState();
@@ -62,6 +64,7 @@ class _ListPageState extends State<ListPage> {
     );
   }
 
+  /// dispose
   @override
   void dispose() {
     subscription.cancel();
@@ -69,6 +72,7 @@ class _ListPageState extends State<ListPage> {
     super.dispose();
   }
 
+  /// _syncCheckConnectivity
   _syncCheckConnectivity(ConnectivityResult result) async {
     final hasInternet = result != ConnectivityResult.none;
 
@@ -79,6 +83,7 @@ class _ListPageState extends State<ListPage> {
     }
   }
 
+  /// _syncMwpa
   _syncMwpa() async {
     EasyLoading.instance.dismissOnTap = false;
     EasyLoading.instance.maskType = EasyLoadingMaskType.black;
@@ -108,6 +113,7 @@ class _ListPageState extends State<ListPage> {
     }
   }
 
+  /// _loadController
   _loadController() async {
     await _speciesController.getSpecies();
     await _vehicleController.getVehicle();
@@ -117,6 +123,7 @@ class _ListPageState extends State<ListPage> {
     _sightingController.getSightings();
   }
 
+  /// _logout
   _logout() async {
     ConfirmDialog.show(context, "Logout", "Do you want to log out?", (p0) async {
       if (p0 == "ok") {
@@ -129,6 +136,7 @@ class _ListPageState extends State<ListPage> {
     });
   }
 
+  /// _setEndTour
   _setEndTour(BuildContext context) {
     ConfirmDialog.show(
       context,
@@ -167,6 +175,7 @@ class _ListPageState extends State<ListPage> {
     );
   }
 
+  /// _appBar
   _appBar() {
     return AppBar(
       backgroundColor: kPrimaryHeaderColor,
@@ -244,6 +253,7 @@ class _ListPageState extends State<ListPage> {
     );
   }
 
+  /// _addShortSighting
   _addShortSighting(String otherName) async {
     DynInputValue tOD = DynInputValue();
     tOD.timeValue = TimeOfDay.now();
@@ -272,6 +282,7 @@ class _ListPageState extends State<ListPage> {
     _loadController();
   }
 
+  /// _addTaskBar
   _addTaskBar() {
     List<Widget> columnList = [
       Text(
@@ -415,6 +426,7 @@ class _ListPageState extends State<ListPage> {
     );
   }
 
+  /// _addMapBar
   _addMapBar() {
     return Container(
         height: 200,
@@ -425,6 +437,7 @@ class _ListPageState extends State<ListPage> {
     );
   }
 
+  /// _showSighting
   _showSighting() {
     return Expanded(
       child: Obx(() {
@@ -459,6 +472,7 @@ class _ListPageState extends State<ListPage> {
     );
   }
 
+  /// _bottomSheetButton
   _bottomSheetButton({
     required String label,
     required Function()? onTab,
@@ -491,6 +505,7 @@ class _ListPageState extends State<ListPage> {
     );
   }
 
+  /// _showBottomSheet
   _showBottomSheet(BuildContext context, Sighting sighting) {
     Get.bottomSheet(
       Container(
@@ -545,6 +560,7 @@ class _ListPageState extends State<ListPage> {
     );
   }
 
+  /// build
   @override
   Widget build(BuildContext context) {
     _loadController();

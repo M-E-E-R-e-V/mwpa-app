@@ -1,15 +1,19 @@
+
+/// VehicleDriver
 class VehicleDriver {
   int? id;
-  int? user_id;
+  int? userId;
   String? description;
   String? username;
   int? isdeleted;
 
-  VehicleDriver({this.id, this.user_id, this.description, this.username, this.isdeleted});
+  /// VehicleDriver
+  VehicleDriver({this.id, this.userId, this.description, this.username, this.isdeleted});
 
+  /// fromJson
   VehicleDriver.fromJson(Map<String, dynamic> json) {
     id = json['id'];
-    user_id = json['user_id'];
+    userId = json['user_id'];
     description = json['description'];
 
     if (json['username'] is String) {
@@ -21,6 +25,7 @@ class VehicleDriver {
     isdeleted = json['isdeleted'];
   }
 
+  /// toJson
   Map<String, dynamic> toJson(bool withId) {
     final Map<String, dynamic> data = <String, dynamic>{};
 
@@ -28,7 +33,7 @@ class VehicleDriver {
       data['id'] = id;
     }
 
-    data['user_id'] = user_id;
+    data['user_id'] = userId;
     data['description'] = description;
     data['username'] = username;
     data['isdeleted'] = isdeleted;

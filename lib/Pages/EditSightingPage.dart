@@ -23,6 +23,7 @@ import 'package:mwpaapp/Util/UtilDistanceCoast.dart';
 import 'package:mwpaapp/Util/UtilTourFId.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// EditSightingPage
 class EditSightingPage extends StatefulWidget {
   final Sighting? sighting;
 
@@ -32,6 +33,7 @@ class EditSightingPage extends StatefulWidget {
   State<EditSightingPage> createState() => _EditSightingPageState();
 }
 
+/// _EditSightingPageState
 class _EditSightingPageState extends State<EditSightingPage> {
   final PrefController _prefController = Get.find<PrefController>();
   final LocationController _locationController = Get.find<LocationController>();
@@ -131,6 +133,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
   late DynInput sightImage;
   DynInputValue sightImageValue = DynInputValue();
 
+  /// _appBar
   _appBar(BuildContext context) {
     return AppBar(
       backgroundColor: kPrimaryHeaderColor,
@@ -165,6 +168,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
     );
   }
 
+  /// _saveSightingToDb
   _saveSightingToDb() async {
     Sighting tSigh = Sighting(
         unid: "",
@@ -218,6 +222,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
     Get.back();
   }
 
+  /// _loadPref
   Future<void> _loadPref() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -242,6 +247,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
     }
   }
 
+  /// _setLocationByTime
   _setLocationByTime(BuildContext context, TimeOfDay aTimeOfDay, Function onSet) async {
     if (widget.sighting == null) {
       return;
@@ -262,6 +268,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
       );
 
       if (aPos != null) {
+        // TODO (do not use BuildContexts across async gaps)
         ConfirmDialog.show(
           context,
           "Position is found", "At this time a position was found for the current tour. Should this be used as the position?",
@@ -274,6 +281,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
     }
   }
 
+  /// initState
   @override
   void initState() {
     super.initState();
@@ -327,6 +335,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
     }
   }
 
+  /// build
   @override
   Widget build(BuildContext context) {
     return Obx(() {

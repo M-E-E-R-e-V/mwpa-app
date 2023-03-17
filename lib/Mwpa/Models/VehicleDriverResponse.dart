@@ -24,7 +24,7 @@ class VehicleDriverResponse extends DefaultReturn {
       for (var element in vlist) {
         tlist.add(VehicleDriver(
           id: UtilCheckJson.checkValue(element['id'], UtilCheckJsonTypes.int),
-          user_id: UtilCheckJson.checkValue(element['user']['user_id'], UtilCheckJsonTypes.int),
+          userId: UtilCheckJson.checkValue(element['user']['user_id'], UtilCheckJsonTypes.int),
           description: UtilCheckJson.checkValue(element['description'], UtilCheckJsonTypes.string),
           username: UtilCheckJson.checkValue(element['user']['name'], UtilCheckJsonTypes.string),
           isdeleted: UtilCheckJson.checkValue(element['isdeleted'], UtilCheckJsonTypes.int)

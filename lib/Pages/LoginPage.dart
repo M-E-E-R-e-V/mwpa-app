@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../Mwpa/MwpaAPI.dart';
 import '../Mwpa/MwpaException.dart';
 
+/// LoginPage
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
 
@@ -16,12 +17,14 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => _LoginPageState();
 }
 
+/// _LoginPageState
 class _LoginPageState extends State<LoginPage> {
 
   final _urlController = TextEditingController();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  /// initState
   @override
   void initState() {
     super.initState();
@@ -29,6 +32,7 @@ class _LoginPageState extends State<LoginPage> {
     _loadPref();
   }
 
+  /// signIn
   Future signIn() async {
     var url = _urlController.text.trim();
     var username = _usernameController.text.trim();
@@ -60,14 +64,9 @@ class _LoginPageState extends State<LoginPage> {
         InfoDialog.show(context, 'Internal Error', error.toString());
       }
     }
-
-    // https://www.youtube.com/watch?v=c09XiwOZKsI
-    // https://www.youtube.com/watch?v=PBxbWZZTG2Q
-    // https://www.youtube.com/hashtag/createdbykoko
-
-    // https://www.youtube.com/watch?v=tKtYfuuVHlA
   }
 
+  /// _loadPref
   Future<void> _loadPref() async {
     final prefs = await SharedPreferences.getInstance();
 
@@ -86,6 +85,7 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
+  /// _isLogin
   Future<void> _isLogin() async {
     final prefs = await SharedPreferences.getInstance();
 
@@ -96,6 +96,7 @@ class _LoginPageState extends State<LoginPage> {
     return;
   }
 
+  /// build
   @override
   Widget build(BuildContext context) {
     return Scaffold(

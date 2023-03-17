@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:background_locator_2/settings/ios_settings.dart';
 import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
@@ -15,23 +14,26 @@ import 'package:background_locator_2/background_locator.dart';
 
 import '../Models/TourTracking.dart';
 
+/// LocationController
 class LocationController extends GetxController {
 
   @override
   void onReady() {
     super.onReady();
     locationTimer = scheduleTimeout(10 * 1000);
-    //_registerBackground();
   }
 
+  bool isLocationInit = false;
   Timer? locationTimer;
   Position? currentPosition;
 
   Timer scheduleTimeout([int milliseconds = 10000]) =>
       Timer.periodic(Duration(milliseconds: milliseconds), callLocation);
 
+  /// _checkLocationPermission
   Future<bool> _checkLocationPermission() async {
     final access = await LocationPermissions().checkPermissionStatus();
+
     switch (access) {
       case PermissionStatus.unknown:
       case PermissionStatus.denied:
@@ -39,50 +41,55 @@ class LocationController extends GetxController {
         final permission = await LocationPermissions().requestPermissions(
           permissionLevel: LocationPermissionLevel.locationAlways,
         );
+
         if (permission == PermissionStatus.granted) {
           return true;
         } else {
           return false;
         }
-        break;
+
       case PermissionStatus.granted:
         return true;
-        break;
+
       default:
         return false;
-        break;
     }
   }
 
-  _registerBackground() async {
+  /// initLocation
+  initLocation() async {
     await BackgroundLocator.initialize();
 
     if (await _checkLocationPermission()) {
-      LocationBackgroundService.register(
-              (location) {
-            Position tpos = Position(
-                longitude: location.longitude,
-                latitude: location.latitude,
-                timestamp: DateTime.fromMillisecondsSinceEpoch(
-                    location.time.toInt()
-                ),
-                accuracy: location.accuracy,
-                altitude: location.altitude,
-                speed: location.speed,
-                speedAccuracy: 0.0,
-                heading: 0.0
-            );
+      LocationBackgroundService.register((location) {
+        Position tpos = Position(
+            longitude: location.longitude,
+            latitude: location.latitude,
+            timestamp: DateTime.fromMillisecondsSinceEpoch(
+                location.time.toInt()
+            ),
+            accuracy: location.accuracy,
+            altitude: location.altitude,
+            speed: location.speed,
+            speedAccuracy: 0.0,
+            heading: 0.0
+        );
 
-            _setAndSavePosition(tpos);
-          }
+        _setAndSavePosition(tpos);
+      }
       );
+
+      isLocationInit = true;
     }
 
     final _isRunning = await BackgroundLocator.isServiceRunning();
-
     print(_isRunning);
   }
 
+  /// _registerBackground
+  _registerBackground() async {}
+
+  /// _setAndSavePosition
   _setAndSavePosition(Position position) {
     currentPosition = position;
 
@@ -107,10 +114,23 @@ class LocationController extends GetxController {
     update();
   }
 
+  /// callLocation
   Future<void> callLocation(Timer time) async {
+    if (!isLocationInit) {
+      // init self when is accept
+      PrefController prefController = Get.find<PrefController>();
+
+      if (prefController.prominentDisclosureConfirmed) {
+        initLocation();
+      }
+
+      return;
+    }
+
     try {
-      var tpos = await LocationProvider.getLocation();
-      _setAndSavePosition(tpos);
+      var tPos = await LocationProvider.getLocation();
+
+      _setAndSavePosition(tPos);
     } catch(e) {
       if (kDebugMode) {
         print("LocationController:callLocation");
@@ -119,6 +139,7 @@ class LocationController extends GetxController {
     }
   }
 
+  /// getLocationBy
   Future<Position?> getLocationBy(String tourFId, DateTime date) async {
     try {
       String timeStr = date.toUtc().toString();
