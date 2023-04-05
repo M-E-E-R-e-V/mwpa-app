@@ -131,7 +131,7 @@ class _LoginPageState extends State<LoginPage> {
 
                 const SizedBox(height: 50),
 
-                // url portal textfield
+                // url portal text-field
 
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 25.0),
@@ -156,7 +156,7 @@ class _LoginPageState extends State<LoginPage> {
 
                 const SizedBox(height: 10),
 
-                // username textfield
+                // username text-field
 
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 25.0),
@@ -181,7 +181,7 @@ class _LoginPageState extends State<LoginPage> {
 
                 const SizedBox(height: 10),
 
-                // password textfield
+                // password text-field
 
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 25.0),

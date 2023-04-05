@@ -391,47 +391,26 @@ class MwpaApi {
         try {
 
           final file = await File(imgFile).open(mode: FileMode.read);
-          var byte;
+          var fileSize = file.lengthSync();
+          var url = getUrl(MwpaApi.URL_SIGHTING_IMAGE_SAVE);
 
-          var filesize = file.lengthSync();
-          var offset = 0;
+          var request = http.MultipartRequest('POST', Uri.parse(url));
 
-          while (byte != -1) {
-            List<int> buffer = [];
+          request.fields['unid'] = unid;
+          request.fields['filename'] = filename;
+          request.fields['size'] = fileSize.toString();
 
-            for(var i=0; i<50000; i++) {
-              byte = await file.readByte();
+          http.MultipartFile multipartFile = await http.MultipartFile.fromPath('file', imgFile);
 
-              if (byte != -1) {
-                buffer.add(byte);
-              }
+          request.files.add(multipartFile);
 
-              offset++;
-            }
+          http.StreamedResponse response = await request.send();
 
-            var url = getUrl(MwpaApi.URL_SIGHTING_IMAGE_SAVE);
-            var postBody = jsonEncode(<String, dynamic>{
-              'unid': unid,
-              'filename': filename,
-              'size': filesize,
-              'offset': offset,
-              'data': base64Encode(buffer)
-            });
+          final res = await http.Response.fromStream(response);
+          var objResponse = DefaultReturn.fromJson(jsonDecode(res.body));
 
-            var response = await http.post(
-              Uri.parse(url),
-              headers: <String, String>{
-                'Content-Type': 'application/json; charset=UTF-8',
-                'cookie': _cookie
-              },
-              body: postBody,
-            );
-
-            var objResponse = DefaultReturn.fromJson(jsonDecode(response.body));
-
-            if (objResponse.statusCode != StatusCodes.OK) {
-              throw Exception('Image can not update!');
-            }
+          if (objResponse.statusCode != StatusCodes.OK) {
+            throw Exception('Image can not update!');
           }
 
           return true;
@@ -445,7 +424,10 @@ class MwpaApi {
     on MwpaException {
       rethrow;
     } catch(error) {
-      print(error);
+      if (kDebugMode) {
+        print(error);
+      }
+
       throw Exception('Connection error');
     }
 
