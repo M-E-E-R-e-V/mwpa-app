@@ -44,6 +44,8 @@ class _EditSightingPageState extends State<EditSightingPage> {
   final EncounterCategoriesController _encounterCategoriesController = Get.find<EncounterCategoriesController>();
   final BehaviouralStateController _behaviouralStateController = Get.find<BehaviouralStateController>();
 
+  bool isInit = false;
+
   String title = "";
 
   late DynInput sightVehicle;
@@ -285,59 +287,65 @@ class _EditSightingPageState extends State<EditSightingPage> {
   @override
   void initState() {
     super.initState();
-
-    Sighting? sighting = widget.sighting;
-
-    title = "Add Sighting";
-
-    if (sighting != null) {
-      title = "Edit Sighting";
-      sightVehicleValue.setStrValueByInt(sighting.vehicle_id!);
-      sightVehicleDriverValue.setStrValueByInt(sighting.vehicle_driver_id!);
-      sightBeaufortValue.setStrValueByInt(sighting.beaufort_wind!);
-      sightDateValue.setDateTime(sighting.date!);
-      sightTourStartValue.setTimeOfDy(sighting.tour_start!);
-      sightTourEndValue.setTimeOfDy(sighting.tour_end!);
-      sightDurationFromValue.setTimeOfDy(sighting.duration_from!);
-      sightDurationUntilValue.setTimeOfDy(sighting.duration_until!);
-      sightLocationBeginValue.setPositionStr(sighting.location_begin!);
-      sightLocationEndValue.setPositionStr(sighting.location_end!);
-      sightPhotoTakenValue.setIntValue(sighting.photo_taken!);
-      sightDistanceCoastValue.setValue(sighting.distance_coast!);
-      sightDistanceCoastEstimationGpsValue.setIntValue(sighting.distance_coast_estimation_gps!);
-      sightSpeciesValue.setStrValueByInt(sighting.species_id!);
-      sightSpeciesNumValue.setStrValueByInt(sighting.species_count!);
-      sightJuvenilesValue.setIntValue(sighting.juveniles!);
-      sightCalvesValue.setIntValue(sighting.calves!);
-      sightNewbornsValue.setIntValue(sighting.newborns!);
-      sightBehaviourValue.setMultiValue(sighting.behaviours!);
-      sightSubgroupsValue.setIntValue(sighting.subgroups!);
-      sightGroupStructureValue.setStrValueByInt(sighting.group_structure_id!);
-      sightReactionValue.setStrValueByInt(sighting.reaction_id!);
-      sightFreqBehaviourValue.setValue(sighting.freq_behaviour!);
-      sightRecAnimalsValue.setValue(sighting.recognizable_animals!);
-      sightOtherSpeciesValue.setMultiValue(sighting.other_species!);
-      sightOtherValue.setValue(sighting.other!);
-      sightOtherVehicleValue.setValue(sighting.other_vehicle!);
-      sightNoteValue.setValue(sighting.note!);
-      sightImageValue.setImagePath(sighting.image!);
-    } else {
-      _loadPref();
-
-      sightDurationFromValue.setTimeof(TimeOfDay.now());
-
-      if (_locationController.currentPosition != null) {
-        sightLocationBeginValue.setPosition(_locationController.currentPosition!);
-
-        var distance = UtilDistanceCoast.getDistance(_locationController.currentPosition!);
-        sightDistanceCoastValue.setValue("$distance");
-      }
-    }
   }
 
   /// build
   @override
   Widget build(BuildContext context) {
+    if (!isInit) {
+      isInit = true;
+      Sighting? sighting = widget.sighting;
+
+      title = "Add Sighting";
+
+      if (sighting != null) {
+        title = "Edit Sighting";
+        sightVehicleValue.setStrValueByInt(sighting.vehicle_id!);
+        sightVehicleDriverValue.setStrValueByInt(sighting.vehicle_driver_id!);
+        sightBeaufortValue.setStrValueByInt(sighting.beaufort_wind!);
+        sightDateValue.setDateTime(sighting.date!);
+        sightTourStartValue.setTimeOfDy(sighting.tour_start!);
+        sightTourEndValue.setTimeOfDy(sighting.tour_end!);
+        sightDurationFromValue.setTimeOfDy(sighting.duration_from!);
+        sightDurationUntilValue.setTimeOfDy(sighting.duration_until!);
+        sightLocationBeginValue.setPositionStr(sighting.location_begin!);
+        sightLocationEndValue.setPositionStr(sighting.location_end!);
+        sightPhotoTakenValue.setIntValue(sighting.photo_taken!);
+        sightDistanceCoastValue.setValue(sighting.distance_coast!);
+        sightDistanceCoastEstimationGpsValue.setIntValue(
+            sighting.distance_coast_estimation_gps!);
+        sightSpeciesValue.setStrValueByInt(sighting.species_id!);
+        sightSpeciesNumValue.setStrValueByInt(sighting.species_count!);
+        sightJuvenilesValue.setIntValue(sighting.juveniles!);
+        sightCalvesValue.setIntValue(sighting.calves!);
+        sightNewbornsValue.setIntValue(sighting.newborns!);
+        sightBehaviourValue.setMultiValue(sighting.behaviours!);
+        sightSubgroupsValue.setIntValue(sighting.subgroups!);
+        sightGroupStructureValue.setStrValueByInt(sighting.group_structure_id!);
+        sightReactionValue.setStrValueByInt(sighting.reaction_id!);
+        sightFreqBehaviourValue.setValue(sighting.freq_behaviour!);
+        sightRecAnimalsValue.setValue(sighting.recognizable_animals!);
+        sightOtherSpeciesValue.setMultiValue(sighting.other_species!);
+        sightOtherValue.setValue(sighting.other!);
+        sightOtherVehicleValue.setValue(sighting.other_vehicle!);
+        sightNoteValue.setValue(sighting.note!);
+        sightImageValue.setImagePath(sighting.image!);
+      } else {
+        _loadPref();
+
+        sightDurationFromValue.setTimeof(TimeOfDay.now());
+
+        if (_locationController.currentPosition != null) {
+          sightLocationBeginValue.setPosition(
+              _locationController.currentPosition!);
+
+          var distance = UtilDistanceCoast.getDistance(
+              _locationController.currentPosition!);
+          sightDistanceCoastValue.setValue("$distance");
+        }
+      }
+    }
+
     return Obx(() {
         sightVehicle = DynInput(
            context: context,
