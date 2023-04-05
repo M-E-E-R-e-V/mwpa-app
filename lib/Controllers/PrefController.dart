@@ -75,6 +75,7 @@ class PrefController extends GetxController {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(Preference.PROMINENT_DISCLOSURE_CONFIRMED, confirmed);
+
       prominentDisclosureConfirmed = confirmed;
     } catch(e) {
       if (kDebugMode) {

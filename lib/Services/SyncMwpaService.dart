@@ -206,7 +206,14 @@ class SyncMwpaService {
         }
 
         if (sighting.image != null && sighting.image != "") {
-          await api.saveSightingImage(sighting.unid!, sighting.image!);
+          try {
+            await api.saveSightingImage(sighting.unid!, sighting.image!);
+          } catch(ei) {
+            if (kDebugMode) {
+              print(ei);
+              // TODO later, handle upload is finish
+            }
+          }
         }
 
         if (UtilDate.isOverDays(DateTime.parse(sighting.date!).toLocal(), 7)) {

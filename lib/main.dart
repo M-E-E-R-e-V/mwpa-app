@@ -29,7 +29,6 @@ class MWPAApp extends StatefulWidget {
 
 class _MWPAAppState extends State<MWPAApp> {
   final PrefController _prefController = Get.put(PrefController());
-  final LocationController _locationController = Get.put(LocationController());
 
   // This widget is the root of your application.
   @override

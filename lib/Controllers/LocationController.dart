@@ -3,14 +3,10 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-import 'package:location_permissions/location_permissions.dart';
 import 'package:mwpaapp/Controllers/PrefController.dart';
 import 'package:mwpaapp/Db/DBHelper.dart';
-import 'package:mwpaapp/Location/LocationProvider.dart';
-import 'package:mwpaapp/Services/LocationBackgroundService.dart';
 import 'package:mwpaapp/Util/UtilTourFId.dart';
 import 'package:uuid/uuid.dart';
-import 'package:background_locator_2/background_locator.dart';
 
 import '../Models/TourTracking.dart';
 
@@ -20,74 +16,93 @@ class LocationController extends GetxController {
   @override
   void onReady() {
     super.onReady();
-    locationTimer = scheduleTimeout(10 * 1000);
+
+    if (!isLocationInit) {
+      // init self when is accept
+      PrefController prefController = Get.find<PrefController>();
+
+      if (prefController.prominentDisclosureConfirmed) {
+        initLocation();
+      }
+
+      return;
+    }
   }
 
+  final GeolocatorPlatform geolocatorAndroid = GeolocatorPlatform.instance;
+  StreamSubscription<Position>? _positionStreamSubscription;
   bool isLocationInit = false;
   Timer? locationTimer;
   Position? currentPosition;
 
-  Timer scheduleTimeout([int milliseconds = 10000]) =>
-      Timer.periodic(Duration(milliseconds: milliseconds), callLocation);
+  /// initLocation
+  Future<bool> initLocation() async {
+    if (_positionStreamSubscription == null) {
+      bool serviceEnabled;
+      LocationPermission permission;
 
-  /// _checkLocationPermission
-  Future<bool> _checkLocationPermission() async {
-    final access = await LocationPermissions().checkPermissionStatus();
+      // Test if location services are enabled.
+      serviceEnabled = await geolocatorAndroid.isLocationServiceEnabled();
 
-    switch (access) {
-      case PermissionStatus.unknown:
-      case PermissionStatus.denied:
-      case PermissionStatus.restricted:
-        final permission = await LocationPermissions().requestPermissions(
-          permissionLevel: LocationPermissionLevel.locationAlways,
-        );
+      if (!serviceEnabled) {
+        return false;
+      }
 
-        if (permission == PermissionStatus.granted) {
-          return true;
-        } else {
+      permission = await geolocatorAndroid.checkPermission();
+
+      if (permission == LocationPermission.denied) {
+        permission = await geolocatorAndroid.requestPermission();
+
+        if (permission == LocationPermission.denied) {
           return false;
         }
-
-      case PermissionStatus.granted:
-        return true;
-
-      default:
-        return false;
-    }
-  }
-
-  /// initLocation
-  initLocation() async {
-    await BackgroundLocator.initialize();
-
-    if (await _checkLocationPermission()) {
-      LocationBackgroundService.register((location) {
-        Position tpos = Position(
-            longitude: location.longitude,
-            latitude: location.latitude,
-            timestamp: DateTime.fromMillisecondsSinceEpoch(
-                location.time.toInt()
-            ),
-            accuracy: location.accuracy,
-            altitude: location.altitude,
-            speed: location.speed,
-            speedAccuracy: 0.0,
-            heading: 0.0
-        );
-
-        _setAndSavePosition(tpos);
       }
+
+      if (permission == LocationPermission.deniedForever) {
+        return false;
+      }
+
+      final androidSettings = AndroidSettings(
+        accuracy: LocationAccuracy.best,
+        intervalDuration: const Duration(seconds: 10),
+        forceLocationManager: false,
+        useMSLAltitude: true,
+        foregroundNotificationConfig: const ForegroundNotificationConfig(
+            notificationText: "MWPA app is tracking your route in background ...",
+            notificationTitle: "MWPA app Tracking",
+            enableWakeLock: false,
+            notificationIcon: AndroidResource(name: 'ic_stat_onesignal_default')
+        ),
       );
 
-      isLocationInit = true;
+      final positionStream = geolocatorAndroid.getPositionStream(
+          locationSettings: androidSettings);
+
+      _positionStreamSubscription = positionStream.handleError((error) {
+        _positionStreamSubscription?.cancel();
+        _positionStreamSubscription = null;
+      }).listen((position) {
+        Position tPosition = Position(
+            longitude: position.longitude,
+            latitude: position.latitude,
+            timestamp: position.timestamp,
+            accuracy: position.accuracy,
+            altitude: position.altitude,
+            speed: position.speed,
+            speedAccuracy: position.speedAccuracy,
+            heading: position.heading
+        );
+
+        if (kDebugMode) {
+          print(tPosition.toString());
+        }
+
+        _setAndSavePosition(tPosition);
+      });
     }
 
-    final _isRunning = await BackgroundLocator.isServiceRunning();
-    print(_isRunning);
+    return true;
   }
-
-  /// _registerBackground
-  _registerBackground() async {}
 
   /// _setAndSavePosition
   _setAndSavePosition(Position position) {
@@ -112,31 +127,6 @@ class LocationController extends GetxController {
     }
 
     update();
-  }
-
-  /// callLocation
-  Future<void> callLocation(Timer time) async {
-    if (!isLocationInit) {
-      // init self when is accept
-      PrefController prefController = Get.find<PrefController>();
-
-      if (prefController.prominentDisclosureConfirmed) {
-        initLocation();
-      }
-
-      return;
-    }
-
-    try {
-      var tPos = await LocationProvider.getLocation();
-
-      _setAndSavePosition(tPos);
-    } catch(e) {
-      if (kDebugMode) {
-        print("LocationController:callLocation");
-        print(e);
-      }
-    }
   }
 
   /// getLocationBy
