@@ -82,7 +82,7 @@ class SyncMwpaService {
 
 
     if (update != null) {
-      await update(10);
+      await update(5);
     }
 
     // vehicle driver sync
@@ -109,7 +109,7 @@ class SyncMwpaService {
     }
 
     if (update != null) {
-      await update(20);
+      await update(10);
     }
 
     // species
@@ -136,7 +136,7 @@ class SyncMwpaService {
     }
 
     if (update != null) {
-      await update(30);
+      await update(15);
     }
 
     // encounter categories
@@ -163,7 +163,7 @@ class SyncMwpaService {
     }
 
     if (update != null) {
-      await update(40);
+      await update(20);
     }
 
     // behavioural state
@@ -189,6 +189,10 @@ class SyncMwpaService {
       rethrow;
     }
 
+    if (update != null) {
+      await update(25);
+    }
+
     // sightings
     // -------------------------------------------------------------------------
 
@@ -197,12 +201,30 @@ class SyncMwpaService {
     sightingList = sightings.map((data) => Sighting.fromJson(data)).toList();
 
     try {
+      var index = 0;
+      var count = sightingList.length;
+
       for (var sighting in sightingList) {
+        index++;
+
+        if (update != null) {
+          var percentStep = 100*(index*2-1)/(count*2);
+          var percentUpdate = 75*100/percentStep ?? (25+index);
+          await update(percentUpdate.toInt());
+        }
+
+
         String? unid = await api.saveSighting(sighting);
 
         if (unid != null) {
           sighting.unid = unid;
           await DBHelper.updateSighting(sighting);
+        }
+
+        if (update != null) {
+          var percentStep2 = 100*(index*2)/(count*2);
+          var percentUpdate2 = 75*100/percentStep2 ?? (25+index);
+          await update(percentUpdate2.toInt());
         }
 
         if (sighting.image != null && sighting.image != "") {
