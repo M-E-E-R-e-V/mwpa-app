@@ -254,12 +254,26 @@ class _ListPageState extends State<ListPage> {
   }
 
   /// _addShortSighting
-  _addShortSighting(String otherName) async {
+  _addShortSighting(String otherName, BuildContext context) async {
     DynInputValue tOD = DynInputValue();
     tOD.timeValue = TimeOfDay.now();
     Position pos = _locationController.currentPosition!;
     String location = jsonEncode(pos.toJson());
     var distance = UtilDistanceCoast.getDistance(pos);
+
+    if (_prefController.prefToru == null) {
+      if (kDebugMode) {
+        print("_ListPageState:_addShortSighting - prefToru is empty!");
+      }
+
+      InfoDialog.show(
+          context,
+          "Error",
+          "Please set the standard tour dates beforehand. The entry cannot be added until then."
+      );
+
+      return;
+    }
 
     await _sightingController.addSighting(newSighting: Sighting(
       unid: '',
@@ -316,6 +330,7 @@ class _ListPageState extends State<ListPage> {
       btnList.add(const SizedBox(width: 5));
     }
 
+    // TODO, fast button animals should come from the database in the future
     btnList.add(DefaultButton(
       buttonIcon: Icons.switch_access_shortcut_add,
       label: 'Add Tortoise',
@@ -330,7 +345,7 @@ class _ListPageState extends State<ListPage> {
               return Dialog(
               shape: RoundedRectangleBorder(
                   borderRadius:BorderRadius.circular(30.0)),
-              child: Container(
+              child: SizedBox(
                   height: 300,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -345,8 +360,8 @@ class _ListPageState extends State<ListPage> {
                             label: 'Caretta caretta',
                             bgColor: Colors.green,
                             onTab: () {
-                              _addShortSighting('Caretta caretta');
                               Navigator.of(context).pop();
+                              _addShortSighting('Caretta caretta', context);
                             }
                           ),
                           const SizedBox(width: 15),
@@ -354,8 +369,8 @@ class _ListPageState extends State<ListPage> {
                             label: 'Dermochelys coriacea',
                             bgColor: Colors.green,
                             onTab: () {
-                              _addShortSighting('Dermochelys coriacea');
                               Navigator.of(context).pop();
+                              _addShortSighting('Dermochelys coriacea', context);
                             }
                           )
                         ],
@@ -369,8 +384,8 @@ class _ListPageState extends State<ListPage> {
                             label: 'Chelonia mydas',
                             bgColor: Colors.green,
                             onTab: () {
-                              _addShortSighting('Chelonia mydas');
                               Navigator.of(context).pop();
+                              _addShortSighting('Chelonia mydas', context);
                             }
                           ),
                           const SizedBox(width: 15),
@@ -378,8 +393,8 @@ class _ListPageState extends State<ListPage> {
                             label: 'Eretmochelys imbricata',
                             bgColor: Colors.green,
                             onTab: () {
-                              _addShortSighting('Eretmochelys imbricata');
                               Navigator.of(context).pop();
+                              _addShortSighting('Eretmochelys imbricata', context);
                             }
                           )
                         ],
