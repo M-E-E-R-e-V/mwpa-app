@@ -318,7 +318,7 @@ class _ListPageState extends State<ListPage> {
               buttonIcon: Icons.tour,
               label: 'Tour End',
               height: 40,
-              width: 90,
+              width: 88,
               onTab: () async {
                 _setEndTour(context);
               }
@@ -422,7 +422,7 @@ class _ListPageState extends State<ListPage> {
     ));
 
     return Container(
-      margin: const EdgeInsets.only(left: 20, right: 20, top: 15),
+      margin: const EdgeInsets.only(left: 10, right: 10, top: 15),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,

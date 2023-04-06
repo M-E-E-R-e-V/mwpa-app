@@ -55,6 +55,7 @@ dependencies:
   connectivity:
   image_picker:
   app_settings: 4.2.0
+  auto_size_text: ^3.0.0
 
 dev_dependencies:
   flutter_launcher_icons: ^0.10.0

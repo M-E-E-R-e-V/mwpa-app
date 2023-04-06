@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -57,7 +58,10 @@ class DynInputValue {
     try {
       return int.parse(strValue);
     } catch(e) {
-      print(e);
+      if (kDebugMode) {
+        print('DynInputValue::getStrValueAsInt: $strValue');
+        print(e);
+      }
     }
 
     return 0;
@@ -75,7 +79,10 @@ class DynInputValue {
     try {
       dateValue = DateTime.parse(date).toLocal();
     } catch(e) {
-      print(e);
+      if (kDebugMode) {
+        print('DynInputValue::setDateTime: $date');
+        print(e);
+      }
     }
   }
 
@@ -106,7 +113,10 @@ class DynInputValue {
           TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
     }
     catch(e) {
-      print(e);
+      if (kDebugMode) {
+        print('DynInputValue::setTimeOfDy: $time');
+        print(e);
+      }
     }
   }
 
@@ -122,7 +132,10 @@ class DynInputValue {
     try {
       posValue = Position.fromMap(jsonDecode(pos));
     } catch(e) {
-      print(e);
+      if (kDebugMode) {
+        print('DynInputValue::setPositionStr: $pos');
+        print(e);
+      }
     }
   }
 
@@ -162,7 +175,10 @@ class DynInputValue {
         multiValue.add(tval);
       });
     } catch(e) {
-      print(e);
+      if (kDebugMode) {
+        print('DynInputValue::setMultiValue: $val');
+        print(e);
+      }
     }
   }
 
@@ -533,7 +549,10 @@ class _DynInputState extends State<DynInput> {
               initTagList.add(element);
             }
           } catch(e) {
-            print(e);
+            if (kDebugMode) {
+              print('DynInputValue::buildSingle: ${dynValue!.strValue}');
+              print(e);
+            }
 
             initTagList = dynValue!.strValue.split(" ");
 
@@ -658,7 +677,10 @@ class _DynInputState extends State<DynInput> {
                                                   style: const TextStyle(color: Colors.white),
                                                 ),
                                                 onTap: () {
-                                                  print("$tag selected");
+                                                  if (kDebugMode) {
+                                                    print('DynInputValue::buildSingle:');
+                                                    print("$tag selected");
+                                                  }
                                                 },
                                               ),
                                               const SizedBox(width: 4.0),
@@ -675,7 +697,10 @@ class _DynInputState extends State<DynInput> {
                                                     dynValue!.strValue =
                                                         jsonEncode(_tagController!.getTags);
                                                   } catch(e) {
-                                                    print(e);
+                                                    if (kDebugMode) {
+                                                      print('DynInputValue::buildSingle: ${_tagController!.getTags}');
+                                                      print(e);
+                                                    }
                                                   }
                                                 },
                                               )
@@ -694,7 +719,10 @@ class _DynInputState extends State<DynInput> {
                                   dynValue!.strValue =
                                       jsonEncode(_tagController!.getTags);
                                 } catch(e) {
-                                  print(e);
+                                  if (kDebugMode) {
+                                    print('DynInputValue::buildSingle: ${_tagController!.getTags}');
+                                    print(e);
+                                  }
                                 }
                               },
                             );

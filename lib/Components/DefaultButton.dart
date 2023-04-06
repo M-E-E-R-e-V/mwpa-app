@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:mwpaapp/Constants.dart';
 
@@ -13,7 +14,7 @@ class DefaultButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var newWidth = 150.0;
+    var newWidth = 140.0;
     var newHeight = 60.0;
     var newBgColor = kButtonBackgroundColor;
 
@@ -40,12 +41,15 @@ class DefaultButton extends StatelessWidget {
     }
 
     if (label != null) {
-      inner.add(Text(
+      inner.add(AutoSizeText(
         label!,
         style: const TextStyle(
             color: kButtonFontColor,
-            fontWeight: FontWeight.bold
+            fontWeight: FontWeight.bold,
+            fontSize: 12
         ),
+        minFontSize: 6,
+        maxLines: 1
       ));
     }
 
