@@ -4,6 +4,9 @@ import 'package:mwpaapp/Util/UtilCheckJson.dart';
 
 class Sighting {
 
+  static const int SYNC_STATUS_OPEN = 0;
+  static const int SYNC_STATUS_FINISH = 1;
+
   int? id;
   String? unid;
   int? vehicle_id;
@@ -36,6 +39,7 @@ class Sighting {
   String? other_vehicle;
   String? note;
   String? image;
+  int? syncStatus;
 
   Sighting({
     this.id,
@@ -69,7 +73,8 @@ class Sighting {
     this.other,
     this.other_vehicle,
     this.note,
-    this.image
+    this.image,
+    this.syncStatus
   });
 
   Sighting.fromJson(Map<String, dynamic> json) {
@@ -105,9 +110,10 @@ class Sighting {
     other_vehicle = UtilCheckJson.checkValue(json['other_vehicle'], UtilCheckJsonTypes.string);
     note = UtilCheckJson.checkValue(json['note'], UtilCheckJsonTypes.string);
     image = UtilCheckJson.checkValue(json['image'], UtilCheckJsonTypes.string);
+    syncStatus = UtilCheckJson.checkValue(json['syncStatus'], UtilCheckJsonTypes.int);
   }
 
-  Map<String, dynamic> toJson(bool withId) {
+  Map<String, dynamic> toJson(bool withId, bool withSyncStatus) {
     final Map<String, dynamic> data = <String, dynamic>{};
 
     if (withId) {
@@ -145,6 +151,10 @@ class Sighting {
     data['other_vehicle'] = other_vehicle;
     data['note'] = note;
     data['image'] = image;
+
+    if (withSyncStatus) {
+      data['syncStatus'] = syncStatus;
+    }
 
     return data;
   }

@@ -74,8 +74,8 @@ class ListSightingTile extends StatelessWidget {
 
     if (sighting.location_begin != null) {
       try {
-        Position tpos = Position.fromMap(jsonDecode(sighting.location_begin!));
-        locationString = UtilPosition.getStr(tpos);
+        Position tPos = Position.fromMap(jsonDecode(sighting.location_begin!));
+        locationString = UtilPosition.getStr(tPos);
       }
       catch(loce) {
         if (kDebugMode) {
@@ -97,6 +97,34 @@ class ListSightingTile extends StatelessWidget {
       backgroundColor = Colors.yellow;
       speciesName = "Specie not found";
     }
+
+    // -------------------------------------------------------------------------
+
+    Widget syncStatus = Icon(
+      Icons.sync_outlined,
+      color: backgroundColor.computeLuminance() < 0.5 ? Colors.grey[200] : Colors.grey[700],
+      size: 18,
+    );
+
+    if (sighting.unid != '') {
+      if (sighting.syncStatus == Sighting.SYNC_STATUS_OPEN) {
+        syncStatus = Icon(
+          Icons.sync_problem,
+          color: backgroundColor.computeLuminance() < 0.5
+              ? Colors.grey[200]
+              : Colors.grey[700],
+          size: 18,
+        );
+      } else {
+        syncStatus = const Icon(
+          Icons.cloud,
+          color: Colors.green,
+          size: 18,
+        );
+      }
+    }
+
+    // -------------------------------------------------------------------------
 
     List<Widget> symbols = [];
 
@@ -164,15 +192,22 @@ class ListSightingTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      speciesName,
-                      style: GoogleFonts.lato(
-                        textStyle: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: backgroundColor.computeLuminance() < 0.5 ? Colors.white : Colors.black
-                        )
-                      ),
+                    Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            speciesName,
+                            style: GoogleFonts.lato(
+                                textStyle: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: backgroundColor.computeLuminance() < 0.5 ? Colors.white : Colors.black
+                                )
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          syncStatus
+                        ]
                     ),
                     const SizedBox(
                       height: 12,

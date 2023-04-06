@@ -209,7 +209,7 @@ class SyncMwpaService {
 
         if (update != null) {
           var percentStep = 100*(index*2-1)/(count*2);
-          var percentUpdate = 75*100/percentStep ?? (25+index);
+          var percentUpdate = (percentStep*75)/100 ?? (25+index);
           await update(percentUpdate.toInt());
         }
 
@@ -218,12 +218,13 @@ class SyncMwpaService {
 
         if (unid != null) {
           sighting.unid = unid;
+          sighting.syncStatus = Sighting.SYNC_STATUS_FINISH;
           await DBHelper.updateSighting(sighting);
         }
 
         if (update != null) {
           var percentStep2 = 100*(index*2)/(count*2);
-          var percentUpdate2 = 75*100/percentStep2 ?? (25+index);
+          var percentUpdate2 = (percentStep2*75)/100 ?? (25+index);
           await update(percentUpdate2.toInt());
         }
 

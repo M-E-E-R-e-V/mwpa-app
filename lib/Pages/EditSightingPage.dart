@@ -172,39 +172,46 @@ class _EditSightingPageState extends State<EditSightingPage> {
 
   /// _saveSightingToDb
   _saveSightingToDb() async {
+    var mUnid = "";
+
+    if (widget.sighting != null) {
+      mUnid = widget.sighting?.unid ?? "";
+    }
+
     Sighting tSigh = Sighting(
-        unid: "",
-        vehicle_id: sightVehicle.dynValue?.getStrValueAsInt(),
-        vehicle_driver_id: sightVehicleDriver.dynValue
-            ?.getStrValueAsInt(),
-        beaufort_wind: sightBeaufort.dynValue?.getStrValueAsInt(),
-        date: sightDate.dynValue?.getDateTime(),
-        tour_start: sightTourStart.dynValue?.getTimeOfDay(),
-        tour_end: sightTourEnd.dynValue?.getTimeOfDay(),
-        duration_from: sightDurationFrom.dynValue?.getTimeOfDay(),
-        duration_until: sightDurationUntil.dynValue?.getTimeOfDay(),
-        location_begin: sightLocationBegin.dynValue?.getPosition(),
-        location_end: sightLocationEnd.dynValue?.getPosition(),
-        photo_taken: sightPhotoTaken.dynValue?.getIntValue(),
-        distance_coast: sightDistanceCoast.dynValue?.getValue(),
-        distance_coast_estimation_gps: sightDistanceCoastEstimationGps
-            .dynValue?.getIntValue(),
-        species_id: sightSpecies.dynValue?.getStrValueAsInt(),
-        species_count: sightSpeciesNum.dynValue?.getStrValueAsInt(),
-        juveniles: sightJuveniles.dynValue?.getIntValue(),
-        calves: sightCalves.dynValue?.getIntValue(),
-        newborns: sightNewborns.dynValue?.getIntValue(),
-        behaviours: sightBehaviour.dynValue?.getMultiValue(),
-        subgroups: sightSubgroups.dynValue?.getIntValue(),
-        group_structure_id: sightGroupStructure.dynValue?.getStrValueAsInt(),
-        reaction_id: sightReaction.dynValue?.getStrValueAsInt(),
-        freq_behaviour: sightFreqBehaviour.dynValue?.getValue(),
-        recognizable_animals: sightRecAnimals.dynValue?.getValue(),
-        other_species: sightOtherSpecies.dynValue?.getMultiValue(),
-        other: sightOther.dynValue?.getValue(),
-        other_vehicle: sightOtherVehicle.dynValue?.getValue(),
-        note: sightNote.dynValue?.getValue(),
-        image: sightImage.dynValue?.getImagePath()
+      unid: mUnid,
+      vehicle_id: sightVehicle.dynValue?.getStrValueAsInt(),
+      vehicle_driver_id: sightVehicleDriver.dynValue
+          ?.getStrValueAsInt(),
+      beaufort_wind: sightBeaufort.dynValue?.getStrValueAsInt(),
+      date: sightDate.dynValue?.getDateTime(),
+      tour_start: sightTourStart.dynValue?.getTimeOfDay(),
+      tour_end: sightTourEnd.dynValue?.getTimeOfDay(),
+      duration_from: sightDurationFrom.dynValue?.getTimeOfDay(),
+      duration_until: sightDurationUntil.dynValue?.getTimeOfDay(),
+      location_begin: sightLocationBegin.dynValue?.getPosition(),
+      location_end: sightLocationEnd.dynValue?.getPosition(),
+      photo_taken: sightPhotoTaken.dynValue?.getIntValue(),
+      distance_coast: sightDistanceCoast.dynValue?.getValue(),
+      distance_coast_estimation_gps: sightDistanceCoastEstimationGps
+          .dynValue?.getIntValue(),
+      species_id: sightSpecies.dynValue?.getStrValueAsInt(),
+      species_count: sightSpeciesNum.dynValue?.getStrValueAsInt(),
+      juveniles: sightJuveniles.dynValue?.getIntValue(),
+      calves: sightCalves.dynValue?.getIntValue(),
+      newborns: sightNewborns.dynValue?.getIntValue(),
+      behaviours: sightBehaviour.dynValue?.getMultiValue(),
+      subgroups: sightSubgroups.dynValue?.getIntValue(),
+      group_structure_id: sightGroupStructure.dynValue?.getStrValueAsInt(),
+      reaction_id: sightReaction.dynValue?.getStrValueAsInt(),
+      freq_behaviour: sightFreqBehaviour.dynValue?.getValue(),
+      recognizable_animals: sightRecAnimals.dynValue?.getValue(),
+      other_species: sightOtherSpecies.dynValue?.getMultiValue(),
+      other: sightOther.dynValue?.getValue(),
+      other_vehicle: sightOtherVehicle.dynValue?.getValue(),
+      note: sightNote.dynValue?.getValue(),
+      image: sightImage.dynValue?.getImagePath(),
+      syncStatus: Sighting.SYNC_STATUS_OPEN
     );
 
     tSigh.tour_fid = UtilTourFid.createSTourFId(tSigh);

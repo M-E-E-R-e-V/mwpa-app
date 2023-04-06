@@ -10,7 +10,7 @@ import 'package:sqflite/sqflite.dart';
 
 class DBHelper {
   static Database? _db;
-  static const int _version = 2;
+  static const int _version = 3;
   static const String _tableNameSighting = "sighting";
   static const String _tableNameTourTracking = "tour_tracking";
   static const String _tableNameVehicle = "vehicle";
@@ -34,6 +34,10 @@ class DBHelper {
 
             if (oldVersion == 1) {
               _updateTableSightingV1toV2(batch);
+            }
+
+            if (oldVersion == 2) {
+              _updateTableSightingV2toV3(batch);
             }
 
             await batch.commit();
@@ -136,8 +140,12 @@ class DBHelper {
     batch.execute('ALTER TABLE $_tableNameSighting ADD group_structure_id INTEGER');
   }
 
+  static void _updateTableSightingV2toV3(Batch batch) {
+    batch.execute('ALTER TABLE $_tableNameSighting ADD syncStatus INTEGER');
+  }
+
   static Future<int> insertSighting(Sighting newSighting) async {
-    return await _db?.insert(_tableNameSighting, newSighting.toJson(false)) ?? 1;
+    return await _db?.insert(_tableNameSighting, newSighting.toJson(false, true)) ?? 1;
   }
 
   static Future<List<Map<String, dynamic>>> querySighting() async {
@@ -155,7 +163,7 @@ class DBHelper {
   static Future<int> updateSighting(Sighting uSighting) async {
     return await _db!.update(
         _tableNameSighting,
-        uSighting.toJson(false),
+        uSighting.toJson(false, true),
         where: 'id=?',
         whereArgs: [uSighting.id]
     );
@@ -380,7 +388,7 @@ class DBHelper {
     List<Map<String, dynamic>> list = await _db!.query(
         _tableNameTourTracking,
         where: "tour_fid = ? AND date LIKE ?",
-        whereArgs: [tourFId, "${searchDate}%"]
+        whereArgs: [tourFId, "$searchDate%"]
     );
 
     if (list.isNotEmpty) {

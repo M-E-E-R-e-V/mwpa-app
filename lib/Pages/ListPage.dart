@@ -92,7 +92,7 @@ class _ListPageState extends State<ListPage> {
 
     try {
       await service.sync((p0) async {
-        EasyLoading.showProgress(p0 / 100, status: 'sync to server ...');
+        EasyLoading.showProgress(p0.round() / 100, status: 'sync to server ...');
       });
 
       await _vehicleController.getVehicle();
@@ -111,6 +111,8 @@ class _ListPageState extends State<ListPage> {
         InfoDialog.show(context, 'Internal Error', error.toString());
       }
     }
+
+    setState(() { });
   }
 
   /// _loadController
@@ -290,7 +292,8 @@ class _ListPageState extends State<ListPage> {
       location_end: location,
       distance_coast: "$distance",
       other: otherName,
-      note: "Short insert"
+      note: "Short insert",
+      syncStatus: Sighting.SYNC_STATUS_OPEN
     ));
 
     _loadController();
