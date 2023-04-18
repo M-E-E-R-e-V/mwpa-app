@@ -1,0 +1,38 @@
+
+import 'package:mwpaapp/Models/TourTracking.dart';
+import 'package:mwpaapp/Mwpa/Models/SightingTourTracking.dart';
+
+class SightingTourTrackingSave {
+  List<SightingTourTracking> list;
+
+  SightingTourTrackingSave({required this.list});
+
+  static SightingTourTrackingSave fromTrackingList(List<TourTracking> trackList) {
+    List<SightingTourTracking> tList = [];
+
+    for (var entry in trackList) {
+      tList.add(SightingTourTracking(
+        unid: entry.uuid,
+        tour_fid: entry.tour_fid,
+        date: entry.date,
+        location: entry.location
+      ));
+    }
+
+    return SightingTourTrackingSave(list: tList);
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+
+    var list = [];
+
+    for (var track in this.list) {
+      list.add(track.toJson());
+    }
+
+    data['list'] = list;
+
+    return data;
+  }
+}

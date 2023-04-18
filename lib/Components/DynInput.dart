@@ -23,6 +23,7 @@ enum DynInputType {
   time,
   select,
   switcher,
+  nyntogglebtn,
   location,
   multiselect,
   multiselectmixed,
@@ -387,6 +388,8 @@ class _DynInputState extends State<DynInput> {
           isExpanded: true,
           style: subTitleStyle,
           itemHeight: null,
+          dropdownColor: kPrimaryHeaderColor,
+          borderRadius: BorderRadius.circular(12),
           underline: Container(
             height: 0,
           ),
@@ -402,7 +405,8 @@ class _DynInputState extends State<DynInput> {
                       color: kPrimaryColor,
                       width: 1.0
                     ),
-                    borderRadius: BorderRadius.circular(12)
+                    borderRadius: BorderRadius.circular(12),
+                    color: kPrimaryBackgroundColor,
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -793,6 +797,59 @@ class _DynInputState extends State<DynInput> {
               ),
               const SizedBox(height: 10,)
             ],
+          ),
+        );
+        break;
+
+      case DynInputType.nyntogglebtn:
+        List<bool> _isSelected = [false, false, false];
+
+        if (dynValue!.intValue <= -1) {
+          _isSelected[0] = true;
+        } else if (dynValue!.intValue == 0) {
+          _isSelected[2] = true;
+        } else if (dynValue!.intValue >= 1) {
+          _isSelected[1] = true;
+        }
+
+        inContainer = Container(
+          margin: const EdgeInsets.only(top: 8.0),
+          padding: const EdgeInsets.only(left: 14),
+          child: ToggleButtons(
+            isSelected: _isSelected,
+            onPressed: (int index) {
+              setState(() {
+                _isSelected[index] = !_isSelected[index];
+
+                switch (index) {
+                  case 0:
+                    dynValue!.intValue = -1;
+                    break;
+
+                  case 1:
+                    dynValue!.intValue = 1;
+                    break;
+
+                  case 2:
+                    dynValue!.intValue = 0;
+                    break;
+                }
+
+                if (widget.onChange != null) {
+                  widget.onChange!();
+                }
+              });
+            },
+            color: Get.isDarkMode ? kPrimaryDarkFontColor :  kPrimaryFontColor,
+            selectedColor: Colors.grey[700],
+            fillColor: kButtonBackgroundColor,
+            borderColor: kPrimaryColor,
+            borderRadius: const BorderRadius.all(Radius.circular(10)),
+            children: const [
+              Text(' Unknown '),
+              Text(' Yes '),
+              Text(' No '),
+            ]
           ),
         );
         break;

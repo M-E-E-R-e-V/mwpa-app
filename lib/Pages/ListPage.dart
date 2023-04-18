@@ -44,7 +44,7 @@ class ListPage extends StatefulWidget {
 /// _ListPageState
 class _ListPageState extends State<ListPage> {
   final PrefController _prefController = Get.find<PrefController>();
-  final LocationController _locationController = Get.find<LocationController>();
+  final LocationController _locationController = Get.put(LocationController());
   final SightingController _sightingController = Get.put(SightingController());
   final VehicleController _vehicleController = Get.put(VehicleController());
   final VehicleDriverController _vehicleDriverController = Get.put(VehicleDriverController());
@@ -91,8 +91,8 @@ class _ListPageState extends State<ListPage> {
     SyncMwpaService service = SyncMwpaService();
 
     try {
-      await service.sync((p0) async {
-        EasyLoading.showProgress(p0.round() / 100, status: 'sync to server ...');
+      await service.sync((p0, p1) async {
+        EasyLoading.showProgress(p0.round() / 100, status: '$p1 ... ${p0.round()}%');
       });
 
       await _vehicleController.getVehicle();
@@ -514,9 +514,9 @@ class _ListPageState extends State<ListPage> {
         child: Center(
           child: Text(
             label,
-            style: clr == Colors.white ? titleStyle : titleStyle.copyWith(
-              color: Colors.white
-            ),
+            style: clr == Colors.white ?
+              titleStyle.copyWith(color: kPrimaryFontColor) :
+              titleStyle.copyWith(color: kPrimaryDarkFontColor),
           ),
         ),
       ),
@@ -537,7 +537,7 @@ class _ListPageState extends State<ListPage> {
               width: 120,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                color: Get.isDarkMode ? Colors.grey[600] : Colors.grey[300]
+                color: Get.isDarkMode ? Colors.grey[900] : Colors.grey[300]
               ),
             ),
             const Spacer(),

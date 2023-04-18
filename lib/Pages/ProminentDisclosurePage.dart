@@ -50,7 +50,7 @@ class _ProminentDisclosurePageState extends State<ProminentDisclosurePage> {
               double cWidth = MediaQuery.of(context).size.width*0.6;
 
               return Dialog(
-                  child: Container(
+                  child: SizedBox(
                     height: 300,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,

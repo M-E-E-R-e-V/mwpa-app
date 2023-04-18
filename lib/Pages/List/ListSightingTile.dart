@@ -98,6 +98,10 @@ class ListSightingTile extends StatelessWidget {
       speciesName = "Specie not found";
     }
 
+    // shorting
+    var speciesNameParts = speciesName.split(',');
+    speciesName = speciesNameParts[0];
+
     // -------------------------------------------------------------------------
 
     Widget syncStatus = Icon(

@@ -39,7 +39,7 @@ class _MWPAAppState extends State<MWPAApp> {
       theme: Themes.light,
       darkTheme: Themes.dark,
       themeMode: ThemeService().theme,
-      initialRoute: '/ProminentDisclosure',
+      initialRoute: '/Login',
       getPages: [
         GetPage(
             name: '/ProminentDisclosure',

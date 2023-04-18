@@ -3,7 +3,7 @@ import 'package:mwpaapp/Util/UtilCheckJson.dart';
 class TourPref {
   int? vehicle_id;
   int? vehicle_driver_id;
-  int? beaufort_wind;
+  String? beaufort_wind;
   String? date;
   String? tour_start;
   String? tour_end;
@@ -22,7 +22,7 @@ class TourPref {
   TourPref.fromJson(Map<String, dynamic> json) {
     vehicle_id = UtilCheckJson.checkValue(json['vehicle_id'], UtilCheckJsonTypes.int);
     vehicle_driver_id = UtilCheckJson.checkValue(json['vehicle_driver_id'], UtilCheckJsonTypes.int);
-    beaufort_wind = UtilCheckJson.checkValue(json['beaufort_wind'], UtilCheckJsonTypes.int);
+    beaufort_wind = UtilCheckJson.checkValue(json['beaufort_wind'], UtilCheckJsonTypes.string);
     date = UtilCheckJson.checkValue(json['date'], UtilCheckJsonTypes.string);
     tour_start = UtilCheckJson.checkValue(json['tour_start'], UtilCheckJsonTypes.string);
     tour_end = UtilCheckJson.checkValue(json['tour_end'], UtilCheckJsonTypes.string);

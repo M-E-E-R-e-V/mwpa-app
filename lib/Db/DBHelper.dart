@@ -10,7 +10,7 @@ import 'package:sqflite/sqflite.dart';
 
 class DBHelper {
   static Database? _db;
-  static const int _version = 3;
+  static const int _version = 4;
   static const String _tableNameSighting = "sighting";
   static const String _tableNameTourTracking = "tour_tracking";
   static const String _tableNameVehicle = "vehicle";
@@ -38,6 +38,10 @@ class DBHelper {
 
             if (oldVersion == 2) {
               _updateTableSightingV2toV3(batch);
+            }
+
+            if (oldVersion == 3) {
+              _updateTableSightingV3toV4(batch);
             }
 
             await batch.commit();
@@ -142,6 +146,11 @@ class DBHelper {
 
   static void _updateTableSightingV2toV3(Batch batch) {
     batch.execute('ALTER TABLE $_tableNameSighting ADD syncStatus INTEGER');
+  }
+
+  static void _updateTableSightingV3toV4(Batch batch) {
+    batch.execute('ALTER TABLE $_tableNameSighting RENAME COLUMN beaufort_wind TO beaufort_wind_old');
+    batch.execute('ALTER TABLE $_tableNameSighting ADD beaufort_wind STRING');
   }
 
   static Future<int> insertSighting(Sighting newSighting) async {
@@ -396,5 +405,32 @@ class DBHelper {
     }
 
     return {};
+  }
+
+  static Future<List<Map<String, dynamic>>> queryTourTrackingFIds() async {
+    return await _db!.query(
+        _tableNameTourTracking,
+        columns: ['tour_fid'],
+        groupBy: 'tour_fid'
+      );
+  }
+
+  static Future<List<Map<String, dynamic>>> queryTourTracking(String tourFId, int offset, int limit) async {
+    return await _db!.query(
+      _tableNameTourTracking,
+      where: "tour_fid = ?",
+      whereArgs: [tourFId],
+      limit: limit,
+      offset: offset
+    );
+  }
+
+  static Future<int> countTourTracking(String tourFId) async {
+    return Sqflite.firstIntValue(await _db!.query(
+        _tableNameTourTracking,
+        columns: ['COUNT(*)'],
+        where: "tour_fid = ?",
+        whereArgs: [tourFId]
+    )) ?? 0;
   }
 }

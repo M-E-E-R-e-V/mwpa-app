@@ -11,7 +11,7 @@ class Sighting {
   String? unid;
   int? vehicle_id;
   int? vehicle_driver_id;
-  int? beaufort_wind;
+  String? beaufort_wind;
   String? date;
   String? tour_fid;
   String? tour_start;
@@ -82,7 +82,7 @@ class Sighting {
     unid = UtilCheckJson.checkValue(json['unid'], UtilCheckJsonTypes.string);
     vehicle_id = UtilCheckJson.checkValue(json['vehicle_id'], UtilCheckJsonTypes.int);
     vehicle_driver_id = UtilCheckJson.checkValue(json['vehicle_driver_id'], UtilCheckJsonTypes.int);
-    beaufort_wind = UtilCheckJson.checkValue(json['beaufort_wind'], UtilCheckJsonTypes.int);
+    beaufort_wind = UtilCheckJson.checkValue(json['beaufort_wind'], UtilCheckJsonTypes.string);
     date = UtilCheckJson.checkValue(json['date'], UtilCheckJsonTypes.string);
     tour_fid = UtilCheckJson.checkValue(json['tour_fid'], UtilCheckJsonTypes.string);
     tour_start = UtilCheckJson.checkValue(json['tour_start'], UtilCheckJsonTypes.string);
@@ -111,6 +111,10 @@ class Sighting {
     note = UtilCheckJson.checkValue(json['note'], UtilCheckJsonTypes.string);
     image = UtilCheckJson.checkValue(json['image'], UtilCheckJsonTypes.string);
     syncStatus = UtilCheckJson.checkValue(json['syncStatus'], UtilCheckJsonTypes.int);
+
+    if (json.containsKey('beaufort_wind_old') && json['beaufort_wind_old'] != 0 && beaufort_wind == '') {
+      beaufort_wind = "${json['beaufort_wind_old']}";
+    }
   }
 
   Map<String, dynamic> toJson(bool withId, bool withSyncStatus) {
@@ -151,6 +155,9 @@ class Sighting {
     data['other_vehicle'] = other_vehicle;
     data['note'] = note;
     data['image'] = image;
+
+    // reset old field
+    data['beaufort_wind_old'] = 0;
 
     if (withSyncStatus) {
       data['syncStatus'] = syncStatus;

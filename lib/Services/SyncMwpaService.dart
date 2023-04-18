@@ -6,6 +6,7 @@ import 'package:mwpaapp/Models/BehaviouralState.dart';
 import 'package:mwpaapp/Models/EncounterCategorie.dart';
 import 'package:mwpaapp/Models/Sighting.dart';
 import 'package:mwpaapp/Models/Species.dart';
+import 'package:mwpaapp/Models/TourTracking.dart';
 import 'package:mwpaapp/Models/Vehicle.dart';
 import 'package:mwpaapp/Models/VehicleDriver.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
@@ -15,7 +16,7 @@ import '../Mwpa/MwpaAPI.dart';
 
 class SyncMwpaService {
 
-  Future<void> sync(Function(int)? update) async {
+  Future<void> sync(Function(int, String)? update) async {
     MwpaApi api;
 
     // load userdata and login
@@ -82,7 +83,7 @@ class SyncMwpaService {
 
 
     if (update != null) {
-      await update(5);
+      await update(5, 'vehicle driver sync');
     }
 
     // vehicle driver sync
@@ -109,7 +110,7 @@ class SyncMwpaService {
     }
 
     if (update != null) {
-      await update(10);
+      await update(10, 'species sync');
     }
 
     // species
@@ -136,7 +137,7 @@ class SyncMwpaService {
     }
 
     if (update != null) {
-      await update(15);
+      await update(15, 'encounter categories sync');
     }
 
     // encounter categories
@@ -163,7 +164,7 @@ class SyncMwpaService {
     }
 
     if (update != null) {
-      await update(20);
+      await update(20, 'behavioural state sync');
     }
 
     // behavioural state
@@ -190,7 +191,7 @@ class SyncMwpaService {
     }
 
     if (update != null) {
-      await update(25);
+      await update(25, 'sightings sync');
     }
 
     // sightings
@@ -209,8 +210,8 @@ class SyncMwpaService {
 
         if (update != null) {
           var percentStep = 100*(index*2-1)/(count*2);
-          var percentUpdate = (percentStep*75)/100 ?? (25+index);
-          await update(percentUpdate.toInt());
+          var percentUpdate = (percentStep*75)/100;
+          await update(percentUpdate.toInt(), 'sightings sync');
         }
 
 
@@ -224,13 +225,15 @@ class SyncMwpaService {
 
         if (update != null) {
           var percentStep2 = 100*(index*2)/(count*2);
-          var percentUpdate2 = (percentStep2*75)/100 ?? (25+index);
-          await update(percentUpdate2.toInt());
+          var percentUpdate2 = (percentStep2*75)/100;
+          await update(percentUpdate2.toInt(), 'sightings image sync');
         }
 
         if (sighting.image != null && sighting.image != "") {
           try {
-            await api.saveSightingImage(sighting.unid!, sighting.image!);
+            if (!await api.existSightingImage(sighting.unid!, sighting.image!)) {
+              await api.saveSightingImage(sighting.unid!, sighting.image!);
+            }
           } catch(ei) {
             if (kDebugMode) {
               print(ei);
@@ -256,10 +259,44 @@ class SyncMwpaService {
       rethrow;
     }
 
+    // tracking
+    // -------------------------------------------------------------------------
+
+    List<Map<String, dynamic>> tourFids = await DBHelper.queryTourTrackingFIds();
+
+    for (var fidMap in tourFids) {
+      var tourFId = fidMap['tour_fid'];
+
+      try {
+        var trackingCount = await DBHelper.countTourTracking(tourFId);
+        var limitSteps = 100;
+        var offset = 0;
+
+        while (offset<trackingCount) {
+          if (update != null) {
+            await update(90, 'sightings tracking sync $offset/$trackingCount');
+          }
+
+          List<Map<String, dynamic>> tracks = await DBHelper.queryTourTracking(tourFId, offset, limitSteps);
+          List<TourTracking> trackList = tracks.map((data) => TourTracking.fromJson(data)).toList();
+
+          await api.saveSightingTourTracking(trackList);
+
+          offset += limitSteps;
+        }
+      } catch(e) {
+        if (kDebugMode) {
+          print(e);
+        }
+
+        rethrow;
+      }
+    }
+
     // -------------------------------------------------------------------------
 
     if (update != null) {
-      await update(100);
+      await update(100, 'finish');
     }
   }
 }

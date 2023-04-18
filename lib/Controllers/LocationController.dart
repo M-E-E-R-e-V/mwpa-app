@@ -13,6 +13,12 @@ import '../Models/TourTracking.dart';
 /// LocationController
 class LocationController extends GetxController {
 
+  final GeolocatorPlatform geolocatorAndroid = GeolocatorPlatform.instance;
+  StreamSubscription<Position>? _positionStreamSubscription;
+  bool isLocationInit = false;
+  Timer? locationTimer;
+  Position? currentPosition;
+
   @override
   void onReady() {
     super.onReady();
@@ -28,12 +34,6 @@ class LocationController extends GetxController {
       return;
     }
   }
-
-  final GeolocatorPlatform geolocatorAndroid = GeolocatorPlatform.instance;
-  StreamSubscription<Position>? _positionStreamSubscription;
-  bool isLocationInit = false;
-  Timer? locationTimer;
-  Position? currentPosition;
 
   /// initLocation
   Future<bool> initLocation() async {

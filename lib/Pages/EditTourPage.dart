@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mwpaapp/Components/DefaultButton.dart';
@@ -80,7 +79,7 @@ class _EditTourPageState extends State<EditTourPage> {
     if (_prefController.prefToru != null) {
       sightVehicleValue.setStrValueByInt(_prefController.prefToru!.vehicle_id!);
       sightVehicleDriverValue.setStrValueByInt(_prefController.prefToru!.vehicle_driver_id!);
-      sightBeaufortValue.setStrValueByInt(_prefController.prefToru!.beaufort_wind!);
+      sightBeaufortValue.setValue(_prefController.prefToru!.beaufort_wind!);
       sightDateValue.setDateTime(_prefController.prefToru!.date!);
       sightTourStartValue.setTimeOfDy(_prefController.prefToru!.tour_start!);
       sightTourEndValue.setTimeOfDy(_prefController.prefToru!.tour_end!);
@@ -93,7 +92,7 @@ class _EditTourPageState extends State<EditTourPage> {
         vehicle_id: sightVehicle.dynValue?.getStrValueAsInt(),
         vehicle_driver_id: sightVehicleDriver.dynValue
             ?.getStrValueAsInt(),
-        beaufort_wind: sightBeaufort.dynValue?.getStrValueAsInt(),
+        beaufort_wind: sightBeaufort.dynValue?.getValue(),
         date: sightDate.dynValue?.getDateTime(),
         tour_start: sightTourStart.dynValue?.getTimeOfDay(),
         tour_end: sightTourEnd.dynValue?.getTimeOfDay(),
@@ -138,23 +137,36 @@ class _EditTourPageState extends State<EditTourPage> {
 
       sightBeaufort = DynInput(
           context: context,
-          title: "Wind/Seastate (Beaufort)",
+          title: "Wind/Sea-state (Beaufort)",
           hint: "",
           inputType: DynInputType.select,
           dynValue: sightBeaufortValue,
           selectList: [
+            DynInputSelectItem(value: "", label: "none select"),
             DynInputSelectItem(value: "0", label: "0"),
+            DynInputSelectItem(value: "0.5", label: "0.5"),
             DynInputSelectItem(value: "1", label: "1"),
+            DynInputSelectItem(value: "1.5", label: "1.5"),
             DynInputSelectItem(value: "2", label: "2"),
+            DynInputSelectItem(value: "2.5", label: "2.5"),
             DynInputSelectItem(value: "3", label: "3"),
+            DynInputSelectItem(value: "3.5", label: "3.5"),
             DynInputSelectItem(value: "4", label: "4"),
+            DynInputSelectItem(value: "4.5", label: "4.5"),
             DynInputSelectItem(value: "5", label: "5"),
+            DynInputSelectItem(value: "5.5", label: "5.5"),
             DynInputSelectItem(value: "6", label: "6"),
+            DynInputSelectItem(value: "6.5", label: "6.5"),
             DynInputSelectItem(value: "7", label: "7"),
+            DynInputSelectItem(value: "7.5", label: "7.5"),
             DynInputSelectItem(value: "8", label: "8"),
+            DynInputSelectItem(value: "8.5", label: "8.5"),
             DynInputSelectItem(value: "9", label: "9"),
+            DynInputSelectItem(value: "9.5", label: "9.5"),
             DynInputSelectItem(value: "10", label: "10"),
+            DynInputSelectItem(value: "10.5", label: "10.5"),
             DynInputSelectItem(value: "11", label: "11"),
+            DynInputSelectItem(value: "11.5", label: "11.5"),
             DynInputSelectItem(value: "12", label: "12"),
           ]
       );

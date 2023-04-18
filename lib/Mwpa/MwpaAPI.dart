@@ -13,9 +13,12 @@ import 'package:mwpaapp/Models/VehicleDriver.dart';
 import 'package:mwpaapp/Mwpa/Models/BehaviouralStatesResponse.dart';
 import 'package:mwpaapp/Mwpa/Models/DefaultReturn.dart';
 import 'package:mwpaapp/Mwpa/Models/EncounterCategoriesResponse.dart';
+import 'package:mwpaapp/Mwpa/Models/ImageExist.dart';
+import 'package:mwpaapp/Mwpa/Models/ImageExistResponse.dart';
 import 'package:mwpaapp/Mwpa/Models/IsLogin.dart';
 import 'package:mwpaapp/Mwpa/Models/LoginResponse.dart';
 import 'package:mwpaapp/Mwpa/Models/SightingSaveResponse.dart';
+import 'package:mwpaapp/Mwpa/Models/SightingTourTrackingSave.dart';
 import 'package:mwpaapp/Mwpa/Models/SpeciesListResponse.dart';
 import 'package:mwpaapp/Mwpa/Models/StatusCodes.dart';
 import 'package:mwpaapp/Mwpa/Models/User/UserInfoData.dart';
@@ -24,6 +27,8 @@ import 'package:mwpaapp/Mwpa/Models/VehicleDriverResponse.dart';
 import 'package:mwpaapp/Mwpa/Models/VehicleResponse.dart';
 import 'package:mwpaapp/Mwpa/MwpaException.dart';
 import 'package:path/path.dart' as p;
+
+import '../Models/TourTracking.dart';
 
 class MwpaApi {
 
@@ -37,6 +42,8 @@ class MwpaApi {
   static const URL_BEH_STATE = 'mobile/behaviouralstates/list';
   static const URL_SIGHTING_SAVE = 'mobile/sighting/save';
   static const URL_SIGHTING_IMAGE_SAVE = 'mobile/sighting/image/save';
+  static const URL_SIGHTING_IMAGE_EXIST = 'mobile/sighting/image/exist';
+  static const URL_SIGHTING_TOUR_TRACKING_SAVE = 'mobile/sighting/tourtracking/save';
 
   String _url = "";
   String _cookie = "";
@@ -389,12 +396,15 @@ class MwpaApi {
         String filename = p.basename(imgFile);
 
         try {
-
           final file = await File(imgFile).open(mode: FileMode.read);
           var fileSize = file.lengthSync();
           var url = getUrl(MwpaApi.URL_SIGHTING_IMAGE_SAVE);
 
           var request = http.MultipartRequest('POST', Uri.parse(url));
+
+          request.headers.addAll(<String, String>{
+            'cookie': _cookie
+          });
 
           request.fields['unid'] = unid;
           request.fields['filename'] = filename;
@@ -419,6 +429,91 @@ class MwpaApi {
             print(te);
           }
         }
+      }
+    }
+    on MwpaException {
+      rethrow;
+    } catch(error) {
+      if (kDebugMode) {
+        print(error);
+      }
+
+      throw Exception('Connection error');
+    }
+
+    return false;
+  }
+
+  Future<bool> existSightingImage(String unid, String imgFile) async {
+    try {
+      if ( File(imgFile).existsSync()) {
+        String filename = p.basename(imgFile);
+
+        try {
+          final file = await File(imgFile).open(mode: FileMode.read);
+          var fileSize = file.lengthSync();
+
+          var url = getUrl(MwpaApi.URL_SIGHTING_IMAGE_EXIST);
+          var ie = ImageExist(unid: unid, filename: filename, size: fileSize.toString());
+          var postBody = jsonEncode(ie.toJson());
+
+          var response = await http.post(
+            Uri.parse(url),
+            headers: <String, String>{
+              'Content-Type': 'application/json; charset=UTF-8',
+              'cookie': _cookie
+            },
+            body: postBody,
+          );
+
+          var objResponse = ImageExistResponse.fromJson(jsonDecode(response.body));
+
+          if (objResponse.statusCode == StatusCodes.OK) {
+            if (objResponse.isExist != null) {
+              return objResponse.isExist!;
+            }
+          }
+        } catch(te) {
+          if (kDebugMode) {
+            print(te);
+          }
+        }
+      }
+    }
+    on MwpaException {
+      rethrow;
+    } catch(error) {
+      if (kDebugMode) {
+        print(error);
+      }
+
+      throw Exception('Connection error');
+    }
+
+    return false;
+  }
+
+  Future<bool> saveSightingTourTracking(List<TourTracking> trackList) async {
+    try {
+      var save = SightingTourTrackingSave.fromTrackingList(trackList);
+
+      var url = getUrl(MwpaApi.URL_SIGHTING_TOUR_TRACKING_SAVE);
+
+      var postBody = jsonEncode(save.toJson());
+
+      var response = await http.post(
+        Uri.parse(url),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'cookie': _cookie
+        },
+        body: postBody,
+      );
+
+      var objResponse = DefaultReturn.fromJson(jsonDecode(response.body));
+
+      if (objResponse.statusCode == StatusCodes.OK) {
+        return true;
       }
     }
     on MwpaException {

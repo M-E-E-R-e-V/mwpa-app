@@ -183,7 +183,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
       vehicle_id: sightVehicle.dynValue?.getStrValueAsInt(),
       vehicle_driver_id: sightVehicleDriver.dynValue
           ?.getStrValueAsInt(),
-      beaufort_wind: sightBeaufort.dynValue?.getStrValueAsInt(),
+      beaufort_wind: sightBeaufort.dynValue?.getValue(),
       date: sightDate.dynValue?.getDateTime(),
       tour_start: sightTourStart.dynValue?.getTimeOfDay(),
       tour_end: sightTourEnd.dynValue?.getTimeOfDay(),
@@ -243,7 +243,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
 
           sightVehicleValue.setStrValueByInt(tour.vehicle_id!);
           sightVehicleDriverValue.setStrValueByInt(tour.vehicle_driver_id!);
-          sightBeaufortValue.setStrValueByInt(tour.beaufort_wind!);
+          sightBeaufortValue.setValue(tour.beaufort_wind!);
           sightDateValue.setDateTime(tour.date!);
           sightTourStartValue.setTimeOfDy(tour.tour_start!);
           sightTourEndValue.setTimeOfDy(tour.tour_end!);
@@ -309,7 +309,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
         title = "Edit Sighting";
         sightVehicleValue.setStrValueByInt(sighting.vehicle_id!);
         sightVehicleDriverValue.setStrValueByInt(sighting.vehicle_driver_id!);
-        sightBeaufortValue.setStrValueByInt(sighting.beaufort_wind!);
+        sightBeaufortValue.setValue(sighting.beaufort_wind!);
         sightDateValue.setDateTime(sighting.date!);
         sightTourStartValue.setTimeOfDy(sighting.tour_start!);
         sightTourEndValue.setTimeOfDy(sighting.tour_end!);
@@ -384,23 +384,36 @@ class _EditSightingPageState extends State<EditSightingPage> {
 
         sightBeaufort = DynInput(
           context: context,
-          title: "Wind/Seastate (Beaufort)",
+          title: "Wind/Sea-state (Beaufort)",
           hint: "",
           inputType: DynInputType.select,
           dynValue: sightBeaufortValue,
           selectList: [
+            DynInputSelectItem(value: "", label: "none select"),
             DynInputSelectItem(value: "0", label: "0"),
+            DynInputSelectItem(value: "0.5", label: "0.5"),
             DynInputSelectItem(value: "1", label: "1"),
+            DynInputSelectItem(value: "1.5", label: "1.5"),
             DynInputSelectItem(value: "2", label: "2"),
+            DynInputSelectItem(value: "2.5", label: "2.5"),
             DynInputSelectItem(value: "3", label: "3"),
+            DynInputSelectItem(value: "3.5", label: "3.5"),
             DynInputSelectItem(value: "4", label: "4"),
+            DynInputSelectItem(value: "4.5", label: "4.5"),
             DynInputSelectItem(value: "5", label: "5"),
+            DynInputSelectItem(value: "5.5", label: "5.5"),
             DynInputSelectItem(value: "6", label: "6"),
+            DynInputSelectItem(value: "6.5", label: "6.5"),
             DynInputSelectItem(value: "7", label: "7"),
+            DynInputSelectItem(value: "7.5", label: "7.5"),
             DynInputSelectItem(value: "8", label: "8"),
+            DynInputSelectItem(value: "8.5", label: "8.5"),
             DynInputSelectItem(value: "9", label: "9"),
+            DynInputSelectItem(value: "9.5", label: "9.5"),
             DynInputSelectItem(value: "10", label: "10"),
+            DynInputSelectItem(value: "10.5", label: "10.5"),
             DynInputSelectItem(value: "11", label: "11"),
+            DynInputSelectItem(value: "11.5", label: "11.5"),
             DynInputSelectItem(value: "12", label: "12"),
           ]
         );
@@ -567,7 +580,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
            context: context,
            title: 'Juveniles',
            hint: '',
-           inputType: DynInputType.switcher,
+           inputType: DynInputType.nyntogglebtn,
            dynValue: sightJuvenilesValue,
          );
 
@@ -575,7 +588,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
            context: context,
            title: 'Calves',
            hint: '',
-           inputType: DynInputType.switcher,
+           inputType: DynInputType.nyntogglebtn,
            dynValue: sightCalvesValue,
          );
 
@@ -583,7 +596,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
            context: context,
            title: 'Newborns',
            hint: '',
-           inputType: DynInputType.switcher,
+           inputType: DynInputType.nyntogglebtn,
            dynValue: sightNewbornsValue,
          );
 
@@ -605,7 +618,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
            context: context,
            title: 'Subgroups',
            hint: '',
-           inputType: DynInputType.switcher,
+           inputType: DynInputType.nyntogglebtn,
            dynValue: sightSubgroupsValue,
          );
 
@@ -762,21 +775,9 @@ class _EditSightingPageState extends State<EditSightingPage> {
                        ),
                        sightSpecies,
                        sightSpeciesNum,
-                       Row(
-                         children: [
-                           Expanded(
-                               child: sightJuveniles
-                           ),
-                           const SizedBox(width: 12),
-                           Expanded(
-                               child: sightCalves
-                           ),
-                           const SizedBox(width: 12),
-                           Expanded(
-                               child: sightNewborns
-                           ),
-                         ],
-                       ),
+                       sightJuveniles,
+                       sightCalves,
+                       sightNewborns,
                        sightBehaviour,
                        sightSubgroups,
                        sightGroupStructure,

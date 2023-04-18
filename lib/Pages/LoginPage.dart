@@ -89,6 +89,17 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _isLogin() async {
     final prefs = await SharedPreferences.getInstance();
 
+    var isAccept = false;
+
+    if (prefs.containsKey(Preference.PROMINENT_DISCLOSURE_CONFIRMED)) {
+      isAccept = prefs.getBool(Preference.PROMINENT_DISCLOSURE_CONFIRMED) ?? false;
+    }
+
+    if (!isAccept) {
+      Get.toNamed('/ProminentDisclosure');
+      return;
+    }
+
     if (prefs.containsKey(Preference.USERID)) {
       Get.toNamed('/List');
     }
