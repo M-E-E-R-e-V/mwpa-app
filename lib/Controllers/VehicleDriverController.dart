@@ -19,5 +19,6 @@ class VehicleDriverController extends GetxController {
   Future<void> getVehicleDriver() async {
     List<Map<String, dynamic>> drivers = await DBHelper.queryVehicleDriver(false);
     vehicleDriverList.assignAll(drivers.map((data) => VehicleDriver.fromJson(data)).toList());
+    vehicleDriverList.insert(0, VehicleDriver(id: 0, username: 'Unknown'));
   }
 }

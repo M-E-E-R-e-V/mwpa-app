@@ -17,19 +17,18 @@ class VehicleResponse extends DefaultReturn {
     List<Vehicle>? list;
 
     if (json.containsKey('list')) {
-      List<Vehicle> tlist = [];
+      List<Vehicle> tList = [];
+      List<dynamic> vList = json['list'];
 
-      List<dynamic> vlist = json['list'];
-
-      for (var element in vlist) {
-        tlist.add(Vehicle(
+      for (var element in vList) {
+        tList.add(Vehicle(
             id: UtilCheckJson.checkValue(element['id'], UtilCheckJsonTypes.int),
             name: UtilCheckJson.checkValue(element['name'], UtilCheckJsonTypes.string),
             isdeleted: UtilCheckJson.checkValue(element['isdeleted'], UtilCheckJsonTypes.int)
         ));
       }
 
-      list = tlist;
+      list = tList;
     }
 
     return VehicleResponse(

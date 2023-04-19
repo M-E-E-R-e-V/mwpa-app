@@ -1,17 +1,14 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mwpaapp/Components/DefaultButton.dart';
 import 'package:mwpaapp/Components/DynInput.dart';
 import 'package:mwpaapp/Constants.dart';
+import 'package:mwpaapp/Controllers/BeaufortController.dart';
 import 'package:mwpaapp/Controllers/PrefController.dart';
 import 'package:mwpaapp/Controllers/VehicleController.dart';
 import 'package:mwpaapp/Controllers/VehicleDriverController.dart';
 import 'package:mwpaapp/Dialog/ConfirmDialog.dart';
 import 'package:mwpaapp/Models/TourPref.dart';
-import 'package:mwpaapp/Settings/Preference.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class EditTourPage extends StatefulWidget {
 
@@ -141,34 +138,7 @@ class _EditTourPageState extends State<EditTourPage> {
           hint: "",
           inputType: DynInputType.select,
           dynValue: sightBeaufortValue,
-          selectList: [
-            DynInputSelectItem(value: "", label: "none select"),
-            DynInputSelectItem(value: "0", label: "0"),
-            DynInputSelectItem(value: "0.5", label: "0.5"),
-            DynInputSelectItem(value: "1", label: "1"),
-            DynInputSelectItem(value: "1.5", label: "1.5"),
-            DynInputSelectItem(value: "2", label: "2"),
-            DynInputSelectItem(value: "2.5", label: "2.5"),
-            DynInputSelectItem(value: "3", label: "3"),
-            DynInputSelectItem(value: "3.5", label: "3.5"),
-            DynInputSelectItem(value: "4", label: "4"),
-            DynInputSelectItem(value: "4.5", label: "4.5"),
-            DynInputSelectItem(value: "5", label: "5"),
-            DynInputSelectItem(value: "5.5", label: "5.5"),
-            DynInputSelectItem(value: "6", label: "6"),
-            DynInputSelectItem(value: "6.5", label: "6.5"),
-            DynInputSelectItem(value: "7", label: "7"),
-            DynInputSelectItem(value: "7.5", label: "7.5"),
-            DynInputSelectItem(value: "8", label: "8"),
-            DynInputSelectItem(value: "8.5", label: "8.5"),
-            DynInputSelectItem(value: "9", label: "9"),
-            DynInputSelectItem(value: "9.5", label: "9.5"),
-            DynInputSelectItem(value: "10", label: "10"),
-            DynInputSelectItem(value: "10.5", label: "10.5"),
-            DynInputSelectItem(value: "11", label: "11"),
-            DynInputSelectItem(value: "11.5", label: "11.5"),
-            DynInputSelectItem(value: "12", label: "12"),
-          ]
+          selectList: BeaufortController.beaufortSelectList
       );
 
       sightDate = DynInput(

@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:mwpaapp/Components/DefaultButton.dart';
 import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Components/DynInput.dart';
+import 'package:mwpaapp/Controllers/BeaufortController.dart';
 import 'package:mwpaapp/Controllers/BehaviouralStateController.dart';
 import 'package:mwpaapp/Controllers/EncounterCategoriesController.dart';
 import 'package:mwpaapp/Controllers/LocationController.dart';
@@ -241,8 +242,20 @@ class _EditSightingPageState extends State<EditSightingPage> {
           TourPref tour = TourPref.fromJson(
               jsonDecode(prefs.getString(Preference.TOUR)!));
 
-          sightVehicleValue.setStrValueByInt(tour.vehicle_id!);
-          sightVehicleDriverValue.setStrValueByInt(tour.vehicle_driver_id!);
+          //  vehicle
+          if (_vehicleController.vehicleList.map(
+                  (element) => element.id).contains(tour.vehicle_id!)
+          ) {
+            sightVehicleValue.setStrValueByInt(tour.vehicle_id!);
+          }
+
+          // vehicle driver
+          if (_vehicleDriverController.vehicleDriverList.map(
+                  (element) => element.id).contains(tour.vehicle_driver_id!)
+          ) {
+            sightVehicleDriverValue.setStrValueByInt(tour.vehicle_driver_id!);
+          }
+
           sightBeaufortValue.setValue(tour.beaufort_wind!);
           sightDateValue.setDateTime(tour.date!);
           sightTourStartValue.setTimeOfDy(tour.tour_start!);
@@ -340,7 +353,23 @@ class _EditSightingPageState extends State<EditSightingPage> {
       } else {
         _loadPref();
 
+        // vehicle -------------------------------------------------------------
+        // set as default when list have only one element
+        if (_vehicleController.vehicleList.length == 1) {
+          sightVehicleValue.setStrValueByInt(_vehicleController.vehicleList[0].id!);
+        }
+
+        // vehicle driver ------------------------------------------------------
+        // set as default when list have only one element
+        if (_vehicleDriverController.vehicleDriverList.length == 1) {
+          sightVehicleDriverValue.setStrValueByInt(_vehicleDriverController.vehicleDriverList[0].id!);
+        }
+
         sightDurationFromValue.setTimeof(TimeOfDay.now());
+        sightJuvenilesValue.setIntValue(-1);
+        sightCalvesValue.setIntValue(-1);
+        sightNewbornsValue.setIntValue(-1);
+        sightSubgroupsValue.setIntValue(-1);
 
         if (_locationController.currentPosition != null) {
           sightLocationBeginValue.setPosition(
@@ -388,34 +417,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
           hint: "",
           inputType: DynInputType.select,
           dynValue: sightBeaufortValue,
-          selectList: [
-            DynInputSelectItem(value: "", label: "none select"),
-            DynInputSelectItem(value: "0", label: "0"),
-            DynInputSelectItem(value: "0.5", label: "0.5"),
-            DynInputSelectItem(value: "1", label: "1"),
-            DynInputSelectItem(value: "1.5", label: "1.5"),
-            DynInputSelectItem(value: "2", label: "2"),
-            DynInputSelectItem(value: "2.5", label: "2.5"),
-            DynInputSelectItem(value: "3", label: "3"),
-            DynInputSelectItem(value: "3.5", label: "3.5"),
-            DynInputSelectItem(value: "4", label: "4"),
-            DynInputSelectItem(value: "4.5", label: "4.5"),
-            DynInputSelectItem(value: "5", label: "5"),
-            DynInputSelectItem(value: "5.5", label: "5.5"),
-            DynInputSelectItem(value: "6", label: "6"),
-            DynInputSelectItem(value: "6.5", label: "6.5"),
-            DynInputSelectItem(value: "7", label: "7"),
-            DynInputSelectItem(value: "7.5", label: "7.5"),
-            DynInputSelectItem(value: "8", label: "8"),
-            DynInputSelectItem(value: "8.5", label: "8.5"),
-            DynInputSelectItem(value: "9", label: "9"),
-            DynInputSelectItem(value: "9.5", label: "9.5"),
-            DynInputSelectItem(value: "10", label: "10"),
-            DynInputSelectItem(value: "10.5", label: "10.5"),
-            DynInputSelectItem(value: "11", label: "11"),
-            DynInputSelectItem(value: "11.5", label: "11.5"),
-            DynInputSelectItem(value: "12", label: "12"),
-          ]
+          selectList: BeaufortController.beaufortSelectList
         );
 
         sightDate = DynInput(
