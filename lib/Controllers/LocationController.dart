@@ -18,6 +18,7 @@ class LocationController extends GetxController {
   bool isLocationInit = false;
   Timer? locationTimer;
   Position? currentPosition;
+  int positionCount = 0;
 
   @override
   void onReady() {
@@ -76,12 +77,14 @@ class LocationController extends GetxController {
       );
 
       final positionStream = geolocatorAndroid.getPositionStream(
-          locationSettings: androidSettings);
+          locationSettings: androidSettings
+      );
 
       _positionStreamSubscription = positionStream.handleError((error) {
         _positionStreamSubscription?.cancel();
         _positionStreamSubscription = null;
       }).listen((position) {
+        positionCount++;
         Position tPosition = Position(
             longitude: position.longitude,
             latitude: position.latitude,

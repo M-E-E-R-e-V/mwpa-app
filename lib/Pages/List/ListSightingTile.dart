@@ -77,9 +77,9 @@ class ListSightingTile extends StatelessWidget {
         Position tPos = Position.fromMap(jsonDecode(sighting.location_begin!));
         locationString = UtilPosition.getStr(tPos);
       }
-      catch(loce) {
+      catch(locExp) {
         if (kDebugMode) {
-          print(loce);
+          print(locExp);
         }
       }
     }
@@ -95,7 +95,7 @@ class ListSightingTile extends StatelessWidget {
 
     if (speciesName == null) {
       backgroundColor = Colors.yellow;
-      speciesName = "Specie not found";
+      speciesName = "Species not found";
     }
 
     // shorting

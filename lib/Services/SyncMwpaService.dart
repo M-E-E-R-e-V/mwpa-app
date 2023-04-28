@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:mwpaapp/Db/DBHelper.dart';
 import 'package:mwpaapp/Models/BehaviouralState.dart';
@@ -52,6 +50,7 @@ class SyncMwpaService {
       }
     } catch(e) {
       if (kDebugMode) {
+        print('SyncMwpaService::sync:login:');
         print(e);
       }
 
@@ -75,6 +74,7 @@ class SyncMwpaService {
       }
     } catch(e) {
       if (kDebugMode) {
+        print('SyncMwpaService::sync:vehicle:');
         print(e);
       }
 
@@ -103,6 +103,7 @@ class SyncMwpaService {
       }
     } catch(e) {
       if (kDebugMode) {
+        print('SyncMwpaService::sync:vehicleDriver:');
         print(e);
       }
 
@@ -130,6 +131,7 @@ class SyncMwpaService {
       }
     } catch(e) {
       if (kDebugMode) {
+        print('SyncMwpaService::sync:species:');
         print(e);
       }
 
@@ -157,6 +159,7 @@ class SyncMwpaService {
       }
     } catch(e) {
       if (kDebugMode) {
+        print('SyncMwpaService::sync:encounterCategorie:');
         print(e);
       }
 
@@ -184,6 +187,7 @@ class SyncMwpaService {
       }
     } catch(e) {
       if (kDebugMode) {
+        print('SyncMwpaService::sync:BehaviouralState:');
         print(e);
       }
 
@@ -215,12 +219,21 @@ class SyncMwpaService {
         }
 
 
-        String? unid = await api.saveSighting(sighting);
+        try {
+          String? unid = await api.saveSighting(sighting);
 
-        if (unid != null) {
-          sighting.unid = unid;
-          sighting.syncStatus = Sighting.SYNC_STATUS_FINISH;
-          await DBHelper.updateSighting(sighting);
+          if (unid != null) {
+            sighting.unid = unid;
+            sighting.syncStatus = Sighting.SYNC_STATUS_FINISH;
+            await DBHelper.updateSighting(sighting);
+          }
+        } catch(ei) {
+          if (kDebugMode) {
+            print('SyncMwpaService::sync:sightingUpdate: ');
+            print(sighting.id);
+          }
+
+          throw ei;
         }
 
         if (update != null) {
@@ -236,6 +249,7 @@ class SyncMwpaService {
             }
           } catch(ei) {
             if (kDebugMode) {
+              print('SyncMwpaService::sync:image: ');
               print(ei);
               // TODO later, handle upload is finish
             }
@@ -253,6 +267,7 @@ class SyncMwpaService {
       }
     } catch(e) {
       if (kDebugMode) {
+        print('SyncMwpaService::sync:');
         print(e);
       }
 
@@ -286,6 +301,7 @@ class SyncMwpaService {
         }
       } catch(e) {
         if (kDebugMode) {
+          print('SyncMwpaService::sync:tracking:');
           print(e);
         }
 

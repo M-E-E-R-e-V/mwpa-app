@@ -58,6 +58,7 @@ class DefaultButton extends StatelessWidget {
       child: Container(
         width: newWidth,
         height: newHeight,
+        margin: const EdgeInsets.only(left: 5, right: 5, top: 5, bottom: 5),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           color: newBgColor

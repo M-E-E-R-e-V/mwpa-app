@@ -32,15 +32,15 @@ class DBHelper {
           onUpgrade: (db, oldVersion, newVersion) async {
             var batch = db.batch();
 
-            if (oldVersion == 1) {
+            if (oldVersion <= 1) {
               _updateTableSightingV1toV2(batch);
             }
 
-            if (oldVersion == 2) {
+            if (oldVersion <= 2) {
               _updateTableSightingV2toV3(batch);
             }
 
-            if (oldVersion == 3) {
+            if (oldVersion <= 3) {
               _updateTableSightingV3toV4(batch);
             }
 
@@ -53,7 +53,8 @@ class DBHelper {
                     "unid STRING,"
                     "vehicle_id INTEGER,"
                     "vehicle_driver_id INTEGER,"
-                    "beaufort_wind INTEGER,"
+                    "beaufort_wind STRING,"
+                    "beaufort_wind_old INTEGER,"
                     "date STRING,"
                     "tour_fid,"
                     "tour_start STRING,"

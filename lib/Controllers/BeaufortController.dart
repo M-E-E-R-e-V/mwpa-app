@@ -9,7 +9,7 @@ class BeaufortController extends GetxController {
   }
 
   static var beaufortSelectList = <DynInputSelectItem>[
-    DynInputSelectItem(value: "", label: "none select"),
+    DynInputSelectItem(value: "", label: "not selected"),
     DynInputSelectItem(value: "0", label: "0"),
     DynInputSelectItem(value: "0.5", label: "0.5"),
     DynInputSelectItem(value: "1", label: "1"),

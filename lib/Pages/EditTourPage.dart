@@ -44,6 +44,8 @@ class _EditTourPageState extends State<EditTourPage> {
   late DynInput sightSetEndTour;
   DynInputValue sightSetEndTourValue = DynInputValue();
 
+  bool isInit = false;
+
   _appBar(BuildContext context) {
     return AppBar(
       backgroundColor: kPrimaryHeaderColor,
@@ -72,16 +74,6 @@ class _EditTourPageState extends State<EditTourPage> {
   @override
   void initState() {
     super.initState();
-
-    if (_prefController.prefToru != null) {
-      sightVehicleValue.setStrValueByInt(_prefController.prefToru!.vehicle_id!);
-      sightVehicleDriverValue.setStrValueByInt(_prefController.prefToru!.vehicle_driver_id!);
-      sightBeaufortValue.setValue(_prefController.prefToru!.beaufort_wind!);
-      sightDateValue.setDateTime(_prefController.prefToru!.date!);
-      sightTourStartValue.setTimeOfDy(_prefController.prefToru!.tour_start!);
-      sightTourEndValue.setTimeOfDy(_prefController.prefToru!.tour_end!);
-      sightSetEndTourValue.setIntValue(_prefController.prefToru!.set_end_tour!);
-    }
   }
 
   _saveTourToPref() async {
@@ -103,6 +95,32 @@ class _EditTourPageState extends State<EditTourPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (!isInit) {
+      isInit = true;
+
+      if (_prefController.prefToru != null) {
+        //  vehicle
+        if (_vehicleController.vehicleList.map(
+                (element) => element.id).contains(_prefController.prefToru!.vehicle_id!)
+        ) {
+          sightVehicleValue.setStrValueByInt(_prefController.prefToru!.vehicle_id!);
+        }
+
+        // vehicle driver
+        if (_vehicleDriverController.vehicleDriverList.map(
+                (element) => element.id).contains(_prefController.prefToru!.vehicle_driver_id!)
+        ) {
+          sightVehicleDriverValue.setStrValueByInt(_prefController.prefToru!.vehicle_driver_id!);
+        }
+
+        sightBeaufortValue.setValue(_prefController.prefToru!.beaufort_wind!);
+        sightDateValue.setDateTime(_prefController.prefToru!.date!);
+        sightTourStartValue.setTimeOfDy(_prefController.prefToru!.tour_start!);
+        sightTourEndValue.setTimeOfDy(_prefController.prefToru!.tour_end!);
+        sightSetEndTourValue.setIntValue(_prefController.prefToru!.set_end_tour!);
+      }
+    }
+
     return Obx(() {
       sightVehicle = DynInput(
         context: context,

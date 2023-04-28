@@ -193,6 +193,14 @@ class _ListPageState extends State<ListPage> {
         )
       ),
       actions: [
+        DefaultButton(
+            buttonIcon: Icons.post_add,
+            label: 'Add Sighting',
+            onTab: () async {
+              await Get.toNamed('/Edit');
+              _sightingController.getSightings();
+            }
+        ),
         PopupMenuButton(itemBuilder: (context) {
           var list = <PopupMenuEntry<Object>>[];
           list.add(
@@ -431,14 +439,6 @@ class _ListPageState extends State<ListPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: columnList,
           ),
-          DefaultButton(
-            buttonIcon: Icons.post_add,
-            label: 'Add Sighting',
-            onTab: () async {
-              await Get.toNamed('/Edit');
-              _sightingController.getSightings();
-            }
-          )
         ],
       ),
     );
