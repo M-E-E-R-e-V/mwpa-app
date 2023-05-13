@@ -1,4 +1,6 @@
-
+/**
+ * LoginResponse
+ */
 class LoginResponse {
   final bool success;
   final String? error;

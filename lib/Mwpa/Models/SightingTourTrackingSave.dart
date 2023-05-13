@@ -2,11 +2,13 @@
 import 'package:mwpaapp/Models/TourTracking.dart';
 import 'package:mwpaapp/Mwpa/Models/SightingTourTracking.dart';
 
+/// SightingTourTrackingSave
 class SightingTourTrackingSave {
   List<SightingTourTracking> list;
 
   SightingTourTrackingSave({required this.list});
 
+  /// fromTrackingList
   static SightingTourTrackingSave fromTrackingList(List<TourTracking> trackList) {
     List<SightingTourTracking> tList = [];
 
@@ -22,6 +24,7 @@ class SightingTourTrackingSave {
     return SightingTourTrackingSave(list: tList);
   }
 
+  /// toJson
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
 

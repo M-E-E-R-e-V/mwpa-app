@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -19,6 +20,7 @@ enum DynInputType {
   textarea,
   number,
   numberdecimal,
+  numberchars,
   date,
   time,
   select,
@@ -335,6 +337,7 @@ class _DynInputState extends State<DynInput> {
     var textInputType = TextInputType.text;
     var inputHeight = 52.0;
     Widget? inContainer;
+    List<TextInputFormatter>? inputFormatters;
 
     switch (widget.inputType) {
       case DynInputType.date:
@@ -519,6 +522,21 @@ class _DynInputState extends State<DynInput> {
 
       case DynInputType.numberdecimal:
         textInputType = const TextInputType.numberWithOptions(decimal: true);
+
+        if (tHint == "") {
+          if (widget.onFormat != null) {
+            tHint = widget.onFormat!(widget.dynValue);
+          } else {
+            tHint = dynValue!.strValue;
+          }
+        }
+        break;
+
+      case DynInputType.numberchars:
+        textInputType = const TextInputType.numberWithOptions(decimal: true);
+        inputFormatters = <TextInputFormatter>[
+          FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+        ];
 
         if (tHint == "") {
           if (widget.onFormat != null) {
@@ -895,6 +913,7 @@ class _DynInputState extends State<DynInput> {
                   initialValue: widget.inputType == DynInputType.textarea ? tHint : null,
                   style: subTitleStyle,
                   keyboardType: textInputType,
+                  inputFormatters: inputFormatters,
                   textInputAction: widget.inputType == DynInputType.textarea ? TextInputAction.newline : null,
                   minLines: widget.inputType == DynInputType.textarea ? 20 : null,
                   maxLines: widget.inputType == DynInputType.textarea ? 20 : null,

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Dialog/InfoDialog.dart';
+import 'package:mwpaapp/Mwpa/Models/Info.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -40,6 +41,12 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       var api = MwpaApi(url);
+
+      Info apiInfo = await api.getInfo();
+
+      if (apiInfo.version_api_login != versionApiMobileLogin) {
+        throw Exception("The API for login has changed, please update your app, the data will not be lost.");
+      }
 
       if (!await api.isLogin()) {
         if (await api.login(username, password)) {

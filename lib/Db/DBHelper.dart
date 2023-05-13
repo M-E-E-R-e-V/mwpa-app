@@ -8,9 +8,10 @@ import 'package:mwpaapp/Models/Vehicle.dart';
 import 'package:mwpaapp/Models/VehicleDriver.dart';
 import 'package:sqflite/sqflite.dart';
 
+/// DBHelper
 class DBHelper {
   static Database? _db;
-  static const int _version = 4;
+  static const int _version = 5;
   static const String _tableNameSighting = "sighting";
   static const String _tableNameTourTracking = "tour_tracking";
   static const String _tableNameVehicle = "vehicle";
@@ -19,6 +20,7 @@ class DBHelper {
   static const String _tableNameEncCate = "encounter_categories";
   static const String _tableNameBehState = "behavioural_state";
 
+  /// initDb
   static Future<void> initDb() async {
     if (_db != null) {
       return;
@@ -44,6 +46,10 @@ class DBHelper {
               _updateTableSightingV3toV4(batch);
             }
 
+            if (oldVersion <= 4) {
+              _updateTableSightingV4toV5(batch);
+            }
+
             await batch.commit();
           },
           onCreate: (db, version) {
@@ -51,6 +57,7 @@ class DBHelper {
                 "CREATE TABLE IF NOT EXISTS $_tableNameSighting("
                     "id INTEGER PRIMARY KEY AUTOINCREMENT,"
                     "unid STRING,"
+                    "creater_id INTEGER,"
                     "vehicle_id INTEGER,"
                     "vehicle_driver_id INTEGER,"
                     "beaufort_wind STRING,"
@@ -141,23 +148,33 @@ class DBHelper {
     }
   }
 
+  /// _updateTableSightingV1toV2
   static void _updateTableSightingV1toV2(Batch batch) {
     batch.execute('ALTER TABLE $_tableNameSighting ADD group_structure_id INTEGER');
   }
 
+  /// _updateTableSightingV2toV3
   static void _updateTableSightingV2toV3(Batch batch) {
     batch.execute('ALTER TABLE $_tableNameSighting ADD syncStatus INTEGER');
   }
 
+  /// _updateTableSightingV3toV4
   static void _updateTableSightingV3toV4(Batch batch) {
     batch.execute('ALTER TABLE $_tableNameSighting RENAME COLUMN beaufort_wind TO beaufort_wind_old');
     batch.execute('ALTER TABLE $_tableNameSighting ADD beaufort_wind STRING');
   }
 
+  /// _updateTableSightingV4toV5
+  static void _updateTableSightingV4toV5(Batch batch) {
+    batch.execute('ALTER TABLE $_tableNameSighting ADD creater_id INTEGER');
+  }
+
+  /// insertSighting
   static Future<int> insertSighting(Sighting newSighting) async {
     return await _db?.insert(_tableNameSighting, newSighting.toJson(false, true)) ?? 1;
   }
 
+  /// querySighting
   static Future<List<Map<String, dynamic>>> querySighting() async {
     return await _db!.query(
         _tableNameSighting,
@@ -165,11 +182,13 @@ class DBHelper {
     );
   }
 
+  /// deleteSighting
   static Future<int> deleteSighting(Sighting oldSighting) async {
     return await _db!.delete(
         _tableNameSighting, where: 'id=?', whereArgs: [oldSighting.id]);
   }
 
+  /// updateSighting
   static Future<int> updateSighting(Sighting uSighting) async {
     return await _db!.update(
         _tableNameSighting,
@@ -179,6 +198,7 @@ class DBHelper {
     );
   }
 
+  /// updateSightingEndTour
   static Future<int> updateSightingEndTour(String tourFid, String tourend) async {
     return await _db!.update(
       _tableNameSighting,
@@ -190,10 +210,12 @@ class DBHelper {
     );
   }
 
+  /// insertVehicle
   static Future<int> insertVehicle(Vehicle vehicle) async {
     return await _db?.insert(_tableNameVehicle, vehicle.toJson(false)) ?? 1;
   }
 
+  /// queryVehicle
   static Future<List<Map<String, dynamic>>> queryVehicle(bool withDelete) async {
     if (withDelete) {
       return await _db!.query(_tableNameVehicle);
@@ -207,6 +229,7 @@ class DBHelper {
     }
   }
 
+  /// readVehicle
   static Future<Map<String, dynamic>> readVehicle(int id) async {
     List<Map<String, dynamic>> list = await _db!.query(
         _tableNameVehicle,
@@ -221,6 +244,7 @@ class DBHelper {
     return {};
   }
 
+  /// updateVehicle
   static Future<int> updateVehicle(Vehicle vehicle) async {
     return await _db!.update(
       _tableNameVehicle,
@@ -230,10 +254,12 @@ class DBHelper {
     );
   }
 
+  /// insertVehicleDriver
   static Future<int> insertVehicleDriver(VehicleDriver driver) async {
     return await _db?.insert(_tableNameVehicleDriver, driver.toJson(false)) ?? 1;
   }
 
+  /// queryVehicleDriver
   static Future<List<Map<String, dynamic>>> queryVehicleDriver(bool withDelete) async {
     if (withDelete) {
       return await _db!.query(_tableNameVehicleDriver);
@@ -247,6 +273,7 @@ class DBHelper {
     }
   }
 
+  /// readVehicleDriver
   static Future<Map<String, dynamic>> readVehicleDriver(int id) async {
     List<Map<String, dynamic>> list = await _db!.query(
         _tableNameVehicleDriver,
@@ -261,6 +288,7 @@ class DBHelper {
     return {};
   }
 
+  /// updateVehicleDriver
   static Future<int> updateVehicleDriver(VehicleDriver driver) async {
     return await _db!.update(
       _tableNameVehicleDriver,
@@ -270,10 +298,12 @@ class DBHelper {
     );
   }
 
+  /// insertSpecies
   static Future<int> insertSpecies(Species species) async {
     return await _db?.insert(_tableNameSpecies, species.toJson(false)) ?? 1;
   }
 
+  /// querySpecies
   static Future<List<Map<String, dynamic>>> querySpecies(bool withDelete) async {
     if (withDelete) {
       return await _db!.query(_tableNameSpecies);
@@ -287,6 +317,7 @@ class DBHelper {
     }
   }
 
+  /// readSpecies
   static Future<Map<String, dynamic>> readSpecies(int id) async {
     List<Map<String, dynamic>> list = await _db!.query(
         _tableNameSpecies,
@@ -301,6 +332,7 @@ class DBHelper {
     return {};
   }
 
+  /// updateSpecies
   static Future<int> updateSpecies(Species species) async {
     return await _db!.update(
       _tableNameSpecies,
@@ -310,10 +342,12 @@ class DBHelper {
     );
   }
 
+  /// insertEncounterCategorie
   static Future<int> insertEncounterCategorie(EncounterCategorie encCat) async {
     return await _db?.insert(_tableNameEncCate, encCat.toJson(false)) ?? 1;
   }
 
+  /// queryEncounterCategorie
   static Future<List<Map<String, dynamic>>> queryEncounterCategorie(bool withDelete) async {
     if (withDelete) {
       return await _db!.query(_tableNameEncCate);
@@ -327,6 +361,7 @@ class DBHelper {
     }
   }
 
+  /// readEncounterCategorie
   static Future<Map<String, dynamic>> readEncounterCategorie(int id) async {
     List<Map<String, dynamic>> list = await _db!.query(
         _tableNameEncCate,
@@ -341,6 +376,7 @@ class DBHelper {
     return {};
   }
 
+  /// updateEncounterCategorie
   static Future<int> updateEncounterCategorie(EncounterCategorie encCat) async {
     return await _db!.update(
       _tableNameEncCate,
@@ -350,10 +386,12 @@ class DBHelper {
     );
   }
 
+  /// insertBehaviouralState
   static Future<int> insertBehaviouralState(BehaviouralState behState) async {
     return await _db?.insert(_tableNameBehState, behState.toJson(false)) ?? 1;
   }
 
+  /// queryBehaviouralState
   static Future<List<Map<String, dynamic>>> queryBehaviouralState(bool withDelete) async {
     if (withDelete) {
       return await _db!.query(_tableNameBehState);
@@ -367,6 +405,7 @@ class DBHelper {
     }
   }
 
+  /// readBehaviouralState
   static Future<Map<String, dynamic>> readBehaviouralState(int id) async {
     List<Map<String, dynamic>> list = await _db!.query(
         _tableNameBehState,
@@ -381,6 +420,7 @@ class DBHelper {
     return {};
   }
 
+  /// updateBehaviouralState
   static Future<int> updateBehaviouralState(BehaviouralState behState) async {
     return await _db!.update(
       _tableNameBehState,
@@ -390,10 +430,12 @@ class DBHelper {
     );
   }
 
+  /// insertTourTracking
   static Future<int> insertTourTracking(TourTracking behState) async {
     return await _db?.insert(_tableNameTourTracking, behState.toJson()) ?? 1;
   }
 
+  /// readTourTracking
   static Future<Map<String, dynamic>> readTourTracking(String tourFId, String searchDate) async {
     List<Map<String, dynamic>> list = await _db!.query(
         _tableNameTourTracking,
@@ -408,6 +450,7 @@ class DBHelper {
     return {};
   }
 
+  /// queryTourTrackingFIds
   static Future<List<Map<String, dynamic>>> queryTourTrackingFIds() async {
     return await _db!.query(
         _tableNameTourTracking,
@@ -416,6 +459,7 @@ class DBHelper {
       );
   }
 
+  /// queryTourTracking
   static Future<List<Map<String, dynamic>>> queryTourTracking(String tourFId, int offset, int limit) async {
     return await _db!.query(
       _tableNameTourTracking,
@@ -426,6 +470,7 @@ class DBHelper {
     );
   }
 
+  /// countTourTracking
   static Future<int> countTourTracking(String tourFId) async {
     return Sqflite.firstIntValue(await _db!.query(
         _tableNameTourTracking,

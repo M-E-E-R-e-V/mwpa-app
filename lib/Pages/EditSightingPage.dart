@@ -179,8 +179,12 @@ class _EditSightingPageState extends State<EditSightingPage> {
       mUnid = widget.sighting?.unid ?? "";
     }
 
+    var pref = Preference();
+    await pref.load();
+
     Sighting tSigh = Sighting(
       unid: mUnid,
+      creater_id: pref.getUserId(),
       vehicle_id: sightVehicle.dynValue?.getStrValueAsInt(),
       vehicle_driver_id: sightVehicleDriver.dynValue
           ?.getStrValueAsInt(),
@@ -574,7 +578,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
            context: context,
            title: "Number of animals",
            hint: "",
-           inputType: DynInputType.number,
+           inputType: DynInputType.numberchars,
            dynValue: sightSpeciesNumValue,
          );
 

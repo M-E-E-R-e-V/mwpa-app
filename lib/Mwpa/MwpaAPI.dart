@@ -15,9 +15,11 @@ import 'package:mwpaapp/Mwpa/Models/DefaultReturn.dart';
 import 'package:mwpaapp/Mwpa/Models/EncounterCategoriesResponse.dart';
 import 'package:mwpaapp/Mwpa/Models/ImageExist.dart';
 import 'package:mwpaapp/Mwpa/Models/ImageExistResponse.dart';
+import 'package:mwpaapp/Mwpa/Models/Info.dart';
 import 'package:mwpaapp/Mwpa/Models/IsLogin.dart';
 import 'package:mwpaapp/Mwpa/Models/LoginResponse.dart';
 import 'package:mwpaapp/Mwpa/Models/SightingSaveResponse.dart';
+import 'package:mwpaapp/Mwpa/Models/SightingTourTrackingCheck.dart';
 import 'package:mwpaapp/Mwpa/Models/SightingTourTrackingSave.dart';
 import 'package:mwpaapp/Mwpa/Models/SpeciesListResponse.dart';
 import 'package:mwpaapp/Mwpa/Models/StatusCodes.dart';
@@ -30,8 +32,10 @@ import 'package:path/path.dart' as p;
 
 import '../Models/TourTracking.dart';
 
+/// MwpaApi
 class MwpaApi {
 
+  static const URL_INFO = 'mobile/info';
   static const URL_ISLOGIN = 'mobile/islogin';
   static const URL_LOGIN = 'mobile/login';
   static const URL_USERINFO = 'mobile/user/info';
@@ -43,20 +47,24 @@ class MwpaApi {
   static const URL_SIGHTING_SAVE = 'mobile/sighting/save';
   static const URL_SIGHTING_IMAGE_SAVE = 'mobile/sighting/image/save';
   static const URL_SIGHTING_IMAGE_EXIST = 'mobile/sighting/image/exist';
+  static const URL_SIGHTING_TOUR_TRACKING_CHECK = 'mobile/sighting/tourtracking/check';
   static const URL_SIGHTING_TOUR_TRACKING_SAVE = 'mobile/sighting/tourtracking/save';
 
   String _url = "";
   String _cookie = "";
   bool _isLogin = false;
 
+  /// MwpaApi
   MwpaApi(String url) {
     _url = url;
   }
 
+  /// getUrl
   String getUrl(String path) {
     return p.join(_url, path);
   }
 
+  /// isLogin
   Future<bool> isLogin() async {
     var url = getUrl(MwpaApi.URL_ISLOGIN);
     var response = await http.get(
@@ -73,6 +81,7 @@ class MwpaApi {
     return isLogin.status;
   }
 
+  /// _getDeviceDetails
   Future<List<String>> _getDeviceDetails() async {
     String deviceName = "";
     String deviceVersion = "";
@@ -101,6 +110,42 @@ class MwpaApi {
     return [deviceName, deviceVersion, identifier];
   }
 
+  /// getInfo
+  Future<Info> getInfo() async {
+    try {
+      var url = getUrl(MwpaApi.URL_INFO);
+
+      var response = await http.get(
+        Uri.parse(url),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+      );
+
+      var objResponse = Info.fromJson(jsonDecode(response.body));
+
+      if (objResponse.statusCode == StatusCodes.OK) {
+        return objResponse;
+      } else {
+        if (objResponse.msg != null) {
+          throw MwpaException(objResponse.msg!);
+        }
+
+        throw MwpaException('Response success false');
+      }
+    }
+    on MwpaException {
+      rethrow;
+    } catch(error) {
+      if (kDebugMode) {
+        print(error);
+      }
+
+      throw Exception('Connection error');
+    }
+  }
+
+  /// login
   Future<bool> login(String email, String password) async {
     try {
       var deviceDetails = await _getDeviceDetails();
@@ -140,10 +185,15 @@ class MwpaApi {
     on MwpaException {
       rethrow;
     } catch(error) {
+      if (kDebugMode) {
+        print(error);
+      }
+
       throw Exception('Connection error');
     }
   }
 
+  /// getUserInfo
   Future<UserInfoData> getUserInfo() async {
     if (!_isLogin) {
       throw MwpaException('Please login first!');
@@ -175,10 +225,15 @@ class MwpaApi {
     on MwpaException {
       rethrow;
     } catch(error) {
+      if (kDebugMode) {
+        print(error);
+      }
+
       throw Exception('Connection error');
     }
   }
 
+  /// getVehicleList
   Future<List<Vehicle>> getVehicleList() async {
     if (!_isLogin) {
       throw MwpaException('Please login first!');
@@ -210,11 +265,15 @@ class MwpaApi {
     on MwpaException {
       rethrow;
     } catch(error) {
-      print(error);
+      if (kDebugMode) {
+        print(error);
+      }
+
       throw Exception('Connection error');
     }
   }
 
+  /// getVehicleDriverList
   Future<List<VehicleDriver>> getVehicleDriverList() async {
     if (!_isLogin) {
       throw MwpaException('Please login first!');
@@ -246,11 +305,15 @@ class MwpaApi {
     on MwpaException {
       rethrow;
     } catch(error) {
-      print(error);
+      if (kDebugMode) {
+        print(error);
+      }
+
       throw Exception('Connection error');
     }
   }
 
+  /// getSpeciesList
   Future<List<Species>> getSpeciesList() async {
     if (!_isLogin) {
       throw MwpaException('Please login first!');
@@ -282,11 +345,15 @@ class MwpaApi {
     on MwpaException {
       rethrow;
     } catch(error) {
-      print(error);
+      if (kDebugMode) {
+        print(error);
+      }
+
       throw Exception('Connection error');
     }
   }
 
+  /// getEncounterCategorieList
   Future<List<EncounterCategorie>> getEncounterCategorieList() async {
     if (!_isLogin) {
       throw MwpaException('Please login first!');
@@ -318,11 +385,15 @@ class MwpaApi {
     on MwpaException {
       rethrow;
     } catch(error) {
-      print(error);
+      if (kDebugMode) {
+        print(error);
+      }
+
       throw Exception('Connection error');
     }
   }
 
+  /// getBehaviouralStateList
   Future<List<BehaviouralState>> getBehaviouralStateList() async {
     if (!_isLogin) {
       throw MwpaException('Please login first!');
@@ -354,11 +425,15 @@ class MwpaApi {
     on MwpaException {
       rethrow;
     } catch(error) {
-      print(error);
+      if (kDebugMode) {
+        print(error);
+      }
+
       throw Exception('Connection error');
     }
   }
 
+  /// saveSighting
   Future<String?> saveSighting(Sighting sigh) async {
     try {
       var url = getUrl(MwpaApi.URL_SIGHTING_SAVE);
@@ -383,13 +458,17 @@ class MwpaApi {
     on MwpaException {
       rethrow;
     } catch(error) {
-      print(error);
+      if (kDebugMode) {
+        print(error);
+      }
+
       throw Exception('Connection error');
     }
 
     return null;
   }
 
+  /// saveSightingImage
   Future<bool> saveSightingImage(String unid, String imgFile) async {
     try {
       if ( File(imgFile).existsSync()) {
@@ -444,6 +523,7 @@ class MwpaApi {
     return false;
   }
 
+  /// existSightingImage
   Future<bool> existSightingImage(String unid, String imgFile) async {
     try {
       if ( File(imgFile).existsSync()) {
@@ -493,6 +573,42 @@ class MwpaApi {
     return false;
   }
 
+  /// checkSightingTourTracking
+  Future<bool> checkSightingTourTracking(SightingTourTrackingCheck trackCheck) async {
+    try {
+      var url = getUrl(MwpaApi.URL_SIGHTING_TOUR_TRACKING_CHECK);
+
+      var postBody = jsonEncode(trackCheck.toJson());
+
+      var response = await http.post(
+        Uri.parse(url),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'cookie': _cookie
+        },
+        body: postBody,
+      );
+
+      var objResponse = DefaultReturn.fromJson(jsonDecode(response.body));
+
+      if (objResponse.statusCode == StatusCodes.OK) {
+        return true;
+      }
+    }
+    on MwpaException {
+      rethrow;
+    } catch(error) {
+      if (kDebugMode) {
+        print(error);
+      }
+
+      throw Exception('Connection error');
+    }
+
+    return false;
+  }
+
+  /// saveSightingTourTracking
   Future<bool> saveSightingTourTracking(List<TourTracking> trackList) async {
     try {
       var save = SightingTourTrackingSave.fromTrackingList(trackList);

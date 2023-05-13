@@ -182,24 +182,21 @@ class _ListMapState extends State<ListMap> {
 
             Widget gpsInfo = Container();
 
-            if (position == null) {
-              gpsInfo = PositionedDirectional(
-                  bottom: 5,
-                  start: 5,
-                  child: Container(
-                      padding: const EdgeInsets.only(left: 4, right: 4),
-                      decoration: const BoxDecoration(
-                        color: kPrimaryHeaderColor,
-                        borderRadius: BorderRadius.all(Radius.circular(8)),
-                      ),
-                      child: Text(
-                        //position == null ? "wait for GPS ..." : UtilPosition.getStr(position),
-                        "wait for GPS ...",
-                        style: subTitleStyle.copyWith(color: kButtonFontColor),
-                      )
-                  )
-              );
-            }
+            gpsInfo = PositionedDirectional(
+                bottom: 5,
+                start: 5,
+                child: Container(
+                    padding: const EdgeInsets.only(left: 4, right: 4),
+                    decoration: const BoxDecoration(
+                      color: kPrimaryHeaderColor,
+                      borderRadius: BorderRadius.all(Radius.circular(8)),
+                    ),
+                    child: Text(
+                      position == null ? "wait for GPS ..." : UtilPosition.getStr(position),
+                      style: subTitleStyle.copyWith(color: kButtonFontColor),
+                    )
+                )
+            );
 
             return GestureDetector(
               behavior: HitTestBehavior.opaque,

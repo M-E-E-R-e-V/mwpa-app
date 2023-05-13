@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Db/DBHelper.dart';
 import 'package:mwpaapp/Models/BehaviouralState.dart';
 import 'package:mwpaapp/Models/EncounterCategorie.dart';
@@ -7,13 +8,18 @@ import 'package:mwpaapp/Models/Species.dart';
 import 'package:mwpaapp/Models/TourTracking.dart';
 import 'package:mwpaapp/Models/Vehicle.dart';
 import 'package:mwpaapp/Models/VehicleDriver.dart';
+import 'package:mwpaapp/Mwpa/Models/Info.dart';
+import 'package:mwpaapp/Mwpa/Models/SightingTourTrackingCheck.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
 import 'package:mwpaapp/Util/UtilDate.dart';
+import 'package:mwpaapp/Util/UtilTourFId.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Mwpa/MwpaAPI.dart';
 
+/// SyncMwpaService
 class SyncMwpaService {
 
+  /// sync
   Future<void> sync(Function(int, String)? update) async {
     MwpaApi api;
 
@@ -40,6 +46,16 @@ class SyncMwpaService {
       String password = prefs.getString(Preference.PASSWORD)!;
 
       api = MwpaApi(url);
+
+      Info apiInfo = await api.getInfo();
+
+      if (apiInfo.version_api_login != versionApiMobileLogin) {
+        throw Exception("The API for login has changed, please update your app, the data will not be lost.");
+      }
+
+      if (apiInfo.version_api_sync != versionApiMobileSync) {
+        throw Exception("The API for syncing has changed, please update your app, the data will not be lost.");
+      }
 
       if (!await api.isLogin()) {
         if (await api.login(username, password)) {
@@ -233,7 +249,7 @@ class SyncMwpaService {
             print(sighting.id);
           }
 
-          throw ei;
+          rethrow;
         }
 
         if (update != null) {
@@ -280,24 +296,29 @@ class SyncMwpaService {
     List<Map<String, dynamic>> tourFids = await DBHelper.queryTourTrackingFIds();
 
     for (var fidMap in tourFids) {
-      var tourFId = fidMap['tour_fid'];
+      var tourFId = UtilTourFid.convertTourFid(fidMap['tour_fid']);
 
       try {
         var trackingCount = await DBHelper.countTourTracking(tourFId);
-        var limitSteps = 100;
-        var offset = 0;
 
-        while (offset<trackingCount) {
-          if (update != null) {
-            await update(90, 'sightings tracking sync $offset/$trackingCount');
+        if (! await api.checkSightingTourTracking(
+            SightingTourTrackingCheck(tour_fid: tourFId, count: trackingCount)
+        )) {
+          var limitSteps = 100;
+          var offset = 0;
+
+          while (offset<trackingCount) {
+            if (update != null) {
+              await update(90, 'sightings tracking sync $offset/$trackingCount');
+            }
+
+            List<Map<String, dynamic>> tracks = await DBHelper.queryTourTracking(tourFId, offset, limitSteps);
+            List<TourTracking> trackList = tracks.map((data) => TourTracking.fromJson(data)).toList();
+
+            await api.saveSightingTourTracking(trackList);
+
+            offset += limitSteps;
           }
-
-          List<Map<String, dynamic>> tracks = await DBHelper.queryTourTracking(tourFId, offset, limitSteps);
-          List<TourTracking> trackList = tracks.map((data) => TourTracking.fromJson(data)).toList();
-
-          await api.saveSightingTourTracking(trackList);
-
-          offset += limitSteps;
         }
       } catch(e) {
         if (kDebugMode) {

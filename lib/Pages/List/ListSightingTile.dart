@@ -62,14 +62,23 @@ class ListSightingTile extends StatelessWidget {
     }
   }
 
+  /// build
   @override
   Widget build(BuildContext context) {
     String timeString = "not set!";
     String locationString = "not set!";
+    int speciesCount = 0;
 
     if (sighting.date != null) {
-      DateTime tDate = DateTime.parse(sighting.date!);
-      timeString = "${DateFormat.yMd().format(tDate.toLocal())} - ${sighting.duration_from!}";
+      try {
+        DateTime tDate = DateTime.parse(sighting.date!);
+        timeString = "${DateFormat.yMd().format(tDate.toLocal())} - ${sighting
+            .duration_from!}";
+      } catch(e) {
+        timeString = "${sighting.date!} - ${sighting.duration_from!}";
+      }
+
+      speciesCount = sighting.species_count ?? 0;
     }
 
     if (sighting.location_begin != null) {
@@ -120,9 +129,11 @@ class ListSightingTile extends StatelessWidget {
           size: 18,
         );
       } else {
-        syncStatus = const Icon(
+        Color nColor = Colors.green.value == backgroundColor.value ? Colors.white : Colors.green;
+
+        syncStatus = Icon(
           Icons.cloud,
-          color: Colors.green,
+          color: nColor,
           size: 18,
         );
       }
@@ -233,7 +244,23 @@ class ListSightingTile extends StatelessWidget {
                               color: backgroundColor.computeLuminance() < 0.5 ? Colors.grey[100] : Colors.grey[700]
                             )
                           ),
-                        )
+                        ),
+                        const SizedBox(width: 6),
+                        Icon(
+                          Icons.add_alarm_sharp,
+                          color: backgroundColor.computeLuminance() < 0.5 ? Colors.grey[200] : Colors.grey[700],
+                          size: 18,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          "$speciesCount",
+                          style: GoogleFonts.lato(
+                              textStyle: TextStyle(
+                                  fontSize: 13,
+                                  color: backgroundColor.computeLuminance() < 0.5 ? Colors.grey[100] : Colors.grey[700]
+                              )
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 12),

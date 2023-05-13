@@ -1,7 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Util/UtilCheckJson.dart';
+import 'package:mwpaapp/Util/UtilTourFId.dart';
 
+/// Sighting
 class Sighting {
 
   static const int SYNC_STATUS_OPEN = 0;
@@ -9,6 +13,7 @@ class Sighting {
 
   int? id;
   String? unid;
+  int? creater_id;
   int? vehicle_id;
   int? vehicle_driver_id;
   String? beaufort_wind;
@@ -44,6 +49,7 @@ class Sighting {
   Sighting({
     this.id,
     required this.unid,
+    this.creater_id,
     this.vehicle_id,
     this.vehicle_driver_id,
     this.date,
@@ -80,6 +86,7 @@ class Sighting {
   Sighting.fromJson(Map<String, dynamic> json) {
     id = UtilCheckJson.checkValue(json['id'], UtilCheckJsonTypes.int);
     unid = UtilCheckJson.checkValue(json['unid'], UtilCheckJsonTypes.string);
+    creater_id = UtilCheckJson.checkValue(json['creater_id'], UtilCheckJsonTypes.int);
     vehicle_id = UtilCheckJson.checkValue(json['vehicle_id'], UtilCheckJsonTypes.int);
     vehicle_driver_id = UtilCheckJson.checkValue(json['vehicle_driver_id'], UtilCheckJsonTypes.int);
     beaufort_wind = UtilCheckJson.checkValue(json['beaufort_wind'], UtilCheckJsonTypes.string);
@@ -125,9 +132,31 @@ class Sighting {
     }
 
     data['unid'] = unid;
+    data['creater_id'] = creater_id;
     data['vehicle_id'] = vehicle_id;
     data['vehicle_driver_id'] = vehicle_driver_id;
     data['beaufort_wind'] = beaufort_wind;
+
+    try {
+      if (date!.contains('/')) {
+        var parts = date!.split('/');
+
+        date = '${parts[2]}-${parts[0]}-${parts[1]}';
+      }
+
+      DateTime tDate = DateTime.parse(date!);
+      date = DateFormat("yyyy-MM-dd").format(tDate.toLocal());
+    } catch(e) {
+      if (kDebugMode) {
+        print('Sighting::toJson: date parsing error:');
+        print(e);
+      }
+    }
+
+    if (tour_fid != null) {
+      tour_fid = UtilTourFid.convertTourFid(tour_fid!);
+    }
+
     data['date'] = date;
     data['tour_fid'] = tour_fid ?? "";
     data['tour_start'] = tour_start;
@@ -202,6 +231,10 @@ class Sighting {
       if (tortoiseList.indexOf(other!) > -1) {
         return Colors.green;
       }
+    }
+
+    if (species_count == 0) {
+      return Colors.red;
     }
 
     return kPrimaryHeaderColor;
