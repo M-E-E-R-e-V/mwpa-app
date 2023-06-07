@@ -240,6 +240,14 @@ class SyncMwpaService {
 
           if (unid != null) {
             sighting.unid = unid;
+
+            if (sighting.creater_id == null || sighting.creater_id == 0) {
+              var pref = Preference();
+              await pref.load();
+
+              sighting.creater_id = pref.getUserId();
+            }
+
             sighting.syncStatus = Sighting.SYNC_STATUS_FINISH;
             await DBHelper.updateSighting(sighting);
           }

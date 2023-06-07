@@ -59,7 +59,7 @@ class DynInputValue {
 
   int getStrValueAsInt() {
     try {
-      return int.parse(strValue);
+      return int.parse(strValue.replaceAll(RegExp(r'[^0-9.]'), ''));
     } catch(e) {
       if (kDebugMode) {
         print('DynInputValue::getStrValueAsInt: $strValue');
@@ -409,7 +409,7 @@ class _DynInputState extends State<DynInput> {
                       width: 1.0
                     ),
                     borderRadius: BorderRadius.circular(12),
-                    color: kPrimaryBackgroundColor,
+                    color: Get.isDarkMode ? kPrimaryDarkBackgroundColor : kPrimaryBackgroundColor,
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),

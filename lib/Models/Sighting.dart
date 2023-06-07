@@ -11,6 +11,11 @@ class Sighting {
   static const int SYNC_STATUS_OPEN = 0;
   static const int SYNC_STATUS_FINISH = 1;
 
+  static const int TYPE_NORMAL = 0;   // normal sighting
+  static const int TYPE_SHORT = 1;    // over the fast button sample a turtle
+  static const int TYPE_NOTICE = 2;   // only a notice
+  static const int TYPE_FREE = 3;     // a free sighting without a tour
+
   int? id;
   String? unid;
   int? creater_id;
@@ -45,6 +50,7 @@ class Sighting {
   String? note;
   String? image;
   int? syncStatus;
+  int? sightingType;
 
   Sighting({
     this.id,
@@ -80,7 +86,8 @@ class Sighting {
     this.other_vehicle,
     this.note,
     this.image,
-    this.syncStatus
+    this.syncStatus,
+    this.sightingType
   });
 
   Sighting.fromJson(Map<String, dynamic> json) {
@@ -118,6 +125,7 @@ class Sighting {
     note = UtilCheckJson.checkValue(json['note'], UtilCheckJsonTypes.string);
     image = UtilCheckJson.checkValue(json['image'], UtilCheckJsonTypes.string);
     syncStatus = UtilCheckJson.checkValue(json['syncStatus'], UtilCheckJsonTypes.int);
+    sightingType = UtilCheckJson.checkValue(json['sightingType'], UtilCheckJsonTypes.int);
 
     if (json.containsKey('beaufort_wind_old') && json['beaufort_wind_old'] != 0 && beaufort_wind == '') {
       beaufort_wind = "${json['beaufort_wind_old']}";
@@ -190,6 +198,12 @@ class Sighting {
 
     if (withSyncStatus) {
       data['syncStatus'] = syncStatus;
+    }
+
+    if (sightingType != null) {
+      data['sightingType'] = sightingType;
+    } else {
+      data['sightingType'] = Sighting.TYPE_NORMAL;
     }
 
     return data;

@@ -531,7 +531,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
            onFormat: (value) {
              try {
                if (value != null) {
-                 var fValue = double.parse(value.strValue);
+                 var fValue = double.parse(value.strValue.replaceAll(RegExp(r'[^0-9.]'), ''));
                  fValue = 0.5399568035 * (fValue / 1000);
 
                  return "${fValue.toPrecision(2)}";
