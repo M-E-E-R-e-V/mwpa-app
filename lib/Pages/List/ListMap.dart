@@ -192,7 +192,7 @@ class _ListMapState extends State<ListMap> {
                       borderRadius: BorderRadius.all(Radius.circular(8)),
                     ),
                     child: Text(
-                      position == null ? "wait for GPS ..." : UtilPosition.getStr(position),
+                      position == null ? "wait for GPS ..." : "${UtilPosition.getStr(position)} / Points: ${locationController.positionCount}",
                       style: subTitleStyle.copyWith(color: kButtonFontColor),
                     )
                 )

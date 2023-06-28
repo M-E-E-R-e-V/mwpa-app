@@ -27,6 +27,7 @@ import 'package:mwpaapp/Pages/List/ListSightingTile.dart';
 import 'package:mwpaapp/Services/SyncMwpaService.dart';
 import 'package:mwpaapp/Services/ThemeService.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
+import 'package:mwpaapp/Util/UtilDate.dart';
 import 'package:mwpaapp/Util/UtilDistanceCoast.dart';
 import 'package:mwpaapp/Util/UtilTourFId.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -53,6 +54,8 @@ class _ListPageState extends State<ListPage> {
   final BehaviouralStateController _behaviouralStateController = Get.put(BehaviouralStateController());
 
   late StreamSubscription subscription;
+
+  bool diffTourDateIgnored = false;
 
   /// initState
   @override
@@ -127,7 +130,7 @@ class _ListPageState extends State<ListPage> {
 
   /// _logout
   _logout() async {
-    ConfirmDialog.show(context, "Logout", "Do you want to log out?", (p0) async {
+    ConfirmDialog.show(context, "Logout", "Do you want to logout?", (p0) async {
       if (p0 == "ok") {
         final prefs = await SharedPreferences.getInstance();
         prefs.remove(Preference.PASSWORD);
@@ -301,17 +304,51 @@ class _ListPageState extends State<ListPage> {
       distance_coast: "$distance",
       other: otherName,
       note: "Short insert",
-      syncStatus: Sighting.SYNC_STATUS_OPEN
+      syncStatus: Sighting.SYNC_STATUS_OPEN,
+      sightingType: Sighting.TYPE_SHORT
     ));
 
     _loadController();
   }
 
   /// _addTaskBar
-  _addTaskBar() {
+  _addTaskBar(BuildContext context) {
+    var titleDate = 'default date is not set';
+
+    try {
+      if (_prefController.prefToru != null) {
+        DateTime tDate = DateTime.parse(_prefController.prefToru!.date!);
+
+        if (!diffTourDateIgnored) {
+          /*if (!UtilDate.isCurrentDate(tDate)) {
+            InfoDialog.show(
+                context,
+                "Tour date",
+                "The tour date is not current, please reset it!"/*,
+                (select) async {
+                    if (select == "ok") {
+                      await Get.toNamed('/setTour');
+                      _sightingController.getSightings();
+                    } else {
+                      diffTourDateIgnored = true;
+                    }
+                }*/);
+          }*/
+        }
+
+        titleDate = "${DateFormat("yyyy-MM-dd").format(tDate.toLocal())} - ${_prefController.prefToru!.tour_start!}";
+      }
+    } catch(e) {
+      if (kDebugMode) {
+        print('ListPage::_addTaskBar: date parsing error:');
+        print(e);
+      }
+    }
+
+    var titleLine = "Tour: $titleDate";
     List<Widget> columnList = [
       Text(
-        DateFormat.yMMMMd().format(DateTime.now()),
+        titleLine,
         style: subHeadingStyle,
       ),
       const SizedBox(height: 5),
@@ -375,7 +412,7 @@ class _ListPageState extends State<ListPage> {
                               _addShortSighting('Caretta caretta', context);
                             }
                           ),
-                          const SizedBox(width: 15),
+                          const SizedBox(width: 10),
                           DefaultButton(
                             label: 'Dermochelys coriacea',
                             bgColor: Colors.green,
@@ -399,7 +436,7 @@ class _ListPageState extends State<ListPage> {
                               _addShortSighting('Chelonia mydas', context);
                             }
                           ),
-                          const SizedBox(width: 15),
+                          const SizedBox(width: 10),
                           DefaultButton(
                             label: 'Eretmochelys imbricata',
                             bgColor: Colors.green,
@@ -589,7 +626,7 @@ class _ListPageState extends State<ListPage> {
         appBar: _appBar(),
         body: Column(
           children: [
-            _addTaskBar(),
+            _addTaskBar(context),
             const SizedBox(height: 20),
             _addMapBar(),
             const SizedBox(height: 20),
