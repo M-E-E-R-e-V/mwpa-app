@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+import 'package:intl/intl.dart';
 import 'package:mwpaapp/Util/UtilCheckJson.dart';
 
 class TourPref {
@@ -35,6 +37,23 @@ class TourPref {
     data['vehicle_id'] = vehicle_id;
     data['vehicle_driver_id'] = vehicle_driver_id;
     data['beaufort_wind'] = beaufort_wind;
+
+    try {
+      if (date!.contains('/')) {
+        var parts = date!.split('/');
+
+        date = '${parts[2]}-${parts[0]}-${parts[1]}';
+      }
+
+      DateTime tDate = DateTime.parse(date!);
+      date = DateFormat("yyyy-MM-dd").format(tDate.toLocal());
+    } catch(e) {
+      if (kDebugMode) {
+        print('TourPref::toJson: date parsing error:');
+        print(e);
+      }
+    }
+
     data['date'] = date;
     data['tour_start'] = tour_start;
     data['tour_end'] = tour_end;

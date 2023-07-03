@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart';
 import 'package:mwpaapp/Models/Sighting.dart';
 import 'package:mwpaapp/Models/TourPref.dart';
 
@@ -6,12 +7,18 @@ class UtilTourFid {
 
   /// createTTourFId
   static createTTourFId(TourPref tour) {
-    return "${tour.vehicle_id}-${tour.vehicle_driver_id}-${tour.date}-${tour.tour_start}";
+    DateTime tDate = DateTime.parse("${tour.date}");
+    var date = DateFormat("yyyy-MM-dd").format(tDate.toLocal());
+
+    return "${tour.vehicle_id}-${tour.vehicle_driver_id}-$date-${tour.tour_start}";
   }
 
   /// createSTourFId
   static createSTourFId(Sighting sighting) {
-    return "${sighting.vehicle_id}-${sighting.vehicle_driver_id}-${sighting.date}-${sighting.tour_start}";
+    DateTime tDate = DateTime.parse("${sighting.date}");
+    var date = DateFormat("yyyy-MM-dd").format(tDate.toLocal());
+
+    return "${sighting.vehicle_id}-${sighting.vehicle_driver_id}-$date-${sighting.tour_start}";
   }
 
   /// convertTourFid

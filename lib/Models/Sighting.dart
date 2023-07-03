@@ -90,6 +90,7 @@ class Sighting {
     this.sightingType
   });
 
+  /// fromJson
   Sighting.fromJson(Map<String, dynamic> json) {
     id = UtilCheckJson.checkValue(json['id'], UtilCheckJsonTypes.int);
     unid = UtilCheckJson.checkValue(json['unid'], UtilCheckJsonTypes.string);
@@ -132,6 +133,7 @@ class Sighting {
     }
   }
 
+  /// toJson
   Map<String, dynamic> toJson(bool withId, bool withSyncStatus) {
     final Map<String, dynamic> data = <String, dynamic>{};
 
