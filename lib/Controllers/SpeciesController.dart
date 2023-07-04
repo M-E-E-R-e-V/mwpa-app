@@ -22,13 +22,13 @@ class SpeciesController extends GetxController {
   /// getSpecies
   Future<void> getSpecies() async {
     List<Map<String, dynamic>> species = await DBHelper.querySpecies(false);
-    speciesList.assignAll(species.map((data) => Species.fromJson(data)).toList());
+    speciesList.assignAll(species.map((data) => Species.fromDbJson(data)).toList());
   }
 
   /// getSpeciesName
   String? getSpeciesName(int id) {
     for (var specie in speciesList) {
-      if (specie.id == id) {
+      if (specie.orgid == id) {
         return specie.name;
       }
     }

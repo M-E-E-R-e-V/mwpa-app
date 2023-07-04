@@ -568,7 +568,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
              }
 
              return DynInputSelectItem(
-                 value: element.id!.toString(),
+                 value: element.orgid!.toString(),
                  label: labelName
              );
            }).toList(),

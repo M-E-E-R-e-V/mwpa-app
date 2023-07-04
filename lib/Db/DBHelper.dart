@@ -11,7 +11,7 @@ import 'package:sqflite/sqflite.dart';
 /// DBHelper
 class DBHelper {
   static Database? _db;
-  static const int _version = 6;
+  static const int _version = 7;
   static const String _tableNameSighting = "sighting";
   static const String _tableNameTourTracking = "tour_tracking";
   static const String _tableNameVehicle = "vehicle";
@@ -52,6 +52,10 @@ class DBHelper {
 
             if (oldVersion <= 5) {
               _updateTableSightingV5toV6(batch);
+            }
+
+            if (oldVersion <= 6) {
+              _updateTableSightingV6toV7(batch);
             }
 
             await batch.commit();
@@ -117,16 +121,17 @@ class DBHelper {
             db.execute(
                 "CREATE TABLE IF NOT EXISTS $_tableNameVehicleDriver("
                     "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                    "user_id INTEGER,"
-                    "description STRING,"
-                    "username STRING,"
+                    "user_id INTEGER, "
+                    "description STRING, "
+                    "username STRING, "
                     "isdeleted INTEGER)"
             );
 
             db.execute(
                 "CREATE TABLE IF NOT EXISTS $_tableNameSpecies("
                     "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                    "name STRING,"
+                    "orgid INTEGER, "
+                    "name STRING, "
                     "isdeleted INTEGER)"
             );
 
@@ -178,6 +183,11 @@ class DBHelper {
   /// _updateTableSightingV5toV6
   static void _updateTableSightingV5toV6(Batch batch) {
     batch.execute('ALTER TABLE $_tableNameSighting ADD sightingType INTEGER');
+  }
+
+  /// _updateTableSightingV6toV7
+  static void _updateTableSightingV6toV7(Batch batch) {
+    batch.execute('ALTER TABLE $_tableNameSpecies ADD orgid INTEGER');
   }
 
   /// insertSighting
@@ -311,7 +321,7 @@ class DBHelper {
 
   /// insertSpecies
   static Future<int> insertSpecies(Species species) async {
-    return await _db?.insert(_tableNameSpecies, species.toJson(false)) ?? 1;
+    return await _db?.insert(_tableNameSpecies, species.toDbJson(false)) ?? 1;
   }
 
   /// querySpecies
@@ -332,7 +342,7 @@ class DBHelper {
   static Future<Map<String, dynamic>> readSpecies(int id) async {
     List<Map<String, dynamic>> list = await _db!.query(
         _tableNameSpecies,
-        where: 'id = ?',
+        where: 'orgid = ?',
         whereArgs: [id]
     );
 
@@ -348,9 +358,15 @@ class DBHelper {
     return await _db!.update(
       _tableNameSpecies,
       species.toJson(false),
-      where: 'id = ?',
+      where: 'orgid = ?',
       whereArgs: [species.id]
     );
+  }
+
+  /// truncateSpecies
+  static Future<int> truncateSpecies() async {
+    await _db!.delete(_tableNameSpecies);
+    return await _db!.update('sqlite_sequence', {'seq':1}, where: 'name = ?', whereArgs: [_tableNameSpecies]);
   }
 
   /// insertEncounterCategorie

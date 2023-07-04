@@ -136,13 +136,17 @@ class SyncMwpaService {
     try {
       List<Species> speciesList = await api.getSpeciesList();
 
-      for (var species in speciesList) {
-        var tSpecie = await DBHelper.readSpecies(species.id!);
+      if (speciesList.isNotEmpty) {
+        await DBHelper.truncateSpecies();
 
-        if (tSpecie.isEmpty) {
-          await DBHelper.insertSpecies(species);
-        } else {
-          await DBHelper.updateSpecies(species);
+        for (var species in speciesList) {
+          var tSpecie = await DBHelper.readSpecies(species.orgid!);
+
+          if (tSpecie.isEmpty) {
+            await DBHelper.insertSpecies(species);
+          } else {
+            await DBHelper.updateSpecies(species);
+          }
         }
       }
     } catch(e) {
