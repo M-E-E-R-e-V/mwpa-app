@@ -27,7 +27,6 @@ import 'package:mwpaapp/Pages/List/ListSightingTile.dart';
 import 'package:mwpaapp/Services/SyncMwpaService.dart';
 import 'package:mwpaapp/Services/ThemeService.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
-import 'package:mwpaapp/Util/UtilDate.dart';
 import 'package:mwpaapp/Util/UtilDistanceCoast.dart';
 import 'package:mwpaapp/Util/UtilTourFId.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -400,52 +399,40 @@ class _ListPageState extends State<ListPage> {
                     children: [
                       const Text("Please select"),
                       const SizedBox(height: 15),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          DefaultButton(
-                            label: 'Caretta caretta',
-                            bgColor: Colors.green,
-                            onTab: () {
-                              Navigator.of(context).pop();
-                              _addShortSighting('Caretta caretta', context);
-                            }
-                          ),
-                          const SizedBox(width: 10),
-                          DefaultButton(
-                            label: 'Dermochelys coriacea',
-                            bgColor: Colors.green,
-                            onTab: () {
-                              Navigator.of(context).pop();
-                              _addShortSighting('Dermochelys coriacea', context);
-                            }
-                          )
-                        ],
+                      DefaultButton(
+                          label: 'Caretta caretta\n(Loggerhead sea turtle)',
+                          bgColor: Colors.green,
+                          onTab: () {
+                            Navigator.of(context).pop();
+                            _addShortSighting('Caretta caretta', context);
+                          }
+                      ),
+                      const SizedBox(width: 15),
+                      DefaultButton(
+                          label: 'Dermochelys coriacea',
+                          bgColor: Colors.green,
+                          onTab: () {
+                            Navigator.of(context).pop();
+                            _addShortSighting('Dermochelys coriacea', context);
+                          }
                       ),
                       const SizedBox(height: 15),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          DefaultButton(
-                            label: 'Chelonia mydas',
-                            bgColor: Colors.green,
-                            onTab: () {
-                              Navigator.of(context).pop();
-                              _addShortSighting('Chelonia mydas', context);
-                            }
-                          ),
-                          const SizedBox(width: 10),
-                          DefaultButton(
-                            label: 'Eretmochelys imbricata',
-                            bgColor: Colors.green,
-                            onTab: () {
-                              Navigator.of(context).pop();
-                              _addShortSighting('Eretmochelys imbricata', context);
-                            }
-                          )
-                        ],
+                      DefaultButton(
+                          label: 'Chelonia mydas',
+                          bgColor: Colors.green,
+                          onTab: () {
+                            Navigator.of(context).pop();
+                            _addShortSighting('Chelonia mydas', context);
+                          }
+                      ),
+                      const SizedBox(width: 15),
+                      DefaultButton(
+                          label: 'Eretmochelys imbricata',
+                          bgColor: Colors.green,
+                          onTab: () {
+                            Navigator.of(context).pop();
+                            _addShortSighting('Eretmochelys imbricata', context);
+                          }
                       ),
                       const SizedBox(height: 15),
                       DefaultButton(label: 'Cancel', onTab: () {

@@ -289,7 +289,7 @@ class _DynInputState extends State<DynInput> {
   }
 
   _getImage(ImageSource imageSource) async {
-    PickedFile? imageFile = await picker!.getImage(source: imageSource);
+    XFile? imageFile = await picker!.pickImage(source: imageSource);
     //if user doesn't take any image, just return.
     if (imageFile == null) return;
 
@@ -820,24 +820,24 @@ class _DynInputState extends State<DynInput> {
         break;
 
       case DynInputType.nyntogglebtn:
-        List<bool> _isSelected = [false, false, false];
+        List<bool> isSelected = [false, false, false];
 
         if (dynValue!.intValue <= -1) {
-          _isSelected[0] = true;
+          isSelected[0] = true;
         } else if (dynValue!.intValue == 0) {
-          _isSelected[2] = true;
+          isSelected[2] = true;
         } else if (dynValue!.intValue >= 1) {
-          _isSelected[1] = true;
+          isSelected[1] = true;
         }
 
         inContainer = Container(
           margin: const EdgeInsets.only(top: 8.0),
           padding: const EdgeInsets.only(left: 14),
           child: ToggleButtons(
-            isSelected: _isSelected,
+            isSelected: isSelected,
             onPressed: (int index) {
               setState(() {
-                _isSelected[index] = !_isSelected[index];
+                isSelected[index] = !isSelected[index];
 
                 switch (index) {
                   case 0:
