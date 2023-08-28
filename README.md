@@ -62,23 +62,21 @@ The app is implemented with Flutter (Dart) and should support the following plat
   * Flutter -> Flutter Pub Upgrade
   * Flutter -> Flutter Upgrade
 
-* Add for Debuger 2 Task:
-  * Edit Configration main.dart
+* Add for Debugger 2 Task:
+  * Edit Configuration main.dart
     * Add "Create Tool" with:
       * Name: Flutter icon
       * Group: External Tools
-      * Program: /home/user/fluter/bin/flutter
+      * Program: /home/user/flutter/bin/flutter
       * Arguments: pub run flutter_launcher_icons:main
       * Working directory: /home/user/*/mwpa-app
+
     * Add "Create Tool" with:
       * Name: Flutter name
       * Description: Flutter App Name
       * Group: External Tools
-      * Program: /home/user/fluter/bin/flutter
+      * Program: /home/user/flutter/bin/flutter
       * Arguments: pub run flutter_app_name
       * Working directory: /home/user/*/mwpa-app
 
 Now you can work with the project!
-
-## TODO 
-https://docs.flutter.dev/cookbook/persistence/sqlite

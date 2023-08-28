@@ -10,6 +10,7 @@ import '../Models/TourPref.dart';
 /// PrefController
 class PrefController extends GetxController {
 
+  bool isLogin = false;
   bool prominentDisclosureConfirmed = false;
   TourPref? prefToru;
 
@@ -33,6 +34,12 @@ class PrefController extends GetxController {
         if (pdc != null) {
           prominentDisclosureConfirmed = pdc ? true : false;
         }
+      }
+
+      // is login --------------------------------------------------------------
+
+      if (prefs.containsKey(Preference.USERID)) {
+        isLogin = true;
       }
 
       // read default tour settings --------------------------------------------

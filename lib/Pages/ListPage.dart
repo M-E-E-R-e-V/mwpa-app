@@ -27,11 +27,13 @@ import 'package:mwpaapp/Pages/List/ListSightingTile.dart';
 import 'package:mwpaapp/Services/SyncMwpaService.dart';
 import 'package:mwpaapp/Services/ThemeService.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
+import 'package:mwpaapp/Util/UtilDate.dart';
 import 'package:mwpaapp/Util/UtilDistanceCoast.dart';
 import 'package:mwpaapp/Util/UtilTourFId.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:connectivity/connectivity.dart';
 import 'List/ListMap.dart';
+import 'package:flutter_icons_null_safety/flutter_icons_null_safety.dart';
 
 /// ListPage
 class ListPage extends StatefulWidget {
@@ -319,20 +321,21 @@ class _ListPageState extends State<ListPage> {
         DateTime tDate = DateTime.parse(_prefController.prefToru!.date!);
 
         if (!diffTourDateIgnored) {
-          /*if (!UtilDate.isCurrentDate(tDate)) {
-            InfoDialog.show(
-                context,
-                "Tour date",
-                "The tour date is not current, please reset it!"/*,
-                (select) async {
-                    if (select == "ok") {
-                      await Get.toNamed('/setTour');
-                      _sightingController.getSightings();
-                    } else {
-                      diffTourDateIgnored = true;
-                    }
-                }*/);
-          }*/
+          if (!UtilDate.isCurrentDate(tDate)) {
+            Future.delayed(Duration.zero, () => ConfirmDialog.show(
+              context,
+              "Tour date",
+              "The tour date is not current, please check!",
+              (select) async {
+                if (select == "ok") {
+                  await Get.toNamed('/setTour');
+                  _sightingController.getSightings();
+                } else {
+                  diffTourDateIgnored = true;
+                }
+              }
+            ));
+          }
         }
 
         titleDate = "${DateFormat("yyyy-MM-dd").format(tDate.toLocal())} - ${_prefController.prefToru!.tour_start!}";
@@ -379,7 +382,7 @@ class _ListPageState extends State<ListPage> {
 
     // TODO, fast button animals should come from the database in the future
     btnList.add(DefaultButton(
-      buttonIcon: Icons.switch_access_shortcut_add,
+      buttonIcon: MaterialCommunityIcons.tortoise,
       label: 'Add Tortoise',
       height: 40,
       width: 120,
@@ -390,58 +393,67 @@ class _ListPageState extends State<ListPage> {
             barrierDismissible: false, // user must tap button!
             builder: (BuildContext context) {
               return Dialog(
-              shape: RoundedRectangleBorder(
-                  borderRadius:BorderRadius.circular(30.0)),
-              child: SizedBox(
-                  height: 300,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text("Please select"),
-                      const SizedBox(height: 15),
-                      DefaultButton(
-                          label: 'Caretta caretta\n(Loggerhead sea turtle)',
-                          bgColor: Colors.green,
-                          onTab: () {
-                            Navigator.of(context).pop();
-                            _addShortSighting('Caretta caretta', context);
-                          }
-                      ),
-                      const SizedBox(width: 15),
-                      DefaultButton(
-                          label: 'Dermochelys coriacea',
-                          bgColor: Colors.green,
-                          onTab: () {
-                            Navigator.of(context).pop();
-                            _addShortSighting('Dermochelys coriacea', context);
-                          }
-                      ),
-                      const SizedBox(height: 15),
-                      DefaultButton(
-                          label: 'Chelonia mydas',
-                          bgColor: Colors.green,
-                          onTab: () {
-                            Navigator.of(context).pop();
-                            _addShortSighting('Chelonia mydas', context);
-                          }
-                      ),
-                      const SizedBox(width: 15),
-                      DefaultButton(
-                          label: 'Eretmochelys imbricata',
-                          bgColor: Colors.green,
-                          onTab: () {
-                            Navigator.of(context).pop();
-                            _addShortSighting('Eretmochelys imbricata', context);
-                          }
-                      ),
-                      const SizedBox(height: 15),
-                      DefaultButton(label: 'Cancel', onTab: () {
-                        Navigator.of(context).pop();
-                      }),
-                    ],
-                  )
-              )
-          );
+                shape: RoundedRectangleBorder(
+                  borderRadius:BorderRadius.circular(30.0)
+                ),
+                child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text("Please select"),
+                    const SizedBox(height: 15),
+                    DefaultButton(
+                        label: 'Caretta caretta\nLoggerhead sea turtle',
+                        bgColor: Colors.green,
+                        onTab: () {
+                          Navigator.of(context).pop();
+                          _addShortSighting('Caretta caretta - Loggerhead sea turtle', context);
+                        }
+                    ),
+                    const SizedBox(width: 15),
+                    DefaultButton(
+                        label: 'Dermochelys coriacea\nLeatherback sea turtle',
+                        bgColor: Colors.green,
+                        onTab: () {
+                          Navigator.of(context).pop();
+                          _addShortSighting('Dermochelys coriacea - Leatherback sea turtle', context);
+                        }
+                    ),
+                    const SizedBox(height: 15),
+                    DefaultButton(
+                        label: 'Chelonia mydas\nGreen sea turtle',
+                        bgColor: Colors.green,
+                        onTab: () {
+                          Navigator.of(context).pop();
+                          _addShortSighting('Chelonia mydas - Green sea turtle', context);
+                        }
+                    ),
+                    const SizedBox(width: 15),
+                    DefaultButton(
+                        label: 'Eretmochelys imbricata\nHawksbill sea turtle',
+                        bgColor: Colors.green,
+                        onTab: () {
+                          Navigator.of(context).pop();
+                          _addShortSighting('Eretmochelys imbricata - Hawksbill sea turtle', context);
+                        }
+                    ),
+                    const SizedBox(width: 15),
+                    DefaultButton(
+                        label: 'Unknown sea turtle',
+                        bgColor: Colors.teal,
+                        onTab: () {
+                          Navigator.of(context).pop();
+                          _addShortSighting('Unknown sea turtle', context);
+                        }
+                    ),
+                    const SizedBox(height: 15),
+                    DefaultButton(label: 'Cancel', onTab: () {
+                      Navigator.of(context).pop();
+                    }),
+                  ],
+                )
+                )
+              );
             },
         );
       }

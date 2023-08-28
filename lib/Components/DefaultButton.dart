@@ -2,6 +2,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:mwpaapp/Constants.dart';
 
+/// DefaultButton
 class DefaultButton extends StatelessWidget {
   final String? label;
   final IconData? buttonIcon;
@@ -12,6 +13,7 @@ class DefaultButton extends StatelessWidget {
 
   const DefaultButton({Key? key, this.label, this.buttonIcon, this.onTab, this.width, this.height, this.bgColor}) : super(key: key);
 
+  /// build
   @override
   Widget build(BuildContext context) {
     var newWidth = 140.0;
@@ -48,8 +50,8 @@ class DefaultButton extends StatelessWidget {
             fontWeight: FontWeight.bold,
             fontSize: 12
         ),
-        minFontSize: 6,
-        maxLines: 1
+        textAlign: TextAlign.center,
+        minFontSize: 6
       ));
     }
 

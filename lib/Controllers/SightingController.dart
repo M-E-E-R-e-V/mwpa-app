@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:mwpaapp/Db/DBHelper.dart';
 import 'package:mwpaapp/Models/Sighting.dart';
@@ -28,7 +29,10 @@ class SightingController extends GetxController {
   /// delete
   Future<void> delete(Sighting oldSighting) async {
     var val = await DBHelper.deleteSighting(oldSighting);
-    print(val);
+
+    if (kDebugMode) {
+      print(val);
+    }
   }
 
   /// updateSighting

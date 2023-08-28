@@ -11,7 +11,7 @@ import 'package:sqflite/sqflite.dart';
 /// DBHelper
 class DBHelper {
   static Database? _db;
-  static const int _version = 7;
+  static const int _version = 8;
   static const String _tableNameSighting = "sighting";
   static const String _tableNameTourTracking = "tour_tracking";
   static const String _tableNameVehicle = "vehicle";
@@ -58,6 +58,10 @@ class DBHelper {
               _updateTableSightingV6toV7(batch);
             }
 
+            if (oldVersion <= 7 ) {
+              _updateTableSightingV7toV8(batch);
+            }
+
             await batch.commit();
           },
           onCreate: (db, version) {
@@ -98,7 +102,9 @@ class DBHelper {
                     "note STRING,"
                     "image STRING,"
                     "syncStatus INTEGER,"
-                    "sightingType INTEGER"
+                    "sightingType INTEGER,"
+                    "parentid INTEGER,"
+                    "parentuid STRING"
                     ")"
             );
 
@@ -188,6 +194,12 @@ class DBHelper {
   /// _updateTableSightingV6toV7
   static void _updateTableSightingV6toV7(Batch batch) {
     batch.execute('ALTER TABLE $_tableNameSpecies ADD orgid INTEGER');
+  }
+
+  /// _updateTableSightingV7toV8
+  static void _updateTableSightingV7toV8(Batch batch) {
+    batch.execute('ALTER TABLE $_tableNameSighting ADD parentid INTEGER');
+    batch.execute('ALTER TABLE $_tableNameSighting ADD parentuid STRING');
   }
 
   /// insertSighting

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:mwpaapp/Controllers/LocationController.dart';
 import 'package:mwpaapp/Controllers/PrefController.dart';
 import 'package:mwpaapp/Db/DBHelper.dart';
 import 'package:mwpaapp/Pages/EditSightingPage.dart';
@@ -13,6 +12,7 @@ import 'package:mwpaapp/Pages/ProminentDisclosurePage.dart';
 import 'package:mwpaapp/Services/ThemeService.dart';
 import 'package:mwpaapp/Ui/Themes.dart';
 
+/// main
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await DBHelper.initDb();
@@ -20,6 +20,7 @@ void main() async {
   runApp(const MWPAApp());
 }
 
+/// MWPAApp
 class MWPAApp extends StatefulWidget {
   const MWPAApp({Key? key}) : super(key: key);
 
@@ -27,6 +28,7 @@ class MWPAApp extends StatefulWidget {
   State<MWPAApp> createState() => _MWPAAppState();
 }
 
+/// _MWPAAppState
 class _MWPAAppState extends State<MWPAApp> {
   final PrefController _prefController = Get.put(PrefController());
 

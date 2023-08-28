@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mwpaapp/Constants.dart';
+import 'package:mwpaapp/Controllers/PrefController.dart';
 import 'package:mwpaapp/Dialog/InfoDialog.dart';
 import 'package:mwpaapp/Mwpa/Models/Info.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
@@ -20,7 +21,7 @@ class LoginPage extends StatefulWidget {
 
 /// _LoginPageState
 class _LoginPageState extends State<LoginPage> {
-
+  final PrefController _prefController = Get.find<PrefController>();
   final _urlController = TextEditingController();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -94,20 +95,14 @@ class _LoginPageState extends State<LoginPage> {
 
   /// _isLogin
   Future<void> _isLogin() async {
-    final prefs = await SharedPreferences.getInstance();
+    await _prefController.load();
 
-    var isAccept = false;
-
-    if (prefs.containsKey(Preference.PROMINENT_DISCLOSURE_CONFIRMED)) {
-      isAccept = prefs.getBool(Preference.PROMINENT_DISCLOSURE_CONFIRMED) ?? false;
-    }
-
-    if (!isAccept) {
+    if (_prefController.prominentDisclosureConfirmed == false) {
       Get.toNamed('/ProminentDisclosure');
       return;
     }
 
-    if (prefs.containsKey(Preference.USERID)) {
+    if (_prefController.isLogin) {
       Get.toNamed('/List');
     }
 

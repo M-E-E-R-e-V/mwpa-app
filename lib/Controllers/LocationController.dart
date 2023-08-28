@@ -135,7 +135,8 @@ class LocationController extends GetxController {
   /// getLocationBy
   Future<Position?> getLocationBy(String tourFId, DateTime date) async {
     try {
-      String timeStr = date.toUtc().toString();
+      //String timeStr = date.toUtc().toString();
+      String timeStr = date.toString();
 
       var timeParts = timeStr.split(":");
       var newTimeSearch = "${timeParts[0]}:${timeParts[1]}";

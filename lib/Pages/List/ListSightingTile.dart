@@ -142,6 +142,7 @@ class ListSightingTile extends StatelessWidget {
     // -------------------------------------------------------------------------
 
     List<Widget> symbols = [];
+    List<Widget> actions = [];
 
     if (sighting.subgroups != null && sighting.subgroups! > 0) {
       symbols.add(Icon(
@@ -210,6 +211,7 @@ class ListSightingTile extends StatelessWidget {
                     Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
+                          // species name --------------------------------------
                           Text(
                             speciesName,
                             style: GoogleFonts.lato(
@@ -230,6 +232,7 @@ class ListSightingTile extends StatelessWidget {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
+                        // time ------------------------------------------------
                         Icon(
                           Icons.access_time_rounded,
                           color: backgroundColor.computeLuminance() < 0.5 ? Colors.grey[200] : Colors.grey[700],
@@ -246,6 +249,8 @@ class ListSightingTile extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 6),
+
+                        // species count ---------------------------------------
                         Icon(
                           Icons.add_alarm_sharp,
                           color: backgroundColor.computeLuminance() < 0.5 ? Colors.grey[200] : Colors.grey[700],
@@ -263,6 +268,7 @@ class ListSightingTile extends StatelessWidget {
                         ),
                       ],
                     ),
+
                     const SizedBox(height: 12),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -295,12 +301,26 @@ class ListSightingTile extends StatelessWidget {
             ),
             Column(
               children: !endLocationEmpty ? symbols : [
-                DefaultButton(
-                  buttonIcon: Icons.add_location_alt,
-                  width: 22,
-                  onTab: () {
-                    _setEndLocation(context);
-                  },
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    /*DefaultButton(
+                      buttonIcon: Icons.add_reaction,
+                      width: 22,
+                      onTab: () {
+
+                      },
+                      bgColor: Colors.green,
+                    ),*/
+                    const SizedBox(width: 4),
+                    DefaultButton(
+                      buttonIcon: Icons.add_location_alt,
+                      width: 22,
+                      onTab: () {
+                        _setEndLocation(context);
+                      },
+                    )
+                  ]
                 )
               ],
             )
