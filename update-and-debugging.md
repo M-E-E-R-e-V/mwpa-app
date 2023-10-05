@@ -23,6 +23,9 @@ Now the tablet and Android Studio can be reconnected and paired.
 ## Steps
 
 1. Install, set up and start [OpenVPN](https://play.google.com/store/apps/details?id=de.blinkt.openvpn\&hl=de\&gl=US). A private IP with <mark style="background-color:blue;">10.8.\*</mark> can be seen.
+
+<figure><img src=".gitbook/assets/WhatsApp Image 2023-10-05 at 13.16.58.jpeg" alt="" width="188"><figcaption></figcaption></figure>
+
 2. Connect to [AnyDesk](https://play.google.com/store/apps/details?id=com.anydesk.anydeskandroid\&hl=de\&gl=US) and transfer the second [app APF](https://github.com/stefanwerfling/apf). The remote person on the tablet installs this and starts it as follows:
    1. **Listen**: Specify the OpenVPN IP on lists, e.g. <mark style="background-color:blue;">10.8.0.6</mark>
    2. **Port from/to:** Leave port from to <mark style="background-color:blue;">10000</mark>, the second port is not of interest.
@@ -34,11 +37,14 @@ Now the tablet and Android Studio can be reconnected and paired.
 
 3. The developer on the other hand can check the list via browser: [http://10.8.0.6:10000/?action=info](http://10.8.0.6:10000/?action=info)
 4. If everything works, the person on the tablet goes to Android "Settings" ⇾ "Developer options" ⇾ "Debugging via Wi-Fi".
-   1. Activate
-   2. "Pair the device using a pairing cord"
-   3. You can now see the IP and port below. Example: <mark style="background-color:blue;">192.168.11.120</mark>:<mark style="background-color:orange;">40719</mark>
-   4. The port is now activated by the developer on the other side with the URL: [http://10.8.0.6:10000/?action=open\_port\&port=<mark style="background-color:orange;">40719</mark>](http://10.8.0.6:10000/?action=open\_port\&port=40719)
-   5. Now start the pair in the console in Android studio:
+
+<figure><img src=".gitbook/assets/WhatsApp Image 2023-10-05 at 13.17.50.jpeg" alt="" width="188"><figcaption></figcaption></figure>
+
+5. &#x20;Activate
+   1. "Pair the device using a pairing cord"
+   2. You can now see the IP and port below. Example: <mark style="background-color:blue;">192.168.11.120</mark>:<mark style="background-color:orange;">40719</mark>
+   3. The port is now activated by the developer on the other side with the URL: [http://10.8.0.6:10000/?action=open\_port\&port=<mark style="background-color:orange;">40719</mark>](http://10.8.0.6:10000/?action=open\_port\&port=40719)
+   4. Now start the pair in the console in Android studio:
 
 ```sh
 cd /home/~/Android/Sdk/platform-tools
