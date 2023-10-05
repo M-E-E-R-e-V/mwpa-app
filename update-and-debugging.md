@@ -29,6 +29,9 @@ Now the tablet and Android Studio can be reconnected and paired.
    3. "Enable remote listen start for port forwarding" Activate.
    4. **Destination**: Select the IP that the tablet has on the Wi-Fi. Usually start with a <mark style="background-color:blue;">192.168.\*</mark>
    5. Press the start button.
+
+<figure><img src=".gitbook/assets/c081e999-3dab-4b6e-b795-9d4955b343e3.jpeg" alt="" width="188"><figcaption></figcaption></figure>
+
 3. The developer on the other hand can check the list via browser: [http://10.8.0.6:10000/?action=info](http://10.8.0.6:10000/?action=info)
 4. If everything works, the person on the tablet goes to Android "Settings" ⇾ "Developer options" ⇾ "Debugging via Wi-Fi".
    1. Activate
