@@ -4,7 +4,7 @@ description: This page describes how a new version can be installed.
 
 # Update & Debugging
 
-<figure><img src=".gitbook/assets/mwpa_app_debugging.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/mwpa_app_debugging.png" alt=""><figcaption></figcaption></figure>
 
 ## Problem
 
@@ -24,7 +24,7 @@ Now the tablet and Android Studio can be reconnected and paired.
 
 1. Install, set up and start [OpenVPN](https://play.google.com/store/apps/details?id=de.blinkt.openvpn\&hl=de\&gl=US). A private IP with <mark style="background-color:blue;">10.8.\*</mark> can be seen.
 
-<figure><img src=".gitbook/assets/WhatsApp Image 2023-10-05 at 13.16.58.jpeg" alt="" width="188"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/WhatsApp Image 2023-10-05 at 13.16.58.jpeg" alt="" width="188"><figcaption></figcaption></figure>
 
 2. Connect to [AnyDesk](https://play.google.com/store/apps/details?id=com.anydesk.anydeskandroid\&hl=de\&gl=US) and transfer the second [app APF](https://github.com/stefanwerfling/apf). The remote person on the tablet installs this and starts it as follows:
    1. **Listen**: Specify the OpenVPN IP on lists, e.g. <mark style="background-color:blue;">10.8.0.6</mark>
@@ -33,12 +33,12 @@ Now the tablet and Android Studio can be reconnected and paired.
    4. **Destination**: Select the IP that the tablet has on the Wi-Fi. Usually start with a <mark style="background-color:blue;">192.168.\*</mark>
    5. Press the start button.
 
-<figure><img src=".gitbook/assets/c081e999-3dab-4b6e-b795-9d4955b343e3.jpeg" alt="" width="188"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/c081e999-3dab-4b6e-b795-9d4955b343e3.jpeg" alt="" width="188"><figcaption></figcaption></figure>
 
 3. The developer on the other hand can check the list via browser: [http://10.8.0.6:10000/?action=info](http://10.8.0.6:10000/?action=info)
 4. If everything works, the person on the tablet goes to Android "Settings" ⇾ "Developer options" ⇾ "Debugging via Wi-Fi".
 
-<figure><img src=".gitbook/assets/WhatsApp Image 2023-10-05 at 13.17.50.jpeg" alt="" width="188"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/WhatsApp Image 2023-10-05 at 13.17.50.jpeg" alt="" width="188"><figcaption></figcaption></figure>
 
 5. &#x20;Activate
    1. "Pair the device using a pairing cord"
