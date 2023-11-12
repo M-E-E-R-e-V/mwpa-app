@@ -441,7 +441,7 @@ class MwpaApi {
     try {
       var url = getUrl(MwpaApi.URL_SIGHTING_SAVE);
 
-      var postBody = jsonEncode(sigh.toJson(false, false));
+      var postBody = jsonEncode(sigh.toJson(false, false, true));
 
       var response = await http.post(
         Uri.parse(url),

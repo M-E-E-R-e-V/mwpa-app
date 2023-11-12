@@ -25,6 +25,26 @@ class SpeciesController extends GetxController {
     speciesList.assignAll(species.map((data) => Species.fromDbJson(data)).toList());
   }
 
+  Species? getSpeciesById(int id) {
+    for (var specie in speciesList) {
+      if (specie.id == id) {
+        return specie;
+      }
+    }
+
+    return null;
+  }
+
+  Species? getSpeciesByOrgId(int orgid) {
+    for (var specie in speciesList) {
+      if (specie.orgid == orgid) {
+        return specie;
+      }
+    }
+
+    return null;
+  }
+
   /// getSpeciesName
   String? getSpeciesName(int id) {
     for (var specie in speciesList) {

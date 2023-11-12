@@ -1,9 +1,15 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:intl/intl.dart';
 import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Util/UtilCheckJson.dart';
 import 'package:mwpaapp/Util/UtilTourFId.dart';
+
+import '../Controllers/SpeciesController.dart';
 
 /// Sighting
 class Sighting {
@@ -134,7 +140,7 @@ class Sighting {
   }
 
   /// toJson
-  Map<String, dynamic> toJson(bool withId, bool withSyncStatus) {
+  Map<String, dynamic> toJson(bool withId, bool withSyncStatus, bool? forSync) {
     final Map<String, dynamic> data = <String, dynamic>{};
 
     if (withId) {
@@ -190,6 +196,29 @@ class Sighting {
     data['freq_behaviour'] = freq_behaviour;
     data['recognizable_animals'] = recognizable_animals;
     data['other_species'] = other_species;
+
+    // only for repairing a bug
+    if (forSync != null) {
+      if (forSync) {
+        Map<String, dynamic> newdata = {};
+        Map<String, dynamic> olddata = jsonDecode(other_species!);
+        final SpeciesController _speciesController = Get.find<SpeciesController>();
+
+        olddata.forEach((key, value) {
+          if (value != "") {
+            var species = _speciesController.getSpeciesById(int.parse(value));
+
+            if (species != null) {
+              var orgid = species.orgid;
+              newdata["$key"] = "$orgid";
+            }
+          }
+        });
+
+        data['other_species'] = const JsonEncoder().convert(newdata);
+      }
+    }
+
     data['other'] = other;
     data['other_vehicle'] = other_vehicle;
     data['note'] = note;

@@ -204,7 +204,7 @@ class DBHelper {
 
   /// insertSighting
   static Future<int> insertSighting(Sighting newSighting) async {
-    return await _db?.insert(_tableNameSighting, newSighting.toJson(false, true)) ?? 1;
+    return await _db?.insert(_tableNameSighting, newSighting.toJson(false, true, false)) ?? 1;
   }
 
   /// querySighting
@@ -225,7 +225,7 @@ class DBHelper {
   static Future<int> updateSighting(Sighting uSighting) async {
     return await _db!.update(
         _tableNameSighting,
-        uSighting.toJson(false, true),
+        uSighting.toJson(false, true, false),
         where: 'id=?',
         whereArgs: [uSighting.id]
     );
