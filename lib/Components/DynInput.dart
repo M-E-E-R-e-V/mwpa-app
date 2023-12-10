@@ -225,6 +225,7 @@ class DynInput extends StatefulWidget {
 }
 
 class _DynInputState extends State<DynInput> {
+  double _distanceToField = 0;
   final LocationController _locationController = Get.find<LocationController>();
   TextfieldTagsController? _tagController;
 
@@ -304,6 +305,12 @@ class _DynInputState extends State<DynInput> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _distanceToField = MediaQuery.of(context).size.width;
+  }
+
+  @override
   void initState() {
     super.initState();
 
@@ -323,11 +330,7 @@ class _DynInputState extends State<DynInput> {
 
   @override
   void dispose() {
-    super.dispose();
-
-    if (_tagController != null) {
-      _tagController!.dispose();
-    }
+      super.dispose();
   }
 
   Widget buildSingle(BuildContext context) {
@@ -652,7 +655,10 @@ class _DynInputState extends State<DynInput> {
                     fieldViewBuilder: (context, ttec, tfn, onFieldSubmitted) {
                       return TextFieldTags(
                         textfieldTagsController: _tagController,
+                        textEditingController: ttec,
+                        focusNode: tfn,
                         initialTags: initTagList,
+                        textSeparators: const [' ', ','],
                         inputfieldBuilder: (context, tec, fn, error, onChanged, onSubmitted) {
                           return ((context, sc, tags, onTagDelete) {
                             return TextField(
@@ -675,9 +681,8 @@ class _DynInputState extends State<DynInput> {
                                 hintText: _tagController!.hasTags ? '' : "Enter ...",
                                 errorText: error,
                                 prefixIconConstraints:
-                                BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.74),
-                                prefixIcon: tags.isNotEmpty
-                                    ? SingleChildScrollView(
+                                  BoxConstraints(maxWidth: _distanceToField * 0.74),
+                                prefixIcon: tags.isNotEmpty ? SingleChildScrollView(
                                   controller: sc,
                                   scrollDirection: Axis.horizontal,
                                   child: Row(
@@ -690,12 +695,11 @@ class _DynInputState extends State<DynInput> {
                                           margin: const EdgeInsets.symmetric(horizontal: 5.0),
                                           padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
                                           child: Row(
-                                            mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                             children: [
                                               InkWell(
                                                 child: Text(
-                                                  '#$tag',
+                                                  tag,
                                                   style: const TextStyle(color: Colors.white),
                                                 ),
                                                 onTap: () {
@@ -779,7 +783,7 @@ class _DynInputState extends State<DynInput> {
             children: [
               Center(
                 child: _image != null
-                    ? Padding(
+                ? Padding(
                   padding: const EdgeInsets.all(10.0),
                   child: SizedBox(
                     width: 300,
@@ -789,7 +793,7 @@ class _DynInputState extends State<DynInput> {
                     ),
                   ),
                 )
-                    : const Padding(
+                : const Padding(
                   padding: EdgeInsets.all(18.0),
                   child: Text('No image selected'),
                 ),
