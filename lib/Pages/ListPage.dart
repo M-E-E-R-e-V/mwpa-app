@@ -303,6 +303,7 @@ class _ListPageState extends State<ListPage> {
       location_begin: location,
       location_end: location,
       distance_coast: "$distance",
+      species_count: 1,
       other: otherName,
       note: "Short insert",
       syncStatus: Sighting.SYNC_STATUS_OPEN,
@@ -541,7 +542,7 @@ class _ListPageState extends State<ListPage> {
         width: MediaQuery.of(context).size.width * 0.9,
         decoration: BoxDecoration(
           border: Border.all(
-            width: 2,
+            width: 1,
             color: Colors.grey[600]!
           ),
           borderRadius: BorderRadius.circular(20),
