@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Db/DBHelper.dart';
@@ -14,6 +15,7 @@ import 'package:mwpaapp/Settings/Preference.dart';
 import 'package:mwpaapp/Util/UtilDate.dart';
 import 'package:mwpaapp/Util/UtilTourFId.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../Mwpa/Models/SightingSaveResponse.dart';
 import '../Mwpa/MwpaAPI.dart';
 
 /// SyncMwpaService
@@ -238,12 +240,13 @@ class SyncMwpaService {
           await update(percentUpdate.toInt(), 'sightings sync');
         }
 
+        SightingSaveResponse? saveResponse;
 
         try {
-          String? unid = await api.saveSighting(sighting);
+          saveResponse = await api.saveSighting(sighting);
 
-          if (unid != null) {
-            sighting.unid = unid;
+          if (saveResponse != null) {
+            sighting.unid = saveResponse.unid;
 
             if (sighting.creater_id == null || sighting.creater_id == 0) {
               var pref = Preference();
@@ -279,18 +282,36 @@ class SyncMwpaService {
             if (kDebugMode) {
               print('SyncMwpaService::sync:image: ');
               print(ei);
-              // TODO later, handle upload is finish
             }
           }
         }
 
-        if (UtilDate.isOverDays(DateTime.parse(sighting.date!).toLocal(), 7)) {
-          // todo later for a update
-          /*if (sighting.image != null && sighting.image != "") {
-            File(sighting.image!).delete();
-          }
+        // delete old sighting -------------------------------------------------
 
-          DBHelper.deleteSighting(sighting);*/
+        if (saveResponse != null) {
+          if (saveResponse.unid != null) {
+            if (saveResponse.canDelete != null) {
+              if (saveResponse.canDelete!) {
+                if (sighting.image != null && sighting.image != "") {
+                  File(sighting.image!).delete();
+                }
+
+                DBHelper.deleteSighting(sighting);
+              }
+            } else {
+              if (kDebugMode) {
+                print('SyncMwpaService::sync:tracking: SightingSaveResponse canDelete is empty');
+              }
+            }
+          } else {
+            if (kDebugMode) {
+              print('SyncMwpaService::sync:tracking: SightingSaveResponse unid is empty');
+            }
+          }
+        } else {
+          if (kDebugMode) {
+            print('SyncMwpaService::sync:tracking: SightingSaveResponse is empty');
+          }
         }
       }
     } catch(e) {
@@ -312,24 +333,37 @@ class SyncMwpaService {
 
       try {
         var trackingCount = await DBHelper.countTourTracking(tourFId);
-
-        if (! await api.checkSightingTourTracking(
+        var checkResponse = await api.checkSightingTourTracking(
             SightingTourTrackingCheck(tour_fid: tourFId, count: trackingCount)
-        )) {
-          var limitSteps = 100;
-          var offset = 0;
+        );
 
-          while (offset<trackingCount) {
-            if (update != null) {
-              await update(90, 'sightings tracking sync $offset/$trackingCount');
+        if (checkResponse != null) {
+          var isComplete = checkResponse.isComplete ?? false;
+
+          if (! isComplete) {
+            var limitSteps = 100;
+            var offset = 0;
+
+            while (offset<trackingCount) {
+              if (update != null) {
+                await update(90, 'sightings tracking sync $offset/$trackingCount');
+              }
+
+              List<Map<String, dynamic>> tracks = await DBHelper.queryTourTracking(tourFId, offset, limitSteps);
+              List<TourTracking> trackList = tracks.map((data) => TourTracking.fromJson(data)).toList();
+
+              await api.saveSightingTourTracking(trackList);
+
+              offset += limitSteps;
             }
-
-            List<Map<String, dynamic>> tracks = await DBHelper.queryTourTracking(tourFId, offset, limitSteps);
-            List<TourTracking> trackList = tracks.map((data) => TourTracking.fromJson(data)).toList();
-
-            await api.saveSightingTourTracking(trackList);
-
-            offset += limitSteps;
+          } else {
+            if (kDebugMode) {
+              print('SyncMwpaService::sync:tracking: SightingTourTrackingCheck isComplete: $isComplete');
+            }
+          }
+        } else {
+          if (kDebugMode) {
+            print('SyncMwpaService::sync:tracking: SightingTourTrackingCheck return null');
           }
         }
       } catch(e) {

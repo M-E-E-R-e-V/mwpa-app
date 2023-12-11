@@ -20,6 +20,7 @@ import 'package:mwpaapp/Mwpa/Models/IsLogin.dart';
 import 'package:mwpaapp/Mwpa/Models/LoginResponse.dart';
 import 'package:mwpaapp/Mwpa/Models/SightingSaveResponse.dart';
 import 'package:mwpaapp/Mwpa/Models/SightingTourTrackingCheck.dart';
+import 'package:mwpaapp/Mwpa/Models/SightingTourTrackingCheckResponse.dart';
 import 'package:mwpaapp/Mwpa/Models/SightingTourTrackingSave.dart';
 import 'package:mwpaapp/Mwpa/Models/SpeciesListResponse.dart';
 import 'package:mwpaapp/Mwpa/Models/StatusCodes.dart';
@@ -437,7 +438,7 @@ class MwpaApi {
   }
 
   /// saveSighting
-  Future<String?> saveSighting(Sighting sigh) async {
+  Future<SightingSaveResponse?> saveSighting(Sighting sigh) async {
     try {
       var url = getUrl(MwpaApi.URL_SIGHTING_SAVE);
 
@@ -455,7 +456,7 @@ class MwpaApi {
       var objResponse = SightingSaveResponse.fromJson(jsonDecode(response.body));
 
       if (objResponse.statusCode == StatusCodes.OK) {
-        return objResponse.unid;
+        return objResponse;
       }
     }
     on MwpaException {
@@ -577,7 +578,7 @@ class MwpaApi {
   }
 
   /// checkSightingTourTracking
-  Future<bool> checkSightingTourTracking(SightingTourTrackingCheck trackCheck) async {
+  Future<SightingTourTrackingCheckResponse?> checkSightingTourTracking(SightingTourTrackingCheck trackCheck) async {
     try {
       var url = getUrl(MwpaApi.URL_SIGHTING_TOUR_TRACKING_CHECK);
 
@@ -592,10 +593,10 @@ class MwpaApi {
         body: postBody,
       );
 
-      var objResponse = DefaultReturn.fromJson(jsonDecode(response.body));
+      var objResponse = SightingTourTrackingCheckResponse.fromJson(jsonDecode(response.body));
 
       if (objResponse.statusCode == StatusCodes.OK) {
-        return true;
+        return objResponse;
       }
     }
     on MwpaException {
@@ -608,7 +609,7 @@ class MwpaApi {
       throw Exception('Connection error');
     }
 
-    return false;
+    return null;
   }
 
   /// saveSightingTourTracking
