@@ -37,6 +37,7 @@ class PrefController extends GetxController {
       }
 
       // is login --------------------------------------------------------------
+      isLogin = false;
 
       if (prefs.containsKey(Preference.USERID)) {
         isLogin = true;
