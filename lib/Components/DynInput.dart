@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -324,6 +325,18 @@ class _DynInputState extends State<DynInput> {
 
       case DynInputType.image:
         picker = ImagePicker();
+        break;
+
+      case DynInputType.date:
+        break;
+
+      case DynInputType.location:
+        break;
+
+      case DynInputType.text:
+        break;
+
+      case DynInputType.textarea:
         break;
     }
   }
@@ -864,6 +877,7 @@ class _DynInputState extends State<DynInput> {
             },
             color: Get.isDarkMode ? kPrimaryDarkFontColor :  kPrimaryFontColor,
             selectedColor: Colors.grey[700],
+            selectedBorderColor: kPrimaryColor,
             fillColor: kButtonBackgroundColor,
             borderColor: kPrimaryColor,
             borderRadius: const BorderRadius.all(Radius.circular(10)),
