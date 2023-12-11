@@ -142,7 +142,6 @@ class ListSightingTile extends StatelessWidget {
     // -------------------------------------------------------------------------
 
     List<Widget> symbols = [];
-    List<Widget> actions = [];
 
     if (sighting.subgroups != null && sighting.subgroups! > 0) {
       symbols.add(Icon(
@@ -192,6 +191,10 @@ class ListSightingTile extends StatelessWidget {
       endLocationEmpty = true;
     }
 
+    if (speciesName.length > 28) {
+      speciesName = '${speciesName.substring(0, 28)}...';
+    }
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       width: MediaQuery.of(context).size.width,
@@ -220,7 +223,7 @@ class ListSightingTile extends StatelessWidget {
                                     fontWeight: FontWeight.bold,
                                     color: backgroundColor.computeLuminance() < 0.5 ? Colors.white : Colors.black
                                 )
-                            ),
+                            )
                           ),
                           const SizedBox(width: 4),
                           syncStatus
