@@ -199,7 +199,7 @@ class Sighting {
 
     // only for repairing a bug
     if (forSync != null) {
-      if (forSync) {
+      if (forSync && (other_species != "")) {
         Map<String, dynamic> newdata = {};
         Map<String, dynamic> olddata = jsonDecode(other_species!);
         final SpeciesController _speciesController = Get.find<SpeciesController>();
