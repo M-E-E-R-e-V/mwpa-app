@@ -12,7 +12,6 @@ import 'package:mwpaapp/Models/VehicleDriver.dart';
 import 'package:mwpaapp/Mwpa/Models/Info.dart';
 import 'package:mwpaapp/Mwpa/Models/SightingTourTrackingCheck.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
-import 'package:mwpaapp/Util/UtilDate.dart';
 import 'package:mwpaapp/Util/UtilTourFId.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Mwpa/Models/SightingSaveResponse.dart';
@@ -293,7 +292,15 @@ class SyncMwpaService {
             if (saveResponse.canDelete != null) {
               if (saveResponse.canDelete!) {
                 if (sighting.image != null && sighting.image != "") {
+                  if (kDebugMode) {
+                    print('SyncMwpaService::sync:tracking: delete image from sighting: ${sighting.image}');
+                  }
+
                   File(sighting.image!).delete();
+                }
+
+                if (kDebugMode) {
+                  print('SyncMwpaService::sync:tracking: delete sighting: ${sighting.unid}');
                 }
 
                 DBHelper.deleteSighting(sighting);
@@ -359,6 +366,23 @@ class SyncMwpaService {
           } else {
             if (kDebugMode) {
               print('SyncMwpaService::sync:tracking: SightingTourTrackingCheck isComplete: $isComplete');
+            }
+
+            if (checkResponse.canDelete != null) {
+              var canDelete = checkResponse.canDelete ?? false;
+
+              if (canDelete) {
+                if (kDebugMode) {
+                  print('SyncMwpaService::sync:tracking: delete tracking entries by tourFId: $tourFId');
+                }
+
+                await DBHelper.deleteTourTrackingEntries(tourFId);
+              }
+            }
+            else {
+              if (kDebugMode) {
+                print('SyncMwpaService::sync:tracking: checkSightingTourTracking canDelete is empty');
+              }
             }
           }
         } else {

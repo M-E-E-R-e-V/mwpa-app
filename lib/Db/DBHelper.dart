@@ -518,4 +518,13 @@ class DBHelper {
         whereArgs: [tourFId]
     )) ?? 0;
   }
+
+  /// deleteTourTrackingEntries
+  static Future<int> deleteTourTrackingEntries(String tourFId) async {
+    return await _db!.delete(
+        _tableNameTourTracking,
+        where: "tour_fid = ?",
+        whereArgs: [tourFId]
+    );
+  }
 }
