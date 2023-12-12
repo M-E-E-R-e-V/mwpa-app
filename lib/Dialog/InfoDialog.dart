@@ -26,8 +26,8 @@ class InfoDialog {
             actions: <Widget>[
               OutlinedButton(
                 style: OutlinedButton.styleFrom(
+                  foregroundColor: kButtonFontColor,
                   backgroundColor: kPrimaryColor,
-                  primary: kButtonFontColor,
                 ),
                 child: const Text('Ok'),
                 onPressed: () {
