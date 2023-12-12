@@ -57,6 +57,7 @@ class _ListPageState extends State<ListPage> {
   late StreamSubscription subscription;
 
   bool diffTourDateIgnored = false;
+  bool isSyncInProgress = false;
 
   /// initState
   @override
@@ -89,12 +90,18 @@ class _ListPageState extends State<ListPage> {
 
   /// _syncMwpa
   _syncMwpa() async {
+    if (isSyncInProgress) {
+      return;
+    }
+
     EasyLoading.instance.dismissOnTap = false;
     EasyLoading.instance.maskType = EasyLoadingMaskType.black;
 
     SyncMwpaService service = SyncMwpaService();
 
     try {
+      isSyncInProgress = true;
+
       await service.sync((p0, p1) async {
         EasyLoading.showProgress(p0.round() / 100, status: '$p1 ... ${p0.round()}%');
       });
@@ -105,8 +112,10 @@ class _ListPageState extends State<ListPage> {
       await _encounterCategoriesController.getEncounterCategorie();
       await _behaviouralStateController.getBehaviouralStates();
 
+      isSyncInProgress = false;
       EasyLoading.dismiss();
     } catch(error) {
+      isSyncInProgress = false;
       EasyLoading.dismiss();
 
       if (error is MwpaException) {

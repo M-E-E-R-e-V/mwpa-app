@@ -4,13 +4,13 @@ import 'package:mwpaapp/Constants.dart';
 
 class InfoDialog {
 
-  static void show(BuildContext context, String dtitle, String msg) {
+  static void show(BuildContext context, String dTitle, String msg) {
     showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text(
-              dtitle,
+              dTitle,
               style: const TextStyle(
                 fontSize: 32.0,
                 fontWeight: FontWeight.bold,
