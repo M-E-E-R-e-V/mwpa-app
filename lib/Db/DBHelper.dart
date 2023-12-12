@@ -494,7 +494,8 @@ class DBHelper {
     return await _db!.query(
         _tableNameTourTracking,
         columns: ['tour_fid'],
-        groupBy: 'tour_fid'
+        groupBy: 'tour_fid',
+        orderBy: "tour_fid DESC"
       );
   }
 
