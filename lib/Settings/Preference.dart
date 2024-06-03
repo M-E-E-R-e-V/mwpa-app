@@ -7,6 +7,7 @@ class Preference {
   static const USERNAME = 'username';
   static const PASSWORD = 'password';
   static const USERID = 'userid';
+  static const ORGID = 'orgid';
   static const TOUR = "tour";
   static const PROMINENT_DISCLOSURE_CONFIRMED = "prominent_disclosure_confirmed";
 
@@ -44,6 +45,17 @@ class Preference {
     if (prefs != null) {
       if (prefs!.containsKey(Preference.USERID)) {
         return prefs!.getInt(Preference.USERID) ?? 0;
+      }
+    }
+
+    return 0;
+  }
+
+  /// getOrgId
+  int getOrgId() {
+    if (prefs != null) {
+      if (prefs!.containsKey(Preference.ORGID)) {
+        return prefs!.getInt(Preference.ORGID) ?? 0;
       }
     }
 

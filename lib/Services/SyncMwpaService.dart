@@ -7,13 +7,16 @@ import 'package:mwpaapp/Models/EncounterCategorie.dart';
 import 'package:mwpaapp/Models/Sighting.dart';
 import 'package:mwpaapp/Models/Species.dart';
 import 'package:mwpaapp/Models/TourTracking.dart';
+import 'package:mwpaapp/Models/TrackingAreaHome.dart';
 import 'package:mwpaapp/Models/Vehicle.dart';
 import 'package:mwpaapp/Models/VehicleDriver.dart';
 import 'package:mwpaapp/Mwpa/Models/Info.dart';
 import 'package:mwpaapp/Mwpa/Models/SightingTourTrackingCheck.dart';
+import 'package:mwpaapp/Mwpa/Models/TrackingAreaHomeData.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
 import 'package:mwpaapp/Util/UtilTourFId.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 import '../Mwpa/Models/SightingSaveResponse.dart';
 import '../Mwpa/MwpaAPI.dart';
 
@@ -219,8 +222,65 @@ class SyncMwpaService {
       await update(25, 'sightings sync');
     }
 
-    // sightings
-    // -------------------------------------------------------------------------
+    /// home tracking area
+    /// ------------------------------------------------------------------------
+
+    try {
+      TrackingAreaHomeData? trackingHomeData = await api.getHomeAreaTrackingArea();
+
+      if (trackingHomeData != null) {
+        bool isTrackingAreaHomeUpdate = true;
+
+        /// clear old tracking area home data ----------------------------------
+        List<Map<String, dynamic>> oldTrackingAreaHomeData = await DBHelper.queryTrackingAreaHome(
+            trackingHomeData.organization_id
+        );
+
+        if (oldTrackingAreaHomeData.isNotEmpty) {
+          TrackingAreaHome oldTrackingAreaHomeEntry = TrackingAreaHome.fromJson(
+              oldTrackingAreaHomeData[0]
+          );
+
+          if (oldTrackingAreaHomeEntry.update_datetime != null) {
+            if (trackingHomeData.update_datetime > oldTrackingAreaHomeEntry.update_datetime!) {
+              await DBHelper.deleteTrackingAreaHome(trackingHomeData.organization_id);
+            } else {
+              isTrackingAreaHomeUpdate = false;
+            }
+          }
+        }
+
+        /// add new tracking area home data ------------------------------------
+        if (isTrackingAreaHomeUpdate) {
+          int trackingHomeCordIndex = 0;
+
+          for (var cord in trackingHomeData.coordinates) {
+            var uuid = const Uuid();
+
+            await DBHelper.insertTrackingAreaHome(TrackingAreaHome(
+                update_datetime: trackingHomeData.update_datetime,
+                lat: '${cord.lat}',
+                lon: '${cord.lon}',
+                cord_index: trackingHomeCordIndex,
+                orgid: trackingHomeData.organization_id,
+                uuid: uuid.v4()
+            ));
+
+            trackingHomeCordIndex++;
+          }
+        }
+      }
+    } catch(e) {
+      if (kDebugMode) {
+        print('SyncMwpaService::sync:TrackingAreaHomeData:');
+        print(e);
+      }
+
+      rethrow;
+    }
+
+    /// sightings
+    /// ------------------------------------------------------------------------
 
     List<Sighting> sightingList = [];
     List<Map<String, dynamic>> sightings = await DBHelper.querySighting();
@@ -285,7 +345,7 @@ class SyncMwpaService {
           }
         }
 
-        // delete old sighting -------------------------------------------------
+        /// delete old sighting ------------------------------------------------
 
         if (saveResponse != null) {
           if (saveResponse.unid != null) {
@@ -330,8 +390,8 @@ class SyncMwpaService {
       rethrow;
     }
 
-    // tracking
-    // -------------------------------------------------------------------------
+    /// tracking
+    /// ------------------------------------------------------------------------
 
     List<Map<String, dynamic>> tourFids = await DBHelper.queryTourTrackingFIds();
 
@@ -400,7 +460,7 @@ class SyncMwpaService {
       }
     }
 
-    // -------------------------------------------------------------------------
+    /// ------------------------------------------------------------------------
 
     if (update != null) {
       await update(100, 'finish');

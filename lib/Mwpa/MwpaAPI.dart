@@ -24,7 +24,9 @@ import 'package:mwpaapp/Mwpa/Models/SightingTourTrackingCheckResponse.dart';
 import 'package:mwpaapp/Mwpa/Models/SightingTourTrackingSave.dart';
 import 'package:mwpaapp/Mwpa/Models/SpeciesListResponse.dart';
 import 'package:mwpaapp/Mwpa/Models/StatusCodes.dart';
-import 'package:mwpaapp/Mwpa/Models/User/UserInfoData.dart';
+import 'package:mwpaapp/Mwpa/Models/TrackingAreaHomeData.dart';
+import 'package:mwpaapp/Mwpa/Models/TrackingAreaHomeResponse.dart';
+import 'package:mwpaapp/Mwpa/Models/User/UserInfo.dart';
 import 'package:mwpaapp/Mwpa/Models/UserInfoResponse.dart';
 import 'package:mwpaapp/Mwpa/Models/VehicleDriverResponse.dart';
 import 'package:mwpaapp/Mwpa/Models/VehicleResponse.dart';
@@ -50,6 +52,7 @@ class MwpaApi {
   static const URL_SIGHTING_IMAGE_EXIST = 'mobile/sighting/image/exist';
   static const URL_SIGHTING_TOUR_TRACKING_CHECK = 'mobile/sighting/tourtracking/check';
   static const URL_SIGHTING_TOUR_TRACKING_SAVE = 'mobile/sighting/tourtracking/save';
+  static const URL_TRACKINGAREA_HOME = 'mobile/trackingarea/homearea';
 
   String _url = "";
   String _cookie = "";
@@ -198,7 +201,7 @@ class MwpaApi {
   }
 
   /// getUserInfo
-  Future<UserInfoData> getUserInfo() async {
+  Future<UserInfo> getUserInfo() async {
     if (!_isLogin) {
       throw MwpaException('Please login first!');
     }
@@ -217,7 +220,7 @@ class MwpaApi {
       var objResponse = UserInfoResponse.fromJson(jsonDecode(response.body));
 
       if (objResponse.statusCode == StatusCodes.OK) {
-        return objResponse.data!.user!;
+        return objResponse.data!;
       } else {
         if (objResponse.msg != null) {
           throw MwpaException(objResponse.msg!);
@@ -648,4 +651,46 @@ class MwpaApi {
 
     return false;
   }
+
+  /// getHomeAreaTrackingArea
+  Future<TrackingAreaHomeData?> getHomeAreaTrackingArea() async {
+    if (!_isLogin) {
+      throw MwpaException('Please login first!');
+    }
+
+    try {
+      var url = getUrl(MwpaApi.URL_TRACKINGAREA_HOME);
+
+      var response = await http.get(
+        Uri.parse(url),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'cookie': _cookie
+        },
+      );
+
+      /// https://pub.dev/documentation/point_in_polygon/latest/
+      var objResponse = TrackingAreaHomeResponse.fromJson(jsonDecode(response.body));
+
+      if (objResponse.statusCode == StatusCodes.OK) {
+        return objResponse.data;
+      } else {
+        if (objResponse.msg != null) {
+          throw MwpaException(objResponse.msg!);
+        }
+
+        throw MwpaException('Response success false');
+      }
+    }
+    on MwpaException {
+      rethrow;
+    } catch(error) {
+      if (kDebugMode) {
+        print(error);
+      }
+
+      throw Exception('Connection error');
+    }
+  }
+
 }

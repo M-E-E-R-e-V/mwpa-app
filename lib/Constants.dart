@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 const versionApiMobileLogin = '1.0.1';
-const versionApiMobileSync = '1.0.2';
+const versionApiMobileSync = '1.0.3';
 
 // primary
 const kPrimaryColor = Color(0xff022b55);

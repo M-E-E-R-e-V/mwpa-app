@@ -4,6 +4,7 @@ import 'package:mwpaapp/Models/EncounterCategorie.dart';
 import 'package:mwpaapp/Models/Sighting.dart';
 import 'package:mwpaapp/Models/Species.dart';
 import 'package:mwpaapp/Models/TourTracking.dart';
+import 'package:mwpaapp/Models/TrackingAreaHome.dart';
 import 'package:mwpaapp/Models/Vehicle.dart';
 import 'package:mwpaapp/Models/VehicleDriver.dart';
 import 'package:sqflite/sqflite.dart';
@@ -11,7 +12,7 @@ import 'package:sqflite/sqflite.dart';
 /// DBHelper
 class DBHelper {
   static Database? _db;
-  static const int _version = 8;
+  static const int _version = 11;
   static const String _tableNameSighting = "sighting";
   static const String _tableNameTourTracking = "tour_tracking";
   static const String _tableNameVehicle = "vehicle";
@@ -19,6 +20,7 @@ class DBHelper {
   static const String _tableNameSpecies = "species";
   static const String _tableNameEncCate = "encounter_categories";
   static const String _tableNameBehState = "behavioural_state";
+  static const String _tableNameTrackingAreaHome = 'tracking_area_home';
 
   /// initDb
   static Future<void> initDb() async {
@@ -60,6 +62,10 @@ class DBHelper {
 
             if (oldVersion <= 7 ) {
               _updateTableSightingV7toV8(batch);
+            }
+
+            if (oldVersion <= 8 ) {
+              _updateTableSightingV8toV9(batch);
             }
 
             await batch.commit();
@@ -110,10 +116,10 @@ class DBHelper {
 
             db.execute(
               "CREATE TABLE IF NOT EXISTS $_tableNameTourTracking("
-              "uuid STRING PRIMARY KEY,"
-              "tour_fid STRING,"
-              "location STRING,"
-              "date STRING"
+                  "uuid STRING PRIMARY KEY,"
+                  "tour_fid STRING,"
+                  "location STRING,"
+                  "date STRING"
               ")"
             );
 
@@ -151,10 +157,21 @@ class DBHelper {
             db.execute(
                 "CREATE TABLE IF NOT EXISTS $_tableNameBehState("
                     "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                    "name STRING,"
-                    "description STRING,"
+                    "name STRING, "
+                    "description STRING, "
                     "isdeleted INTEGER)"
             );
+
+            db.execute(
+              "CREATE TABLE IF NOT EXISTS $_tableNameTrackingAreaHome("
+                  "uuid STRING PRIMARY KEY, "
+                  "orgid INTEGER, "
+                  "cord_index INTEGER, "
+                  "lon STRING, "
+                  "lat STRING, "
+                  "update_datetime INTEGER)"
+            );
+
             return;
           }
       );
@@ -200,6 +217,9 @@ class DBHelper {
   static void _updateTableSightingV7toV8(Batch batch) {
     batch.execute('ALTER TABLE $_tableNameSighting ADD parentid INTEGER');
     batch.execute('ALTER TABLE $_tableNameSighting ADD parentuid STRING');
+  }
+
+  static void _updateTableSightingV8toV9(Batch batch) {
   }
 
   /// insertSighting
@@ -526,6 +546,31 @@ class DBHelper {
         _tableNameTourTracking,
         where: "tour_fid = ?",
         whereArgs: [tourFId]
+    );
+  }
+
+  /// tracking area home -------------------------------------------------------
+
+  /// insert tracking area home
+  static Future<int> insertTrackingAreaHome(TrackingAreaHome track) async {
+    return await _db?.insert(_tableNameTrackingAreaHome, track.toJson()) ?? 1;
+  }
+
+  /// query tracking area home
+  static Future<List<Map<String, dynamic>>> queryTrackingAreaHome(int orgId) async {
+    return await _db!.query(
+        _tableNameTrackingAreaHome,
+        where: 'orgid = ?',
+        whereArgs: [orgId]
+    );
+  }
+
+  /// delete tracking area home
+  static Future<int> deleteTrackingAreaHome(int orgId) async {
+    return await _db!.delete(
+        _tableNameTrackingAreaHome,
+        where: "orgid = ?",
+        whereArgs: [orgId]
     );
   }
 }

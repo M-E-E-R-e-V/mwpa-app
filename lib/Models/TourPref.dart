@@ -10,6 +10,7 @@ class TourPref {
   String? tour_start;
   String? tour_end;
   int? set_end_tour;
+  int? use_home_area;
 
   TourPref({
     this.vehicle_id,
@@ -18,7 +19,8 @@ class TourPref {
     this.beaufort_wind,
     this.tour_start,
     this.tour_end,
-    this.set_end_tour
+    this.set_end_tour,
+    this.use_home_area
   });
 
   TourPref.fromJson(Map<String, dynamic> json) {
@@ -29,6 +31,7 @@ class TourPref {
     tour_start = UtilCheckJson.checkValue(json['tour_start'], UtilCheckJsonTypes.string);
     tour_end = UtilCheckJson.checkValue(json['tour_end'], UtilCheckJsonTypes.string);
     set_end_tour = UtilCheckJson.checkValue(json['set_end_tour'], UtilCheckJsonTypes.int);
+    use_home_area = UtilCheckJson.checkValue(json['use_home_area'], UtilCheckJsonTypes.int);
   }
 
   Map<String, dynamic> toJson() {
@@ -58,6 +61,7 @@ class TourPref {
     data['tour_start'] = tour_start;
     data['tour_end'] = tour_end;
     data['set_end_tour'] = set_end_tour ?? 0;
+    data['use_home_area'] = use_home_area ?? 0;
 
     return data;
   }

@@ -44,6 +44,9 @@ class _EditTourPageState extends State<EditTourPage> {
   late DynInput sightSetEndTour;
   DynInputValue sightSetEndTourValue = DynInputValue();
 
+  late DynInput sightUseHomeArea;
+  DynInputValue sightUseHomeAreaValue = DynInputValue();
+
   bool isInit = false;
 
   _appBar(BuildContext context) {
@@ -85,7 +88,8 @@ class _EditTourPageState extends State<EditTourPage> {
         date: sightDate.dynValue?.getDateTime(),
         tour_start: sightTourStart.dynValue?.getTimeOfDay(),
         tour_end: sightTourEnd.dynValue?.getTimeOfDay(),
-        set_end_tour: sightSetEndTour.dynValue?.getIntValue()
+        set_end_tour: sightSetEndTour.dynValue?.getIntValue(),
+        use_home_area: sightUseHomeArea.dynValue?.getIntValue()
     );
 
     await _prefController.saveTour(tour);
@@ -118,6 +122,7 @@ class _EditTourPageState extends State<EditTourPage> {
         sightTourStartValue.setTimeOfDy(_prefController.prefToru!.tour_start!);
         sightTourEndValue.setTimeOfDy(_prefController.prefToru!.tour_end!);
         sightSetEndTourValue.setIntValue(_prefController.prefToru!.set_end_tour!);
+        sightUseHomeAreaValue.setIntValue(_prefController.prefToru!.use_home_area!);
       }
     }
 
@@ -191,6 +196,14 @@ class _EditTourPageState extends State<EditTourPage> {
         dynValue: sightSetEndTourValue,
       );
 
+      sightUseHomeArea = DynInput(
+        context: context,
+        hint: "",
+        inputType: DynInputType.switcher,
+        title: 'Use Home Area auto-tracking tour start and end',
+        dynValue: sightUseHomeAreaValue,
+      );
+
       return WillPopScope(
         onWillPop: () async => false,
         child: Scaffold(
@@ -221,6 +234,8 @@ class _EditTourPageState extends State<EditTourPage> {
                       ],
                     ),
                     sightSetEndTour,
+                    const SizedBox(height: 30),
+                    sightUseHomeArea,
                     const SizedBox(height: 30),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mwpaapp/Constants.dart';
@@ -54,14 +53,17 @@ class _LoginPageState extends State<LoginPage> {
           if (await api.isLogin()) {
             final prefs = await SharedPreferences.getInstance();
 
-            var userdata = await api.getUserInfo();
+            var userInfo = await api.getUserInfo();
 
-            await prefs.setString(Preference.URL, url);
-            await prefs.setString(Preference.USERNAME, username);
-            await prefs.setString(Preference.PASSWORD, password);
-            await prefs.setInt(Preference.USERID, userdata.id);
+            if (userInfo.user != null && userInfo.organization != null) {
+              await prefs.setString(Preference.URL, url);
+              await prefs.setString(Preference.USERNAME, username);
+              await prefs.setString(Preference.PASSWORD, password);
+              await prefs.setInt(Preference.USERID, userInfo.user!.id);
+              await prefs.setInt(Preference.ORGID, userInfo.organization!.id);
 
-            Get.toNamed('/List');
+              Get.toNamed('/List');
+            }
           }
         }
       }
