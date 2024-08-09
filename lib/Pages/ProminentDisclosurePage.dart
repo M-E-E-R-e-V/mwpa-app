@@ -70,9 +70,7 @@ class _ProminentDisclosurePageState extends State<ProminentDisclosurePage> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: kPrimaryHeaderColor
                             ),
-                            onPressed: () {
-                              AppSettings.openLocationSettings();
-                            },
+                            onPressed: () => AppSettings.openAppSettings(type: AppSettingsType.location),
                             child: const Text("Open location settings")
                         ),
                         ElevatedButton(

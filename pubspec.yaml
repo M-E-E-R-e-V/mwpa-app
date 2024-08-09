@@ -42,7 +42,7 @@ dependencies:
   flutter_map:
   device_info_plus:
   switcher: any
-  geolocator: ^12.0.0
+  geolocator: ^13.0.1
   latlong_to_osgrid: ^1.3.2
   uuid: ^4.4.0
   flutter_timezone: ^1.0.7
