@@ -228,7 +228,7 @@ class DynInput extends StatefulWidget {
 class _DynInputState extends State<DynInput> {
   double _distanceToField = 0;
   final LocationController _locationController = Get.find<LocationController>();
-  TextfieldTagsController? _tagController;
+  TextfieldTagsController<String>? _tagController;
 
   File? _image;
   ImagePicker? picker;
@@ -663,109 +663,110 @@ class _DynInputState extends State<DynInput> {
                       });
                     },
                     onSelected: (String selectedTag) {
-                      _tagController!.addTag = selectedTag;
+                      _tagController!.onTagSubmitted(selectedTag);
                     },
                     fieldViewBuilder: (context, ttec, tfn, onFieldSubmitted) {
-                      return TextFieldTags(
-                        textfieldTagsController: _tagController,
+                      return TextFieldTags<String>(
+                        textfieldTagsController: _tagController!,
                         textEditingController: ttec,
                         focusNode: tfn,
                         initialTags: initTagList,
                         textSeparators: const [' ', ','],
-                        inputfieldBuilder: (context, tec, fn, error, onChanged, onSubmitted) {
-                          return ((context, sc, tags, onTagDelete) {
-                            return TextField(
-                              controller: tec,
-                              focusNode: fn,
-                              decoration: InputDecoration(
-                                isDense: true,
-                                focusedBorder: UnderlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: Colors.redAccent.withOpacity(0.0),
-                                        width: 0
-                                    )
-                                ),
-                                enabledBorder: UnderlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: Colors.redAccent.withOpacity(0.0),
-                                        width: 0
-                                    )
-                                ),
-                                hintText: _tagController!.hasTags ? '' : "Enter ...",
-                                errorText: error,
-                                prefixIconConstraints:
+                        inputFieldBuilder: (context, inputFieldValues) {
+                          return Padding(
+                              padding: const EdgeInsets.all(10.0),
+                              child: TextField(
+                                controller: inputFieldValues.textEditingController,
+                                focusNode: inputFieldValues.focusNode,
+                                decoration: InputDecoration(
+                                  isDense: true,
+                                  focusedBorder: UnderlineInputBorder(
+                                      borderSide: BorderSide(
+                                          color: Colors.redAccent.withOpacity(0.0),
+                                          width: 0
+                                      )
+                                  ),
+                                  enabledBorder: UnderlineInputBorder(
+                                      borderSide: BorderSide(
+                                          color: Colors.redAccent.withOpacity(0.0),
+                                          width: 0
+                                      )
+                                  ),
+                                  hintText: inputFieldValues.tags.isNotEmpty ? '' : "Enter ...",
+                                  errorText: inputFieldValues.error,
+                                  prefixIconConstraints:
                                   BoxConstraints(maxWidth: _distanceToField * 0.74),
-                                prefixIcon: tags.isNotEmpty ? SingleChildScrollView(
-                                  controller: sc,
-                                  scrollDirection: Axis.horizontal,
-                                  child: Row(
-                                      children: tags.map((String tag) {
-                                        return Container(
-                                          decoration: const BoxDecoration(
-                                            borderRadius: BorderRadius.all(Radius.circular(12.0)),
-                                            color: kPrimaryColor,
-                                          ),
-                                          margin: const EdgeInsets.symmetric(horizontal: 5.0),
-                                          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
-                                          child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              InkWell(
-                                                child: Text(
-                                                  tag,
-                                                  style: const TextStyle(color: Colors.white),
-                                                ),
-                                                onTap: () {
-                                                  if (kDebugMode) {
-                                                    print('DynInputValue::buildSingle:');
-                                                    print("$tag selected");
-                                                  }
-                                                },
-                                              ),
-                                              const SizedBox(width: 4.0),
-                                              InkWell(
-                                                child: const Icon(
-                                                  Icons.cancel,
-                                                  size: 14.0,
-                                                  color: Color.fromARGB(255, 233, 233, 233),
-                                                ),
-                                                onTap: () {
-                                                  onTagDelete(tag);
-
-                                                  try {
-                                                    dynValue!.strValue =
-                                                        jsonEncode(_tagController!.getTags);
-                                                  } catch(e) {
+                                  prefixIcon: inputFieldValues.tags.isNotEmpty ? SingleChildScrollView(
+                                    controller: inputFieldValues.tagScrollController,
+                                    scrollDirection: Axis.horizontal,
+                                    child: Row(
+                                        children: inputFieldValues.tags.map((tag) {
+                                          return Container(
+                                            decoration: const BoxDecoration(
+                                              borderRadius: BorderRadius.all(Radius.circular(12.0)),
+                                              color: kPrimaryColor,
+                                            ),
+                                            margin: const EdgeInsets.symmetric(horizontal: 5.0),
+                                            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                InkWell(
+                                                  child: Text(
+                                                    tag,
+                                                    style: const TextStyle(color: Colors.white),
+                                                  ),
+                                                  onTap: () {
                                                     if (kDebugMode) {
-                                                      print('DynInputValue::buildSingle: ${_tagController!.getTags}');
-                                                      print(e);
+                                                      print('DynInputValue::buildSingle:');
+                                                      print("$tag selected");
                                                     }
-                                                  }
-                                                },
-                                              )
-                                            ],
-                                          ),
-                                        );
-                                      }).toList()),
-                                )
-                                    : null,
-                              ),
-                              onChanged: onChanged,
-                              onSubmitted: (value) {
-                                onSubmitted!(value);
+                                                  },
+                                                ),
+                                                const SizedBox(width: 4.0),
+                                                InkWell(
+                                                  child: const Icon(
+                                                    Icons.cancel,
+                                                    size: 14.0,
+                                                    color: Color.fromARGB(255, 233, 233, 233),
+                                                  ),
+                                                  onTap: () {
+                                                    inputFieldValues.onTagRemoved(tag);
 
-                                try {
-                                  dynValue!.strValue =
-                                      jsonEncode(_tagController!.getTags);
-                                } catch(e) {
-                                  if (kDebugMode) {
-                                    print('DynInputValue::buildSingle: ${_tagController!.getTags}');
-                                    print(e);
+                                                    try {
+                                                      dynValue!.strValue =
+                                                          jsonEncode(_tagController!.getTags);
+                                                    } catch(e) {
+                                                      if (kDebugMode) {
+                                                        print('DynInputValue::buildSingle: ${_tagController!.getTags}');
+                                                        print(e);
+                                                      }
+                                                    }
+                                                  },
+                                                )
+                                              ],
+                                            ),
+                                          );
+                                        }).toList()),
+                                  )
+                                      : null,
+                                ),
+                                onChanged: inputFieldValues.onTagChanged,
+                                onSubmitted: (value) {
+                                  inputFieldValues.onTagSubmitted(value);
+
+                                  try {
+                                    dynValue!.strValue =
+                                        jsonEncode(_tagController!.getTags);
+                                  } catch(e) {
+                                    if (kDebugMode) {
+                                      print('DynInputValue::buildSingle: ${_tagController!.getTags}');
+                                      print(e);
+                                    }
                                   }
-                                }
-                              },
-                            );
-                          });
+                                },
+                              )
+                          );
                         }
                       );
                     },
