@@ -16,17 +16,17 @@ import 'package:mwpaapp/Util/UtilTileServer.dart';
 
 class ListMap extends StatefulWidget {
 
-  const ListMap({Key? key}) : super(key: key);
+  const ListMap({super.key});
 
   @override
   State<ListMap> createState() => _ListMapState();
 }
 
 class _ListMapState extends State<ListMap> {
-  final LocationController _locationController = Get.put(LocationController());
+  final LocationController _locationController = Get.find<LocationController>();
   final SightingController _sightingController = Get.find<SightingController>();
 
-  final controller = MapController(location: const LatLng(0, 0), zoom: 6);
+  final controller = MapController(location: LatLng.degree(0, 0), zoom: 6);
 
   double _clamp(double x, double min, double max) {
     if (x < min) x = min;
@@ -122,7 +122,7 @@ class _ListMapState extends State<ListMap> {
     var position = _locationController.currentPosition;
 
     if (position != null) {
-      controller.center = LatLng(position.latitude, position.longitude);
+      controller.center = LatLng.degree(position.latitude, position.longitude);
     }
 
     controller.zoom = 14;
@@ -135,7 +135,7 @@ class _ListMapState extends State<ListMap> {
       var position = locationController.currentPosition;
 
       if (position != null) {
-        controller.center = LatLng(position.latitude, position.longitude);
+        controller.center = LatLng.degree(position.latitude, position.longitude);
       }
 
       return Scaffold(
@@ -153,7 +153,7 @@ class _ListMapState extends State<ListMap> {
                   markerWidgets.add(
                       _buildMarkerWidget(
                           transformer,
-                          LatLng(tPos.latitude, tPos.longitude),
+                          LatLng.degree(tPos.latitude, tPos.longitude),
                           backgroundColor
                       )
                   );
@@ -170,7 +170,7 @@ class _ListMapState extends State<ListMap> {
               markerWidgets.add(
                 _buildMarkerWidget(
                   transformer,
-                  LatLng(
+                  LatLng.degree(
                     position.latitude,
                     position.longitude
                   ),
@@ -247,12 +247,12 @@ class _ListMapState extends State<ListMap> {
             );
           },
         ),
-        /*floatingActionButton: FloatingActionButton(
+        floatingActionButton: FloatingActionButton(
           onPressed: _gotoDefault,
           tooltip: 'My Location',
           backgroundColor: kButtonBackgroundColor,
           child: const Icon(Icons.my_location),
-        ),*/
+        ),
       );
     });
   }
