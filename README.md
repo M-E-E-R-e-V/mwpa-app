@@ -22,8 +22,6 @@ This part of MWPA is for the end devices. The software synchronizes data, new da
 The app is implemented with Flutter (Dart) and should support the following platforms:
 
 * Android
-* IOS
-* Web
 
 ## Screenshots
 <table>
