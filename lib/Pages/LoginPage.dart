@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mwpaapp/Constants.dart';
@@ -12,7 +13,7 @@ import '../Mwpa/MwpaException.dart';
 
 /// LoginPage
 class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+  const LoginPage({super.key});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -50,29 +51,52 @@ class _LoginPageState extends State<LoginPage> {
 
       if (!await api.isLogin()) {
         if (await api.login(username, password)) {
-          if (await api.isLogin()) {
-            final prefs = await SharedPreferences.getInstance();
-
-            var userInfo = await api.getUserInfo();
-
-            if (userInfo.user != null && userInfo.organization != null) {
-              await prefs.setString(Preference.URL, url);
-              await prefs.setString(Preference.USERNAME, username);
-              await prefs.setString(Preference.PASSWORD, password);
-              await prefs.setInt(Preference.USERID, userInfo.user!.id);
-              await prefs.setInt(Preference.ORGID, userInfo.organization!.id);
-
-              Get.toNamed('/List');
-            }
-          }
+          await _loadUser(api, url, username, password);
         }
+      } else {
+        await _loadUser(api, url, username, password);
       }
     } catch(error) {
-      if (error is MwpaException) {
-        InfoDialog.show(context, 'Error', error.toString());
-      } else {
-        InfoDialog.show(context, 'Internal Error', error.toString());
+      if (kDebugMode) {
+        print(error);
       }
+
+      if (error is MwpaException) {
+        setState(() {
+          InfoDialog.show(context, 'Error', error.toString());
+        });
+      } else {
+        setState(() {
+          InfoDialog.show(context, 'Internal Error', error.toString());
+        });
+      }
+    }
+  }
+
+  /// Load User
+  Future<void> _loadUser(MwpaApi api, String url, String username, String password) async {
+    if (await api.isLogin()) {
+      final prefs = await SharedPreferences.getInstance();
+
+      var userInfo = await api.getUserInfo();
+
+      if (userInfo.user != null && userInfo.organization != null) {
+        await prefs.setString(Preference.URL, url);
+        await prefs.setString(Preference.USERNAME, username);
+        await prefs.setString(Preference.PASSWORD, password);
+        await prefs.setInt(Preference.USERID, userInfo.user!.id);
+        await prefs.setInt(Preference.ORGID, userInfo.organization!.id);
+
+        Get.toNamed('/List');
+      } else {
+        if (userInfo.organization == null) {
+          throw Exception("Please update the user, all user need a organization.");
+        }
+
+        throw Exception("No user information response from server!");
+      }
+    } else {
+      throw Exception("User session is not started!");
     }
   }
 
@@ -83,14 +107,20 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
       if (prefs.containsKey(Preference.URL)) {
         _urlController.text = prefs.getString(Preference.URL)!;
+      } else {
+        _urlController.text = const String.fromEnvironment('URL', defaultValue: '');
       }
 
       if (prefs.containsKey(Preference.USERNAME)) {
         _usernameController.text = prefs.getString(Preference.USERNAME)!;
+      } else {
+        _usernameController.text = const String.fromEnvironment('USERNAME', defaultValue: '');
       }
 
       if (prefs.containsKey(Preference.PASSWORD)) {
         _passwordController.text = prefs.getString(Preference.PASSWORD)!;
+      } else {
+        _passwordController.text = const String.fromEnvironment('PASSWORD', defaultValue: '');
       }
     });
   }
@@ -162,7 +192,8 @@ class _LoginPageState extends State<LoginPage> {
                         controller: _urlController,
                         decoration: const InputDecoration(
                             border: InputBorder.none,
-                            hintText: 'URL MWPA'
+                            hintText: 'URL MWPA',
+
                         ),
                       ),
                     ),
@@ -250,9 +281,9 @@ class _LoginPageState extends State<LoginPage> {
 
                 const SizedBox(height: 25),
 
-                Row(
+                const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
+                  children: [
                     Text(
                       'Not a Member?',
                       style: TextStyle(
