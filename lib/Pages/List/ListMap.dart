@@ -11,6 +11,8 @@ import 'package:map/map.dart';
 import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Controllers/LocationController.dart';
 import 'package:mwpaapp/Controllers/SightingController.dart';
+import 'package:mwpaapp/Pages/List/Map/PolygonPainter.dart';
+import 'package:mwpaapp/Util/UtilLocation.dart';
 import 'package:mwpaapp/Util/UtilPosition.dart';
 import 'package:mwpaapp/Util/UtilTileServer.dart';
 
@@ -144,6 +146,23 @@ class _ListMapState extends State<ListMap> {
           builder: (context, transformer) {
             List<Widget> markerWidgets = [];
 
+            // Home Area Polygon -----------------------------------------------
+
+            if (_locationController.homeArea.isNotEmpty) {
+              markerWidgets.add(
+                  CustomPaint(
+                    painter: PolygonPainter(
+                        _convertToOffsets(
+                            _locationController.homeArea,
+                          transformer
+                        )
+                    )
+                  )
+              );
+            }
+
+            // sighting markers ------------------------------------------------
+
             for (var sighting in _sightingController.sightingList) {
               if (sighting.location_begin != null) {
                 try {
@@ -166,6 +185,8 @@ class _ListMapState extends State<ListMap> {
               }
             }
 
+            // current position markers ----------------------------------------
+
             if (position != null) {
               markerWidgets.add(
                 _buildMarkerWidget(
@@ -179,6 +200,8 @@ class _ListMapState extends State<ListMap> {
                 )
               );
             }
+
+            // GPS Information -------------------------------------------------
 
             Widget gpsInfo = Container();
 
@@ -256,4 +279,13 @@ class _ListMapState extends State<ListMap> {
       );
     });
   }
+
+  /// convert
+  List<Offset> _convertToOffsets(List<UtilLocationDouble> locations, MapTransformer transformer) {
+    return locations.map((location) {
+      final latLng = LatLng.degree(location.lat, location.lon);
+      return transformer.toOffset(latLng);
+    }).toList();
+  }
+
 }

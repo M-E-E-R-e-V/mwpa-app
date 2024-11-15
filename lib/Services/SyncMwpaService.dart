@@ -77,6 +77,26 @@ class SyncMwpaService {
       rethrow;
     }
 
+    // update user data
+    // -------------------------------------------------------------------------
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      var userInfo = await api.getUserInfo();
+
+      if (userInfo.user != null && userInfo.organization != null) {
+        // update organization (user is switch)
+        await prefs.setInt(Preference.ORGID, userInfo.organization!.id);
+      }
+    } catch(e) {
+      if (kDebugMode) {
+        print('SyncMwpaService::sync:userdata:');
+        print(e);
+      }
+
+      rethrow;
+    }
+
     // vehicle sync
     // -------------------------------------------------------------------------
 

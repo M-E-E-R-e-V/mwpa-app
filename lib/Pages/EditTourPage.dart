@@ -4,6 +4,7 @@ import 'package:mwpaapp/Components/DefaultButton.dart';
 import 'package:mwpaapp/Components/DynInput.dart';
 import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Controllers/BeaufortController.dart';
+import 'package:mwpaapp/Controllers/LocationController.dart';
 import 'package:mwpaapp/Controllers/PrefController.dart';
 import 'package:mwpaapp/Controllers/VehicleController.dart';
 import 'package:mwpaapp/Controllers/VehicleDriverController.dart';
@@ -22,6 +23,7 @@ class _EditTourPageState extends State<EditTourPage> {
   final PrefController _prefController = Get.find<PrefController>();
   final VehicleController _vehicleController = Get.find<VehicleController>();
   final VehicleDriverController _vehicleDriverController = Get.find<VehicleDriverController>();
+  final LocationController _locationController = Get.find<LocationController>();
 
   late DynInput sightVehicle;
   DynInputValue sightVehicleValue = DynInputValue();
@@ -79,6 +81,7 @@ class _EditTourPageState extends State<EditTourPage> {
     super.initState();
   }
 
+  /// save the settings
   _saveTourToPref() async {
     TourPref tour = TourPref(
         vehicle_id: sightVehicle.dynValue?.getStrValueAsInt(),
@@ -93,6 +96,7 @@ class _EditTourPageState extends State<EditTourPage> {
     );
 
     await _prefController.saveTour(tour);
+    await _locationController.reloadSettings();
 
     Get.back();
   }

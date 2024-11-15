@@ -3,9 +3,17 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:mwpaapp/Controllers/PrefController.dart';
 import 'package:mwpaapp/Db/DBHelper.dart';
+import 'package:mwpaapp/Models/TourPref.dart';
+import 'package:mwpaapp/Models/TrackingAreaHome.dart';
+import 'package:mwpaapp/Services/EventManagerService.dart';
+import 'package:mwpaapp/Settings/Preference.dart';
+import 'package:mwpaapp/Util/UtilLocation.dart';
+import 'package:mwpaapp/Util/UtilSighting.dart';
 import 'package:mwpaapp/Util/UtilTourFId.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
 import '../Models/TourTracking.dart';
@@ -13,12 +21,32 @@ import '../Models/TourTracking.dart';
 /// LocationController
 class LocationController extends GetxController {
 
+  /// geoloactor android
   final GeolocatorPlatform geolocatorAndroid = GeolocatorPlatform.instance;
+
+  /// stream subscription
   StreamSubscription<Position>? _positionStreamSubscription;
+
+  /// is location init
   bool isLocationInit = false;
+
+  /// Location timer
   Timer? locationTimer;
+
+  /// Current position
   Position? currentPosition;
+
+  /// Current position count
   int positionCount = 0;
+
+  /// Home Area Points (Polygon)
+  List<UtilLocationDouble> homeArea = [];
+
+  /// a tour by home area
+  TourPref? homeAreaToru;
+
+  /// event manager for updates
+  final EventManagerService updateEvent = EventManagerService();
 
   @override
   void onReady() {
@@ -93,7 +121,9 @@ class LocationController extends GetxController {
             altitude: position.altitude,
             speed: position.speed,
             speedAccuracy: position.speedAccuracy,
-            heading: position.heading
+            heading: position.heading,
+            altitudeAccuracy: position.altitudeAccuracy,
+            headingAccuracy: position.headingAccuracy
         );
 
         if (kDebugMode) {
@@ -101,19 +131,112 @@ class LocationController extends GetxController {
         }
 
         _setAndSavePosition(tPosition);
+        updateEvent.triggerEvent();
       });
     }
 
     return true;
   }
 
+  /// Reload the settings
+  Future<void> reloadSettings({bool reset = false}) async {
+    await _loadHomeArea();
+  }
+
+  /// load Home Area
+  Future<void> _loadHomeArea() async {
+    try {
+      homeArea = [];
+
+      final prefs = await SharedPreferences.getInstance();
+      final orgId = prefs.getInt(Preference.ORGID) ?? 0;
+
+      if (orgId > 0) {
+        List<Map<String, dynamic>> list = await DBHelper.queryTrackingAreaHome(orgId);
+
+        for (var cord in list) {
+          var tah = TrackingAreaHome.fromJson(cord);
+
+          if (tah.lat != null && tah.lon != null) {
+            var dCord = UtilLocationString(lat: tah.lat!, lon: tah.lon!).toLocationDouble();
+
+            homeArea.add(dCord);
+          }
+        }
+      }
+    } catch(e) {
+      if (kDebugMode) {
+        print('LocationController::_loadHomeArea:');
+        print(e);
+      }
+
+      rethrow;
+    }
+  }
+
   /// _setAndSavePosition
   _setAndSavePosition(Position position) {
     currentPosition = position;
 
+    var savePoint = false;
+    var tourFid = "";
+
     PrefController prefController = Get.find<PrefController>();
 
     if (prefController.prefToru != null) {
+      if ((prefController.prefToru!.use_home_area != null) && (prefController.prefToru!.use_home_area! > 0)) {
+        // track with home area ------------------------------------------------
+
+        if (homeArea.isNotEmpty) {
+          if (UtilLocationPolygon.isPointInPolygon(
+              UtilLocationDouble.positionToLocationDouble(currentPosition!),
+              homeArea)
+          ) {
+            // at home area ----------------------------------------------------
+
+            if (homeAreaToru != null) {
+              prefController.prefToru?.tour_end = DateFormat("HH:mm").format(DateTime.now());
+              prefController.saveTour(prefController.prefToru!);
+
+              UtilSighting.setCurrentEndTour(UtilTourFid.createTTourFId(homeAreaToru!));
+              homeAreaToru = null;
+            }
+
+            positionCount = 0;
+          } else {
+            // out home area ---------------------------------------------------
+
+            if (homeAreaToru == null) {
+              homeAreaToru = TourPref(
+                  vehicle_id: prefController.prefToru?.vehicle_id,
+                  vehicle_driver_id: prefController.prefToru?.vehicle_driver_id,
+                  date: DateFormat("yyyy-MM-dd").format(DateTime.now()),
+                  tour_start: DateFormat("HH:mm").format(DateTime.now())
+              );
+
+              prefController.prefToru?.date = homeAreaToru?.date;
+              prefController.prefToru?.tour_start = homeAreaToru?.tour_start;
+
+              // save the new tour info for sighting
+              prefController.saveTour(prefController.prefToru!);
+            }
+
+            savePoint = true;
+            tourFid = UtilTourFid.createTTourFId(homeAreaToru!);
+          }
+        }
+
+      } else {
+        // track all -----------------------------------------------------------
+
+        savePoint = true;
+        tourFid = UtilTourFid.createTTourFId(prefController.prefToru!);
+      }
+    }
+
+    // save the point ----------------------------------------------------------
+
+    if (savePoint) {
       DateTime cTime = DateTime.now();
       var uuid = const Uuid();
       String uuidStr = uuid.v4();
@@ -122,7 +245,7 @@ class LocationController extends GetxController {
       DBHelper.insertTourTracking(
           TourTracking(
               uuid: uuidStr,
-              tour_fid: UtilTourFid.createTTourFId(prefController.prefToru!),
+              tour_fid: tourFid,
               location: jsonEncode(currentPosition!.toJson()),
               date: timeStr
           )

@@ -6,7 +6,6 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:mwpaapp/Components/DynInput.dart';
 import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Components/DefaultButton.dart';
@@ -29,6 +28,7 @@ import 'package:mwpaapp/Services/ThemeService.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
 import 'package:mwpaapp/Util/UtilDate.dart';
 import 'package:mwpaapp/Util/UtilDistanceCoast.dart';
+import 'package:mwpaapp/Util/UtilSighting.dart';
 import 'package:mwpaapp/Util/UtilTourFId.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:connectivity/connectivity.dart';
@@ -37,7 +37,8 @@ import 'package:flutter_icons_null_safety/flutter_icons_null_safety.dart';
 
 /// ListPage
 class ListPage extends StatefulWidget {
-  const ListPage({Key? key}) : super(key: key);
+
+  const ListPage({super.key});
 
   @override
   State<ListPage> createState() => _ListPageState();
@@ -58,6 +59,7 @@ class _ListPageState extends State<ListPage> {
 
   bool diffTourDateIgnored = false;
   bool isSyncInProgress = false;
+  String statusTitle = "Tour: default date is not set";
 
   /// initState
   @override
@@ -111,6 +113,7 @@ class _ListPageState extends State<ListPage> {
       await _speciesController.getSpecies();
       await _encounterCategoriesController.getEncounterCategorie();
       await _behaviouralStateController.getBehaviouralStates();
+      await _locationController.reloadSettings();
 
       isSyncInProgress = false;
       EasyLoading.dismiss();
@@ -130,11 +133,16 @@ class _ListPageState extends State<ListPage> {
 
   /// _loadController
   _loadController() async {
+    _locationController.updateEvent.removeListener(_updateTitle);
+    _locationController.updateEvent.addListener(_updateTitle);
+
     await _speciesController.getSpecies();
     await _vehicleController.getVehicle();
     await _vehicleDriverController.getVehicleDriver();
     await _encounterCategoriesController.getEncounterCategorie();
     await _behaviouralStateController.getBehaviouralStates();
+    await _locationController.reloadSettings();
+
     _sightingController.getSightings();
   }
 
@@ -160,25 +168,7 @@ class _ListPageState extends State<ListPage> {
       (value) async {
         if (value == "ok") {
           if (_prefController.prefToru != null) {
-            TimeOfDay timeValue = TimeOfDay.now();
-            var hour = "${timeValue.hour}";
-            var min = "${timeValue.minute}";
-
-            if (timeValue.hour < 10) {
-              hour = "0${timeValue.hour}";
-            }
-
-            if (timeValue.minute < 10) {
-              min = "0${timeValue.minute}";
-            }
-
-            var tourEndTime = "$hour:$min";
-
-            await _sightingController.updateSightingEndtour(
-              UtilTourFid.createTTourFId(_prefController.prefToru!),
-              tourEndTime
-            );
-
+            UtilSighting.setCurrentEndTour(UtilTourFid.createTTourFId(_prefController.prefToru!));
             _loadController();
           } else {
             if (kDebugMode) {
@@ -322,33 +312,52 @@ class _ListPageState extends State<ListPage> {
     _loadController();
   }
 
-  /// _addTaskBar
-  _addTaskBar(BuildContext context) {
-    var titleDate = 'default date is not set';
-
+  _updateTitle() {
     try {
       if (_prefController.prefToru != null) {
-        DateTime tDate = DateTime.parse(_prefController.prefToru!.date!);
+        if ((_prefController.prefToru!.use_home_area == null) || (_prefController.prefToru!.use_home_area! < 1)) {
+          // without home area -------------------------------------------------
 
-        if (!diffTourDateIgnored) {
-          if (!UtilDate.isCurrentDate(tDate)) {
-            Future.delayed(Duration.zero, () => ConfirmDialog.show(
-              context,
-              "Tour date",
-              "The tour date is not current, please check!",
-              (select) async {
-                if (select == "ok") {
-                  await Get.toNamed('/setTour');
-                  _sightingController.getSightings();
-                } else {
-                  diffTourDateIgnored = true;
-                }
-              }
-            ));
+          DateTime tDate = DateTime.parse(_prefController.prefToru!.date!);
+
+          if (!diffTourDateIgnored) {
+            if (!UtilDate.isCurrentDate(tDate)) {
+              Future.delayed(Duration.zero, () =>
+                  ConfirmDialog.show(
+                      context,
+                      "Tour date",
+                      "The tour date is not current, please check!",
+                          (select) async {
+                        if (select == "ok") {
+                          await Get.toNamed('/setTour');
+                          _sightingController.getSightings();
+                        } else {
+                          diffTourDateIgnored = true;
+                        }
+                      }
+                  ));
+            }
+          }
+
+          setState(() {
+            statusTitle =
+            "Tour: ${_prefController.prefToru!.date!} - ${_prefController
+                .prefToru!.tour_start!}";
+          });
+        } else {
+          // with Home area ----------------------------------------------------
+
+          if (_locationController.homeAreaToru == null) {
+            setState(() {
+              statusTitle = "Tour: In Home-Area, wait for start";
+            });
+          } else {
+            setState(() {
+              statusTitle = "Tour: ${_locationController.homeAreaToru!
+                  .date!} - ${_locationController.homeAreaToru!.tour_start!}";
+            });
           }
         }
-
-        titleDate = "${DateFormat("yyyy-MM-dd").format(tDate.toLocal())} - ${_prefController.prefToru!.tour_start!}";
       }
     } catch(e) {
       if (kDebugMode) {
@@ -356,11 +365,13 @@ class _ListPageState extends State<ListPage> {
         print(e);
       }
     }
+  }
 
-    var titleLine = "Tour: $titleDate";
+  /// _addTaskBar
+  _addTaskBar(BuildContext context) {
     List<Widget> columnList = [
       Text(
-        titleLine,
+        statusTitle,
         style: subHeadingStyle,
       ),
       const SizedBox(height: 5),
@@ -370,7 +381,18 @@ class _ListPageState extends State<ListPage> {
 
     btnList.add(GetBuilder<PrefController>(builder: (prefController) {
       if (prefController.prefToru != null) {
+        var setEndTour = false;
+        var useHomeArea = false;
+
         if (prefController.prefToru!.set_end_tour != null && prefController.prefToru!.set_end_tour! >= 1) {
+          setEndTour = true;
+        }
+
+        if (prefController.prefToru!.use_home_area != null && prefController.prefToru!.use_home_area! >= 1) {
+          useHomeArea = true;
+        }
+
+        if (setEndTour && !useHomeArea) {
           return DefaultButton(
               buttonIcon: Icons.tour,
               label: 'Tour End',
@@ -381,6 +403,7 @@ class _ListPageState extends State<ListPage> {
               }
           );
         }
+
       }
 
       return Container();
@@ -629,8 +652,8 @@ class _ListPageState extends State<ListPage> {
   Widget build(BuildContext context) {
     _loadController();
 
-    return WillPopScope(
-      onWillPop: () async => false,
+    return PopScope(
+      canPop: false,
       child: Scaffold(
         appBar: _appBar(),
         body: Column(
