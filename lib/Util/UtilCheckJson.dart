@@ -3,14 +3,10 @@ enum UtilCheckJsonTypes {
   string
 }
 
-/**
- * UtilCheckJson
- */
+/// UtilCheckJson
 class UtilCheckJson {
 
-  /**
-   * checkValue
-   */
+  /// checkValue
   static dynamic checkValue(dynamic val, UtilCheckJsonTypes type) {
     switch (type) {
       case UtilCheckJsonTypes.int:

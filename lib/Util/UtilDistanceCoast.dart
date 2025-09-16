@@ -1,4 +1,3 @@
-import 'dart:ffi';
 
 import 'package:geolocator/geolocator.dart';
 import 'package:gpx/gpx.dart';
@@ -1120,7 +1119,7 @@ class UtilDistanceCoast {
   static double getDistance(Position pos) {
     double result = 0;
 
-    xmlGpx.wpts.forEach((element) {
+    for (var element in xmlGpx.wpts) {
       double distance = Geolocator.distanceBetween(
         pos.latitude,
         pos.longitude,
@@ -1133,7 +1132,7 @@ class UtilDistanceCoast {
       } else if (result > distance) {
         result = distance;
       }
-    });
+    }
 
     return result;
   }

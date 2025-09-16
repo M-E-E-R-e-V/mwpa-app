@@ -21,7 +21,7 @@ class ListSightingTile extends StatelessWidget {
 
   final Sighting sighting;
 
-  ListSightingTile(this.sighting, {Key? key}) : super(key: key);
+  ListSightingTile(this.sighting, {super.key});
 
   final LocationController _locationController = Get.find<LocationController>();
   final SpeciesController _speciesController = Get.find<SpeciesController>();

@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:intl/intl.dart';
 import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Util/UtilCheckJson.dart';
@@ -202,15 +201,15 @@ class Sighting {
       if (forSync && (other_species != "")) {
         Map<String, dynamic> newdata = {};
         Map<String, dynamic> olddata = jsonDecode(other_species!);
-        final SpeciesController _speciesController = Get.find<SpeciesController>();
+        final SpeciesController speciesController = Get.find<SpeciesController>();
 
         olddata.forEach((key, value) {
           if (value != "") {
-            var species = _speciesController.getSpeciesById(int.parse(value));
+            var species = speciesController.getSpeciesById(int.parse(value));
 
             if (species != null) {
               var orgid = species.orgid;
-              newdata["$key"] = "$orgid";
+              newdata[key] = "$orgid";
             }
           }
         });
@@ -273,7 +272,7 @@ class Sighting {
         'Eretmochelys imbricata'
       ];
 
-      if (tortoiseList.indexOf(other!) > -1) {
+      if (tortoiseList.contains(other!)) {
         return Colors.green;
       }
     }

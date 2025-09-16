@@ -28,7 +28,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class EditSightingPage extends StatefulWidget {
   final Sighting? sighting;
 
-  const EditSightingPage({Key? key, this.sighting}) : super(key: key);
+  const EditSightingPage({super.key, this.sighting});
 
   @override
   State<EditSightingPage> createState() => _EditSightingPageState();

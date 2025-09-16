@@ -11,7 +11,7 @@ class DefaultButton extends StatelessWidget {
   final double? height;
   final Color? bgColor;
 
-  const DefaultButton({Key? key, this.label, this.buttonIcon, this.onTab, this.width, this.height, this.bgColor}) : super(key: key);
+  const DefaultButton({super.key, this.label, this.buttonIcon, this.onTab, this.width, this.height, this.bgColor});
 
   /// build
   @override

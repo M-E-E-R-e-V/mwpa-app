@@ -11,7 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// ProminentDisclosurePage
 class ProminentDisclosurePage extends StatefulWidget {
-  const ProminentDisclosurePage({Key? key}) : super(key: key);
+  const ProminentDisclosurePage({super.key});
 
   @override
   State<ProminentDisclosurePage> createState() => _ProminentDisclosurePageState();
@@ -176,9 +176,9 @@ class _ProminentDisclosurePageState extends State<ProminentDisclosurePage> {
                       ),
                     ]
                 ),
-                Row(
+                const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
+                  children: [
                     Text('https://github.com/M-E-E-R-e-V/mwpa-app'),
                   ],
                 ),
@@ -241,9 +241,9 @@ class _ProminentDisclosurePageState extends State<ProminentDisclosurePage> {
 
                 const SizedBox(height: 20),
 
-                Row(
+                const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
+                  children: [
                     Text('A project of the M.E.E.R. e.V. association.'),
                   ],
                 )

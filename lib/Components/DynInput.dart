@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -208,7 +207,7 @@ class DynInput extends StatefulWidget {
   final List<String>? supportedTagList;
 
   const DynInput({
-    Key? key,
+    super.key,
     required this.context,
     required this.hint,
     required this.inputType,
@@ -219,7 +218,7 @@ class DynInput extends StatefulWidget {
     this.onChange,
     this.onFormat,
     this.supportedTagList
-  }) : super(key: key);
+  });
 
   @override
   State<DynInput> createState() => _DynInputState();

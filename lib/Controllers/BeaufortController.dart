@@ -3,10 +3,6 @@ import 'package:mwpaapp/Components/DynInput.dart';
 
 class BeaufortController extends GetxController {
 
-  @override
-  void onReady() {
-    super.onReady();
-  }
 
   static var beaufortSelectList = <DynInputSelectItem>[
     DynInputSelectItem(value: "", label: "not selected"),

@@ -3,7 +3,7 @@ typedef EventCallback = void Function();
 
 class EventManagerService {
 
-  List<EventCallback> _listeners = [];
+  final List<EventCallback> _listeners = [];
 
   void addListener(EventCallback callback) {
     _listeners.add(callback);

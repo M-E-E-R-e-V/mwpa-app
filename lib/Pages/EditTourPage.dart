@@ -13,7 +13,7 @@ import 'package:mwpaapp/Models/TourPref.dart';
 
 class EditTourPage extends StatefulWidget {
 
-  const EditTourPage({Key? key}) : super(key: key);
+  const EditTourPage({super.key});
 
   @override
   State<EditTourPage> createState() => _EditTourPageState();

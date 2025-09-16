@@ -16,23 +16,23 @@ class Info extends DefaultReturn {
       msg = json['msg'];
     }
 
-    String? version_api_login;
+    String? versionApiLogin;
 
     if (json.containsKey('version_api_login')) {
-      version_api_login = json['version_api_login'];
+      versionApiLogin = json['version_api_login'];
     }
 
-    String? version_api_sync;
+    String? versionApiSync;
 
     if (json.containsKey('version_api_sync')) {
-      version_api_sync = json['version_api_sync'];
+      versionApiSync = json['version_api_sync'];
     }
 
     return Info(
       statusCode: json['statusCode'],
       msg: msg,
-      version_api_login: version_api_login,
-      version_api_sync: version_api_sync
+      version_api_login: versionApiLogin,
+      version_api_sync: versionApiSync
     );
   }
 }

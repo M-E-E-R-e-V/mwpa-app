@@ -22,7 +22,7 @@ void main() async {
 
 /// MWPAApp
 class MWPAApp extends StatefulWidget {
-  const MWPAApp({Key? key}) : super(key: key);
+  const MWPAApp({super.key});
 
   @override
   State<MWPAApp> createState() => _MWPAAppState();

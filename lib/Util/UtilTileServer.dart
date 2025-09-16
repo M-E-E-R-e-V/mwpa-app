@@ -1,5 +1,5 @@
 class UtilTileServer {
-  static final yourMapBoxAccessToken = '';
+  static const yourMapBoxAccessToken = '';
 
   static String mapbox(int z, int x, int y) {
     //Mapbox Streets

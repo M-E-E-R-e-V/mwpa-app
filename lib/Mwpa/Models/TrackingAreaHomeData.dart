@@ -17,9 +17,9 @@ class TrackingAreaHomeData {
 
   factory TrackingAreaHomeData.fromJson(Map<String, dynamic> json) {
     List<UtilLocationDouble> coordinates = [];
-    int organization_id = 0;
-    int create_datetime = 0;
-    int update_datetime = 0;
+    int organizationId = 0;
+    int createDatetime = 0;
+    int updateDatetime = 0;
 
     if (json.containsKey('coordinates')) {
       List<dynamic> vcoordinates = json['coordinates'];
@@ -30,22 +30,22 @@ class TrackingAreaHomeData {
     }
 
     if (json.containsKey('organization_id')) {
-      organization_id = json['organization_id'];
+      organizationId = json['organization_id'];
     }
 
     if (json.containsKey('create_datetime')) {
-      create_datetime = json['create_datetime'];
+      createDatetime = json['create_datetime'];
     }
 
     if (json.containsKey('update_datetime')) {
-      create_datetime = json['update_datetime'];
+      createDatetime = json['update_datetime'];
     }
 
     return TrackingAreaHomeData(
       coordinates: coordinates,
-      organization_id: organization_id,
-      create_datetime: create_datetime,
-      update_datetime: update_datetime
+      organization_id: organizationId,
+      create_datetime: createDatetime,
+      update_datetime: updateDatetime
     );
   }
 
