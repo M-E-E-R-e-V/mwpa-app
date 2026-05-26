@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:mwpaapp/Constants.dart';
 
 /// DefaultButton
+///
+/// Wrapper around [FilledButton] that keeps the long-standing call-sites in
+/// the codebase (label / buttonIcon / onTab / width / height / bgColor) intact
+/// but renders Material 3 ink, ripple and elevation.
 class DefaultButton extends StatelessWidget {
   final String? label;
   final IconData? buttonIcon;
@@ -11,69 +15,68 @@ class DefaultButton extends StatelessWidget {
   final double? height;
   final Color? bgColor;
 
-  const DefaultButton({super.key, this.label, this.buttonIcon, this.onTab, this.width, this.height, this.bgColor});
+  const DefaultButton({
+    super.key,
+    this.label,
+    this.buttonIcon,
+    this.onTab,
+    this.width,
+    this.height,
+    this.bgColor,
+  });
 
-  /// build
   @override
   Widget build(BuildContext context) {
-    var newWidth = 140.0;
-    var newHeight = 60.0;
-    var newBgColor = kButtonBackgroundColor;
+    final background = bgColor ?? kButtonBackgroundColor;
 
-    if (width != null) {
-      newWidth = width!;
-    }
+    final child = label == null
+        ? (buttonIcon != null
+            ? Icon(buttonIcon, color: kButtonFontColor, size: 20)
+            : const SizedBox.shrink())
+        : Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (buttonIcon != null) ...[
+                Icon(buttonIcon, color: kButtonFontColor, size: 18),
+                const SizedBox(width: 6),
+              ],
+              Flexible(
+                child: AutoSizeText(
+                  label!,
+                  style: const TextStyle(
+                    color: kButtonFontColor,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                  ),
+                  textAlign: TextAlign.center,
+                  minFontSize: 6,
+                  maxLines: 2,
+                ),
+              ),
+            ],
+          );
 
-    if (height != null) {
-      newHeight = height!;
-    }
-
-    if (bgColor != null) {
-      newBgColor = bgColor!;
-    }
-
-    List<Widget> inner = [];
-
-    if(buttonIcon != null) {
-      inner.add(Icon(
-        buttonIcon,
-        color: kButtonFontColor,
-        size: 18,
-      ));
-    }
-
-    if (label != null) {
-      inner.add(AutoSizeText(
-        label!,
-        style: const TextStyle(
-            color: kButtonFontColor,
-            fontWeight: FontWeight.bold,
-            fontSize: 12
-        ),
-        textAlign: TextAlign.center,
-        minFontSize: 6
-      ));
-    }
-
-    return GestureDetector(
-      onTap: onTab,
-      child: Container(
-        width: newWidth,
-        height: newHeight,
-        margin: const EdgeInsets.only(left: 5, right: 5, top: 5, bottom: 5),
-        decoration: BoxDecoration(
+    final button = FilledButton(
+      onPressed: onTab,
+      style: FilledButton.styleFrom(
+        backgroundColor: background,
+        foregroundColor: kButtonFontColor,
+        disabledBackgroundColor: background.withValues(alpha: 0.5),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          color: newBgColor
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: inner,
-            )
-          ],
-        )
+      ),
+      child: child,
+    );
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+      child: SizedBox(
+        width: width ?? 140,
+        height: height ?? 48,
+        child: button,
       ),
     );
   }

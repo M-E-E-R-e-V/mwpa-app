@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:mwpaapp/Components/DefaultButton.dart';
 import 'package:mwpaapp/Components/DynInput.dart';
-import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Controllers/BeaufortController.dart';
 import 'package:mwpaapp/Controllers/LocationController.dart';
 import 'package:mwpaapp/Controllers/PrefController.dart';
@@ -53,24 +51,20 @@ class _EditTourPageState extends State<EditTourPage> {
 
   _appBar(BuildContext context) {
     return AppBar(
-      backgroundColor: kPrimaryHeaderColor,
+      title: const Text('Set default Tour'),
       leading: IconButton(
-        icon: const Icon(
-          Icons.arrow_back,
-          color: kButtonFontColor,
-        ),
+        icon: const Icon(Icons.arrow_back),
         onPressed: () async {
           ConfirmDialog.show(
-              context,
-              "Tour close",
-              "Close tour without saving? All changes will be lost!",
-                  (value) {
-                if (value != null) {
-                  if (value == 'ok') {
-                    Get.back();
-                  }
-                }
-              });
+            context,
+            'Tour close',
+            'Close tour without saving? All changes will be lost!',
+            (value) {
+              if (value == 'ok') {
+                Get.back();
+              }
+            },
+          );
         },
       ),
     );
@@ -208,55 +202,37 @@ class _EditTourPageState extends State<EditTourPage> {
         dynValue: sightUseHomeAreaValue,
       );
 
-      return WillPopScope(
-        onWillPop: () async => false,
+      return PopScope(
+        canPop: false,
         child: Scaffold(
           appBar: _appBar(context),
-          body: Container(
-            padding: const EdgeInsets.only(left: 20, right: 20, top: 15),
-            child: SingleChildScrollView(
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                sightVehicle,
+                sightVehicleDriver,
+                sightBeaufort,
+                sightDate,
+                Row(
                   children: [
-                    Text(
-                      "Set default Tour",
-                      style: headingStyle,
-                    ),
-                    sightVehicle,
-                    sightVehicleDriver,
-                    sightBeaufort,
-                    sightDate,
-                    Row(
-                      children: [
-                        Expanded(
-                            child: sightTourStart
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                            child: sightTourEnd
-                        )
-                      ],
-                    ),
-                    sightSetEndTour,
-                    const SizedBox(height: 30),
-                    sightUseHomeArea,
-                    const SizedBox(height: 30),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(),
-                        DefaultButton(
-                          buttonIcon: Icons.save_alt,
-                          label: "Save default Tour",
-                          onTab: () {
-                            _saveTourToPref();
-                          }
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 30),
-                  ]
-              ),
+                    Expanded(child: sightTourStart),
+                    const SizedBox(width: 12),
+                    Expanded(child: sightTourEnd),
+                  ],
+                ),
+                sightSetEndTour,
+                const SizedBox(height: 16),
+                sightUseHomeArea,
+                const SizedBox(height: 24),
+                FilledButton.icon(
+                  onPressed: _saveTourToPref,
+                  icon: const Icon(Icons.save_alt),
+                  label: const Text('Save default Tour'),
+                ),
+                const SizedBox(height: 24),
+              ],
             ),
           ),
         ),

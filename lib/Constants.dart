@@ -3,8 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-const versionApiMobileLogin = '1.0.1';
-const versionApiMobileSync = '1.0.3';
+// Accepted backend API versions. The mobile app refuses to talk to a server
+// that returns a value outside these sets, because the wire shape may have
+// drifted in a way that would corrupt the local data on sync. Add a new
+// version string here when the server bumps but stays wire-compatible.
+const Set<String> versionApiMobileLogin = {'1.0.1'};
+const Set<String> versionApiMobileSync = {'1.0.2', '1.0.3'};
 
 // primary
 const kPrimaryColor = Color(0xff022b55);

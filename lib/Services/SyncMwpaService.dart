@@ -53,12 +53,18 @@ class SyncMwpaService {
 
       Info apiInfo = await api.getInfo();
 
-      if (apiInfo.version_api_login != versionApiMobileLogin) {
-        throw Exception("The API for login has changed, please update your app, the data will not be lost.");
+      if (!versionApiMobileLogin.contains(apiInfo.version_api_login)) {
+        throw Exception(
+            "The API for login has changed (server reports '${apiInfo.version_api_login}', "
+            "app accepts ${versionApiMobileLogin.join(', ')}). Please update your app, "
+            "the data will not be lost.");
       }
 
-      if (apiInfo.version_api_sync != versionApiMobileSync) {
-        throw Exception("The API for syncing has changed, please update your app, the data will not be lost.");
+      if (!versionApiMobileSync.contains(apiInfo.version_api_sync)) {
+        throw Exception(
+            "The API for syncing has changed (server reports '${apiInfo.version_api_sync}', "
+            "app accepts ${versionApiMobileSync.join(', ')}). Please update your app, "
+            "the data will not be lost.");
       }
 
       if (!await api.isLogin()) {

@@ -48,8 +48,11 @@ class _LoginPageState extends State<LoginPage> {
 
       Info apiInfo = await api.getInfo();
 
-      if (apiInfo.version_api_login != versionApiMobileLogin) {
-        throw Exception("The API for login has changed, please update your app, the data will not be lost.");
+      if (!versionApiMobileLogin.contains(apiInfo.version_api_login)) {
+        throw Exception(
+            "The API for login has changed (server reports '${apiInfo.version_api_login}', "
+            "app accepts ${versionApiMobileLogin.join(', ')}). Please update your app, "
+            "the data will not be lost.");
       }
 
       if (!await api.isLogin()) {
@@ -119,8 +122,11 @@ class _LoginPageState extends State<LoginPage> {
 
       Info apiInfo = await api.getInfo();
 
-      if (apiInfo.version_api_login != versionApiMobileLogin) {
-        throw Exception('The API for login has changed, please update your app, the data will not be lost.');
+      if (!versionApiMobileLogin.contains(apiInfo.version_api_login)) {
+        throw Exception(
+            "The API for login has changed (server reports '${apiInfo.version_api_login}', "
+            "app accepts ${versionApiMobileLogin.join(', ')}). Please update your app, "
+            "the data will not be lost.");
       }
 
       if (await api.quickConnect(otp)) {
@@ -244,198 +250,104 @@ class _LoginPageState extends State<LoginPage> {
   /// build
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: Get.isDarkMode ? kPrimaryDarkBackgroundColor : kPrimaryBackgroundColor,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(
-                  height: 120,
-                  child: Image.asset(
-                    'assets/images/logo.png',
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(
+                    height: 120,
+                    child: Image.asset('assets/images/logo.png'),
                   ),
-                ),
-
-                const SizedBox(height: 75),
-
-                // Title
-                Text(
-                  'MWPA Login',
-                  style: headingStyle,
-                ),
-
-                const SizedBox(height: 10),
-
-                Text(
-                  'Mammal watching. Processing. Analysing.',
-                  style: titleStyle,
-                ),
-
-                const SizedBox(height: 50),
-
-                // url portal text-field
-
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white70,
-                      border: Border.all(color: kPrimaryColor),
-                      borderRadius: BorderRadius.circular(12),
+                  const SizedBox(height: 40),
+                  Text(
+                    'MWPA Login',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 20.0),
-                      child: TextField(
-                        controller: _urlController,
-                        decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            hintText: 'URL MWPA',
-
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Mammal watching. Processing. Analysing.',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 36),
+                  TextField(
+                    controller: _urlController,
+                    keyboardType: TextInputType.url,
+                    autocorrect: false,
+                    textInputAction: TextInputAction.next,
+                    decoration: const InputDecoration(
+                      labelText: 'URL MWPA',
+                      prefixIcon: Icon(Icons.link),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _usernameController,
+                    keyboardType: TextInputType.emailAddress,
+                    autocorrect: false,
+                    textInputAction: TextInputAction.next,
+                    decoration: const InputDecoration(
+                      labelText: 'Username / Email',
+                      prefixIcon: Icon(Icons.person_outline),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _passwordController,
+                    obscureText: true,
+                    textInputAction: TextInputAction.done,
+                    onSubmitted: (_) => signIn(),
+                    decoration: const InputDecoration(
+                      labelText: 'Password',
+                      prefixIcon: Icon(Icons.lock_outline),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  FilledButton.icon(
+                    onPressed: signIn,
+                    icon: const Icon(Icons.login),
+                    label: const Text('Sign In'),
+                  ),
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    onPressed: quickConnect,
+                    icon: const Icon(Icons.qr_code_scanner),
+                    label: const Text('Quick Connect'),
+                  ),
+                  const SizedBox(height: 28),
+                  Text.rich(
+                    TextSpan(
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                      children: const [
+                        TextSpan(
+                          text: 'Not a Member? ',
+                          style: TextStyle(fontWeight: FontWeight.w600),
                         ),
-                      ),
+                        TextSpan(text: 'Register on your MWPA Portal!'),
+                      ],
                     ),
+                    textAlign: TextAlign.center,
                   ),
-                ),
-
-                const SizedBox(height: 10),
-
-                // username text-field
-
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white70,
-                      border: Border.all(color: kPrimaryColor),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 20.0),
-                      child: TextField(
-                        controller: _usernameController,
-                        decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            hintText: 'Username/EMail'
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 10),
-
-                // password text-field
-
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white70,
-                      border: Border.all(color: kPrimaryColor),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 20.0),
-                      child: TextField(
-                        controller: _passwordController,
-                        obscureText: true,
-                        decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            hintText: 'Password',
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 10),
-
-                // sign in button
-
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                  child: GestureDetector(
-                    onTap: signIn,
-                    child: Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: kPrimaryHeaderColor,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          'Sign In',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18
-                          ),
-                        ),
-                      ),
-                    ),
-                  )
-                ),
-
-                const SizedBox(height: 10),
-
-                // quick-connect button -------------------------------------------------
-
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                  child: GestureDetector(
-                    onTap: quickConnect,
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(color: kPrimaryColor),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.qr_code_scanner, color: kPrimaryColor),
-                          SizedBox(width: 10),
-                          Text(
-                            'Quick Connect',
-                            style: TextStyle(
-                              color: kPrimaryColor,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 25),
-
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Not a Member?',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                        ' Register on your MWPA Portal!',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                        )
-                    )
-                  ],
-                ),
-              ],
+                ],
+              ),
             ),
-          )
-        )
+          ),
+        ),
       ),
     );
   }

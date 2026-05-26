@@ -326,16 +326,7 @@ class _DynInputState extends State<DynInput> {
         picker = ImagePicker();
         break;
 
-      case DynInputType.date:
-        break;
-
-      case DynInputType.location:
-        break;
-
-      case DynInputType.text:
-        break;
-
-      case DynInputType.textarea:
+      default:
         break;
     }
   }

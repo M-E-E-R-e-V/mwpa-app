@@ -8,7 +8,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:mwpaapp/Components/DynInput.dart';
 import 'package:mwpaapp/Constants.dart';
-import 'package:mwpaapp/Components/DefaultButton.dart';
 import 'package:mwpaapp/Controllers/BehaviouralStateController.dart';
 import 'package:mwpaapp/Controllers/EncounterCategoriesController.dart';
 import 'package:mwpaapp/Controllers/LocationController.dart';
@@ -31,7 +30,7 @@ import 'package:mwpaapp/Util/UtilDistanceCoast.dart';
 import 'package:mwpaapp/Util/UtilSighting.dart';
 import 'package:mwpaapp/Util/UtilTourFId.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:connectivity/connectivity.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'List/ListMap.dart';
 import 'package:flutter_icons_null_safety/flutter_icons_null_safety.dart';
 
@@ -45,7 +44,8 @@ class ListPage extends StatefulWidget {
 }
 
 /// _ListPageState
-class _ListPageState extends State<ListPage> {
+class _ListPageState extends State<ListPage>
+    with SingleTickerProviderStateMixin {
   final PrefController _prefController = Get.find<PrefController>();
   final LocationController _locationController = Get.put(LocationController());
   final SightingController _sightingController = Get.put(SightingController());
@@ -56,6 +56,7 @@ class _ListPageState extends State<ListPage> {
   final BehaviouralStateController _behaviouralStateController = Get.put(BehaviouralStateController());
 
   late StreamSubscription subscription;
+  late final TabController _tabController;
 
   bool diffTourDateIgnored = false;
   bool isSyncInProgress = false;
@@ -66,6 +67,8 @@ class _ListPageState extends State<ListPage> {
   void initState() {
     super.initState();
 
+    _tabController = TabController(length: 2, vsync: this);
+
     subscription = Connectivity().onConnectivityChanged.listen(
         _syncCheckConnectivity
     );
@@ -74,14 +77,15 @@ class _ListPageState extends State<ListPage> {
   /// dispose
   @override
   void dispose() {
+    _tabController.dispose();
     subscription.cancel();
 
     super.dispose();
   }
 
   /// _syncCheckConnectivity
-  _syncCheckConnectivity(ConnectivityResult result) async {
-    final hasInternet = result != ConnectivityResult.none;
+  _syncCheckConnectivity(List<ConnectivityResult> results) async {
+    final hasInternet = results.any((r) => r != ConnectivityResult.none);
 
     if (hasInternet) {
       if (_sightingController.sightingList.isNotEmpty) {
@@ -183,8 +187,9 @@ class _ListPageState extends State<ListPage> {
   /// _appBar
   _appBar() {
     return AppBar(
-      backgroundColor: kPrimaryHeaderColor,
+      title: const Text('MWPA'),
       leading: IconButton(
+        tooltip: Get.isDarkMode ? 'Switch to light theme' : 'Switch to dark theme',
         onPressed: () {
           setState(() {
             ThemeService().switchTheme();
@@ -192,77 +197,66 @@ class _ListPageState extends State<ListPage> {
         },
         icon: Icon(
           Get.isDarkMode ? Icons.wb_sunny_outlined : Icons.nightlight_round,
-          size: 20,
-        )
+        ),
       ),
       actions: [
-        DefaultButton(
-            buttonIcon: Icons.post_add,
-            label: 'Add Sighting',
-            onTab: () async {
-              await Get.toNamed('/Edit');
-              _sightingController.getSightings();
+        PopupMenuButton<String>(
+          tooltip: 'Menu',
+          itemBuilder: (context) => const [
+            PopupMenuItem(
+              value: 'settour',
+              child: ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(Icons.event_note_outlined),
+                title: Text('Set default Tour'),
+              ),
+            ),
+            PopupMenuItem(
+              value: 'sync',
+              child: ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(Icons.sync),
+                title: Text('Sync with Server'),
+              ),
+            ),
+            PopupMenuDivider(),
+            PopupMenuItem(
+              value: 'logout',
+              child: ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(Icons.logout),
+                title: Text('Logout'),
+              ),
+            ),
+          ],
+          icon: const Icon(Icons.account_circle_outlined),
+          onSelected: (value) async {
+            switch (value) {
+              case 'settour':
+                await Get.toNamed('/setTour');
+                _sightingController.getSightings();
+                break;
+              case 'sync':
+                _syncMwpa();
+                break;
+              case 'logout':
+                _logout();
+                break;
             }
+          },
         ),
-        PopupMenuButton(itemBuilder: (context) {
-          var list = <PopupMenuEntry<Object>>[];
-          list.add(
-            const PopupMenuItem(
-                value: "settour",
-                child: Text("Set default Tour")
-            ),
-          );
-
-          list.add(
-              const PopupMenuDivider(
-                height: 10,
-              )
-          );
-
-          list.add(
-            const PopupMenuItem(
-                value: "sync",
-                child: Text("Sync with Server")
-            ),
-          );
-
-          list.add(
-              const PopupMenuDivider(
-                height: 10,
-              )
-          );
-
-          list.add(
-              const PopupMenuItem(
-                value: "logout",
-                child: Text("Logout"),
-              )
-          );
-          return list;
-        },
-        icon: const Icon(
-          Icons.person,
-          color: kButtonFontColor,
-        ),
-        initialValue: "0",
-        onSelected: (value) async {
-          switch (value) {
-            case "settour":
-              await Get.toNamed('/setTour');
-              _sightingController.getSightings();
-              break;
-
-            case "sync":
-              _syncMwpa();
-              break;
-
-            case "logout":
-              _logout();
-              break;
-          }
-        },
-        )
       ],
+      bottom: TabBar(
+        controller: _tabController,
+        indicatorColor: kButtonBackgroundColor,
+        indicatorWeight: 3,
+        labelColor: kButtonFontColor,
+        unselectedLabelColor: Colors.white70,
+        tabs: const [
+          Tab(icon: Icon(Icons.tour_outlined), text: 'Tour'),
+          Tab(icon: Icon(Icons.list_alt), text: 'Sightings'),
+        ],
+      ),
     );
   }
 
@@ -367,283 +361,301 @@ class _ListPageState extends State<ListPage> {
     }
   }
 
-  /// _addTaskBar
-  _addTaskBar(BuildContext context) {
-    List<Widget> columnList = [
-      Text(
-        statusTitle,
-        style: subHeadingStyle,
+  /// _statusCard
+  Widget _statusCard(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      color: theme.colorScheme.primaryContainer,
+      elevation: 0,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 22,
+              backgroundColor: theme.colorScheme.primary,
+              child: Icon(
+                Icons.tour_outlined,
+                color: theme.colorScheme.onPrimary,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Current tour',
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: theme.colorScheme.onPrimaryContainer
+                          .withValues(alpha: 0.7),
+                      letterSpacing: 0.4,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    statusTitle,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: theme.colorScheme.onPrimaryContainer,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
-      const SizedBox(height: 5),
+    );
+  }
+
+  /// _actionRow
+  Widget _actionRow(BuildContext context) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        GetBuilder<PrefController>(builder: (prefController) {
+          if (prefController.prefToru != null) {
+            final setEndTour = (prefController.prefToru!.set_end_tour ?? 0) >= 1;
+            final useHomeArea = (prefController.prefToru!.use_home_area ?? 0) >= 1;
+            if (setEndTour && !useHomeArea) {
+              return FilledButton.tonalIcon(
+                onPressed: () => _setEndTour(context),
+                icon: const Icon(Icons.flag_outlined),
+                label: const Text('Tour End'),
+              );
+            }
+          }
+          return const SizedBox.shrink();
+        }),
+        FilledButton.icon(
+          style: FilledButton.styleFrom(
+            backgroundColor: kButtonBackgroundColor,
+            foregroundColor: kButtonFontColor,
+          ),
+          onPressed: () async {
+            await Get.toNamed('/Edit');
+            _sightingController.getSightings();
+          },
+          icon: const Icon(Icons.add),
+          label: const Text('Add Sighting'),
+        ),
+        // TODO, fast button animals should come from the database in the future
+        FilledButton.icon(
+          style: FilledButton.styleFrom(
+            backgroundColor: Colors.green.shade600,
+            foregroundColor: Colors.white,
+          ),
+          onPressed: () => _showTortoiseDialog(context),
+          icon: const Icon(MaterialCommunityIcons.tortoise),
+          label: const Text('Add Tortoise'),
+        ),
+      ],
+    );
+  }
+
+  /// _showTortoiseDialog
+  void _showTortoiseDialog(BuildContext context) {
+    const turtles = <_TurtleChoice>[
+      _TurtleChoice('Caretta caretta', 'Loggerhead sea turtle',
+          'Caretta caretta - Loggerhead sea turtle'),
+      _TurtleChoice('Dermochelys coriacea', 'Leatherback sea turtle',
+          'Dermochelys coriacea - Leatherback sea turtle'),
+      _TurtleChoice('Chelonia mydas', 'Green sea turtle',
+          'Chelonia mydas - Green sea turtle'),
+      _TurtleChoice('Eretmochelys imbricata', 'Hawksbill sea turtle',
+          'Eretmochelys imbricata - Hawksbill sea turtle'),
+      _TurtleChoice('Unknown', 'Sea turtle', 'Unknown sea turtle'),
     ];
 
-    List<Widget> btnList = [];
-
-    btnList.add(GetBuilder<PrefController>(builder: (prefController) {
-      if (prefController.prefToru != null) {
-        var setEndTour = false;
-        var useHomeArea = false;
-
-        if (prefController.prefToru!.set_end_tour != null && prefController.prefToru!.set_end_tour! >= 1) {
-          setEndTour = true;
-        }
-
-        if (prefController.prefToru!.use_home_area != null && prefController.prefToru!.use_home_area! >= 1) {
-          useHomeArea = true;
-        }
-
-        if (setEndTour && !useHomeArea) {
-          return DefaultButton(
-              buttonIcon: Icons.tour,
-              label: 'Tour End',
-              height: 40,
-              width: 88,
-              onTab: () async {
-                _setEndTour(context);
-              }
-          );
-        }
-
-      }
-
-      return Container();
-    }));
-
-    if (btnList.isNotEmpty) {
-      btnList.add(const SizedBox(width: 5));
-    }
-
-    // TODO, fast button animals should come from the database in the future
-    btnList.add(DefaultButton(
-      buttonIcon: MaterialCommunityIcons.tortoise,
-      label: 'Add Tortoise',
-      height: 40,
-      width: 120,
-      bgColor: Colors.green,
-      onTab: () async {
-        showDialog<void>(
-            context: context,
-            barrierDismissible: false, // user must tap button!
-            builder: (BuildContext context) {
-              return Dialog(
-                shape: RoundedRectangleBorder(
-                  borderRadius:BorderRadius.circular(30.0)
-                ),
-                child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text("Please select"),
-                    const SizedBox(height: 15),
-                    DefaultButton(
-                        label: 'Caretta caretta\nLoggerhead sea turtle',
-                        bgColor: Colors.green,
-                        onTab: () {
-                          Navigator.of(context).pop();
-                          _addShortSighting('Caretta caretta - Loggerhead sea turtle', context);
-                        }
-                    ),
-                    const SizedBox(width: 15),
-                    DefaultButton(
-                        label: 'Dermochelys coriacea\nLeatherback sea turtle',
-                        bgColor: Colors.green,
-                        onTab: () {
-                          Navigator.of(context).pop();
-                          _addShortSighting('Dermochelys coriacea - Leatherback sea turtle', context);
-                        }
-                    ),
-                    const SizedBox(height: 15),
-                    DefaultButton(
-                        label: 'Chelonia mydas\nGreen sea turtle',
-                        bgColor: Colors.green,
-                        onTab: () {
-                          Navigator.of(context).pop();
-                          _addShortSighting('Chelonia mydas - Green sea turtle', context);
-                        }
-                    ),
-                    const SizedBox(width: 15),
-                    DefaultButton(
-                        label: 'Eretmochelys imbricata\nHawksbill sea turtle',
-                        bgColor: Colors.green,
-                        onTab: () {
-                          Navigator.of(context).pop();
-                          _addShortSighting('Eretmochelys imbricata - Hawksbill sea turtle', context);
-                        }
-                    ),
-                    const SizedBox(width: 15),
-                    DefaultButton(
-                        label: 'Unknown sea turtle',
-                        bgColor: Colors.teal,
-                        onTab: () {
-                          Navigator.of(context).pop();
-                          _addShortSighting('Unknown sea turtle', context);
-                        }
-                    ),
-                    const SizedBox(height: 15),
-                    DefaultButton(label: 'Cancel', onTab: () {
-                      Navigator.of(context).pop();
-                    }),
-                  ],
-                )
-                )
-              );
-            },
+    showDialog<void>(
+      context: context,
+      builder: (BuildContext dialogCtx) {
+        return AlertDialog(
+          icon: const Icon(MaterialCommunityIcons.tortoise,
+              size: 32, color: Colors.green),
+          title: const Text('Add tortoise sighting'),
+          contentPadding: const EdgeInsets.fromLTRB(8, 16, 8, 8),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView.separated(
+              shrinkWrap: true,
+              itemCount: turtles.length,
+              separatorBuilder: (_, __) => const Divider(height: 0),
+              itemBuilder: (_, i) {
+                final t = turtles[i];
+                return ListTile(
+                  leading: const Icon(MaterialCommunityIcons.tortoise,
+                      color: Colors.green),
+                  title: Text(t.scientific),
+                  subtitle: Text(t.common),
+                  onTap: () {
+                    Navigator.of(dialogCtx).pop();
+                    _addShortSighting(t.payload, context);
+                  },
+                );
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogCtx).pop(),
+              child: const Text('Cancel'),
+            ),
+          ],
         );
-      }
-    ));
+      },
+    );
+  }
 
-    columnList.add(Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: btnList,
-    ));
-
-    return Container(
-      margin: const EdgeInsets.only(left: 10, right: 10, top: 15),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
+  /// _tourTab — Tab 1: Status card, quick actions, map.
+  Widget _tourTab(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: columnList,
+          _statusCard(context),
+          const SizedBox(height: 12),
+          _actionRow(context),
+          const SizedBox(height: 12),
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Container(
+                color: kButtonBackgroundColor,
+                child: const ListMap(),
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  /// _addMapBar
-  _addMapBar() {
-    return Container(
-        height: 200,
-        decoration: const BoxDecoration(
-            color: kButtonBackgroundColor
-        ),
-        child: const ListMap()
-    );
-  }
-
-  /// _showSighting
-  _showSighting() {
-    return Expanded(
-      child: Obx(() {
-        return ListView.builder(
-          itemCount: _sightingController.sightingList.length,
-          itemBuilder: (_, index) {
-            Sighting sighting = _sightingController.sightingList[index];
-
-            return AnimationConfiguration.staggeredList(
-                position: index,
-                child: SlideAnimation(
-                  child: FadeInAnimation(
-                    child: Row(
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            _showBottomSheet(
-                              context,
-                              sighting
-                            );
-                          },
-                          child: ListSightingTile(sighting),
-                        )
-                      ],
-                    ),
+  /// _sightingsTab — Tab 2: the full list of sightings.
+  Widget _sightingsTab(BuildContext context) {
+    final theme = Theme.of(context);
+    return Obx(() {
+      final sightings = _sightingController.sightingList;
+      if (sightings.isEmpty) {
+        return Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.travel_explore_outlined,
+                  size: 56,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'No sightings yet',
+                  style: theme.textTheme.titleMedium,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Tap "Add Sighting" to record one.',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
-                )
-            );
-          }
+                ),
+              ],
+            ),
+          ),
         );
-      })
-    );
-  }
+      }
 
-  /// _bottomSheetButton
-  _bottomSheetButton({
-    required String label,
-    required Function()? onTab,
-    required Color clr,
-    required BuildContext context
-  }) {
-    return GestureDetector(
-      onTap: onTab,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 4),
-        height: 55,
-        width: MediaQuery.of(context).size.width * 0.9,
-        decoration: BoxDecoration(
-          border: Border.all(
-            width: 1,
-            color: Colors.grey[600]!
-          ),
-          borderRadius: BorderRadius.circular(20),
-          color: clr
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: clr == Colors.white ?
-              titleStyle.copyWith(color: kPrimaryFontColor) :
-              titleStyle.copyWith(color: kPrimaryDarkFontColor),
-          ),
-        ),
-      ),
-    );
+      return ListView.builder(
+        padding: const EdgeInsets.fromLTRB(0, 8, 0, 16),
+        itemCount: sightings.length,
+        itemBuilder: (_, index) {
+          final sighting = sightings[index];
+          return AnimationConfiguration.staggeredList(
+            position: index,
+            child: SlideAnimation(
+              child: FadeInAnimation(
+                child: GestureDetector(
+                  onTap: () => _showBottomSheet(context, sighting),
+                  child: ListSightingTile(sighting),
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    });
   }
 
   /// _showBottomSheet
   _showBottomSheet(BuildContext context, Sighting sighting) {
+    final theme = Theme.of(context);
+
     Get.bottomSheet(
-      Container(
-        padding: const EdgeInsets.only(top: 4),
-        height: MediaQuery.of(context).size.height * 0.32,
-        color: Get.isDarkMode ? kPrimaryDarkBackgroundColor : kPrimaryBackgroundColor,
-        child: Column(
-          children: [
-            Container(
-              height: 6,
-              width: 120,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: Get.isDarkMode ? Colors.grey[900] : Colors.grey[300]
+      SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  height: 4,
+                  width: 48,
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
               ),
-            ),
-            const Spacer(),
-            _bottomSheetButton(
-              label: 'Edit',
-              onTab: () async {
-                await Get.to(() => EditSightingPage(sighting: sighting));
-                _sightingController.getSightings();
-                Get.back();
-              },
-              clr: kPrimaryHeaderColor,
-              context: context
-            ),
-            const SizedBox(height: 20),
-            _bottomSheetButton(
-                label: 'Delete',
-                onTab: () async {
+              ListTile(
+                leading: Icon(Icons.edit_outlined, color: theme.colorScheme.primary),
+                title: const Text('Edit'),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                onTap: () async {
+                  Get.back();
+                  await Get.to(() => EditSightingPage(sighting: sighting));
+                  _sightingController.getSightings();
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.delete_outline, color: theme.colorScheme.error),
+                title: Text(
+                  'Delete',
+                  style: TextStyle(color: theme.colorScheme.error),
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                onTap: () async {
+                  Get.back();
                   await _sightingController.delete(sighting);
                   _sightingController.getSightings();
-                  Get.back();
                 },
-                clr: Colors.red[300]!,
-                context: context
-            ),
-            const SizedBox(height: 20),
-            _bottomSheetButton(
-                label: 'Close',
-                onTab: () {
-                  Get.back();
-                },
-                clr: Colors.white,
-                context: context
-            ),
-            const SizedBox(height: 10),
-          ],
+              ),
+              const SizedBox(height: 8),
+              OutlinedButton(
+                onPressed: () => Get.back(),
+                child: const Text('Close'),
+              ),
+            ],
+          ),
         ),
-      )
+      ),
+      backgroundColor: theme.colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
     );
   }
 
@@ -656,16 +668,21 @@ class _ListPageState extends State<ListPage> {
       canPop: false,
       child: Scaffold(
         appBar: _appBar(),
-        body: Column(
+        body: TabBarView(
+          controller: _tabController,
           children: [
-            _addTaskBar(context),
-            const SizedBox(height: 20),
-            _addMapBar(),
-            const SizedBox(height: 20),
-            _showSighting(),
+            _tourTab(context),
+            _sightingsTab(context),
           ],
         ),
       ),
     );
   }
+}
+
+class _TurtleChoice {
+  final String scientific;
+  final String common;
+  final String payload;
+  const _TurtleChoice(this.scientific, this.common, this.payload);
 }

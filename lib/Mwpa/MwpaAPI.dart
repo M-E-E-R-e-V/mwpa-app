@@ -97,13 +97,13 @@ class MwpaApi {
     try {
       if (Platform.isAndroid) {
         var build = await deviceInfoPlugin.androidInfo;
-        deviceName = build.model;
+        deviceName = build.model ?? '';
         deviceVersion = build.version.toString();
-        identifier = build.id;  //UUID for Android
+        identifier = build.id ?? '';  //UUID for Android
       } else if (Platform.isIOS) {
         var data = await deviceInfoPlugin.iosInfo;
-        deviceName = data.name;
-        deviceVersion = data.systemVersion;
+        deviceName = data.name ?? '';
+        deviceVersion = data.systemVersion ?? '';
 
         if (data.identifierForVendor != null) {
           identifier = data.identifierForVendor!; //UUID for iOS

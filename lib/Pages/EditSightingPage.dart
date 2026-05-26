@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:mwpaapp/Components/DefaultButton.dart';
-import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Components/DynInput.dart';
 import 'package:mwpaapp/Controllers/BeaufortController.dart';
 import 'package:mwpaapp/Controllers/BehaviouralStateController.dart';
@@ -139,34 +138,32 @@ class _EditSightingPageState extends State<EditSightingPage> {
   /// _appBar
   _appBar(BuildContext context) {
     return AppBar(
-      backgroundColor: kPrimaryHeaderColor,
-      leading: DefaultButton(
-        buttonIcon: Icons.arrow_back,
-        height: 40,
-        onTab: () async {
+      title: Text(title.isEmpty ? 'Sighting' : title),
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back),
+        onPressed: () async {
           ConfirmDialog.show(
-              context,
-              "Sighting close",
-              "Close sighting without saving? All changes will be lost!",
-                  (value) {
-                if (value != null) {
-                  if (value == 'ok') {
-                    Get.back();
-                  }
-                }
-              });
-          //await Navigator.pushNamed(context, '/List');
+            context,
+            'Sighting close',
+            'Close sighting without saving? All changes will be lost!',
+            (value) {
+              if (value == 'ok') {
+                Get.back();
+              }
+            },
+          );
         },
       ),
       actions: [
-        DefaultButton(
+        Padding(
+          padding: const EdgeInsets.only(right: 8),
+          child: DefaultButton(
             buttonIcon: Icons.save_alt,
             height: 40,
-            label: "Save Sighting",
-            onTab: () {
-              _saveSightingToDb();
-            }
-        )
+            label: 'Save',
+            onTab: _saveSightingToDb,
+          ),
+        ),
       ],
     );
   }
@@ -725,93 +722,67 @@ class _EditSightingPageState extends State<EditSightingPage> {
           dynValue: sightImageValue,
         );
 
-         return WillPopScope(
-           onWillPop: () async => false,
+         return PopScope(
+           canPop: false,
            child: Scaffold(
              appBar: _appBar(context),
-             body: Container(
-               padding: const EdgeInsets.only(left: 20, right: 20, top: 15),
-               child: SingleChildScrollView(
-                 child: Column(
-                     crossAxisAlignment: CrossAxisAlignment.start,
+             body: SingleChildScrollView(
+               padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+               child: Column(
+                 crossAxisAlignment: CrossAxisAlignment.stretch,
+                 children: [
+                   sightVehicle,
+                   sightVehicleDriver,
+                   sightBeaufort,
+                   sightDate,
+                   Row(
                      children: [
-                       Text(
-                         title,
-                         style: headingStyle,
-                       ),
-                       sightVehicle,
-                       sightVehicleDriver,
-                       sightBeaufort,
-                       sightDate,
-                       Row(
-                         children: [
-                           Expanded(
-                               child: sightTourStart
-                           ),
-                           const SizedBox(width: 12),
-                           Expanded(
-                               child: sightTourEnd
-                           )
-                         ],
-                       ),
-                       Row(
-                         children: [
-                           Expanded(
-                               child: sightDurationFrom
-                           ),
-                           const SizedBox(width: 12),
-                           Expanded(
-                               child: sightDurationUntil
-                           )
-                         ],
-                       ),
-                       sightLocationBegin,
-                       sightLocationEnd,
-                       sightDistanceCoast,
-                       Row(
-                         children: [
-                           Expanded(
-                               child: sightPhotoTaken
-                           ),
-                           const SizedBox(width: 12),
-                           Expanded(
-                               child: sightDistanceCoastEstimationGps
-                           )
-                         ],
-                       ),
-                       sightSpecies,
-                       sightSpeciesNum,
-                       sightJuveniles,
-                       sightCalves,
-                       sightNewborns,
-                       sightBehaviour,
-                       sightSubgroups,
-                       sightGroupStructure,
-                       sightReaction,
-                       sightFreqBehaviour,
-                       sightRecAnimals,
-                       sightOtherSpecies,
-                       sightOther,
-                       sightOtherVehicle,
-                       sightNote,
-                       sightImage,
-                       const SizedBox(height: 30),
-                       Row(
-                         mainAxisAlignment: MainAxisAlignment.center,
-                         children: [
-                           Container(),
-                           DefaultButton(
-                             buttonIcon: Icons.save_alt,
-                             label: "Save Sighting",
-                             onTab: () {
-                               _saveSightingToDb();
-                             }
-                           ),
-                         ],
-                       ),
-                       const SizedBox(height: 30),
-                     ]
-                 ),
+                       Expanded(child: sightTourStart),
+                       const SizedBox(width: 12),
+                       Expanded(child: sightTourEnd),
+                     ],
+                   ),
+                   Row(
+                     children: [
+                       Expanded(child: sightDurationFrom),
+                       const SizedBox(width: 12),
+                       Expanded(child: sightDurationUntil),
+                     ],
+                   ),
+                   sightLocationBegin,
+                   sightLocationEnd,
+                   sightDistanceCoast,
+                   Row(
+                     children: [
+                       Expanded(child: sightPhotoTaken),
+                       const SizedBox(width: 12),
+                       Expanded(child: sightDistanceCoastEstimationGps),
+                     ],
+                   ),
+                   sightSpecies,
+                   sightSpeciesNum,
+                   sightJuveniles,
+                   sightCalves,
+                   sightNewborns,
+                   sightBehaviour,
+                   sightSubgroups,
+                   sightGroupStructure,
+                   sightReaction,
+                   sightFreqBehaviour,
+                   sightRecAnimals,
+                   sightOtherSpecies,
+                   sightOther,
+                   sightOtherVehicle,
+                   sightNote,
+                   sightImage,
+                   const SizedBox(height: 24),
+                   FilledButton.icon(
+                     onPressed: _saveSightingToDb,
+                     icon: const Icon(Icons.save_alt),
+                     label: const Text('Save Sighting'),
+                   ),
+                   const SizedBox(height: 24),
+                 ],
                ),
              ),
            ),

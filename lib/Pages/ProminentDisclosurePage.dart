@@ -3,7 +3,6 @@ import 'package:app_settings/app_settings.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Controllers/LocationController.dart';
 import 'package:mwpaapp/Controllers/PrefController.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
@@ -14,13 +13,12 @@ class ProminentDisclosurePage extends StatefulWidget {
   const ProminentDisclosurePage({super.key});
 
   @override
-  State<ProminentDisclosurePage> createState() => _ProminentDisclosurePageState();
+  State<ProminentDisclosurePage> createState() =>
+      _ProminentDisclosurePageState();
 }
 
 /// _ProminentDisclosurePageState
 class _ProminentDisclosurePageState extends State<ProminentDisclosurePage> {
-
-  /// initState
   @override
   void initState() {
     super.initState();
@@ -34,7 +32,8 @@ class _ProminentDisclosurePageState extends State<ProminentDisclosurePage> {
     var isAccept = false;
 
     if (prefs.containsKey(Preference.PROMINENT_DISCLOSURE_CONFIRMED)) {
-      isAccept = prefs.getBool(Preference.PROMINENT_DISCLOSURE_CONFIRMED) ?? false;
+      isAccept =
+          prefs.getBool(Preference.PROMINENT_DISCLOSURE_CONFIRMED) ?? false;
     }
 
     if (isAccept) {
@@ -43,68 +42,50 @@ class _ProminentDisclosurePageState extends State<ProminentDisclosurePage> {
       if (await locationController.initLocation()) {
         Get.toNamed('/Login');
       } else {
+        if (!mounted) return;
         showDialog<void>(
-            context: context,
-            barrierDismissible: false, // user must tap button!
-            builder: (BuildContext context) {
-              double cWidth = MediaQuery.of(context).size.width*0.6;
-
-              return Dialog(
-                  child: SizedBox(
-                    height: 300,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                            "No access to location determination!"
-                        ),
-                        const SizedBox(height: 15),
-                        Container(
-                          padding: const EdgeInsets.all(16.0),
-                          width: cWidth,
-                          child: const Text(
-                            'Please go to the system settings and allow the app access to the location:',
-                          ),
-                        ),
-                        ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: kPrimaryHeaderColor
-                            ),
-                            onPressed: () => AppSettings.openAppSettings(type: AppSettingsType.location),
-                            child: const Text("Open location settings")
-                        ),
-                        ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                                backgroundColor: kPrimaryHeaderColor
-                            ),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                              Get.toNamed('/ProminentDisclosure');
-                            },
-                            child: const Text("Back")
-                        )
-                      ]
-                    )
-                  )
-              );
-            }
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              icon: const Icon(Icons.location_off_outlined, size: 32),
+              title: const Text('Location permission required'),
+              content: const Text(
+                'Please go to the system settings and allow the app access to the location.',
+              ),
+              actionsAlignment: MainAxisAlignment.spaceBetween,
+              actions: [
+                OutlinedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    Get.toNamed('/ProminentDisclosure');
+                  },
+                  child: const Text('Back'),
+                ),
+                FilledButton.icon(
+                  onPressed: () => AppSettings.openAppSettings(
+                    type: AppSettingsType.location,
+                  ),
+                  icon: const Icon(Icons.settings),
+                  label: const Text('Open settings'),
+                ),
+              ],
+            );
+          },
         );
       }
     }
-
-    return;
   }
 
   /// acceptDisclosure
-  Future acceptDisclosure() async {
+  Future<void> acceptDisclosure() async {
     PrefController prefController = Get.find<PrefController>();
     await prefController.saveProminentDisclosureConfirmed(true);
-
     _isAccept();
   }
 
   /// rejectDisclosure
-  Future rejectDisclosure() async {
+  Future<void> rejectDisclosure() async {
     if (Platform.isAndroid) {
       SystemNavigator.pop();
     } else if (Platform.isIOS) {
@@ -112,147 +93,119 @@ class _ProminentDisclosurePageState extends State<ProminentDisclosurePage> {
     }
   }
 
-  /// build
   @override
   Widget build(BuildContext context) {
-    double cWidth = MediaQuery.of(context).size.width*0.8;
+    final theme = Theme.of(context);
 
     PrefController prefController = Get.find<PrefController>();
     prefController.saveProminentDisclosureConfirmed(false);
 
     return Scaffold(
-      backgroundColor: Get.isDarkMode ? kPrimaryDarkBackgroundColor : kPrimaryBackgroundColor,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(
-                  height: 120,
-                  child: Image.asset(
-                    'assets/images/logo.png',
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 520),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(
+                    height: 120,
+                    child: Image.asset('assets/images/logo.png'),
                   ),
-                ),
-
-                const SizedBox(height: 40),
-
-                // Title
-                Text(
-                  'MWPA Disclosure',
-                  style: headingStyle,
-                ),
-
-                const SizedBox(height: 10),
-
-                Text(
-                  'Mammal watching. Processing. Analysing.',
-                  style: titleStyle,
-                ),
-
-                const SizedBox(height: 20),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(16.0),
-                      width: cWidth,
-                      child: const Text(
-                          'The MWPA app collects location data to auto-fill sighting data and track routes for movement activated even if the app is closed or not in use.',
-                        )
+                  const SizedBox(height: 32),
+                  Text(
+                    'MWPA Disclosure',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
                     ),
-                  ]
-                ),
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                          padding: const EdgeInsets.all(16.0),
-                          width: cWidth,
-                          child: const Text(
-                            'The app can only be used with position/location determination, otherwise the recorded data is useless. The data is only sent to the portal that is entered during login. For further questions you can contact or view the source code:',
-                          )
-                      ),
-                    ]
-                ),
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('https://github.com/M-E-E-R-e-V/mwpa-app'),
-                  ],
-                ),
-
-                const SizedBox(height: 30),
-
-                Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                    child: GestureDetector(
-                      onTap: acceptDisclosure,
-                      child: Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: kPrimaryHeaderColor,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Center(
-                          child: Text(
-                            'Ok, sure and save',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Mammal watching. Processing. Analysing.',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.my_location_outlined,
+                                color: theme.colorScheme.primary,
+                              ),
+                              const SizedBox(width: 10),
+                              Text(
+                                'How we use your location',
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'The MWPA app collects location data to auto-fill '
+                            'sighting data and track routes for movement '
+                            'activated even if the app is closed or not in use.',
+                            style: theme.textTheme.bodyMedium,
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'The app can only be used with position/location '
+                            'determination, otherwise the recorded data is '
+                            'useless. The data is only sent to the portal that '
+                            'is entered during login. For further questions you '
+                            'can contact or view the source code:',
+                            style: theme.textTheme.bodyMedium,
+                          ),
+                          const SizedBox(height: 12),
+                          SelectableText(
+                            'https://github.com/M-E-E-R-e-V/mwpa-app',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.primary,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                        ),
+                        ],
                       ),
-                    )
-                ),
-
-
-                const SizedBox(height: 30),
-
-                Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                    child: GestureDetector(
-                      onTap: rejectDisclosure,
-                      child: Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: kPrimaryBackgroundColor,
-                          border: Border.all(
-                            color: kPrimaryHeaderColor
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Center(
-                          child: Text(
-                            'No, thanks and close',
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18
-                            ),
-                          ),
-                        ),
-                      ),
-                    )
-                ),
-
-                const SizedBox(height: 20),
-
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('A project of the M.E.E.R. e.V. association.'),
-                  ],
-                )
-              ]
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  FilledButton.icon(
+                    onPressed: acceptDisclosure,
+                    icon: const Icon(Icons.check_circle_outline),
+                    label: const Text('Ok, sure and save'),
+                  ),
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    onPressed: rejectDisclosure,
+                    icon: const Icon(Icons.close),
+                    label: const Text('No, thanks and close'),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    'A project of the M.E.E.R. e.V. association.',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          )
-        )
+          ),
+        ),
       ),
     );
   }
-
 }

@@ -6,13 +6,32 @@ allprojects {
 }
 
 ext {
-    kotlin_version = '1.8.0'
+    kotlin_version = '1.9.22'
 }
 
 rootProject.buildDir = '../build'
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
 }
+
+// AGP 8 requires every Android subproject to declare a `namespace`. Many older
+// Flutter plugins (device_info_plus<10, connectivity, …) still ship without
+// one, which makes the build abort at configure time. Inject the plugin's
+// Gradle `group` as a fallback so legacy plugins keep compiling until they
+// publish a namespace-aware version. Registered before evaluationDependsOn so
+// afterEvaluate fires for every subproject.
+subprojects {
+    afterEvaluate { project ->
+        if (project.hasProperty('android')) {
+            project.android {
+                if (namespace == null) {
+                    namespace project.group
+                }
+            }
+        }
+    }
+}
+
 subprojects {
     project.evaluationDependsOn(':app')
 }
