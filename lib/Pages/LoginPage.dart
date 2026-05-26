@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -5,6 +7,7 @@ import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Controllers/PrefController.dart';
 import 'package:mwpaapp/Dialog/InfoDialog.dart';
 import 'package:mwpaapp/Mwpa/Models/Info.dart';
+import 'package:mwpaapp/Pages/QuickConnectScanPage.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -70,6 +73,103 @@ class _LoginPageState extends State<LoginPage> {
           InfoDialog.show(context, 'Internal Error', error.toString());
         });
       }
+    }
+  }
+
+  /// quickConnect
+  /// Open the QR scanner, parse the payload the web portal generated, exchange
+  /// the embedded OTP for a mobile session, and persist enough preferences for
+  /// the rest of the app to work.
+  ///
+  /// We deliberately do NOT store the user's password — Quick Connect never
+  /// learns it. SyncMwpaService falls back to the login page when PASSWORD is
+  /// missing, so background sync will be inactive until the user signs in once
+  /// with email/password (acceptable for the MVP).
+  Future<void> quickConnect() async {
+    try {
+      final scanned = await Navigator.of(context).push<String>(
+        MaterialPageRoute(builder: (_) => const QuickConnectScanPage()),
+      );
+
+      if (scanned == null || scanned.isEmpty) {
+        return;
+      }
+
+      Map<String, dynamic> payload;
+      try {
+        payload = jsonDecode(scanned) as Map<String, dynamic>;
+      } catch (_) {
+        throw MwpaException('QR code is not a valid Quick Connect payload.');
+      }
+
+      final version = payload['version'];
+      final server = payload['server'] as String?;
+      final username = payload['username'] as String?;
+      final otp = payload['otp'] as String?;
+
+      if (version != 1) {
+        throw MwpaException('Unsupported Quick Connect version. Please update the app.');
+      }
+
+      if (server == null || server.isEmpty || otp == null || otp.isEmpty || username == null) {
+        throw MwpaException('Quick Connect payload is incomplete.');
+      }
+
+      var api = MwpaApi(server);
+
+      Info apiInfo = await api.getInfo();
+
+      if (apiInfo.version_api_login != versionApiMobileLogin) {
+        throw Exception('The API for login has changed, please update your app, the data will not be lost.');
+      }
+
+      if (await api.quickConnect(otp)) {
+        await _persistQuickConnect(api, server, username);
+      }
+    } catch (error) {
+      if (kDebugMode) {
+        print(error);
+      }
+
+      if (error is MwpaException) {
+        setState(() {
+          InfoDialog.show(context, 'Error', error.toString());
+        });
+      } else {
+        setState(() {
+          InfoDialog.show(context, 'Internal Error', error.toString());
+        });
+      }
+    }
+  }
+
+  /// Persist URL + username + ids for a Quick Connect session. Mirrors
+  /// _loadUser but skips the password — Quick Connect never receives it.
+  Future<void> _persistQuickConnect(MwpaApi api, String url, String username) async {
+    if (await api.isLogin()) {
+      final prefs = await SharedPreferences.getInstance();
+
+      var userInfo = await api.getUserInfo();
+
+      if (userInfo.user != null && userInfo.organization != null) {
+        await prefs.setString(Preference.URL, url);
+        await prefs.setString(Preference.USERNAME, username);
+        // Wipe any stale password so SyncMwpaService doesn't reuse a previous
+        // user's credentials against this session.
+        await prefs.remove(Preference.PASSWORD);
+        await prefs.setInt(Preference.USERID, userInfo.user!.id);
+        await prefs.setInt(Preference.ORGID, userInfo.organization!.id);
+
+        Get.toNamed('/List');
+      } else {
+        if (userInfo.organization == null) {
+          throw Exception('Please update the user, all user need a organization.');
+        }
+
+        throw Exception('No user information response from server!');
+      }
+    } else {
+      throw Exception('User session is not started!');
     }
   }
 
@@ -277,6 +377,40 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                   )
+                ),
+
+                const SizedBox(height: 10),
+
+                // quick-connect button -------------------------------------------------
+
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                  child: GestureDetector(
+                    onTap: quickConnect,
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(color: kPrimaryColor),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.qr_code_scanner, color: kPrimaryColor),
+                          SizedBox(width: 10),
+                          Text(
+                            'Quick Connect',
+                            style: TextStyle(
+                              color: kPrimaryColor,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
 
                 const SizedBox(height: 25),

@@ -41,6 +41,7 @@ class MwpaApi {
   static const URL_INFO = 'mobile/info';
   static const URL_ISLOGIN = 'mobile/islogin';
   static const URL_LOGIN = 'mobile/login';
+  static const URL_QUICKCONNECT = 'mobile/quickconnect';
   static const URL_USERINFO = 'mobile/user/info';
   static const URL_VEHICLE = 'mobile/vehicle/list';
   static const URL_VEHICLE_DRIVER = 'mobile/vehicledriver/list';
@@ -161,6 +162,56 @@ class MwpaApi {
       var postBody = jsonEncode(<String, String>{
         'email': email,
         'password': password,
+        'deviceIdentity': deviceDetails[2],
+        'deviceDescription': "${deviceDetails[0]} - ${deviceDetails[1]}"
+      });
+
+      var response = await http.post(
+        Uri.parse(url),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: postBody,
+      );
+
+      var objResponse = LoginResponse.fromJson(jsonDecode(response.body));
+
+      if (objResponse.success) {
+        if (response.headers.containsKey('set-cookie')) {
+          _cookie = response.headers['set-cookie']!;
+        }
+
+        return true;
+      } else {
+        if (objResponse.error != null) {
+          throw MwpaException(objResponse.error!);
+        }
+
+        throw MwpaException('Response success false');
+      }
+    }
+    on MwpaException {
+      rethrow;
+    } catch(error) {
+      if (kDebugMode) {
+        print(error);
+      }
+
+      throw Exception('Connection error');
+    }
+  }
+
+  /// quickConnect
+  /// Exchange a single-use Quick Connect OTP (scanned from the web QR) for a
+  /// mobile session. The backend resolves the user from the OTP itself, so we
+  /// only send {otp, deviceIdentity, deviceDescription} — no email/password.
+  Future<bool> quickConnect(String otp) async {
+    try {
+      var deviceDetails = await _getDeviceDetails();
+
+      var url = getUrl(MwpaApi.URL_QUICKCONNECT);
+      var postBody = jsonEncode(<String, String>{
+        'otp': otp,
         'deviceIdentity': deviceDetails[2],
         'deviceDescription': "${deviceDetails[0]} - ${deviceDetails[1]}"
       });
