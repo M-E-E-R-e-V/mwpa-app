@@ -9,6 +9,11 @@ import 'package:mwpaapp/Ui/Fonts.dart';
 const Set<String> versionApiMobileLogin = {'1.0.1'};
 const Set<String> versionApiMobileSync = {'1.0.2', '1.0.3'};
 
+// App version, shown on the About page. Must match `version:` in
+// pubspec.yaml (checked by test/app_version_test.dart) - no plugin needed.
+const String kAppVersion = '1.1.0';
+const int kAppBuild = 14;
+
 /// isDarkMode - true when the active theme of [context] is dark
 bool isDarkMode(BuildContext context) {
   return Theme.of(context).brightness == Brightness.dark;

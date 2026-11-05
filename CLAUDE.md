@@ -21,6 +21,8 @@ dart run flutter_launcher_icons                   # regenerate launcher icons (a
 dart run flutter_native_splash:create             # regenerate the native launch screen (Android 12+, older Android, iOS)
 ```
 
+When bumping `version:` in `pubspec.yaml`, also update `kAppVersion`/`kAppBuild` in `lib/Constants.dart` (shown on the About page; `test/app_version_test.dart` fails if they differ). Bundled font licenses are registered for the license page in `main.dart` (`_registerFontLicenses`).
+
 CI (`.github/workflows/ci.yml`) runs `flutter analyze`, `flutter test` and a debug APK build on pushes to `main` and on pull requests; keep the pinned `flutter-version` there in step with the local Flutter.
 
 The `flutter_launcher_icons` run is also configured as an External Tool in Android Studio (see README). Re-run it after changing the `flutter_launcher_icons:` section in `pubspec.yaml`; likewise `flutter_native_splash` after changing its section. The artwork (white/blue whale tail on transparent) lives in `assets/splash/` and was derived from `assets/images/logo_512.png`. The app's first route is decided in `MWPAApp.initialRoute` from the preloaded `PrefController` (disclosure → list/login). The app display name and id are set directly in `android/app/src/main/AndroidManifest.xml` (`android:label`) and `android/app/build.gradle` (`applicationId`).
@@ -53,7 +55,7 @@ The app uses the `provider` package (GetX was removed — do not reintroduce it)
 - All controllers are registered once in `main()` via `MultiProvider`. `PrefController` and `ThemeController` are loaded before `runApp`; the others are created lazily on first `context.read`. `LocationController` gets `PrefController`/`SightingController` via its constructor and only starts tracking when the prominent disclosure is confirmed (`initIfConfirmed`). A watchdog timer (15 s) restarts the position stream after an error (e.g. location switched off) without re-requesting permission; `gpsStatus` (off/searching/ok) drives `GpsStatusIcon`/`GpsOffBanner` on the main screen. The foreground-service notification uses the drawable `ic_stat_tracking` (kept from resource shrinking by `res/raw/keep.xml`). On Android 13+ the notification needs `POST_NOTIFICATIONS`; `initLocation()` asks for it via `UtilNotificationPermission` (own MethodChannel `mwpa/notification_permission` in `MainActivity.kt`, no plugin) — tracking also runs if it is denied.
 - In widgets: `context.read<T>()` for one-off access (State fields use `late final _x = context.read<T>()`), `ListenableBuilder` / `Consumer<T>` / `context.watch<T>()` to rebuild on changes.
 - Non-widget code (models, utils, services) must not look controllers up — pass what it needs as parameters (e.g. `Sighting.toJson(..., speciesById:)`, `SyncMwpaService(speciesController)`, `UtilSighting.setCurrentEndTour(sightingController, ...)`).
-- Routing uses plain `MaterialApp(routes:)` registered in `lib/main.dart` (`/Login`, `/List`, `/Edit`, `/setTour`, `/ProminentDisclosure`). Navigate with `Navigator.of(context).pushNamed(...)`; after an `await`, check `mounted` first.
+- Routing uses plain `MaterialApp(routes:)` registered in `lib/main.dart` (`/Login`, `/List`, `/Edit`, `/setTour`, `/ProminentDisclosure`, `/About`). Navigate with `Navigator.of(context).pushNamed(...)`; after an `await`, check `mounted` first.
 - Dark mode: `ThemeController` (persisted under `Preference.DARK_MODE`); for colors use `isDarkMode(context)` from `Constants.dart`.
 
 ### Preferences vs. DB

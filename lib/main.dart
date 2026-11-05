@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mwpaapp/Controllers/BehaviouralStateController.dart';
 import 'package:mwpaapp/Controllers/EncounterCategoriesController.dart';
 import 'package:mwpaapp/Controllers/LocationController.dart';
@@ -12,6 +13,7 @@ import 'package:mwpaapp/Controllers/ThemeController.dart';
 import 'package:mwpaapp/Controllers/VehicleController.dart';
 import 'package:mwpaapp/Controllers/VehicleDriverController.dart';
 import 'package:mwpaapp/Db/DBHelper.dart';
+import 'package:mwpaapp/Pages/AboutPage.dart';
 import 'package:mwpaapp/Pages/EditSightingPage.dart';
 import 'package:mwpaapp/Pages/EditTourPage.dart';
 import 'package:mwpaapp/Pages/ListPage.dart';
@@ -19,6 +21,21 @@ import 'package:mwpaapp/Pages/LoginPage.dart';
 import 'package:mwpaapp/Pages/ProminentDisclosurePage.dart';
 import 'package:mwpaapp/Ui/Themes.dart';
 import 'package:provider/provider.dart';
+
+/// _registerFontLicenses - the bundled fonts on the license page (packages
+/// register their licenses themselves)
+void _registerFontLicenses() {
+  LicenseRegistry.addLicense(() async* {
+    yield LicenseEntryWithLineBreaks(
+      ['Lato font'],
+      await rootBundle.loadString('assets/fonts/OFL.txt'),
+    );
+    yield LicenseEntryWithLineBreaks(
+      ['Material Design Icons'],
+      await rootBundle.loadString('assets/fonts/MaterialDesignIcons-LICENSE.txt'),
+    );
+  });
+}
 
 /// main
 void main() async {
@@ -32,6 +49,8 @@ void main() async {
   }
 
   await DBHelper.initDb();
+
+  _registerFontLicenses();
 
   // Preferences are loaded before the first frame, so every page sees the
   // login state, the disclosure flag and the active tour from the start.
@@ -103,6 +122,7 @@ class MWPAApp extends StatelessWidget {
       initialRoute: initialRoute(context.read<PrefController>()),
       routes: {
         '/ProminentDisclosure': (_) => const ProminentDisclosurePage(),
+        '/About': (_) => const AboutPage(),
         '/Login': (_) => const LoginPage(),
         '/List': (_) => const ListPage(),
         '/Edit': (_) => const EditSightingPage(),

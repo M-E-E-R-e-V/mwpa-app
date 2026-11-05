@@ -69,6 +69,8 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
+    - assets/fonts/OFL.txt
+    - assets/fonts/MaterialDesignIcons-LICENSE.txt
 
   fonts:
     - family: Lato

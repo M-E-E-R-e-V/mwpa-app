@@ -240,6 +240,14 @@ class _ListPageState extends State<ListPage>
                 title: Text('Sync with Server'),
               ),
             ),
+            PopupMenuItem(
+              value: 'about',
+              child: ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(Icons.info_outline),
+                title: Text('About'),
+              ),
+            ),
             PopupMenuDivider(),
             PopupMenuItem(
               value: 'logout',
@@ -259,6 +267,9 @@ class _ListPageState extends State<ListPage>
                 break;
               case 'sync':
                 _syncMwpa();
+                break;
+              case 'about':
+                Navigator.of(context).pushNamed('/About');
                 break;
               case 'logout':
                 _logout();
