@@ -11,6 +11,7 @@ import 'package:mwpaapp/Models/TrackingAreaHome.dart';
 import 'package:mwpaapp/Services/EventManagerService.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
 import 'package:mwpaapp/Util/UtilLocation.dart';
+import 'package:mwpaapp/Util/UtilNotificationPermission.dart';
 import 'package:mwpaapp/Util/UtilSighting.dart';
 import 'package:mwpaapp/Util/UtilTourFId.dart';
 import 'package:mwpaapp/Util/UtilTourTracking.dart';
@@ -217,6 +218,12 @@ class LocationController extends ChangeNotifier {
 
       if (permission == LocationPermission.deniedForever) {
         return false;
+      }
+
+      // Android 13+: allow the tracking notification of the foreground
+      // service; tracking also runs without it
+      if (requestPermission) {
+        await UtilNotificationPermission.request();
       }
 
       final androidSettings = AndroidSettings(
