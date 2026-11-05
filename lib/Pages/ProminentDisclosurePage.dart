@@ -1,7 +1,7 @@
 import 'dart:io' show Platform, exit;
-import 'package:app_settings/app_settings.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:mwpaapp/Controllers/LocationController.dart';
 import 'package:mwpaapp/Controllers/PrefController.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
@@ -65,9 +65,15 @@ class _ProminentDisclosurePageState extends State<ProminentDisclosurePage> {
                   child: const Text('Back'),
                 ),
                 FilledButton.icon(
-                  onPressed: () => AppSettings.openAppSettings(
-                    type: AppSettingsType.location,
-                  ),
+                  // location service off -> system location settings,
+                  // otherwise the app settings with the permission
+                  onPressed: () async {
+                    if (await Geolocator.isLocationServiceEnabled()) {
+                      await Geolocator.openAppSettings();
+                    } else {
+                      await Geolocator.openLocationSettings();
+                    }
+                  },
                   icon: const Icon(Icons.settings),
                   label: const Text('Open settings'),
                 ),
