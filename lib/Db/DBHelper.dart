@@ -12,7 +12,7 @@ import 'package:sqflite/sqflite.dart';
 /// DBHelper
 class DBHelper {
   static Database? _db;
-  static const int _version = 12;
+  static const int _version = 13;
   static const String _tableNameSighting = "sighting";
   static const String _tableNameTourTracking = "tour_tracking";
   static const String _tableNameVehicle = "vehicle";
@@ -72,6 +72,10 @@ class DBHelper {
               _updateTableTourTrackingV11toV12(batch);
             }
 
+            if (oldVersion <= 12) {
+              _updateTableTourTrackingV12toV13(batch);
+            }
+
             await batch.commit();
           },
           onCreate: (db, version) {
@@ -123,7 +127,8 @@ class DBHelper {
                   "uuid STRING PRIMARY KEY,"
                   "tour_fid STRING,"
                   "location STRING,"
-                  "date STRING"
+                  "date STRING,"
+                  "synced INTEGER NOT NULL DEFAULT 0"
               ")"
             );
 
@@ -245,6 +250,13 @@ class DBHelper {
   static void _updateTableTourTrackingV11toV12(Batch batch) {
     batch.execute(_createIndexTourTrackingTourDate);
   }
+  /// _updateTableTourTrackingV12toV13 - upload flag per tracking point, so
+  /// a sync only sends points the server has not received yet
+  static void _updateTableTourTrackingV12toV13(Batch batch) {
+    batch.execute(
+        'ALTER TABLE $_tableNameTourTracking ADD COLUMN synced INTEGER NOT NULL DEFAULT 0');
+  }
+
 
   /// insertSighting
   static Future<int> insertSighting(Sighting newSighting) async {
@@ -557,6 +569,53 @@ class DBHelper {
       whereArgs: [tourFId],
       limit: limit,
       offset: offset
+    );
+  }
+
+  /// queryUnsyncedTourTracking - oldest [limit] points of the tour that
+  /// were not uploaded yet
+  static Future<List<Map<String, dynamic>>> queryUnsyncedTourTracking(String tourFId, int limit) async {
+    return await _db!.query(
+      _tableNameTourTracking,
+      where: "tour_fid = ? AND synced = 0",
+      whereArgs: [tourFId],
+      orderBy: "date",
+      limit: limit
+    );
+  }
+
+  /// countUnsyncedTourTracking
+  static Future<int> countUnsyncedTourTracking(String tourFId) async {
+    return Sqflite.firstIntValue(await _db!.query(
+        _tableNameTourTracking,
+        columns: ['COUNT(*)'],
+        where: "tour_fid = ? AND synced = 0",
+        whereArgs: [tourFId]
+    )) ?? 0;
+  }
+
+  /// markTourTrackingSynced - flags the points [uuids] as uploaded
+  static Future<int> markTourTrackingSynced(List<String> uuids) async {
+    if (uuids.isEmpty) {
+      return 0;
+    }
+
+    return await _db!.update(
+      _tableNameTourTracking,
+      {'synced': 1},
+      where: "uuid IN (${List.filled(uuids.length, '?').join(',')})",
+      whereArgs: uuids
+    );
+  }
+
+  /// setTourTrackingSynced - flags all points of a tour as uploaded
+  /// ([synced] true) or as still to upload (false)
+  static Future<int> setTourTrackingSynced(String tourFId, bool synced) async {
+    return await _db!.update(
+      _tableNameTourTracking,
+      {'synced': synced ? 1 : 0},
+      where: "tour_fid = ?",
+      whereArgs: [tourFId]
     );
   }
 

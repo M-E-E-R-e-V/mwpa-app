@@ -25,6 +25,59 @@ import '../Mwpa/MwpaAPI.dart';
 /// SyncMwpaService
 class SyncMwpaService {
 
+  /// points per upload request
+  static const int trackingBatchSize = 100;
+
+  /// uploadTourTracking - uploads the tracking points of [tourFId] that were
+  /// not sent yet (synced = 0) in batches through [save] and flags each
+  /// uploaded batch; returns the number of points sent.
+  ///
+  /// Called when the server reports the tour as incomplete. If every local
+  /// point is already flagged, the server lost points we sent before (e.g.
+  /// restored database) - then the whole tour is sent again; the server
+  /// skips points it already has (by uuid).
+  ///
+  /// A batch the server does not accept stays unflagged and the upload stops;
+  /// it is retried with the next sync.
+  static Future<int> uploadTourTracking(
+    String tourFId,
+    Future<bool> Function(List<TourTracking> tracks) save, {
+    Future<void> Function(int sent, int total)? progress,
+  }) async {
+    if (await DBHelper.countUnsyncedTourTracking(tourFId) == 0) {
+      await DBHelper.setTourTrackingSynced(tourFId, false);
+    }
+
+    final total = await DBHelper.countUnsyncedTourTracking(tourFId);
+    var sent = 0;
+
+    while (sent < total) {
+      await progress?.call(sent, total);
+
+      final rows = await DBHelper.queryUnsyncedTourTracking(tourFId, trackingBatchSize);
+
+      if (rows.isEmpty) {
+        break;
+      }
+
+      final tracks = rows.map((data) => TourTracking.fromJson(data)).toList();
+
+      if (!await save(tracks)) {
+        if (kDebugMode) {
+          print('SyncMwpaService::uploadTourTracking: batch not accepted for $tourFId, retry with next sync');
+        }
+
+        break;
+      }
+
+      await DBHelper.markTourTrackingSynced(rows.map((r) => r['uuid'] as String).toList());
+      sent += rows.length;
+    }
+
+    return sent;
+  }
+
+
   /// species lookup for translating local species ids (other_species)
   final SpeciesController speciesController;
 
@@ -32,6 +85,18 @@ class SyncMwpaService {
 
   /// sync
   Future<void> sync(Function(int, String)? update) async {
+    MwpaApi? opened;
+
+    try {
+      await _sync(update, (api) => opened = api);
+    } finally {
+      // release the kept-alive connection to the server
+      opened?.close();
+    }
+  }
+
+  /// _sync - the sync steps; [onApi] receives the API client once created
+  Future<void> _sync(Function(int, String)? update, void Function(MwpaApi api) onApi) async {
     MwpaApi api;
 
     // load userdata and login
@@ -57,6 +122,7 @@ class SyncMwpaService {
       String password = prefs.getString(Preference.PASSWORD)!;
 
       api = MwpaApi(url);
+      onApi(api);
 
       Info apiInfo = await api.getInfo();
 
@@ -441,25 +507,21 @@ class SyncMwpaService {
           var isComplete = checkResponse.isComplete ?? false;
 
           if (! isComplete) {
-            var limitSteps = 100;
-            var offset = 0;
-
-            while (offset<trackingCount) {
-              if (update != null) {
-                await update(90, 'sightings tracking sync $offset/$trackingCount');
-              }
-
-              List<Map<String, dynamic>> tracks = await DBHelper.queryTourTracking(tourFId, offset, limitSteps);
-              List<TourTracking> trackList = tracks.map((data) => TourTracking.fromJson(data)).toList();
-
-              await api.saveSightingTourTracking(trackList);
-
-              offset += limitSteps;
-            }
+            await uploadTourTracking(
+              tourFId,
+              api.saveSightingTourTracking,
+              progress: (sent, total) async {
+                if (update != null) {
+                  await update(90, 'sightings tracking sync $sent/$total');
+                }
+              },
+            );
           } else {
             if (kDebugMode) {
               print('SyncMwpaService::sync:tracking: SightingTourTrackingCheck isComplete: $isComplete');
             }
+
+            await DBHelper.setTourTrackingSynced(tourFId, true);
 
             // Delete the local copy once the server has all points and either
             // allows it (canDelete) or the tour is older than the local

@@ -59,9 +59,19 @@ class MwpaApi {
   String _cookie = "";
   bool _isLogin = false;
 
-  /// MwpaApi
-  MwpaApi(String url) {
+  /// one client per API instance: keeps the connection (and TLS session) to
+  /// the server open across the many requests of a sync instead of a new
+  /// handshake per request
+  final http.Client _client;
+
+  /// MwpaApi - [client] for tests, default a new [http.Client]
+  MwpaApi(String url, {http.Client? client}) : _client = client ?? http.Client() {
     _url = url;
+  }
+
+  /// close - releases the connection; the instance can't be used afterwards
+  void close() {
+    _client.close();
   }
 
   /// getUrl
@@ -72,7 +82,7 @@ class MwpaApi {
   /// isLogin
   Future<bool> isLogin() async {
     var url = getUrl(MwpaApi.URL_ISLOGIN);
-    var response = await http.get(
+    var response = await _client.get(
       Uri.parse(url),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
@@ -123,7 +133,7 @@ class MwpaApi {
     try {
       var url = getUrl(MwpaApi.URL_INFO);
 
-      var response = await http.get(
+      var response = await _client.get(
         Uri.parse(url),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
@@ -166,7 +176,7 @@ class MwpaApi {
         'deviceDescription': "${deviceDetails[0]} - ${deviceDetails[1]}"
       });
 
-      var response = await http.post(
+      var response = await _client.post(
         Uri.parse(url),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
@@ -216,7 +226,7 @@ class MwpaApi {
         'deviceDescription': "${deviceDetails[0]} - ${deviceDetails[1]}"
       });
 
-      var response = await http.post(
+      var response = await _client.post(
         Uri.parse(url),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
@@ -260,7 +270,7 @@ class MwpaApi {
     try {
       var url = getUrl(MwpaApi.URL_USERINFO);
 
-      var response = await http.get(
+      var response = await _client.get(
         Uri.parse(url),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
@@ -300,7 +310,7 @@ class MwpaApi {
     try {
       var url = getUrl(MwpaApi.URL_VEHICLE);
 
-      var response = await http.get(
+      var response = await _client.get(
         Uri.parse(url),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
@@ -340,7 +350,7 @@ class MwpaApi {
     try {
       var url = getUrl(MwpaApi.URL_VEHICLE_DRIVER);
 
-      var response = await http.get(
+      var response = await _client.get(
         Uri.parse(url),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
@@ -380,7 +390,7 @@ class MwpaApi {
     try {
       var url = getUrl(MwpaApi.URL_SPECIES);
 
-      var response = await http.get(
+      var response = await _client.get(
         Uri.parse(url),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
@@ -420,7 +430,7 @@ class MwpaApi {
     try {
       var url = getUrl(MwpaApi.URL_ENC_CATE);
 
-      var response = await http.get(
+      var response = await _client.get(
         Uri.parse(url),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
@@ -460,7 +470,7 @@ class MwpaApi {
     try {
       var url = getUrl(MwpaApi.URL_BEH_STATE);
 
-      var response = await http.get(
+      var response = await _client.get(
         Uri.parse(url),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
@@ -498,7 +508,7 @@ class MwpaApi {
 
       var postBody = jsonEncode(sigh.toJson(false, false, true, speciesById: speciesById));
 
-      var response = await http.post(
+      var response = await _client.post(
         Uri.parse(url),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
@@ -551,7 +561,7 @@ class MwpaApi {
 
           request.files.add(multipartFile);
 
-          http.StreamedResponse response = await request.send();
+          http.StreamedResponse response = await _client.send(request);
 
           final res = await http.Response.fromStream(response);
           var objResponse = DefaultReturn.fromJson(jsonDecode(res.body));
@@ -595,7 +605,7 @@ class MwpaApi {
           var ie = ImageExist(unid: unid, filename: filename, size: fileSize.toString());
           var postBody = jsonEncode(ie.toJson());
 
-          var response = await http.post(
+          var response = await _client.post(
             Uri.parse(url),
             headers: <String, String>{
               'Content-Type': 'application/json; charset=UTF-8',
@@ -638,7 +648,7 @@ class MwpaApi {
 
       var postBody = jsonEncode(trackCheck.toJson());
 
-      var response = await http.post(
+      var response = await _client.post(
         Uri.parse(url),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
@@ -675,7 +685,7 @@ class MwpaApi {
 
       var postBody = jsonEncode(save.toJson());
 
-      var response = await http.post(
+      var response = await _client.post(
         Uri.parse(url),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
@@ -712,7 +722,7 @@ class MwpaApi {
     try {
       var url = getUrl(MwpaApi.URL_TRACKINGAREA_HOME);
 
-      var response = await http.get(
+      var response = await _client.get(
         Uri.parse(url),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
