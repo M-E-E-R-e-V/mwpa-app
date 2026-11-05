@@ -15,6 +15,8 @@ class AboutPage extends StatefulWidget {
 
   static const String projectUrl = 'https://github.com/M-E-E-R-e-V/mwpa';
   static const String appUrl = 'https://github.com/M-E-E-R-e-V/mwpa-app';
+  static const String developerName = 'Pegenau GmbH & Co. KG';
+  static const String developerUrl = 'https://www.pegenau.de/';
 
   @override
   State<AboutPage> createState() => _AboutPageState();
@@ -145,7 +147,7 @@ class _AboutPageState extends State<AboutPage> {
                     'MWPA collects and analyses data of whale and dolphin '
                     'watching. This app records sightings and tour tracks, '
                     'also offline, and syncs them with an MWPA server. '
-                    'Developed by M.E.E.R. e.V.',
+                    'A project of M.E.E.R. e.V.',
                   ),
                 ),
                 _InfoTile(
@@ -159,6 +161,12 @@ class _AboutPageState extends State<AboutPage> {
                   label: 'App source code',
                   value: AboutPage.appUrl,
                   onTap: () => _copy(AboutPage.appUrl),
+                ),
+                _InfoTile(
+                  icon: Icons.business_outlined,
+                  label: 'Software development',
+                  value: '${AboutPage.developerName}\n${AboutPage.developerUrl}',
+                  onTap: () => _copy(AboutPage.developerUrl),
                 ),
               ],
             ),
