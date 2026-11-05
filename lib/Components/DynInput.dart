@@ -7,10 +7,10 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:mwpaapp/Components/DefaultButton.dart';
+import 'package:mwpaapp/Components/TagInput.dart';
 import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Controllers/LocationController.dart';
 import 'package:mwpaapp/Util/UtilPosition.dart';
-import 'package:textfield_tags/textfield_tags.dart';
 import 'package:provider/provider.dart';
 
 enum DynInputType {
@@ -47,7 +47,7 @@ class DynInputValue {
   List<DynInputValue> multiValue = [];
   String imgPath = "";
 
-  setValue(String newValue) {
+  void setValue(String newValue) {
     strValue = newValue;
   }
 
@@ -223,16 +223,14 @@ class DynInput extends StatefulWidget {
 }
 
 class _DynInputState extends State<DynInput> {
-  double _distanceToField = 0;
   late final LocationController _locationController = context.read<LocationController>();
-  TextfieldTagsController<String>? _tagController;
 
   File? _image;
   ImagePicker? picker;
   String title = "";
   DynInputValue? dynValue;
 
-  _getDateFromUser() async {
+  Future<void> _getDateFromUser() async {
     DateTime? pickDate = await showDatePicker(
       context: widget.context,
       initialDate: DateTime.now(),
@@ -251,7 +249,7 @@ class _DynInputState extends State<DynInput> {
     }
   }
 
-  _getTimeFromUser() async {
+  Future<void> _getTimeFromUser() async {
     var initialTime = TimeOfDay.now();
 
     if (dynValue!.timeValue != null) {
@@ -275,7 +273,7 @@ class _DynInputState extends State<DynInput> {
     }
   }
 
-  _getLocationFromUser() async {
+  Future<void> _getLocationFromUser() async {
     var position = _locationController.currentPosition!;
 
     setState(() {
@@ -287,7 +285,7 @@ class _DynInputState extends State<DynInput> {
     }
   }
 
-  _getImage(ImageSource imageSource) async {
+  Future<void> _getImage(ImageSource imageSource) async {
     XFile? imageFile = await picker!.pickImage(source: imageSource);
     //if user doesn't take any image, just return.
     if (imageFile == null) return;
@@ -303,12 +301,6 @@ class _DynInputState extends State<DynInput> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _distanceToField = MediaQuery.of(context).size.width;
-  }
-
-  @override
   void initState() {
     super.initState();
 
@@ -316,10 +308,6 @@ class _DynInputState extends State<DynInput> {
     dynValue ??= DynInputValue();
 
     switch (widget.inputType) {
-      case DynInputType.tags:
-        _tagController = TextfieldTagsController();
-        break;
-
       case DynInputType.image:
         picker = ImagePicker();
         break;
@@ -583,9 +571,9 @@ class _DynInputState extends State<DynInput> {
         }
 
         inContainer = Container(
-            height: inputHeight,
+            constraints: BoxConstraints(minHeight: inputHeight),
             margin: const EdgeInsets.only(top: 8.0),
-            padding: const EdgeInsets.only(left: 14),
+            padding: const EdgeInsets.symmetric(horizontal: 14),
             decoration: BoxDecoration(
                 border: Border.all(
                     color: kPrimaryColor,
@@ -593,171 +581,16 @@ class _DynInputState extends State<DynInput> {
                 ),
                 borderRadius: BorderRadius.circular(12)
             ),
-            child: Row(
-                children: [
-                Expanded(
-                flex: 3,
-                child: Autocomplete<String>(
-                    optionsViewBuilder: (context, onSelected, options) {
-                      return Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
-                        child: Align(
-                          alignment: Alignment.topCenter,
-                          child: Material(
-                            elevation: 4.0,
-                            child: ConstrainedBox(
-                              constraints: const BoxConstraints(maxHeight: 200),
-                              child: ListView.builder(
-                                shrinkWrap: true,
-                                itemCount: options.length,
-                                itemBuilder: (BuildContext context, int index) {
-                                  final dynamic option = options.elementAt(index);
-                                  return TextButton(
-                                    onPressed: () {
-                                      onSelected(option);
-                                    },
-                                    child: Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 15.0),
-                                        child: Text(
-                                          '#$option',
-                                          textAlign: TextAlign.left,
-                                          style: const TextStyle(
-                                            color: Color.fromARGB(255, 74, 137, 92),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                    optionsBuilder: (TextEditingValue textEditingValue) {
-                      if (textEditingValue.text == '') {
-                        return const Iterable<String>.empty();
-                      }
+            child: TagInput(
+              initialTags: initTagList,
+              suggestions: widget.supportedTagList ?? const [],
+              onChanged: (tags) {
+                dynValue!.strValue = jsonEncode(tags);
 
-                      return widget.supportedTagList!.where((String option) {
-                        return option.contains(textEditingValue.text.toLowerCase());
-                      });
-                    },
-                    onSelected: (String selectedTag) {
-                      _tagController!.onTagSubmitted(selectedTag);
-                    },
-                    fieldViewBuilder: (context, ttec, tfn, onFieldSubmitted) {
-                      return TextFieldTags<String>(
-                        textfieldTagsController: _tagController!,
-                        textEditingController: ttec,
-                        focusNode: tfn,
-                        initialTags: initTagList,
-                        textSeparators: const [' ', ','],
-                        inputFieldBuilder: (context, inputFieldValues) {
-                          return Padding(
-                              padding: const EdgeInsets.all(10.0),
-                              child: TextField(
-                                controller: inputFieldValues.textEditingController,
-                                focusNode: inputFieldValues.focusNode,
-                                decoration: InputDecoration(
-                                  isDense: true,
-                                  focusedBorder: UnderlineInputBorder(
-                                      borderSide: BorderSide(
-                                          color: Colors.redAccent.withValues(alpha: 0.0),
-                                          width: 0
-                                      )
-                                  ),
-                                  enabledBorder: UnderlineInputBorder(
-                                      borderSide: BorderSide(
-                                          color: Colors.redAccent.withValues(alpha: 0.0),
-                                          width: 0
-                                      )
-                                  ),
-                                  hintText: inputFieldValues.tags.isNotEmpty ? '' : "Enter ...",
-                                  errorText: inputFieldValues.error,
-                                  prefixIconConstraints:
-                                  BoxConstraints(maxWidth: _distanceToField * 0.74),
-                                  prefixIcon: inputFieldValues.tags.isNotEmpty ? SingleChildScrollView(
-                                    controller: inputFieldValues.tagScrollController,
-                                    scrollDirection: Axis.horizontal,
-                                    child: Row(
-                                        children: inputFieldValues.tags.map((tag) {
-                                          return Container(
-                                            decoration: const BoxDecoration(
-                                              borderRadius: BorderRadius.all(Radius.circular(12.0)),
-                                              color: kPrimaryColor,
-                                            ),
-                                            margin: const EdgeInsets.symmetric(horizontal: 5.0),
-                                            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
-                                            child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                              children: [
-                                                InkWell(
-                                                  child: Text(
-                                                    tag,
-                                                    style: const TextStyle(color: Colors.white),
-                                                  ),
-                                                  onTap: () {
-                                                    if (kDebugMode) {
-                                                      print('DynInputValue::buildSingle:');
-                                                      print("$tag selected");
-                                                    }
-                                                  },
-                                                ),
-                                                const SizedBox(width: 4.0),
-                                                InkWell(
-                                                  child: const Icon(
-                                                    Icons.cancel,
-                                                    size: 14.0,
-                                                    color: Color.fromARGB(255, 233, 233, 233),
-                                                  ),
-                                                  onTap: () {
-                                                    inputFieldValues.onTagRemoved(tag);
-
-                                                    try {
-                                                      dynValue!.strValue =
-                                                          jsonEncode(_tagController!.getTags);
-                                                    } catch(e) {
-                                                      if (kDebugMode) {
-                                                        print('DynInputValue::buildSingle: ${_tagController!.getTags}');
-                                                        print(e);
-                                                      }
-                                                    }
-                                                  },
-                                                )
-                                              ],
-                                            ),
-                                          );
-                                        }).toList()),
-                                  )
-                                      : null,
-                                ),
-                                onChanged: inputFieldValues.onTagChanged,
-                                onSubmitted: (value) {
-                                  inputFieldValues.onTagSubmitted(value);
-
-                                  try {
-                                    dynValue!.strValue =
-                                        jsonEncode(_tagController!.getTags);
-                                  } catch(e) {
-                                    if (kDebugMode) {
-                                      print('DynInputValue::buildSingle: ${_tagController!.getTags}');
-                                      print(e);
-                                    }
-                                  }
-                                },
-                              )
-                          );
-                        }
-                      );
-                    },
-                  )
-                  )
-                ],
+                if (widget.onChange != null) {
+                  widget.onChange!();
+                }
+              },
             )
         );
         break;

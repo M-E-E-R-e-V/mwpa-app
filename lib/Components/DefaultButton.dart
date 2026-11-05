@@ -1,4 +1,3 @@
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:mwpaapp/Constants.dart';
 
@@ -42,7 +41,7 @@ class DefaultButton extends StatelessWidget {
                 const SizedBox(width: 6),
               ],
               Flexible(
-                child: AutoSizeText(
+                child: Text(
                   label!,
                   style: const TextStyle(
                     color: kButtonFontColor,
@@ -50,8 +49,8 @@ class DefaultButton extends StatelessWidget {
                     fontSize: 13,
                   ),
                   textAlign: TextAlign.center,
-                  minFontSize: 6,
                   maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],

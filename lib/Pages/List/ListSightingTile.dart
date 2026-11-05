@@ -23,7 +23,7 @@ class ListSightingTile extends StatelessWidget {
 
   const ListSightingTile(this.sighting, {super.key});
 
-  _setEndLocation(BuildContext context) {
+  void _setEndLocation(BuildContext context) {
     final LocationController locationController = context.read<LocationController>();
     final SightingController sightingController = context.read<SightingController>();
 

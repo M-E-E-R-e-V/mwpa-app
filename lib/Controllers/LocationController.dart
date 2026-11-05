@@ -190,7 +190,7 @@ class LocationController extends ChangeNotifier {
   }
 
   /// _setAndSavePosition
-  _setAndSavePosition(Position position) {
+  void _setAndSavePosition(Position position) {
     currentPosition = position;
 
     var savePoint = false;

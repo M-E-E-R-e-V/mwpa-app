@@ -136,7 +136,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
   DynInputValue sightImageValue = DynInputValue();
 
   /// _appBar
-  _appBar(BuildContext context) {
+  AppBar _appBar(BuildContext context) {
     return AppBar(
       title: Text(title.isEmpty ? 'Sighting' : title),
       leading: IconButton(
@@ -169,7 +169,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
   }
 
   /// _saveSightingToDb
-  _saveSightingToDb() async {
+  Future<void> _saveSightingToDb() async {
     var mUnid = "";
 
     if (widget.sighting != null) {
@@ -272,7 +272,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
   }
 
   /// _setLocationByTime
-  _setLocationByTime(BuildContext context, TimeOfDay aTimeOfDay, Function onSet) async {
+  Future<void> _setLocationByTime(BuildContext context, TimeOfDay aTimeOfDay, Function onSet) async {
     if (widget.sighting == null) {
       return;
     }

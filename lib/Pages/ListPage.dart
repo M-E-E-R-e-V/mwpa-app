@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:mwpaapp/Components/DynInput.dart';
 import 'package:mwpaapp/Constants.dart';
@@ -84,7 +83,7 @@ class _ListPageState extends State<ListPage>
   }
 
   /// _syncCheckConnectivity
-  _syncCheckConnectivity(List<ConnectivityResult> results) async {
+  Future<void> _syncCheckConnectivity(List<ConnectivityResult> results) async {
     final hasInternet = results.any((r) => r != ConnectivityResult.none);
 
     if (hasInternet) {
@@ -95,7 +94,7 @@ class _ListPageState extends State<ListPage>
   }
 
   /// _syncMwpa
-  _syncMwpa() async {
+  Future<void> _syncMwpa() async {
     if (isSyncInProgress) {
       return;
     }
@@ -139,7 +138,7 @@ class _ListPageState extends State<ListPage>
   }
 
   /// _loadController
-  _loadController() async {
+  Future<void> _loadController() async {
     _locationController.updateEvent.removeListener(_updateTitle);
     _locationController.updateEvent.addListener(_updateTitle);
 
@@ -154,7 +153,7 @@ class _ListPageState extends State<ListPage>
   }
 
   /// _logout
-  _logout() async {
+  Future<void> _logout() async {
     ConfirmDialog.show(context, "Logout", "Do you want to logout?", (p0) async {
       if (p0 == "ok") {
         final prefs = await SharedPreferences.getInstance();
@@ -168,7 +167,7 @@ class _ListPageState extends State<ListPage>
   }
 
   /// _setEndTour
-  _setEndTour(BuildContext context) {
+  void _setEndTour(BuildContext context) {
     ConfirmDialog.show(
       context,
       "Tour End",
@@ -189,7 +188,7 @@ class _ListPageState extends State<ListPage>
   }
 
   /// _appBar
-  _appBar() {
+  AppBar _appBar() {
     final dark = isDarkMode(context);
 
     return AppBar(
@@ -265,7 +264,7 @@ class _ListPageState extends State<ListPage>
   }
 
   /// _addShortSighting
-  _addShortSighting(String otherName, BuildContext context) async {
+  Future<void> _addShortSighting(String otherName, BuildContext context) async {
     DynInputValue tOD = DynInputValue();
     tOD.timeValue = TimeOfDay.now();
     Position pos = _locationController.currentPosition!;
@@ -310,7 +309,7 @@ class _ListPageState extends State<ListPage>
     _loadController();
   }
 
-  _updateTitle() {
+  void _updateTitle() {
     try {
       if (_prefController.prefToru != null) {
         if ((_prefController.prefToru!.use_home_area == null) || (_prefController.prefToru!.use_home_area! < 1)) {
@@ -585,15 +584,11 @@ class _ListPageState extends State<ListPage>
         itemCount: sightings.length,
         itemBuilder: (_, index) {
           final sighting = sightings[index];
-          return AnimationConfiguration.staggeredList(
-            position: index,
-            child: SlideAnimation(
-              child: FadeInAnimation(
-                child: GestureDetector(
-                  onTap: () => _showBottomSheet(context, sighting),
-                  child: ListSightingTile(sighting),
-                ),
-              ),
+          return _FadeSlideIn(
+            delay: Duration(milliseconds: 50 * index.clamp(0, 8)),
+            child: GestureDetector(
+              onTap: () => _showBottomSheet(context, sighting),
+              child: ListSightingTile(sighting),
             ),
           );
         },
@@ -602,7 +597,7 @@ class _ListPageState extends State<ListPage>
   }
 
   /// _showBottomSheet
-  _showBottomSheet(BuildContext context, Sighting sighting) {
+  void _showBottomSheet(BuildContext context, Sighting sighting) {
     final theme = Theme.of(context);
 
     showModalBottomSheet<void>(
@@ -697,4 +692,51 @@ class _TurtleChoice {
   final String common;
   final String payload;
   const _TurtleChoice(this.scientific, this.common, this.payload);
+}
+
+/// _FadeSlideIn - fades and slides a list entry in once when it first appears
+/// (replaces flutter_staggered_animations); [delay] staggers the entries.
+class _FadeSlideIn extends StatefulWidget {
+  final Duration delay;
+  final Widget child;
+
+  const _FadeSlideIn({required this.delay, required this.child});
+
+  @override
+  State<_FadeSlideIn> createState() => _FadeSlideInState();
+}
+
+class _FadeSlideInState extends State<_FadeSlideIn> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 375),
+  );
+
+  late final Animation<double> _curve =
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut);
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(widget.delay, () {
+      if (mounted) _controller.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _curve,
+      child: SlideTransition(
+        position: Tween(begin: const Offset(0, 0.15), end: Offset.zero).animate(_curve),
+        child: widget.child,
+      ),
+    );
+  }
 }

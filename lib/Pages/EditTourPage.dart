@@ -49,7 +49,7 @@ class _EditTourPageState extends State<EditTourPage> {
 
   bool isInit = false;
 
-  _appBar(BuildContext context) {
+  AppBar _appBar(BuildContext context) {
     return AppBar(
       title: const Text('Set default Tour'),
       leading: IconButton(
@@ -76,7 +76,7 @@ class _EditTourPageState extends State<EditTourPage> {
   }
 
   /// save the settings
-  _saveTourToPref() async {
+  Future<void> _saveTourToPref() async {
     TourPref tour = TourPref(
         vehicle_id: sightVehicle.dynValue?.getStrValueAsInt(),
         vehicle_driver_id: sightVehicleDriver.dynValue
