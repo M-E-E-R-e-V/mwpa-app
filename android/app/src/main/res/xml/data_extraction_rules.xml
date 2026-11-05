@@ -3,8 +3,17 @@
 <data-extraction-rules>
     <cloud-backup>
         <exclude domain="file" path="map_tiles/" />
+        <!-- password (flutter_secure_storage): its key stays in the Keystore of
+             the old device, a restored copy can't be decrypted ("Failed to unwrap
+             key"). Without it the app asks to sign in again. -->
+        <exclude domain="sharedpref" path="FlutterSecureStorage.xml" />
+        <exclude domain="sharedpref" path="FlutterSecureKeyStorage.xml" />
+        <exclude domain="sharedpref" path="FlutterSecureStorageConfiguration:FlutterSecureStorage.xml" />
     </cloud-backup>
     <device-transfer>
         <exclude domain="file" path="map_tiles/" />
+        <exclude domain="sharedpref" path="FlutterSecureStorage.xml" />
+        <exclude domain="sharedpref" path="FlutterSecureKeyStorage.xml" />
+        <exclude domain="sharedpref" path="FlutterSecureStorageConfiguration:FlutterSecureStorage.xml" />
     </device-transfer>
 </data-extraction-rules>

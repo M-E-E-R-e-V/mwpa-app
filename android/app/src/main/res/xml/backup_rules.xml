@@ -3,4 +3,10 @@
      hundreds of MB and is re-downloadable; it would exceed the backup quota. -->
 <full-backup-content>
     <exclude domain="file" path="map_tiles/" />
+    <!-- password (flutter_secure_storage): its key stays in the Keystore of
+         the old device, a restored copy can't be decrypted ("Failed to unwrap
+         key"). Without it the app asks to sign in again. -->
+    <exclude domain="sharedpref" path="FlutterSecureStorage.xml" />
+    <exclude domain="sharedpref" path="FlutterSecureKeyStorage.xml" />
+    <exclude domain="sharedpref" path="FlutterSecureStorageConfiguration:FlutterSecureStorage.xml" />
 </full-backup-content>
