@@ -26,8 +26,9 @@ import 'package:mwpaapp/Ui/Themes.dart';
 import 'package:mwpaapp/Util/AppLog.dart';
 import 'package:mwpaapp/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:mwpaapp/l10n/l10n.dart';
 
-/// _registerFontLicenses - the bundled fonts on the license page (packages
+/// _registerFontLicenses - bundled fonts and the OSM map data on the license page (packages
 /// register their licenses themselves)
 void _registerFontLicenses() {
   LicenseRegistry.addLicense(() async* {
@@ -38,6 +39,14 @@ void _registerFontLicenses() {
     yield LicenseEntryWithLineBreaks(
       ['Material Design Icons'],
       await rootBundle.loadString('assets/fonts/MaterialDesignIcons-LICENSE.txt'),
+    );
+    // map tiles of the tour map (data: ODbL)
+    yield const LicenseEntryWithLineBreaks(
+      ['OpenStreetMap'],
+      'Map data © OpenStreetMap contributors.\n\n'
+      'The data is available under the Open Database License (ODbL) 1.0, '
+      'the map tiles are provided by the OpenStreetMap Foundation.\n\n'
+      'https://www.openstreetmap.org/copyright',
     );
   });
 }

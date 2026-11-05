@@ -22,6 +22,7 @@ class AboutPage extends StatefulWidget {
   static const String projectUrl = 'https://github.com/M-E-E-R-e-V/mwpa';
   static const String appUrl = 'https://github.com/M-E-E-R-e-V/mwpa-app';
   static const String developerName = 'Pegenau GmbH & Co. KG';
+  static const String osmCopyrightUrl = 'https://www.openstreetmap.org/copyright';
   static const String developerUrl = 'https://www.pegenau.de/';
 
   @override
@@ -203,6 +204,12 @@ class _AboutPageState extends State<AboutPage> {
                   label: context.l10n.aboutAppSource,
                   value: AboutPage.appUrl,
                   onTap: () => _copy(AboutPage.appUrl),
+                ),
+                _InfoTile(
+                  icon: Icons.map_outlined,
+                  label: context.l10n.aboutMapData,
+                  value: '© OpenStreetMap contributors (ODbL)\n${AboutPage.osmCopyrightUrl}',
+                  onTap: () => _copy(AboutPage.osmCopyrightUrl),
                 ),
                 _InfoTile(
                   icon: Icons.business_outlined,

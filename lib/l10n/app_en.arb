@@ -5,6 +5,7 @@
   "aboutConnection": "Connection",
   "aboutDevelopment": "Software development",
   "aboutLocalData": "Data on this device",
+  "aboutMapData": "Map data",
   "aboutMwpaProject": "MWPA project",
   "aboutNotSynced": "Not synced yet",
   "aboutProject": "Project",
@@ -165,6 +166,7 @@
       }
     }
   },
+  "mapAttribution": "Map attribution",
   "mapPositionPoints": "{position} / Points: {count}",
   "@mapPositionPoints": {
     "placeholders": {
@@ -315,5 +317,7 @@
       }
     }
   },
-  "waitForGps": "Please wait for the GPS signal."
+  "waitForGps": "Please wait for the GPS signal.",
+  "zoomIn": "Zoom in",
+  "zoomOut": "Zoom out"
 }

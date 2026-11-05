@@ -24,6 +24,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aboutLocalData => 'Data on this device';
 
   @override
+  String get aboutMapData => 'Map data';
+
+  @override
   String get aboutMwpaProject => 'MWPA project';
 
   @override
@@ -369,6 +372,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get mapAttribution => 'Map attribution';
+
+  @override
   String mapPositionPoints(String position, int count) {
     return '$position / Points: $count';
   }
@@ -699,4 +705,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get waitForGps => 'Please wait for the GPS signal.';
+
+  @override
+  String get zoomIn => 'Zoom in';
+
+  @override
+  String get zoomOut => 'Zoom out';
 }

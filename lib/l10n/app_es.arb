@@ -5,6 +5,7 @@
   "aboutConnection": "Conexión",
   "aboutDevelopment": "Desarrollo de software",
   "aboutLocalData": "Datos en este dispositivo",
+  "aboutMapData": "Datos del mapa",
   "aboutMwpaProject": "Proyecto MWPA",
   "aboutNotSynced": "Aún sin sincronizar",
   "aboutProject": "Proyecto",
@@ -110,6 +111,7 @@
   "logout": "Cerrar sesión",
   "logoutQuestion": "¿Quieres cerrar la sesión?",
   "logoutUnsynced": "{count} avistamiento(s) aún no están sincronizados. Sincroniza antes de cerrar la sesión; si no, se subirán con el próximo inicio de sesión.\n\n¿Cerrar sesión de todos modos?",
+  "mapAttribution": "Fuente del mapa",
   "mapPositionPoints": "{position} / Puntos: {count}",
   "mapWaitForGps": "esperando GPS ...",
   "menu": "Menú",
@@ -212,5 +214,7 @@
   "useCurrentPosition": "Usar la posición actual",
   "userNeedsOrganization": "Actualiza el usuario, todos los usuarios necesitan una organización.",
   "versionLabel": "Versión {version}",
-  "waitForGps": "Espera la señal GPS."
+  "waitForGps": "Espera la señal GPS.",
+  "zoomIn": "Acercar",
+  "zoomOut": "Alejar"
 }

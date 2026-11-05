@@ -130,6 +130,12 @@ abstract class AppLocalizations {
   /// **'Data on this device'**
   String get aboutLocalData;
 
+  /// No description provided for @aboutMapData.
+  ///
+  /// In en, this message translates to:
+  /// **'Map data'**
+  String get aboutMapData;
+
   /// No description provided for @aboutMwpaProject.
   ///
   /// In en, this message translates to:
@@ -760,6 +766,12 @@ abstract class AppLocalizations {
   /// **'{count} sighting(s) are not synced yet. Please sync before you logout, otherwise they are uploaded with the next login.\n\nLogout anyway?'**
   String logoutUnsynced(int count);
 
+  /// No description provided for @mapAttribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Map attribution'**
+  String get mapAttribution;
+
   /// No description provided for @mapPositionPoints.
   ///
   /// In en, this message translates to:
@@ -1377,6 +1389,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please wait for the GPS signal.'**
   String get waitForGps;
+
+  /// No description provided for @zoomIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom in'**
+  String get zoomIn;
+
+  /// No description provided for @zoomOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom out'**
+  String get zoomOut;
 }
 
 class _AppLocalizationsDelegate

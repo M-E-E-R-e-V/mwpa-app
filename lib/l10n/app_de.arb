@@ -5,6 +5,7 @@
   "aboutConnection": "Verbindung",
   "aboutDevelopment": "Softwareentwicklung",
   "aboutLocalData": "Daten auf diesem Gerät",
+  "aboutMapData": "Kartendaten",
   "aboutMwpaProject": "MWPA-Projekt",
   "aboutNotSynced": "Noch nicht synchronisiert",
   "aboutProject": "Projekt",
@@ -110,6 +111,7 @@
   "logout": "Abmelden",
   "logoutQuestion": "Möchtest du dich abmelden?",
   "logoutUnsynced": "{count} Sichtung(en) sind noch nicht synchronisiert. Bitte vor dem Abmelden synchronisieren, sonst werden sie mit der nächsten Anmeldung hochgeladen.\n\nTrotzdem abmelden?",
+  "mapAttribution": "Kartenquelle",
   "mapPositionPoints": "{position} / Punkte: {count}",
   "mapWaitForGps": "warte auf GPS ...",
   "menu": "Menü",
@@ -212,5 +214,7 @@
   "useCurrentPosition": "Aktuelle Position übernehmen",
   "userNeedsOrganization": "Bitte den Benutzer anpassen, jeder Benutzer braucht eine Organisation.",
   "versionLabel": "Version {version}",
-  "waitForGps": "Bitte auf das GPS-Signal warten."
+  "waitForGps": "Bitte auf das GPS-Signal warten.",
+  "zoomIn": "Vergrößern",
+  "zoomOut": "Verkleinern"
 }
