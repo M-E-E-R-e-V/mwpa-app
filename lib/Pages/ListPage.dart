@@ -24,13 +24,11 @@ import 'package:mwpaapp/Pages/List/GpsStatusIndicator.dart';
 import 'package:mwpaapp/Pages/List/ListSightingTile.dart';
 import 'package:mwpaapp/Services/SyncMwpaService.dart';
 import 'package:mwpaapp/Settings/CredentialStore.dart';
-import 'package:mwpaapp/Settings/Preference.dart';
 import 'package:mwpaapp/Util/UtilDate.dart';
 import 'package:mwpaapp/Util/UtilDistanceCoast.dart';
 import 'package:mwpaapp/Util/UtilSighting.dart';
 import 'package:mwpaapp/Util/UtilTourFId.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'List/ListMap.dart';
 import 'package:mwpaapp/Ui/AppIcons.dart';
@@ -160,14 +158,27 @@ class _ListPageState extends State<ListPage>
 
   /// _logout
   Future<void> _logout() async {
-    ConfirmDialog.show(context, "Logout", "Do you want to logout?", (p0) async {
+    // sightings not on the server yet would otherwise be uploaded with the
+    // next user's session
+    final unsynced = _sightingController.sightingList
+        .where((s) => s.unid == '' || s.syncStatus == Sighting.SYNC_STATUS_OPEN)
+        .length;
+
+    final message = unsynced == 0
+        ? "Do you want to logout?"
+        : "$unsynced sighting(s) are not synced yet. Please sync before you "
+          "logout, otherwise they are uploaded with the next login.\n\n"
+          "Logout anyway?";
+
+    ConfirmDialog.show(context, "Logout", message, destructive: unsynced > 0, okLabel: 'Logout', (p0) async {
       if (p0 == "ok") {
-        final prefs = await SharedPreferences.getInstance();
         await CredentialStore().deletePassword();
-        await prefs.remove(Preference.USERID);
+        await _prefController.logout();
+        _locationController.resetTour();
 
         if (!mounted) return;
-        await Navigator.of(context).pushNamed('/Login');
+        // the list of the old session must not stay underneath
+        await Navigator.of(context).pushNamedAndRemoveUntil('/Login', (_) => false);
       }
     });
   }

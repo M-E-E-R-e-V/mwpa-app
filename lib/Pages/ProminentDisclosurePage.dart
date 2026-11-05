@@ -58,10 +58,8 @@ class _ProminentDisclosurePageState extends State<ProminentDisclosurePage> {
               actionsAlignment: MainAxisAlignment.spaceBetween,
               actions: [
                 OutlinedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    Navigator.of(context).pushNamed('/ProminentDisclosure');
-                  },
+                  // back to the disclosure underneath; "accept" retries
+                  onPressed: () => Navigator.of(context).pop(),
                   child: const Text('Back'),
                 ),
                 FilledButton.icon(
@@ -104,9 +102,6 @@ class _ProminentDisclosurePageState extends State<ProminentDisclosurePage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
-    PrefController prefController = context.read<PrefController>();
-    prefController.saveProminentDisclosureConfirmed(false);
 
     return Scaffold(
       body: SafeArea(

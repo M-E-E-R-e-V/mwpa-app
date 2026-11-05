@@ -101,6 +101,35 @@ class PrefController extends ChangeNotifier {
     }
   }
 
+  /// logout - removes the session and everything that belongs to the user
+  /// or its organization (default tour with boat/skipper ids, running home
+  /// area tour); URL and username stay to prefill the login. The password
+  /// is removed by CredentialStore.
+  Future<void> logout() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      for (final key in [
+        Preference.USERID,
+        Preference.ORGID,
+        Preference.TOUR,
+        Preference.HOME_AREA_TOUR,
+      ]) {
+        await prefs.remove(key);
+      }
+    } catch(e) {
+      if (kDebugMode) {
+        print("PrefController:logout");
+        print(e);
+      }
+    }
+
+    isLogin = false;
+    prefToru = null;
+    homeAreaTour = null;
+    notifyListeners();
+  }
+
   /// saveProminentDisclosureConfirmed
   Future<void> saveProminentDisclosureConfirmed(bool confirmed) async {
     try {

@@ -278,6 +278,15 @@ class LocationController extends ChangeNotifier {
     return true;
   }
 
+  /// resetTour - forget the running home area tour and the home area of the
+  /// previous user (logout); tracking points are only saved again once a
+  /// tour is set
+  void resetTour() {
+    homeAreaToru = null;
+    homeArea = [];
+    notifyListeners();
+  }
+
   /// Reload the settings
   Future<void> reloadSettings({bool reset = false}) async {
     await _loadHomeArea();
