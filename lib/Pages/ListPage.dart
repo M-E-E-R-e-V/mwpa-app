@@ -20,8 +20,10 @@ import 'package:mwpaapp/Dialog/SyncProgressDialog.dart';
 import 'package:mwpaapp/Models/Sighting.dart';
 import 'package:mwpaapp/Mwpa/MwpaException.dart';
 import 'package:mwpaapp/Pages/EditSightingPage.dart';
+import 'package:mwpaapp/Pages/List/GpsStatusIndicator.dart';
 import 'package:mwpaapp/Pages/List/ListSightingTile.dart';
 import 'package:mwpaapp/Services/SyncMwpaService.dart';
+import 'package:mwpaapp/Settings/CredentialStore.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
 import 'package:mwpaapp/Util/UtilDate.dart';
 import 'package:mwpaapp/Util/UtilDistanceCoast.dart';
@@ -161,8 +163,8 @@ class _ListPageState extends State<ListPage>
     ConfirmDialog.show(context, "Logout", "Do you want to logout?", (p0) async {
       if (p0 == "ok") {
         final prefs = await SharedPreferences.getInstance();
-        prefs.remove(Preference.PASSWORD);
-        prefs.remove(Preference.USERID);
+        await CredentialStore().deletePassword();
+        await prefs.remove(Preference.USERID);
 
         if (!mounted) return;
         await Navigator.of(context).pushNamed('/Login');
@@ -207,6 +209,7 @@ class _ListPageState extends State<ListPage>
         ),
       ),
       actions: [
+        const GpsStatusIcon(),
         PopupMenuButton<String>(
           tooltip: 'Menu',
           itemBuilder: (context) => const [
@@ -722,11 +725,18 @@ class _ListPageState extends State<ListPage>
         // edge-to-edge (Android 15+): keep content clear of the gesture bar
         body: SafeArea(
           top: false,
-          child: TabBarView(
-            controller: _tabController,
+          child: Column(
             children: [
-              _tourTab(context),
-              _sightingsTab(context),
+              const GpsOffBanner(),
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    _tourTab(context),
+                    _sightingsTab(context),
+                  ],
+                ),
+              ),
             ],
           ),
         ),

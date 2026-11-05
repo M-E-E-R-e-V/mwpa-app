@@ -19,8 +19,28 @@ import 'package:uuid/uuid.dart';
 
 import '../Models/TourTracking.dart';
 
+/// GpsStatus - state of the position stream as shown on the main screen
+enum GpsStatus {
+  /// no position stream: location service off, permission missing or the
+  /// stream failed (restarted by the watchdog)
+  off,
+
+  /// stream running, but no (recent) position fix
+  searching,
+
+  /// recent position fix
+  ok,
+}
+
 /// LocationController
 class LocationController extends ChangeNotifier {
+
+  /// how often a stopped position stream is restarted / the status re-checked
+  static const Duration watchdogInterval = Duration(seconds: 15);
+
+  /// a fix older than this counts as "searching"; the stream delivers one
+  /// every 10 s
+  static const Duration fixStaleAfter = Duration(seconds: 60);
 
   final PrefController _prefController;
   final SightingController _sightingController;
@@ -58,8 +78,16 @@ class LocationController extends ChangeNotifier {
   /// is location init
   bool isLocationInit = false;
 
-  /// Location timer
+  /// watchdog: restarts a stopped position stream, updates [gpsStatus]
   Timer? locationTimer;
+
+  /// time of the last position fix
+  DateTime? _lastFixAt;
+
+  GpsStatus _gpsStatus = GpsStatus.off;
+
+  /// gpsStatus - off / searching / ok, listeners are notified on change
+  GpsStatus get gpsStatus => _gpsStatus;
 
   /// Current position
   Position? currentPosition;
@@ -95,15 +123,73 @@ class LocationController extends ChangeNotifier {
   /// running initLocation call, prevents two concurrent position streams
   Future<bool>? _initLocationFuture;
 
-  /// initLocation
-  Future<bool> initLocation() {
-    return _initLocationFuture ??= _initLocation().whenComplete(() {
+  /// initLocation - starts the position stream (and the watchdog that keeps
+  /// it running); [requestPermission] false only checks the permission, the
+  /// watchdog must not pop up the permission dialog every few seconds
+  Future<bool> initLocation({bool requestPermission = true}) {
+    locationTimer ??= Timer.periodic(watchdogInterval, (_) => _watchdog());
+
+    return _initLocationFuture ??= _initLocation(requestPermission).whenComplete(() {
       _initLocationFuture = null;
+      _updateGpsStatus();
     });
   }
 
+  /// _watchdog - a position stream stops on an error (location switched off,
+  /// provider failure); start it again as soon as possible
+  void _watchdog() {
+    if (_positionStreamSubscription == null) {
+      initLocation(requestPermission: false);
+    } else {
+      _updateGpsStatus();
+    }
+  }
+
+  /// computeGpsStatus - status for a stream that is [running] with the last
+  /// fix at [lastFixAt]
+  static GpsStatus computeGpsStatus({
+    required bool running,
+    required DateTime? lastFixAt,
+    required DateTime now,
+  }) {
+    if (!running) {
+      return GpsStatus.off;
+    }
+
+    if (lastFixAt == null || now.difference(lastFixAt) > fixStaleAfter) {
+      return GpsStatus.searching;
+    }
+
+    return GpsStatus.ok;
+  }
+
+  void _updateGpsStatus() {
+    final status = computeGpsStatus(
+      running: _positionStreamSubscription != null,
+      lastFixAt: _lastFixAt,
+      now: DateTime.now(),
+    );
+
+    if (status != _gpsStatus) {
+      _gpsStatus = status;
+      notifyListeners();
+    }
+  }
+
+  /// _stopStream - after an error or the end of the position stream; the
+  /// watchdog restarts it
+  void _stopStream([Object? error]) {
+    if (kDebugMode) {
+      print('LocationController: position stream stopped: ${error ?? 'done'}');
+    }
+
+    _positionStreamSubscription?.cancel();
+    _positionStreamSubscription = null;
+    _updateGpsStatus();
+  }
+
   /// _initLocation
-  Future<bool> _initLocation() async {
+  Future<bool> _initLocation(bool requestPermission) async {
     if (_positionStreamSubscription == null) {
       bool serviceEnabled;
       LocationPermission permission;
@@ -118,6 +204,10 @@ class LocationController extends ChangeNotifier {
       permission = await geolocatorAndroid.checkPermission();
 
       if (permission == LocationPermission.denied) {
+        if (!requestPermission) {
+          return false;
+        }
+
         permission = await geolocatorAndroid.requestPermission();
 
         if (permission == LocationPermission.denied) {
@@ -138,7 +228,7 @@ class LocationController extends ChangeNotifier {
             notificationText: "MWPA app is tracking your route in background ...",
             notificationTitle: "MWPA app Tracking",
             enableWakeLock: false,
-            notificationIcon: AndroidResource(name: 'ic_stat_onesignal_default')
+            notificationIcon: AndroidResource(name: 'ic_stat_tracking')
         ),
       );
 
@@ -146,11 +236,12 @@ class LocationController extends ChangeNotifier {
           locationSettings: androidSettings
       );
 
-      _positionStreamSubscription = positionStream.handleError((error) {
-        _positionStreamSubscription?.cancel();
-        _positionStreamSubscription = null;
-      }).listen((position) {
+      _positionStreamSubscription = positionStream.listen((position) {
         positionCount++;
+        _lastFixAt = DateTime.now();
+        // set silently, _setAndSavePosition notifies the listeners
+        _gpsStatus = GpsStatus.ok;
+
         Position tPosition = Position(
             longitude: position.longitude,
             latitude: position.latitude,
@@ -170,7 +261,11 @@ class LocationController extends ChangeNotifier {
 
         _setAndSavePosition(tPosition);
         updateEvent.triggerEvent();
-      });
+      },
+        onError: _stopStream,
+        onDone: _stopStream,
+        cancelOnError: true,
+      );
     }
 
     return true;

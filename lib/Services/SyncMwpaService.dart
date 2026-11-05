@@ -14,6 +14,7 @@ import 'package:mwpaapp/Models/VehicleDriver.dart';
 import 'package:mwpaapp/Mwpa/Models/Info.dart';
 import 'package:mwpaapp/Mwpa/Models/SightingTourTrackingCheck.dart';
 import 'package:mwpaapp/Mwpa/Models/TrackingAreaHomeData.dart';
+import 'package:mwpaapp/Settings/CredentialStore.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
 import 'package:mwpaapp/Util/UtilTourFId.dart';
 import 'package:mwpaapp/Util/UtilTourTracking.dart';
@@ -113,13 +114,14 @@ class SyncMwpaService {
         throw Exception("Preference field 'USERNAME' is not found!");
       }
 
-      if (!prefs.containsKey(Preference.PASSWORD)) {
-        throw Exception("Preference field 'PASSWORD' is not found!");
+      final password = await CredentialStore().readPassword();
+
+      if (password == null) {
+        throw Exception("No password stored, please sign in again!");
       }
 
       String url = prefs.getString(Preference.URL)!;
       String username = prefs.getString(Preference.USERNAME)!;
-      String password = prefs.getString(Preference.PASSWORD)!;
 
       api = MwpaApi(url);
       onApi(api);

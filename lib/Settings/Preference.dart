@@ -5,6 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 class Preference {
   static const URL = 'url';
   static const USERNAME = 'username';
+  /// legacy key: the password now lives in [CredentialStore]; only read to
+  /// move an old value over
   static const PASSWORD = 'password';
   static const USERID = 'userid';
   static const ORGID = 'orgid';

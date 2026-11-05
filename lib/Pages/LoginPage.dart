@@ -7,6 +7,7 @@ import 'package:mwpaapp/Controllers/PrefController.dart';
 import 'package:mwpaapp/Dialog/InfoDialog.dart';
 import 'package:mwpaapp/Mwpa/Models/Info.dart';
 import 'package:mwpaapp/Pages/QuickConnectScanPage.dart';
+import 'package:mwpaapp/Settings/CredentialStore.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -42,9 +43,10 @@ class _LoginPageState extends State<LoginPage> {
     var url = _urlController.text.trim();
     var username = _usernameController.text.trim();
     var password = _passwordController.text.trim();
+    MwpaApi? api;
 
     try {
-      var api = MwpaApi(url);
+      api = MwpaApi(url);
 
       Info apiInfo = await api.getInfo();
 
@@ -67,6 +69,8 @@ class _LoginPageState extends State<LoginPage> {
         print(error);
       }
 
+      if (!mounted) return;
+
       if (error is MwpaException) {
         setState(() {
           InfoDialog.show(context, 'Error', error.toString());
@@ -76,6 +80,8 @@ class _LoginPageState extends State<LoginPage> {
           InfoDialog.show(context, 'Internal Error', error.toString());
         });
       }
+    } finally {
+      api?.close();
     }
   }
 
@@ -89,6 +95,8 @@ class _LoginPageState extends State<LoginPage> {
   /// missing, so background sync will be inactive until the user signs in once
   /// with email/password (acceptable for the MVP).
   Future<void> quickConnect() async {
+    MwpaApi? api;
+
     try {
       final scanned = await Navigator.of(context).push<String>(
         MaterialPageRoute(builder: (_) => const QuickConnectScanPage()),
@@ -118,7 +126,7 @@ class _LoginPageState extends State<LoginPage> {
         throw MwpaException('Quick Connect payload is incomplete.');
       }
 
-      var api = MwpaApi(server);
+      api = MwpaApi(server);
 
       Info apiInfo = await api.getInfo();
 
@@ -137,6 +145,8 @@ class _LoginPageState extends State<LoginPage> {
         print(error);
       }
 
+      if (!mounted) return;
+
       if (error is MwpaException) {
         setState(() {
           InfoDialog.show(context, 'Error', error.toString());
@@ -146,6 +156,8 @@ class _LoginPageState extends State<LoginPage> {
           InfoDialog.show(context, 'Internal Error', error.toString());
         });
       }
+    } finally {
+      api?.close();
     }
   }
 
@@ -162,7 +174,7 @@ class _LoginPageState extends State<LoginPage> {
         await prefs.setString(Preference.USERNAME, username);
         // Wipe any stale password so SyncMwpaService doesn't reuse a previous
         // user's credentials against this session.
-        await prefs.remove(Preference.PASSWORD);
+        await CredentialStore().deletePassword();
         await prefs.setInt(Preference.USERID, userInfo.user!.id);
         await prefs.setInt(Preference.ORGID, userInfo.organization!.id);
 
@@ -190,7 +202,7 @@ class _LoginPageState extends State<LoginPage> {
       if (userInfo.user != null && userInfo.organization != null) {
         await prefs.setString(Preference.URL, url);
         await prefs.setString(Preference.USERNAME, username);
-        await prefs.setString(Preference.PASSWORD, password);
+        await CredentialStore().writePassword(password);
         await prefs.setInt(Preference.USERID, userInfo.user!.id);
         await prefs.setInt(Preference.ORGID, userInfo.organization!.id);
 
@@ -212,6 +224,8 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _loadPref() async {
     final prefs = await SharedPreferences.getInstance();
 
+    if (!mounted) return;
+
     setState(() {
       if (prefs.containsKey(Preference.URL)) {
         _urlController.text = prefs.getString(Preference.URL)!;
@@ -225,11 +239,14 @@ class _LoginPageState extends State<LoginPage> {
         _usernameController.text = const String.fromEnvironment('USERNAME', defaultValue: '');
       }
 
-      if (prefs.containsKey(Preference.PASSWORD)) {
-        _passwordController.text = prefs.getString(Preference.PASSWORD)!;
-      } else {
-        _passwordController.text = const String.fromEnvironment('PASSWORD', defaultValue: '');
-      }
+    });
+
+    final password = await CredentialStore().readPassword();
+
+    if (!mounted) return;
+
+    setState(() {
+      _passwordController.text = password ?? const String.fromEnvironment('PASSWORD', defaultValue: '');
     });
   }
 
