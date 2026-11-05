@@ -153,6 +153,7 @@ class _EditTourPageState extends State<EditTourPage> {
         title: "Wind/Sea-state (Beaufort)",
         value: sightBeaufortValue,
         items: BeaufortController.beaufortSelectList,
+          searchable: false,
       );
 
       sightDate = DateInput(
@@ -184,33 +185,47 @@ class _EditTourPageState extends State<EditTourPage> {
         canPop: false,
         child: Scaffold(
           appBar: _appBar(context),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                sightVehicle,
-                sightVehicleDriver,
-                sightBeaufort,
-                sightDate,
-                Row(
-                  children: [
-                    Expanded(child: sightTourStart),
-                    const SizedBox(width: 12),
-                    Expanded(child: sightTourEnd),
-                  ],
-                ),
-                sightSetEndTour,
-                const SizedBox(height: 16),
-                sightUseHomeArea,
-                const SizedBox(height: 24),
-                FilledButton.icon(
-                  onPressed: _saveTourToPref,
-                  icon: const Icon(Icons.save_alt),
-                  label: const Text('Save default Tour'),
-                ),
-                const SizedBox(height: 24),
-              ],
+          body: SafeArea(
+            top: false,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  InputSection(
+                    title: 'Tour',
+                    icon: Icons.directions_boat_outlined,
+                    children: [
+                      sightVehicle,
+                      sightVehicleDriver,
+                      sightBeaufort,
+                      sightDate,
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(child: sightTourStart),
+                          const SizedBox(width: 12),
+                          Expanded(child: sightTourEnd),
+                        ],
+                      ),
+                    ],
+                  ),
+                  InputSection(
+                    title: 'Settings',
+                    icon: Icons.tune,
+                    children: [
+                      sightSetEndTour,
+                      sightUseHomeArea,
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  FilledButton.icon(
+                    onPressed: _saveTourToPref,
+                    icon: const Icon(Icons.save_alt),
+                    label: const Text('Save default Tour'),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

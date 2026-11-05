@@ -4,6 +4,40 @@ import 'package:gpx/gpx.dart';
 
 class UtilDistanceCoast {
 
+  /// meters per nautical mile
+  static const double metersPerNm = 1852.0;
+
+  /// metersToNmText - stored distance (meters, as string) as nautical miles
+  /// with at most 2 decimals; '' when [meters] is empty or not a number.
+  static String metersToNmText(String meters) {
+    final m = double.tryParse(meters.trim());
+
+    if (m == null) {
+      return '';
+    }
+
+    return '${double.parse((m / metersPerNm).toStringAsFixed(2))}';
+  }
+
+  /// nmTextToMeters - typed nautical miles ('2.5' or '2,5') as meters
+  /// string to store (rounded to whole meters); '' for empty input, null
+  /// when [text] is not a valid number.
+  static String? nmTextToMeters(String text) {
+    final t = text.trim().replaceAll(',', '.');
+
+    if (t.isEmpty) {
+      return '';
+    }
+
+    final nm = double.tryParse(t);
+
+    if (nm == null || nm < 0) {
+      return null;
+    }
+
+    return '${(nm * metersPerNm).round()}';
+  }
+
   // https://www.geoplaner.de/
   // https://pub.dev/packages/gpx
 

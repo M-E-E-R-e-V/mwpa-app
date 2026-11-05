@@ -3,12 +3,13 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:mwpaapp/Components/DefaultButton.dart';
 import 'package:mwpaapp/Components/Inputs/DynInputValue.dart';
 import 'package:mwpaapp/Components/Inputs/InputFrame.dart';
 import 'package:mwpaapp/Components/Inputs/TagChipField.dart';
+import 'package:mwpaapp/Util/UtilImage.dart';
 
-/// ImageInput - photo from gallery or camera (value.imgPath).
+/// ImageInput - photo from gallery or camera (value.imgPath); the picked
+/// file is copied to app storage (see [UtilImage.persist]).
 class ImageInput extends StatefulWidget {
   final String? title;
   final DynInputValue value;
@@ -26,11 +27,38 @@ class _ImageInputState extends State<ImageInput> {
     final XFile? file = await _picker.pickImage(source: source);
 
     // user didn't take/choose an image
-    if (file == null || !mounted) {
+    if (file == null) {
       return;
     }
 
-    setState(() => widget.value.imgPath = file.path);
+    final path = await UtilImage.persist(file.path);
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() => widget.value.imgPath = path);
+  }
+
+  Widget _placeholder(BuildContext context, IconData icon, String text) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return Container(
+      height: 160,
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: scheme.outlineVariant),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 40, color: scheme.onSurfaceVariant),
+          const SizedBox(height: 8),
+          Text(text, style: TextStyle(color: scheme.onSurfaceVariant)),
+        ],
+      ),
+    );
   }
 
   @override
@@ -39,43 +67,51 @@ class _ImageInputState extends State<ImageInput> {
 
     return InputFrame(
       title: widget.title,
-      child: InputBox(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Center(
-              child: path != ""
-                  ? Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: SizedBox(
-                        width: 300,
-                        height: 300,
-                        child: Image.file(File(path)),
-                      ),
-                    )
-                  : const Padding(
-                      padding: EdgeInsets.all(18.0),
-                      child: Text('No image selected'),
-                    ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (path == "")
+            _placeholder(context, Icons.add_photo_alternate_outlined, 'No image selected')
+          else
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.file(
+                File(path),
+                height: 240,
+                fit: BoxFit.cover,
+                errorBuilder: (context, _, __) =>
+                    _placeholder(context, Icons.broken_image_outlined, 'Image not found'),
+              ),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                DefaultButton(
-                  buttonIcon: Icons.image,
-                  width: 44,
-                  onTab: () => _pick(ImageSource.gallery),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  icon: const Icon(Icons.photo_library_outlined),
+                  label: const Text('Gallery'),
+                  onPressed: () => _pick(ImageSource.gallery),
                 ),
-                DefaultButton(
-                  buttonIcon: Icons.camera,
-                  width: 44,
-                  onTab: () => _pick(ImageSource.camera),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: OutlinedButton.icon(
+                  icon: const Icon(Icons.photo_camera_outlined),
+                  label: const Text('Camera'),
+                  onPressed: () => _pick(ImageSource.camera),
+                ),
+              ),
+              if (path != "") ...[
+                const SizedBox(width: 4),
+                IconButton(
+                  icon: const Icon(Icons.delete_outline),
+                  tooltip: 'Remove image',
+                  onPressed: () => setState(() => widget.value.imgPath = ""),
                 ),
               ],
-            ),
-            const SizedBox(height: 10),
-          ],
-        ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -119,11 +155,12 @@ class TagInput extends StatelessWidget {
   Widget build(BuildContext context) {
     return InputFrame(
       title: title,
-      child: InputBox(
-        width: double.infinity,
-        minHeight: kInputHeight,
-        padding: const EdgeInsets.symmetric(horizontal: 14),
+      child: InputDecorator(
+        decoration: const InputDecoration(
+          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        ),
         child: TagChipField(
+          hintText: 'Add tag ...',
           initialTags: parseTags(value.strValue),
           suggestions: suggestions,
           onChanged: (tags) {

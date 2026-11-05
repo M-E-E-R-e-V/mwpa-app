@@ -3,7 +3,8 @@ import 'package:mwpaapp/Components/Inputs/DynInputValue.dart';
 import 'package:mwpaapp/Components/Inputs/InputFrame.dart';
 import 'package:mwpaapp/Constants.dart';
 
-/// SwitchInput - on/off (value.intValue: 1 = on, 0 = off).
+/// SwitchInput - on/off (value.intValue: 1 = on, 0 = off); the [title] is
+/// shown inside the tile, the whole tile toggles.
 class SwitchInput extends StatefulWidget {
   final String? title;
   final DynInputValue value;
@@ -16,32 +17,48 @@ class SwitchInput extends StatefulWidget {
 }
 
 class _SwitchInputState extends State<SwitchInput> {
+  void _set(bool on) {
+    setState(() => widget.value.intValue = on ? 1 : 0);
+    widget.onChange?.call();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final on = widget.value.intValue >= 1;
+    final theme = Theme.of(context);
+
     return InputFrame(
-      title: widget.title,
-      child: Container(
-        margin: const EdgeInsets.only(top: 8.0),
-        padding: const EdgeInsets.only(left: 14),
-        alignment: Alignment.centerLeft,
-        child: Switch(
-          value: widget.value.intValue >= 1,
-          activeTrackColor: kButtonBackgroundColor,
-          thumbIcon: WidgetStateProperty.resolveWith((states) => Icon(
-              states.contains(WidgetState.selected)
-                  ? Icons.radio_button_checked
-                  : Icons.radio_button_unchecked)),
-          onChanged: (bool on) {
-            setState(() => widget.value.intValue = on ? 1 : 0);
-            widget.onChange?.call();
-          },
+      child: Material(
+        color: theme.inputDecorationTheme.fillColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: theme.colorScheme.outlineVariant),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () => _set(!on),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 12, 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(widget.title ?? '', style: theme.textTheme.bodyLarge),
+                ),
+                Switch(
+                  value: on,
+                  activeTrackColor: kButtonBackgroundColor,
+                  onChanged: _set,
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 }
 
-/// YesNoUnknownInput - three-way toggle
+/// YesNoUnknownInput - three-way choice
 /// (value.intValue: -1 = unknown, 1 = yes, 0 = no).
 class YesNoUnknownInput extends StatefulWidget {
   final String? title;
@@ -55,36 +72,31 @@ class YesNoUnknownInput extends StatefulWidget {
 }
 
 class _YesNoUnknownInputState extends State<YesNoUnknownInput> {
-  /// button order: Unknown, Yes, No
-  static const _values = [-1, 1, 0];
-
   @override
   Widget build(BuildContext context) {
     final v = widget.value.intValue;
-    final isSelected = [v <= -1, v >= 1, v == 0];
+    final selected = v <= -1 ? -1 : (v >= 1 ? 1 : 0);
 
     return InputFrame(
       title: widget.title,
-      child: InputBox(
-        bordered: false,
-        child: ToggleButtons(
-          isSelected: isSelected,
-          onPressed: (int index) {
-            setState(() => widget.value.intValue = _values[index]);
-            widget.onChange?.call();
-          },
-          color: inputIconColor(context),
-          selectedColor: Colors.grey[700],
-          selectedBorderColor: kPrimaryColor,
-          fillColor: kButtonBackgroundColor,
-          borderColor: kPrimaryColor,
-          borderRadius: const BorderRadius.all(Radius.circular(10)),
-          children: const [
-            Text(' Unknown '),
-            Text(' Yes '),
-            Text(' No '),
-          ],
+      child: SegmentedButton<int>(
+        showSelectedIcon: false,
+        style: SegmentedButton.styleFrom(
+          selectedBackgroundColor: kButtonBackgroundColor,
+          selectedForegroundColor: kButtonFontColor,
+          minimumSize: const Size(0, 48),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
+        segments: const [
+          ButtonSegment(value: -1, label: Text('Unknown')),
+          ButtonSegment(value: 1, label: Text('Yes')),
+          ButtonSegment(value: 0, label: Text('No')),
+        ],
+        selected: {selected},
+        onSelectionChanged: (Set<int> s) {
+          setState(() => widget.value.intValue = s.first);
+          widget.onChange?.call();
+        },
       ),
     );
   }

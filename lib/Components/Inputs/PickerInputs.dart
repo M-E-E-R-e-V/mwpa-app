@@ -14,17 +14,26 @@ class DateInput extends StatefulWidget {
 
   const DateInput({super.key, this.title, required this.value, this.onChange});
 
+  static final DateTime firstDate = DateTime(2015);
+  static final DateTime lastDate = DateTime(2040);
+
   @override
   State<DateInput> createState() => _DateInputState();
 }
 
 class _DateInputState extends State<DateInput> {
   Future<void> _pick() async {
+    var initial = widget.value.dateValue;
+
+    if (initial.isBefore(DateInput.firstDate) || initial.isAfter(DateInput.lastDate)) {
+      initial = DateTime.now();
+    }
+
     final picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2015),
-      lastDate: DateTime(2040),
+      initialDate: initial,
+      firstDate: DateInput.firstDate,
+      lastDate: DateInput.lastDate,
     );
 
     if (picked == null || !mounted) {
@@ -39,12 +48,10 @@ class _DateInputState extends State<DateInput> {
   Widget build(BuildContext context) {
     return InputFrame(
       title: widget.title,
-      child: ValueBox(
+      child: TapField(
         text: DateFormat.yMd().format(widget.value.dateValue),
-        trailing: IconButton(
-          icon: Icon(Icons.calendar_today_outlined, color: inputIconColor(context)),
-          onPressed: _pick,
-        ),
+        icon: Icons.calendar_today_outlined,
+        onTap: _pick,
       ),
     );
   }
@@ -82,19 +89,18 @@ class _TimeInputState extends State<TimeInput> {
   Widget build(BuildContext context) {
     return InputFrame(
       title: widget.title,
-      child: ValueBox(
+      child: TapField(
         text: widget.value.timeValue?.format(context) ?? '',
-        trailing: IconButton(
-          icon: Icon(Icons.access_time_rounded, color: inputIconColor(context)),
-          onPressed: _pick,
-        ),
+        hint: '--:--',
+        icon: Icons.schedule,
+        onTap: _pick,
       ),
     );
   }
 }
 
-/// LocationInput - takes over the current GPS position (value.posValue);
-/// the title shows the accuracy of the stored position.
+/// LocationInput - takes over the current GPS position (value.posValue)
+/// with the button in the field; shows the accuracy of the stored position.
 class LocationInput extends StatefulWidget {
   final String? title;
   final DynInputValue value;
@@ -112,6 +118,9 @@ class _LocationInputState extends State<LocationInput> {
 
     // no GPS fix yet - nothing to take over
     if (position == null) {
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        const SnackBar(content: Text('No GPS position available yet')),
+      );
       return;
     }
 
@@ -122,19 +131,28 @@ class _LocationInputState extends State<LocationInput> {
   @override
   Widget build(BuildContext context) {
     final pos = widget.value.posValue;
-    var title = widget.title;
-
-    if (title != null && pos != null) {
-      title += " (accuracy: ${pos.accuracy.toInt()} m)";
-    }
+    final scheme = Theme.of(context).colorScheme;
 
     return InputFrame(
-      title: title,
-      child: ValueBox(
-        text: pos == null ? '' : UtilPosition.getStr(pos),
-        trailing: IconButton(
-          icon: Icon(Icons.edit_location, color: inputIconColor(context)),
-          onPressed: _takeCurrentPosition,
+      title: widget.title,
+      child: InputDecorator(
+        isEmpty: pos == null,
+        decoration: InputDecoration(
+          prefixIcon: Icon(Icons.place_outlined, color: inputAccentColor(context)),
+          helperText: pos == null ? null : 'Accuracy: ${pos.accuracy.toInt()} m',
+          suffixIcon: IconButton(
+            icon: Icon(Icons.my_location, color: inputAccentColor(context)),
+            tooltip: 'Use current position',
+            onPressed: _takeCurrentPosition,
+          ),
+        ),
+        child: Text(
+          pos == null ? 'No position' : UtilPosition.getStr(pos),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: pos == null ? scheme.onSurfaceVariant : null,
+              ),
         ),
       ),
     );

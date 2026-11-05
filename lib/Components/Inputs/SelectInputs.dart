@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:mwpaapp/Components/DefaultButton.dart';
 import 'package:mwpaapp/Components/Inputs/DynInputValue.dart';
 import 'package:mwpaapp/Components/Inputs/InputFrame.dart';
-import 'package:mwpaapp/Constants.dart';
 
 /// SelectInput - one entry out of [items] (value.strValue = item value).
+///
+/// With [searchable] the list can be filtered by typing into the field;
+/// by default only long lists (more than [searchThreshold] items, e.g.
+/// species) are searchable.
 class SelectInput extends StatefulWidget {
   final String? title;
   final DynInputValue value;
   final List<DynInputSelectItem> items;
   final VoidCallback? onChange;
+  final bool? searchable;
+
+  static const int searchThreshold = 15;
 
   const SelectInput({
     super.key,
@@ -17,6 +22,7 @@ class SelectInput extends StatefulWidget {
     required this.value,
     required this.items,
     this.onChange,
+    this.searchable,
   });
 
   @override
@@ -24,20 +30,46 @@ class SelectInput extends StatefulWidget {
 }
 
 class _SelectInputState extends State<SelectInput> {
-  String _label() {
-    if (widget.items.isEmpty) {
+  @override
+  Widget build(BuildContext context) {
+    return InputFrame(
+      title: widget.title,
+      child: SelectField(
+        value: widget.value,
+        items: widget.items,
+        searchable: widget.searchable,
+        onChange: () {
+          setState(() {});
+          widget.onChange?.call();
+        },
+      ),
+    );
+  }
+}
+
+/// SelectField - the dropdown of a [SelectInput] without title and spacing.
+class SelectField extends StatelessWidget {
+  final DynInputValue value;
+  final List<DynInputSelectItem> items;
+  final VoidCallback? onChange;
+  final bool? searchable;
+
+  const SelectField({
+    super.key,
+    required this.value,
+    required this.items,
+    this.onChange,
+    this.searchable,
+  });
+
+  String _hint(DynInputSelectItem? selected) {
+    if (items.isEmpty) {
       return "<empty list>";
     }
 
-    final current = widget.value.strValue;
+    final current = value.strValue;
 
-    for (final item in widget.items) {
-      if (item.value == current) {
-        return item.label;
-      }
-    }
-
-    if (current != "" && current != "0") {
+    if (selected == null && current != "" && current != "0") {
       return "unknown by id: $current";
     }
 
@@ -46,55 +78,54 @@ class _SelectInputState extends State<SelectInput> {
 
   @override
   Widget build(BuildContext context) {
-    final dark = isDarkMode(context);
+    final current = value.strValue;
+    DynInputSelectItem? selected;
 
-    final dropdown = DropdownButton<String>(
-      icon: Icon(Icons.keyboard_arrow_down, color: inputIconColor(context)),
-      iconSize: 32,
-      elevation: 0,
-      isExpanded: true,
-      style: subTitleStyle(context),
-      itemHeight: null,
-      dropdownColor: kPrimaryHeaderColor,
-      borderRadius: BorderRadius.circular(12),
-      underline: const SizedBox.shrink(),
-      items: widget.items.map((item) {
-        return DropdownMenuItem<String>(
-          value: item.value,
-          child: IntrinsicWidth(
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-              margin: const EdgeInsets.only(bottom: 10),
-              decoration: BoxDecoration(
-                border: Border.all(color: kPrimaryColor, width: 1.0),
-                borderRadius: BorderRadius.circular(12),
-                color: dark ? kPrimaryDarkBackgroundColor : kPrimaryBackgroundColor,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(item.label),
-              ),
-            ),
-          ),
-        );
-      }).toList(),
-      onChanged: (String? selected) {
-        if (selected != null) {
-          setState(() => widget.value.strValue = selected);
+    for (final item in items) {
+      if (item.value == current) {
+        selected = item;
+        break;
+      }
+    }
+
+    final searchable = this.searchable ?? items.length > SelectInput.searchThreshold;
+
+    return DropdownMenu<String>(
+      // the page may set the value from outside (e.g. tour defaults loaded
+      // async) - a new key re-applies the initial selection
+      key: ValueKey('$current/${items.length}'),
+      initialSelection: selected?.value,
+      expandedInsets: EdgeInsets.zero,
+      menuHeight: 360,
+      hintText: _hint(selected),
+      enabled: items.isNotEmpty,
+      enableFilter: searchable,
+      requestFocusOnTap: searchable,
+      leadingIcon: searchable ? const Icon(Icons.search) : null,
+      trailingIcon: const Icon(Icons.keyboard_arrow_down),
+      selectedTrailingIcon: const Icon(Icons.keyboard_arrow_up),
+      menuStyle: MenuStyle(
+        shape: WidgetStatePropertyAll(
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      ),
+      dropdownMenuEntries: [
+        for (final item in items)
+          DropdownMenuEntry<String>(value: item.value, label: item.label),
+      ],
+      onSelected: (String? selectedValue) {
+        if (selectedValue == null) {
+          return;
         }
 
-        widget.onChange?.call();
+        value.strValue = selectedValue;
+        onChange?.call();
       },
-    );
-
-    return InputFrame(
-      title: widget.title,
-      child: ValueBox(text: _label(), trailing: dropdown),
     );
   }
 }
 
-/// MultiSelectInput - list of selects with an add button
+/// MultiSelectInput - list of selects with add / remove buttons
 /// (value.multiValue, one DynInputValue per select).
 class MultiSelectInput extends StatefulWidget {
   final String? title;
@@ -123,28 +154,39 @@ class _MultiSelectInputState extends State<MultiSelectInput> {
 
     return InputFrame(
       title: widget.title,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(
-            flex: 3,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                for (final entry in values)
-                  SelectInput(value: entry, items: widget.items),
-              ],
+          for (final (index, entry) in values.indexed)
+            Padding(
+              padding: EdgeInsets.only(top: index == 0 ? 0 : 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: SelectField(
+                      key: ObjectKey(entry),
+                      value: entry,
+                      items: widget.items,
+                      onChange: () => setState(() {}),
+                    ),
+                  ),
+                  if (values.length > 1)
+                    IconButton(
+                      icon: const Icon(Icons.remove_circle_outline),
+                      tooltip: 'Remove',
+                      onPressed: () => setState(() => values.remove(entry)),
+                    ),
+                ],
+              ),
             ),
-          ),
-          Expanded(
-            child: Container(
-              height: kInputHeight,
-              margin: const EdgeInsets.only(top: 8.0),
-              padding: const EdgeInsets.only(left: 14),
-              child: DefaultButton(
-                buttonIcon: Icons.add_circle,
-                width: 50,
-                onTab: () => setState(() => values.add(DynInputValue())),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: TextButton.icon(
+                icon: const Icon(Icons.add),
+                label: const Text('Add'),
+                onPressed: () => setState(() => values.add(DynInputValue())),
               ),
             ),
           ),

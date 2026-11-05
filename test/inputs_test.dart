@@ -29,13 +29,17 @@ final _items = [
   DynInputSelectItem(value: '2', label: 'Boat B'),
 ];
 
+/// text shown in the (single) DropdownMenu field
+String _menuText(WidgetTester tester) =>
+    tester.widget<TextField>(find.byType(TextField)).controller!.text;
+
 void main() {
   group('SelectInput', () {
     testWidgets('shows label, unknown id, placeholder and empty list', (tester) async {
       final value = DynInputValue()..strValue = '2';
       await pumpInput(tester, SelectInput(title: 'Boat', value: value, items: _items));
       expect(find.text('Boat'), findsOneWidget);
-      expect(find.text('Boat B'), findsOneWidget);
+      expect(_menuText(tester), 'Boat B');
 
       await pumpInput(tester, SelectInput(value: DynInputValue()..strValue = '9', items: _items));
       expect(find.text('unknown by id: 9'), findsOneWidget);
@@ -52,39 +56,82 @@ void main() {
       var changed = 0;
       await pumpInput(tester, SelectInput(value: value, items: _items, onChange: () => changed++));
 
-      await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
+      await tester.tap(find.byType(DropdownMenu<String>));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Boat A').last);
       await tester.pumpAndSettle();
 
       expect(value.strValue, '1');
       expect(changed, 1);
-      expect(find.text('Boat A'), findsOneWidget);
+      expect(_menuText(tester), 'Boat A');
+    });
+
+    testWidgets('long lists can be filtered by typing', (tester) async {
+      final many = [
+        for (var i = 1; i <= SelectInput.searchThreshold; i++) DynInputSelectItem(value: '$i', label: 'Species $i'),
+        DynInputSelectItem(value: '13', label: 'Fin Whale'),
+      ];
+      final value = DynInputValue();
+      await pumpInput(tester, SelectInput(value: value, items: many));
+
+      await tester.tap(find.byType(DropdownMenu<String>));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'fin');
+      await tester.pumpAndSettle();
+
+      expect(find.widgetWithText(MenuItemButton, 'Species 1'), findsNothing);
+      await tester.tap(find.widgetWithText(MenuItemButton, 'Fin Whale'));
+      await tester.pumpAndSettle();
+
+      expect(value.strValue, '13');
+    });
+
+    testWidgets('searchable: false keeps a long list a plain dropdown', (tester) async {
+      final many = [
+        for (var i = 0; i <= 25; i++) DynInputSelectItem(value: '$i', label: '$i'),
+      ];
+      await pumpInput(tester, SelectInput(value: DynInputValue(), items: many, searchable: false));
+
+      final menu = tester.widget<DropdownMenu<String>>(find.byType(DropdownMenu<String>));
+      expect(menu.enableFilter, isFalse);
+      expect(menu.requestFocusOnTap, isFalse);
     });
   });
 
-  testWidgets('MultiSelectInput starts with one select and adds more', (tester) async {
-    final value = DynInputValue();
+  testWidgets('MultiSelectInput adds and removes selects', (tester) async {
+    final value = DynInputValue()..setMultiValue('{"0":"1","1":"2"}');
     await pumpInput(tester, MultiSelectInput(value: value, items: _items));
 
-    expect(find.byType(SelectInput), findsOneWidget);
-    await tester.tap(find.byIcon(Icons.add_circle));
+    expect(find.byType(SelectField), findsNWidgets(2));
+    await tester.tap(find.text('Add'));
+    await tester.pump();
+    expect(find.byType(SelectField), findsNWidgets(3));
+
+    await tester.tap(find.byTooltip('Remove').first);
     await tester.pump();
 
-    expect(find.byType(SelectInput), findsNWidgets(2));
-    expect(value.multiValue, hasLength(2));
+    expect(find.byType(SelectField), findsNWidgets(2));
+    expect(value.getMultiValue(), '{"0":"2","1":""}');
+  });
+
+  testWidgets('MultiSelectInput keeps at least one select', (tester) async {
+    await pumpInput(tester, MultiSelectInput(value: DynInputValue(), items: _items));
+
+    expect(find.byType(SelectField), findsOneWidget);
+    expect(find.byTooltip('Remove'), findsNothing);
   });
 
   testWidgets('SwitchInput toggles intValue 0/1', (tester) async {
     final value = DynInputValue();
     var changed = 0;
-    await pumpInput(tester, SwitchInput(value: value, onChange: () => changed++));
+    await pumpInput(tester, SwitchInput(title: 'Photos', value: value, onChange: () => changed++));
 
     await tester.tap(find.byType(Switch));
     await tester.pump();
     expect(value.intValue, 1);
 
-    await tester.tap(find.byType(Switch));
+    // the whole tile toggles, not only the switch
+    await tester.tap(find.text('Photos'));
     await tester.pump();
     expect(value.intValue, 0);
     expect(changed, 2);
@@ -94,13 +141,13 @@ void main() {
     final value = DynInputValue();
     await pumpInput(tester, YesNoUnknownInput(value: value));
 
-    for (final (label, expected) in [('Unknown', -1), ('Yes', 1), ('No', 0)]) {
-      await tester.tap(find.text(' $label '));
+    for (final (label, expected) in [('Yes', 1), ('No', 0), ('Unknown', -1)]) {
+      await tester.tap(find.text(label));
       await tester.pump();
       expect(value.intValue, expected, reason: label);
 
-      final buttons = tester.widget<ToggleButtons>(find.byType(ToggleButtons));
-      expect(buttons.isSelected.where((s) => s), hasLength(1));
+      final buttons = tester.widget<SegmentedButton<int>>(find.byType(SegmentedButton<int>));
+      expect(buttons.selected, {expected});
     }
   });
 
@@ -123,11 +170,12 @@ void main() {
 
     setUp(() => location = LocationController(PrefController(), SightingController()));
 
-    testWidgets('shows accuracy in the title when a position is stored', (tester) async {
+    testWidgets('shows the accuracy of a stored position', (tester) async {
       final value = DynInputValue()..posValue = _pos();
       await pumpInput(tester, LocationInput(title: 'Position begin', value: value), location: location);
 
-      expect(find.text('Position begin (accuracy: 12 m)'), findsOneWidget);
+      expect(find.text('Position begin'), findsOneWidget);
+      expect(find.text('Accuracy: 12 m'), findsOneWidget);
     });
 
     testWidgets('takes over the current position, no crash without GPS fix', (tester) async {
@@ -135,13 +183,14 @@ void main() {
       var changed = 0;
       await pumpInput(tester, LocationInput(value: value, onChange: () => changed++), location: location);
 
-      await tester.tap(find.byIcon(Icons.edit_location));
+      await tester.tap(find.byTooltip('Use current position'));
       await tester.pump();
       expect(value.posValue, isNull);
       expect(changed, 0);
+      expect(find.text('No GPS position available yet'), findsOneWidget);
 
       location.currentPosition = _pos(accuracy: 5);
-      await tester.tap(find.byIcon(Icons.edit_location));
+      await tester.tap(find.byTooltip('Use current position'));
       await tester.pump();
       expect(value.posValue!.accuracy, 5);
       expect(changed, 1);
@@ -149,26 +198,22 @@ void main() {
   });
 
   group('TextValueInput', () {
-    testWidgets('decimal shows formatted value as hint and stores typed text', (tester) async {
-      final value = DynInputValue()..strValue = '1852';
-      await pumpInput(tester, TextValueInput(
-        value: value,
-        kind: TextValueKind.decimal,
-        onFormat: (v) => 'formatted ${v.strValue}',
-      ));
-
-      expect(find.text('formatted 1852'), findsOneWidget);
-
-      await tester.enterText(find.byType(TextFormField), '3.5');
-      expect(value.strValue, '3.5');
-    });
-
-    testWidgets('digits accepts only digits', (tester) async {
-      final value = DynInputValue();
+    testWidgets('shows the stored value as text and stores typed text', (tester) async {
+      final value = DynInputValue()..strValue = '7';
       await pumpInput(tester, TextValueInput(value: value, kind: TextValueKind.digits));
 
-      await tester.enterText(find.byType(TextFormField), '12a.3');
+      expect(find.text('7'), findsOneWidget);
+
+      await tester.enterText(find.byType(TextField), '12a.3');
       expect(value.strValue, '123');
+    });
+
+    testWidgets('decimal accepts point and comma only', (tester) async {
+      final value = DynInputValue();
+      await pumpInput(tester, TextValueInput(value: value, kind: TextValueKind.decimal));
+
+      await tester.enterText(find.byType(TextField), '3,5x');
+      expect(value.strValue, '3,5');
     });
 
     testWidgets('textarea shows the stored value as editable text', (tester) async {
@@ -177,6 +222,42 @@ void main() {
 
       final field = tester.widget<TextField>(find.byType(TextField));
       expect(field.controller!.text, 'calm sea');
+    });
+  });
+
+  group('DistanceInput', () {
+    testWidgets('shows stored meters as nm and stores typed nm as meters', (tester) async {
+      final value = DynInputValue()..strValue = '9260';
+      await pumpInput(tester, DistanceInput(value: value));
+
+      expect(find.text('5.0'), findsOneWidget);
+
+      await tester.enterText(find.byType(TextField), '2,5');
+      expect(value.strValue, '4630');
+
+      await tester.enterText(find.byType(TextField), '');
+      expect(value.strValue, '');
+    });
+
+    testWidgets('invalid input shows an error and keeps the last value', (tester) async {
+      final value = DynInputValue()..strValue = '1852';
+      await pumpInput(tester, DistanceInput(value: value));
+
+      await tester.enterText(find.byType(TextField), '1.2.3');
+      await tester.pump();
+
+      expect(find.text('Not a valid number'), findsOneWidget);
+      expect(value.strValue, '1852');
+    });
+
+    testWidgets('follows meters changed by the page', (tester) async {
+      final value = DynInputValue()..strValue = '1852';
+      await pumpInput(tester, DistanceInput(value: value));
+
+      value.strValue = '3704';
+      await pumpInput(tester, DistanceInput(value: value));
+
+      expect(find.text('2.0'), findsOneWidget);
     });
   });
 
@@ -202,6 +283,8 @@ void main() {
     await pumpInput(tester, ImageInput(title: 'Photo', value: DynInputValue()));
 
     expect(find.text('No image selected'), findsOneWidget);
-    expect(find.byIcon(Icons.camera), findsOneWidget);
+    expect(find.text('Gallery'), findsOneWidget);
+    expect(find.text('Camera'), findsOneWidget);
+    expect(find.byTooltip('Remove image'), findsNothing);
   });
 }

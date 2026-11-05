@@ -19,6 +19,7 @@ import 'package:mwpaapp/Models/Sighting.dart';
 import 'package:mwpaapp/Models/TourPref.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
 import 'package:mwpaapp/Util/UtilDistanceCoast.dart';
+import 'package:mwpaapp/Util/UtilImage.dart';
 import 'package:mwpaapp/Util/UtilTourFId.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
@@ -211,7 +212,8 @@ class _EditSightingPageState extends State<EditSightingPage> {
       other: sightOtherValue.getValue(),
       other_vehicle: sightOtherVehicleValue.getValue(),
       note: sightNoteValue.getValue(),
-      image: sightImageValue.getImagePath(),
+      // older sightings may still point into the cache directory
+      image: await UtilImage.persist(sightImageValue.getImagePath()),
       syncStatus: Sighting.SYNC_STATUS_OPEN
     );
 
@@ -301,6 +303,18 @@ class _EditSightingPageState extends State<EditSightingPage> {
           });
       }
     }
+  }
+
+  /// _pair - two inputs side by side
+  Widget _pair(Widget left, Widget right) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: left),
+        const SizedBox(width: 12),
+        Expanded(child: right),
+      ],
+    );
   }
 
   /// initState
@@ -417,6 +431,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
           title: "Wind/Sea-state (Beaufort)",
           value: sightBeaufortValue,
           items: BeaufortController.beaufortSelectList,
+          searchable: false,
         );
 
         sightDate = DateInput(
@@ -439,9 +454,14 @@ class _EditSightingPageState extends State<EditSightingPage> {
            value: sightDurationFromValue,
            onChange: () {
              if (sightLocationBeginValue.posValue == null) {
-               setState(() {
-                 sightLocationBeginValue.posValue = _locationController.currentPosition!;
-               });
+               final current = _locationController.currentPosition;
+
+               if (current != null) {
+                 setState(() {
+                   sightLocationBeginValue.posValue = current;
+                   sightDistanceCoastValue.setValue("${UtilDistanceCoast.getDistance(current)}");
+                 });
+               }
              } else {
                _setLocationByTime(
                    context,
@@ -478,7 +498,8 @@ class _EditSightingPageState extends State<EditSightingPage> {
            onChange: () {
              if (sightLocationBeginValue.posValue != null) {
                var distance = UtilDistanceCoast.getDistance(sightLocationBeginValue.posValue!);
-               sightDistanceCoastValue.setValue("$distance");
+               // rebuild, so the distance field shows the new value
+               setState(() => sightDistanceCoastValue.setValue("$distance"));
              }
            },
          );
@@ -493,25 +514,9 @@ class _EditSightingPageState extends State<EditSightingPage> {
            value: sightPhotoTakenValue,
          );
 
-         sightDistanceCoast = TextValueInput(
-           title: "Distance to nearest coast (nm)",
+         sightDistanceCoast = DistanceInput(
+           title: "Distance to nearest coast",
            value: sightDistanceCoastValue,
-           kind: TextValueKind.decimal,
-           onFormat: (value) {
-             try {
-               var fValue = double.parse(value.strValue.replaceAll(RegExp(r'[^0-9.]'), ''));
-               fValue = 0.5399568035 * (fValue / 1000);
-
-               // same as GetX toPrecision(2): round to 2 digits, drop trailing zeros
-               return "${double.parse(fValue.toStringAsFixed(2))}";
-             } catch(e) {
-               if (kDebugMode) {
-                 print(e);
-               }
-             }
-
-             return "0.0";
-           },
          );
 
          sightDistanceCoastEstimationGps = SwitchInput(
@@ -643,7 +648,6 @@ class _EditSightingPageState extends State<EditSightingPage> {
         );
 
         sightImage = ImageInput(
-          title: "Picture",
           value: sightImageValue,
         );
 
@@ -651,63 +655,82 @@ class _EditSightingPageState extends State<EditSightingPage> {
            canPop: false,
            child: Scaffold(
              appBar: _appBar(context),
-             body: SingleChildScrollView(
-               padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-               child: Column(
-                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                 children: [
-                   sightVehicle,
-                   sightVehicleDriver,
-                   sightBeaufort,
-                   sightDate,
-                   Row(
-                     children: [
-                       Expanded(child: sightTourStart),
-                       const SizedBox(width: 12),
-                       Expanded(child: sightTourEnd),
-                     ],
-                   ),
-                   Row(
-                     children: [
-                       Expanded(child: sightDurationFrom),
-                       const SizedBox(width: 12),
-                       Expanded(child: sightDurationUntil),
-                     ],
-                   ),
-                   sightLocationBegin,
-                   sightLocationEnd,
-                   sightDistanceCoast,
-                   Row(
-                     children: [
-                       Expanded(child: sightPhotoTaken),
-                       const SizedBox(width: 12),
-                       Expanded(child: sightDistanceCoastEstimationGps),
-                     ],
-                   ),
-                   sightSpecies,
-                   sightSpeciesNum,
-                   sightJuveniles,
-                   sightCalves,
-                   sightNewborns,
-                   sightBehaviour,
-                   sightSubgroups,
-                   sightGroupStructure,
-                   sightReaction,
-                   sightFreqBehaviour,
-                   sightRecAnimals,
-                   sightOtherSpecies,
-                   sightOther,
-                   sightOtherVehicle,
-                   sightNote,
-                   sightImage,
-                   const SizedBox(height: 24),
-                   FilledButton.icon(
-                     onPressed: _saveSightingToDb,
-                     icon: const Icon(Icons.save_alt),
-                     label: const Text('Save Sighting'),
-                   ),
-                   const SizedBox(height: 24),
-                 ],
+             body: SafeArea(
+               top: false,
+               child: SingleChildScrollView(
+                 padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
+                 child: Column(
+                   crossAxisAlignment: CrossAxisAlignment.stretch,
+                   children: [
+                     InputSection(
+                       title: 'Tour',
+                       icon: Icons.directions_boat_outlined,
+                       children: [
+                         sightVehicle,
+                         sightVehicleDriver,
+                         sightBeaufort,
+                         sightDate,
+                         _pair(sightTourStart, sightTourEnd),
+                       ],
+                     ),
+                     InputSection(
+                       title: 'Time & position',
+                       icon: Icons.place_outlined,
+                       children: [
+                         _pair(sightDurationFrom, sightDurationUntil),
+                         sightLocationBegin,
+                         sightLocationEnd,
+                         sightDistanceCoast,
+                         sightDistanceCoastEstimationGps,
+                         sightPhotoTaken,
+                       ],
+                     ),
+                     InputSection(
+                       title: 'Animals',
+                       icon: Icons.pets_outlined,
+                       children: [
+                         sightSpecies,
+                         sightSpeciesNum,
+                         sightJuveniles,
+                         sightCalves,
+                         sightNewborns,
+                         sightSubgroups,
+                         sightGroupStructure,
+                       ],
+                     ),
+                     InputSection(
+                       title: 'Behaviour & identification',
+                       icon: Icons.waves_outlined,
+                       children: [
+                         sightBehaviour,
+                         sightReaction,
+                         sightFreqBehaviour,
+                         sightRecAnimals,
+                       ],
+                     ),
+                     InputSection(
+                       title: 'Further notes',
+                       icon: Icons.notes_outlined,
+                       children: [
+                         sightOtherSpecies,
+                         sightOther,
+                         sightOtherVehicle,
+                         sightNote,
+                       ],
+                     ),
+                     InputSection(
+                       title: 'Picture',
+                       icon: Icons.photo_camera_outlined,
+                       children: [sightImage],
+                     ),
+                     const SizedBox(height: 8),
+                     FilledButton.icon(
+                       onPressed: _saveSightingToDb,
+                       icon: const Icon(Icons.save_alt),
+                       label: const Text('Save Sighting'),
+                     ),
+                   ],
+                 ),
                ),
              ),
            ),

@@ -1,8 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mwpaapp/Constants.dart';
-
-/// Height of a single-line input box.
-const double kInputHeight = 52.0;
 
 /// InputFrame - common layout of every form input: optional [title] above
 /// the input [child], with the standard spacing to the previous input.
@@ -14,13 +10,16 @@ class InputFrame extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(top: 16),
+    return Padding(
+      padding: const EdgeInsets.only(top: 16),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (title != null)
-            Text(title!, style: titleStyle(context)),
+            Padding(
+              padding: const EdgeInsets.only(left: 4, bottom: 6),
+              child: Text(title!, style: inputLabelStyle(context)),
+            ),
           child,
         ],
       ),
@@ -28,79 +27,109 @@ class InputFrame extends StatelessWidget {
   }
 }
 
-/// InputBox - the rounded, bordered box around an input.
-class InputBox extends StatelessWidget {
-  final Widget child;
-  final double? width;
-  final double? height;
-  final double? minHeight;
-  final EdgeInsetsGeometry padding;
-  final bool bordered;
+/// InputSection - titled card that groups related inputs of a form.
+class InputSection extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final List<Widget> children;
 
-  const InputBox({
+  const InputSection({
     super.key,
-    required this.child,
-    this.width,
-    this.height,
-    this.minHeight,
-    this.padding = const EdgeInsets.only(left: 14),
-    this.bordered = true,
+    required this.title,
+    required this.icon,
+    required this.children,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: width,
-      height: height,
-      alignment: width == null ? null : Alignment.centerLeft,
-      constraints: minHeight == null ? null : BoxConstraints(minHeight: minHeight!),
-      margin: const EdgeInsets.only(top: 8.0),
-      padding: padding,
-      decoration: bordered
-          ? BoxDecoration(
-              border: Border.all(color: kPrimaryColor, width: 1.0),
-              borderRadius: BorderRadius.circular(12),
-            )
-          : null,
-      child: child,
-    );
-  }
-}
+    final accent = inputAccentColor(context);
 
-/// ValueBox - single-line box that shows a value [text] with an optional
-/// [trailing] action (picker button, dropdown, ...).
-class ValueBox extends StatelessWidget {
-  final String text;
-  final Widget? trailing;
-
-  const ValueBox({super.key, required this.text, this.trailing});
-
-  @override
-  Widget build(BuildContext context) {
-    return InputBox(
-      height: kInputHeight,
-      child: Row(
-        children: [
-          Expanded(
-            flex: 3,
-            child: Text(
-              text,
-              style: subTitleStyle(context),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Icon(icon, size: 22, color: accent),
+                const SizedBox(width: 10),
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: accent,
+                      ),
+                ),
+              ],
             ),
-          ),
-          Expanded(
-            child: trailing == null
-                ? const SizedBox.shrink()
-                : Align(alignment: Alignment.topRight, child: trailing),
-          ),
-        ],
+            ...children,
+          ],
+        ),
       ),
     );
   }
 }
 
-/// inputIconColor - color of the action icons inside an input box.
-Color inputIconColor(BuildContext context) =>
-    isDarkMode(context) ? kPrimaryDarkFontColor : kPrimaryFontColor;
+/// TapField - read-only field that shows [text] (or [hint]) and calls
+/// [onTap] when tapped anywhere; used by the picker inputs.
+class TapField extends StatelessWidget {
+  final String text;
+  final String hint;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const TapField({
+    super.key,
+    required this.text,
+    required this.icon,
+    required this.onTap,
+    this.hint = '',
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: InputDecorator(
+        decoration: InputDecoration(
+          suffixIcon: Icon(icon, color: inputAccentColor(context)),
+        ),
+        isEmpty: text.isEmpty,
+        child: Text(
+          text.isEmpty ? hint : text,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: text.isEmpty ? scheme.onSurfaceVariant : null,
+              ),
+        ),
+      ),
+    );
+  }
+}
+
+/// inputAccentColor - color of section headers and field icons; the brand
+/// blue is too dark on the dark background.
+Color inputAccentColor(BuildContext context) {
+  final theme = Theme.of(context);
+
+  return theme.brightness == Brightness.dark
+      ? const Color(0xff9ec3ff)
+      : theme.colorScheme.primary;
+}
+
+/// inputLabelStyle - style of the title above an input.
+TextStyle? inputLabelStyle(BuildContext context) {
+  final theme = Theme.of(context);
+
+  return theme.textTheme.labelLarge?.copyWith(
+    fontSize: 14,
+    fontWeight: FontWeight.w600,
+    color: theme.colorScheme.onSurfaceVariant,
+  );
+}
