@@ -41,6 +41,14 @@
     }
   },
   "allRequiredFilled": "All required fields are filled in",
+  "animalsCount": "{count, plural, =1{1 animal} other{{count} animals}}",
+  "@animalsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "apiLoginChanged": "The API for login has changed (server reports '{server}', app accepts {accepted}). Please update your app, the data will not be lost.",
   "@apiLoginChanged": {
     "placeholders": {
@@ -94,6 +102,33 @@
   "disclosureText1": "The MWPA app collects location data to auto-fill sighting data and track routes for movement activated even if the app is closed or not in use.",
   "disclosureText2": "The app can only be used with position/location determination, otherwise the recorded data is useless. The data is only sent to the portal that is entered during login. For further questions you can contact or view the source code:",
   "disclosureTitle": "MWPA Disclosure",
+  "distanceNm": "{distance} nm",
+  "@distanceNm": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "durationHoursMinutes": "{hours} h {minutes} min",
+  "@durationHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "durationMinutes": "{minutes} min",
+  "@durationMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "edit": "Edit",
   "editSightingTitle": "Edit Sighting",
   "error": "Error",
@@ -261,6 +296,14 @@
   "shareAppLog": "Share app log",
   "sightingCloseQuestion": "Close sighting without saving? All changes will be lost!",
   "sightingCloseTitle": "Sighting close",
+  "sightingsCount": "{count, plural, =1{1 sighting} other{{count} sightings}}",
+  "@sightingsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "signIn": "Sign In",
   "speciesNotFound": "Species not found",
   "stateEndMissing": "End missing",
@@ -339,6 +382,7 @@
   "tourDateTitle": "Tour date",
   "tourEnd": "Tour End",
   "tourEndQuestion": "Update the tour end time for all sighting entries from the current tour?",
+  "tourFinishedTitle": "Tour finished",
   "tourLabel": "Tour: {date} - {start}",
   "@tourLabel": {
     "placeholders": {
@@ -351,6 +395,14 @@
     }
   },
   "tourNotStartedHomeArea": "The tour has not started yet (still in the home area). The entry cannot be added until then.",
+  "tourSince": "since {time}",
+  "@tourSince": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "tourWaitingHomeArea": "Tour: In Home-Area, wait for start",
   "turtleGreen": "Green sea turtle",
   "turtleHawksbill": "Hawksbill sea turtle",

@@ -109,6 +109,9 @@ class LocationController extends ChangeNotifier {
   /// tour the [route] belongs to
   String? _routeFid;
 
+  /// tour the [route] belongs to (null: no tour recorded since start)
+  String? get routeTourFid => _routeFid;
+
   /// event manager for updates
   final EventManagerService updateEvent = EventManagerService();
 

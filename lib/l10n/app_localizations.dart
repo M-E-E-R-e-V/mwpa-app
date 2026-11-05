@@ -262,6 +262,12 @@ abstract class AppLocalizations {
   /// **'All required fields are filled in'**
   String get allRequiredFilled;
 
+  /// No description provided for @animalsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 animal} other{{count} animals}}'**
+  String animalsCount(int count);
+
   /// No description provided for @apiLoginChanged.
   ///
   /// In en, this message translates to:
@@ -417,6 +423,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'MWPA Disclosure'**
   String get disclosureTitle;
+
+  /// No description provided for @distanceNm.
+  ///
+  /// In en, this message translates to:
+  /// **'{distance} nm'**
+  String distanceNm(String distance);
+
+  /// No description provided for @durationHoursMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} h {minutes} min'**
+  String durationHoursMinutes(int hours, int minutes);
+
+  /// No description provided for @durationMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String durationMinutes(int minutes);
 
   /// No description provided for @edit.
   ///
@@ -1150,6 +1174,12 @@ abstract class AppLocalizations {
   /// **'Sighting close'**
   String get sightingCloseTitle;
 
+  /// No description provided for @sightingsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 sighting} other{{count} sightings}}'**
+  String sightingsCount(int count);
+
   /// No description provided for @signIn.
   ///
   /// In en, this message translates to:
@@ -1408,6 +1438,12 @@ abstract class AppLocalizations {
   /// **'Update the tour end time for all sighting entries from the current tour?'**
   String get tourEndQuestion;
 
+  /// No description provided for @tourFinishedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tour finished'**
+  String get tourFinishedTitle;
+
   /// No description provided for @tourLabel.
   ///
   /// In en, this message translates to:
@@ -1419,6 +1455,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The tour has not started yet (still in the home area). The entry cannot be added until then.'**
   String get tourNotStartedHomeArea;
+
+  /// No description provided for @tourSince.
+  ///
+  /// In en, this message translates to:
+  /// **'since {time}'**
+  String tourSince(String time);
 
   /// No description provided for @tourWaitingHomeArea.
   ///

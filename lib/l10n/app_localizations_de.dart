@@ -96,6 +96,17 @@ class AppLocalizationsDe extends AppLocalizations {
   String get allRequiredFilled => 'Alle Pflichtfelder sind ausgefüllt';
 
   @override
+  String animalsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Tiere',
+      one: '1 Tier',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String apiLoginChanged(String server, String accepted) {
     return 'Die Login-API hat sich geändert (Server meldet \'$server\', die App akzeptiert $accepted). Bitte aktualisiere die App, die Daten gehen nicht verloren.';
   }
@@ -181,6 +192,21 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get disclosureTitle => 'MWPA-Hinweis';
+
+  @override
+  String distanceNm(String distance) {
+    return '$distance sm';
+  }
+
+  @override
+  String durationHoursMinutes(int hours, int minutes) {
+    return '$hours Std. $minutes Min.';
+  }
+
+  @override
+  String durationMinutes(int minutes) {
+    return '$minutes Min.';
+  }
 
   @override
   String get edit => 'Bearbeiten';
@@ -586,6 +612,17 @@ class AppLocalizationsDe extends AppLocalizations {
   String get sightingCloseTitle => 'Sichtung schließen';
 
   @override
+  String sightingsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Sichtungen',
+      one: '1 Sichtung',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get signIn => 'Anmelden';
 
   @override
@@ -750,6 +787,9 @@ class AppLocalizationsDe extends AppLocalizations {
       'Tour-Endzeit für alle Sichtungen der aktuellen Tour setzen?';
 
   @override
+  String get tourFinishedTitle => 'Tour beendet';
+
+  @override
   String tourLabel(String date, String start) {
     return 'Tour: $date - $start';
   }
@@ -757,6 +797,11 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get tourNotStartedHomeArea =>
       'Die Tour hat noch nicht begonnen (noch im Heimatgebiet). Bis dahin kann kein Eintrag angelegt werden.';
+
+  @override
+  String tourSince(String time) {
+    return 'seit $time';
+  }
 
   @override
   String get tourWaitingHomeArea => 'Tour: im Heimatgebiet, warte auf Start';

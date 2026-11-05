@@ -96,6 +96,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get allRequiredFilled => 'All required fields are filled in';
 
   @override
+  String animalsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count animals',
+      one: '1 animal',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String apiLoginChanged(String server, String accepted) {
     return 'The API for login has changed (server reports \'$server\', app accepts $accepted). Please update your app, the data will not be lost.';
   }
@@ -181,6 +192,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get disclosureTitle => 'MWPA Disclosure';
+
+  @override
+  String distanceNm(String distance) {
+    return '$distance nm';
+  }
+
+  @override
+  String durationHoursMinutes(int hours, int minutes) {
+    return '$hours h $minutes min';
+  }
+
+  @override
+  String durationMinutes(int minutes) {
+    return '$minutes min';
+  }
 
   @override
   String get edit => 'Edit';
@@ -582,6 +608,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sightingCloseTitle => 'Sighting close';
 
   @override
+  String sightingsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sightings',
+      one: '1 sighting',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get signIn => 'Sign In';
 
   @override
@@ -745,6 +782,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Update the tour end time for all sighting entries from the current tour?';
 
   @override
+  String get tourFinishedTitle => 'Tour finished';
+
+  @override
   String tourLabel(String date, String start) {
     return 'Tour: $date - $start';
   }
@@ -752,6 +792,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get tourNotStartedHomeArea =>
       'The tour has not started yet (still in the home area). The entry cannot be added until then.';
+
+  @override
+  String tourSince(String time) {
+    return 'since $time';
+  }
 
   @override
   String get tourWaitingHomeArea => 'Tour: In Home-Area, wait for start';

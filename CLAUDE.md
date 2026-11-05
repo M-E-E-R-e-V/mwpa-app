@@ -89,4 +89,4 @@ Use `AppLog` (`lib/Util/AppLog.dart`) instead of `print`: `AppLog.d/i/w/e(tag, m
 
 ### Utilities of note
 
-`lib/Util/` contains pure helpers — `UtilPosition`, `UtilLocation`, `UtilDistanceCoast`, `UtilTourFId` (tour foreign-ID generation), `UtilTourTracking` (when local tracking points may be deleted after sync), `UtilTileServer` (map tile config), `UtilSighting`, `UtilDate`, `UtilCheckJson`, `UtilImage`. Prefer extending these over inlining geo/date logic in widgets or controllers.
+`lib/Util/` contains pure helpers — `UtilPosition`, `UtilLocation`, `UtilDistanceCoast`, `UtilTourFId` (tour foreign-ID generation), `UtilTourTracking` (when local tracking points may be deleted after sync), `UtilTourSummary` (groups sightings into tours for the sightings tab / tour-end dialog, route length from tracking points), `UtilTileServer` (map tile config), `UtilSighting`, `UtilDate`, `UtilCheckJson`, `UtilImage`. Prefer extending these over inlining geo/date logic in widgets or controllers.

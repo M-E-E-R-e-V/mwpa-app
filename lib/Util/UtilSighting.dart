@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:mwpaapp/Controllers/SightingController.dart';
+import 'package:mwpaapp/Models/Sighting.dart';
 import 'package:mwpaapp/Models/TourPref.dart';
 
 /// Sighting Helper
@@ -28,6 +29,24 @@ class UtilSighting {
     );
   }
 
+
+  /// displayName - what a sighting is called in lists: the species name
+  /// ([speciesName] from the species list), else "other" (quick entries),
+  /// else the note; only the common name ("Fin Whale, Finnwal (...)" ->
+  /// "Fin Whale"). Null if nothing is set.
+  static String? displayName(Sighting sighting, String? speciesName) {
+    bool isSet(String? v) => v != null && v.trim() != '' && v.trim() != 'null';
+
+    final name = isSet(speciesName)
+        ? speciesName!
+        : isSet(sighting.other)
+            ? sighting.other!.trim()
+            : isSet(sighting.note)
+                ? sighting.note!.trim()
+                : null;
+
+    return name?.split(',')[0];
+  }
 
   /// shortSightingTour - tour a quick entry ("Add Tortoise") belongs to, or
   /// null when there is no usable tour: no default tour, no date or start

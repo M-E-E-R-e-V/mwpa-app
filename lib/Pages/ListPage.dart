@@ -23,6 +23,8 @@ import 'package:mwpaapp/Components/LanguageSelector.dart';
 import 'package:mwpaapp/Pages/List/GpsStatusIndicator.dart';
 import 'package:mwpaapp/Pages/List/LowBatteryBanner.dart';
 import 'package:mwpaapp/Pages/List/SyncStatusLine.dart';
+import 'package:mwpaapp/Pages/List/TourSummaryCard.dart';
+import 'package:mwpaapp/Util/UtilTourSummary.dart';
 import 'package:mwpaapp/Controllers/SyncController.dart';
 import 'package:mwpaapp/Pages/List/ListSightingTile.dart';
 import 'package:mwpaapp/Services/SyncMwpaService.dart';
@@ -219,13 +221,38 @@ class _ListPageState extends State<ListPage>
       (value) async {
         if (value == "ok") {
           if (_prefController.prefToru != null) {
-            UtilSighting.setCurrentEndTour(_sightingController, UtilTourFid.createTTourFId(_prefController.prefToru!));
-            _loadController();
+            final tourFid = UtilTourFid.createTTourFId(_prefController.prefToru!);
+            await UtilSighting.setCurrentEndTour(_sightingController, tourFid);
+            await _loadController();
+
+            if (!context.mounted) return;
+            await TourSummaryDialog.show(context, _endedTourSummary(tourFid));
           } else {
             AppLog.w('List', 'setEndTour: no default tour set');
           }
         }
       }
+    );
+  }
+
+  /// _endedTourSummary - summary of the tour just ended (also without
+  /// sightings: duration and distance)
+  TourSummary _endedTourSummary(String tourFid) {
+    for (final tour in UtilTourSummary.group(_sightingController.sightingList)) {
+      if (tour.tourFid == tourFid) {
+        return tour;
+      }
+    }
+
+    final pref = _prefController.prefToru;
+    final now = TimeOfDay.now();
+
+    return TourSummary(
+      tourFid: tourFid,
+      date: pref?.date,
+      start: pref?.tour_start,
+      end: '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}',
+      sightings: const [],
     );
   }
 
@@ -703,17 +730,32 @@ class _ListPageState extends State<ListPage>
         );
       }
 
+      final items = <Object>[
+        for (final tour in UtilTourSummary.group(sightings)) ...[tour, ...tour.sightings],
+      ];
+
       // pull down to sync with the server
       return RefreshIndicator(
         onRefresh: () => _syncMwpa(dialog: false),
         child: ListView.builder(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.fromLTRB(0, 12, 0, 16),
-          itemCount: sightings.length,
+          padding: const EdgeInsets.fromLTRB(0, 0, 0, 16),
+          itemCount: items.length,
           itemBuilder: (_, index) {
-            final sighting = sightings[index];
+            final item = items[index];
+            final delay = Duration(milliseconds: 50 * index.clamp(0, 8));
+
+            // tour head, followed by the tour's sightings
+            if (item is TourSummary) {
+              return _FadeSlideIn(
+                delay: delay,
+                child: TourSummaryCard(key: ValueKey(item.tourFid), summary: item),
+              );
+            }
+
+            final sighting = item as Sighting;
             return _FadeSlideIn(
-              delay: Duration(milliseconds: 50 * index.clamp(0, 8)),
+              delay: delay,
               child: ListSightingTile(
                 sighting,
                 onTap: () => _showBottomSheet(context, sighting),

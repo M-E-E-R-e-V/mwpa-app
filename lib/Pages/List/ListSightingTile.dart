@@ -10,6 +10,7 @@ import 'package:mwpaapp/Controllers/SpeciesController.dart';
 import 'package:mwpaapp/Dialog/ConfirmDialog.dart';
 import 'package:mwpaapp/Dialog/InfoDialog.dart';
 import 'package:mwpaapp/Models/Sighting.dart';
+import 'package:mwpaapp/Util/UtilSighting.dart';
 import 'package:mwpaapp/Ui/AppIcons.dart';
 import 'package:mwpaapp/Util/UtilPosition.dart';
 import 'package:provider/provider.dart';
@@ -105,18 +106,15 @@ class ListSightingTile extends StatelessWidget {
       }
     }
 
-    String? speciesName = context.read<SpeciesController>().getSpeciesName(sighting.species_id ?? 0);
+    String? speciesName = UtilSighting.displayName(
+      sighting,
+      context.read<SpeciesController>().getSpeciesName(sighting.species_id ?? 0),
+    );
     var state = switch (sighting.validateColor()) {
       Colors.red => SightingState.incomplete,
       Colors.yellow => SightingState.endMissing,
       _ => SightingState.complete,
     };
-
-    if (speciesName == null && _isSet(sighting.other?.trim())) {
-      speciesName = sighting.other!.trim();
-    } else if (speciesName == null && _isSet(sighting.note?.trim())) {
-      speciesName = sighting.note!.trim();
-    }
 
     if (speciesName == null) {
       speciesName = context.l10n.speciesNotFound;
@@ -125,9 +123,6 @@ class ListSightingTile extends StatelessWidget {
         state = SightingState.unknownSpecies;
       }
     }
-
-    // only the common name ("Fin Whale, Finnwal (...)" -> "Fin Whale")
-    speciesName = speciesName.split(',')[0];
 
     final isTurtle = sighting.sightingType == Sighting.TYPE_SHORT;
 
