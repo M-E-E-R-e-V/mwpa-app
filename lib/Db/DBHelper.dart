@@ -12,7 +12,7 @@ import 'package:sqflite/sqflite.dart';
 /// DBHelper
 class DBHelper {
   static Database? _db;
-  static const int _version = 11;
+  static const int _version = 12;
   static const String _tableNameSighting = "sighting";
   static const String _tableNameTourTracking = "tour_tracking";
   static const String _tableNameVehicle = "vehicle";
@@ -66,6 +66,10 @@ class DBHelper {
 
             if (oldVersion <= 8 ) {
               _updateTableSightingV8toV9(batch);
+            }
+
+            if (oldVersion <= 11) {
+              _updateTableTourTrackingV11toV12(batch);
             }
 
             await batch.commit();
@@ -122,6 +126,8 @@ class DBHelper {
                   "date STRING"
               ")"
             );
+
+            db.execute(_createIndexTourTrackingTourDate);
 
             db.execute(
                 "CREATE TABLE IF NOT EXISTS $_tableNameVehicle("
@@ -182,6 +188,13 @@ class DBHelper {
     }
   }
 
+  /// closeDb - only for tests, so initDb can open a fresh database.
+  @visibleForTesting
+  static Future<void> closeDb() async {
+    await _db?.close();
+    _db = null;
+  }
+
   /// _updateTableSightingV1toV2
   static void _updateTableSightingV1toV2(Batch batch) {
     batch.execute('ALTER TABLE $_tableNameSighting ADD group_structure_id INTEGER');
@@ -220,6 +233,17 @@ class DBHelper {
   }
 
   static void _updateTableSightingV8toV9(Batch batch) {
+  }
+
+  /// Index for the position lookup by tour + time (readTourTracking); without
+  /// it every lookup scans the whole, steadily growing tracking table.
+  static const String _createIndexTourTrackingTourDate =
+      'CREATE INDEX IF NOT EXISTS idx_tour_tracking_tour_date '
+      'ON $_tableNameTourTracking(tour_fid, date)';
+
+  /// _updateTableTourTrackingV11toV12
+  static void _updateTableTourTrackingV11toV12(Batch batch) {
+    batch.execute(_createIndexTourTrackingTourDate);
   }
 
   /// insertSighting
@@ -494,12 +518,18 @@ class DBHelper {
     return await _db?.insert(_tableNameTourTracking, behState.toJson()) ?? 1;
   }
 
-  /// readTourTracking
+  /// readTourTracking - first tracking entry of the tour whose date starts
+  /// with [searchDate] (e.g. "2026-06-08 10:05").
+  ///
+  /// Uses a prefix range instead of `LIKE 'prefix%'` so SQLite can use the
+  /// (tour_fid, date) index - LIKE is not index-optimized here.
   static Future<Map<String, dynamic>> readTourTracking(String tourFId, String searchDate) async {
     List<Map<String, dynamic>> list = await _db!.query(
         _tableNameTourTracking,
-        where: "tour_fid = ? AND date LIKE ?",
-        whereArgs: [tourFId, "$searchDate%"]
+        where: "tour_fid = ? AND date >= ? AND date < ?",
+        whereArgs: [tourFId, searchDate, "$searchDate\uffff"],
+        orderBy: "date",
+        limit: 1
     );
 
     if (list.isNotEmpty) {
