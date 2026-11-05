@@ -241,19 +241,40 @@ class _ListPageState extends State<ListPage>
   AppBar _appBar() {
     final dark = isDarkMode(context);
 
+    // two buttons on each side, so the title is really centered
     return AppBar(
-      title: const Text('MWPA'),
-      leading: IconButton(
-        tooltip: dark ? context.l10n.switchToLightTheme : context.l10n.switchToDarkTheme,
-        onPressed: () {
-          context.read<ThemeController>().switchTheme();
-        },
-        icon: Icon(
-          dark ? Icons.wb_sunny_outlined : Icons.nightlight_round,
-        ),
+      centerTitle: true,
+      title: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Image.asset(
+            'assets/images/whale_tail.png',
+            height: 26,
+            color: kButtonFontColor,
+            semanticLabel: 'MWPA',
+            excludeFromSemantics: true,
+          ),
+          const SizedBox(width: 10),
+          const Text('MWPA'),
+        ],
+      ),
+      leadingWidth: 104,
+      leading: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          const LanguageSelector(),
+          IconButton(
+            tooltip: dark ? context.l10n.switchToLightTheme : context.l10n.switchToDarkTheme,
+            onPressed: () {
+              context.read<ThemeController>().switchTheme();
+            },
+            icon: Icon(
+              dark ? Icons.wb_sunny_outlined : Icons.nightlight_round,
+            ),
+          ),
+        ],
       ),
       actions: [
-        const LanguageSelector(),
         const GpsStatusIcon(),
         PopupMenuButton<String>(
           tooltip: context.l10n.menu,
