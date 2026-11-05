@@ -5,6 +5,7 @@ import 'package:mwpaapp/Settings/Preference.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Models/TourPref.dart';
+import 'package:mwpaapp/Util/AppLog.dart';
 
 /// PrefController
 class PrefController extends ChangeNotifier {
@@ -56,10 +57,7 @@ class PrefController extends ChangeNotifier {
         homeAreaTour = TourPref.fromJson(jsonDecode(homeAreaTourStr));
       }
     } catch(e) {
-      if (kDebugMode) {
-        print("PrefController:load");
-        print(e);
-      }
+      AppLog.e('Pref', 'load failed', e);
     }
 
     notifyListeners();
@@ -71,10 +69,7 @@ class PrefController extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(Preference.TOUR, jsonEncode(tour.toJson()));
     } catch(e) {
-      if (kDebugMode) {
-        print("PrefController:saveTour");
-        print(e);
-      }
+      AppLog.e('Pref', 'saveTour failed', e);
     }
 
     prefToru = tour;
@@ -94,10 +89,7 @@ class PrefController extends ChangeNotifier {
         await prefs.setString(Preference.HOME_AREA_TOUR, jsonEncode(tour.toJson()));
       }
     } catch(e) {
-      if (kDebugMode) {
-        print("PrefController:saveHomeAreaTour");
-        print(e);
-      }
+      AppLog.e('Pref', 'saveHomeAreaTour failed', e);
     }
   }
 
@@ -118,10 +110,7 @@ class PrefController extends ChangeNotifier {
         await prefs.remove(key);
       }
     } catch(e) {
-      if (kDebugMode) {
-        print("PrefController:logout");
-        print(e);
-      }
+      AppLog.e('Pref', 'logout failed', e);
     }
 
     isLogin = false;
@@ -138,10 +127,7 @@ class PrefController extends ChangeNotifier {
 
       prominentDisclosureConfirmed = confirmed;
     } catch(e) {
-      if (kDebugMode) {
-        print("PrefController:saveProminentDisclosureConfirmed");
-        print(e);
-      }
+      AppLog.e('Pref', 'saveProminentDisclosureConfirmed failed', e);
     }
   }
 }

@@ -19,6 +19,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
 import '../Models/TourTracking.dart';
+import 'package:mwpaapp/Util/AppLog.dart';
 
 /// GpsStatus - state of the position stream as shown on the main screen
 enum GpsStatus {
@@ -172,6 +173,7 @@ class LocationController extends ChangeNotifier {
     );
 
     if (status != _gpsStatus) {
+      AppLog.i('Location', 'GPS status ${_gpsStatus.name} -> ${status.name}');
       _gpsStatus = status;
       notifyListeners();
     }
@@ -180,9 +182,7 @@ class LocationController extends ChangeNotifier {
   /// _stopStream - after an error or the end of the position stream; the
   /// watchdog restarts it
   void _stopStream([Object? error]) {
-    if (kDebugMode) {
-      print('LocationController: position stream stopped: ${error ?? 'done'}');
-    }
+    AppLog.w('Location', 'position stream stopped: ${error ?? 'done'}');
 
     _positionStreamSubscription?.cancel();
     _positionStreamSubscription = null;
@@ -247,6 +247,9 @@ class LocationController extends ChangeNotifier {
         positionCount++;
         _lastFixAt = DateTime.now();
         // set silently, _setAndSavePosition notifies the listeners
+        if (_gpsStatus != GpsStatus.ok) {
+          AppLog.i('Location', 'GPS status ${_gpsStatus.name} -> ok');
+        }
         _gpsStatus = GpsStatus.ok;
 
         Position tPosition = Position(
@@ -262,9 +265,7 @@ class LocationController extends ChangeNotifier {
             headingAccuracy: position.headingAccuracy
         );
 
-        if (kDebugMode) {
-          print(tPosition.toString());
-        }
+        AppLog.d('Location', tPosition.toString());
 
         _setAndSavePosition(tPosition);
         updateEvent.triggerEvent();
@@ -314,10 +315,7 @@ class LocationController extends ChangeNotifier {
         }
       }
     } catch(e) {
-      if (kDebugMode) {
-        print('LocationController::_loadHomeArea:');
-        print(e);
-      }
+      AppLog.e('Location', 'loadHomeArea failed', e);
 
       rethrow;
     }
@@ -429,9 +427,7 @@ class LocationController extends ChangeNotifier {
         return tLocation;
       }
     } catch(e) {
-      if (kDebugMode) {
-        print(e);
-      }
+      AppLog.w('Location', 'getLocationBy $tourFId', e);
     }
 
     return null;

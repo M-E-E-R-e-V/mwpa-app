@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mwpaapp/Components/Inputs/DynInputValue.dart';
 import 'package:mwpaapp/Components/Inputs/InputFrame.dart';
 import 'package:mwpaapp/Components/Inputs/TagChipField.dart';
 import 'package:mwpaapp/Util/UtilImage.dart';
+import 'package:mwpaapp/Util/AppLog.dart';
 
 /// ImageInput - photo from gallery or camera (value.imgPath); the picked
 /// file is copied to app storage (see [UtilImage.persist]).
@@ -142,10 +142,7 @@ class TagInput extends StatelessWidget {
     try {
       return (jsonDecode(raw) as List<dynamic>).map((e) => "$e").toList();
     } catch (e) {
-      if (kDebugMode) {
-        print('TagInput::parseTags: $raw');
-        print(e);
-      }
+      AppLog.w('Input', 'parseTags: $raw', e);
     }
 
     return raw.split(" ");

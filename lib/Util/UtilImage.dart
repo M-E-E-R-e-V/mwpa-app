@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:mwpaapp/Util/AppLog.dart';
 
 /// UtilImage - keeps sighting photos in app storage that Android does not
 /// clear on its own (image_picker returns files in the cache directory).
@@ -37,10 +37,7 @@ class UtilImage {
       await File(srcPath).copy(target);
       return target;
     } catch (e) {
-      if (kDebugMode) {
-        print('UtilImage::persist: $srcPath');
-        print(e);
-      }
+      AppLog.e('Image', 'persist: $srcPath', e);
     }
 
     // keep the original file rather than losing the photo

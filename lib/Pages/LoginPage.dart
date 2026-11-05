@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Controllers/PrefController.dart';
@@ -14,6 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Mwpa/MwpaAPI.dart';
 import '../Mwpa/MwpaException.dart';
+import 'package:mwpaapp/Util/AppLog.dart';
 
 /// LoginPage
 class LoginPage extends StatefulWidget {
@@ -65,9 +65,7 @@ class _LoginPageState extends State<LoginPage> {
         await _loadUser(api, url, username, password);
       }
     } catch(error) {
-      if (kDebugMode) {
-        print(error);
-      }
+      AppLog.w('Login', 'sign in failed', error);
 
       if (!mounted) return;
 
@@ -141,9 +139,7 @@ class _LoginPageState extends State<LoginPage> {
         await _persistQuickConnect(api, server, username);
       }
     } catch (error) {
-      if (kDebugMode) {
-        print(error);
-      }
+      AppLog.w('Login', 'quick connect failed', error);
 
       if (!mounted) return;
 
@@ -178,6 +174,8 @@ class _LoginPageState extends State<LoginPage> {
         await prefs.setInt(Preference.USERID, userInfo.user!.id);
         await prefs.setInt(Preference.ORGID, userInfo.organization!.id);
 
+        AppLog.i('Login', 'quick connect: logged in, user ${userInfo.user!.id}');
+
         if (!mounted) return;
         Navigator.of(context).pushNamed('/List');
       } else {
@@ -205,6 +203,7 @@ class _LoginPageState extends State<LoginPage> {
         await CredentialStore().writePassword(password);
         await prefs.setInt(Preference.USERID, userInfo.user!.id);
         await prefs.setInt(Preference.ORGID, userInfo.organization!.id);
+        AppLog.i('Login', 'logged in, user ${userInfo.user!.id}');
 
         if (!mounted) return;
         Navigator.of(context).pushNamed('/List');

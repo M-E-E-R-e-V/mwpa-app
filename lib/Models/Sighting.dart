@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mwpaapp/Constants.dart';
@@ -8,6 +7,7 @@ import 'package:mwpaapp/Util/UtilCheckJson.dart';
 import 'package:mwpaapp/Util/UtilTourFId.dart';
 
 import 'package:mwpaapp/Models/Species.dart';
+import 'package:mwpaapp/Util/AppLog.dart';
 
 /// Sighting
 class Sighting {
@@ -164,10 +164,7 @@ class Sighting {
       DateTime tDate = DateTime.parse(date!);
       date = DateFormat("yyyy-MM-dd").format(tDate.toLocal());
     } catch(e) {
-      if (kDebugMode) {
-        print('Sighting::toJson: date parsing error:');
-        print(e);
-      }
+      AppLog.w('Sighting', 'toJson: date parsing error', e);
     }
 
     if (tour_fid != null) {

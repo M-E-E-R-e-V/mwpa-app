@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:mwpaapp/Util/AppLog.dart';
 
 /// One entry of a SelectInput / MultiSelectInput.
 class DynInputSelectItem {
@@ -35,10 +35,7 @@ class DynInputValue {
     try {
       return int.parse(strValue.replaceAll(RegExp(r'[^0-9.]'), ''));
     } catch(e) {
-      if (kDebugMode) {
-        print('DynInputValue::getStrValueAsInt: $strValue');
-        print(e);
-      }
+      AppLog.w('Input', 'getStrValueAsInt: $strValue', e);
     }
 
     return 0;
@@ -56,10 +53,7 @@ class DynInputValue {
     try {
       dateValue = DateTime.parse(date).toLocal();
     } catch(e) {
-      if (kDebugMode) {
-        print('DynInputValue::setDateTime: $date');
-        print(e);
-      }
+      AppLog.w('Input', 'setDateTime: $date', e);
     }
   }
 
@@ -90,10 +84,7 @@ class DynInputValue {
           TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
     }
     catch(e) {
-      if (kDebugMode) {
-        print('DynInputValue::setTimeOfDy: $time');
-        print(e);
-      }
+      AppLog.w('Input', 'setTimeOfDy: $time', e);
     }
   }
 
@@ -109,10 +100,7 @@ class DynInputValue {
     try {
       posValue = Position.fromMap(jsonDecode(pos));
     } catch(e) {
-      if (kDebugMode) {
-        print('DynInputValue::setPositionStr: $pos');
-        print(e);
-      }
+      AppLog.w('Input', 'setPositionStr: $pos', e);
     }
   }
 
@@ -152,10 +140,7 @@ class DynInputValue {
         multiValue.add(tval);
       });
     } catch(e) {
-      if (kDebugMode) {
-        print('DynInputValue::setMultiValue: $val');
-        print(e);
-      }
+      AppLog.w('Input', 'setMultiValue: $val', e);
     }
   }
 

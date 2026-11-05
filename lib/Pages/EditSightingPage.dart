@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:mwpaapp/Components/DefaultButton.dart';
@@ -23,6 +22,7 @@ import 'package:mwpaapp/Util/UtilImage.dart';
 import 'package:mwpaapp/Util/UtilTourFId.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
+import 'package:mwpaapp/Util/AppLog.dart';
 
 /// EditSightingPage
 class EditSightingPage extends StatefulWidget {
@@ -226,13 +226,11 @@ class _EditSightingPageState extends State<EditSightingPage> {
     if (widget.sighting != null) {
       tSigh.id = widget.sighting?.id!;
 
-      var result = await _sightingController.updateSighting(tSighting: tSigh);
-
-      if (kDebugMode) {
-        print(result);
-      }
+      await _sightingController.updateSighting(tSighting: tSigh);
+      AppLog.i('EditSighting', 'updated sighting ${tSigh.id}');
     } else {
       await _sightingController.addSighting(newSighting: tSigh);
+      AppLog.i('EditSighting', 'added sighting');
     }
 
     if (!mounted) return;
@@ -270,9 +268,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
         }
       });
     } catch(e) {
-      if (kDebugMode) {
-        print(e);
-      }
+      AppLog.w('EditSighting', 'loading the tour defaults failed', e);
     }
   }
 
@@ -291,16 +287,26 @@ class _EditSightingPageState extends State<EditSightingPage> {
           aTimeOfDay.minute
       );
 
+      final watch = Stopwatch()..start();
+
       Position? aPos = await _locationController.getLocationBy(
           UtilTourFid.createTTourFId(_prefController.prefToru!),
           tDate
       );
+
+      // field report: the confirm dialog sometimes came late / the position
+      // was not taken - log the lookup time and the user's answer
+      AppLog.i('EditSighting',
+          'position lookup for ${aTimeOfDay.hour}:${aTimeOfDay.minute.toString().padLeft(2, '0')}: '
+          '${aPos == null ? 'none' : 'found'} in ${watch.elapsedMilliseconds} ms');
 
       if (aPos != null && context.mounted) {
         ConfirmDialog.show(
           context,
           "Position is found", "At this time a position was found for the current tour. Should this be used as the position?",
               (p0) {
+            AppLog.i('EditSighting', 'position by time: ${p0 ?? 'dismissed'}');
+
             if (p0 == "ok") {
               onSet(aPos);
             }

@@ -2,6 +2,7 @@ import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:mwpaapp/Util/AppLog.dart';
 
 /// UtilNotificationPermission - Android 13+ runtime permission for
 /// notifications (POST_NOTIFICATIONS). Without it the foreground
@@ -21,9 +22,7 @@ class UtilNotificationPermission {
     try {
       return await _channel.invokeMethod<bool>('request') ?? false;
     } catch (error) {
-      if (kDebugMode) {
-        print('UtilNotificationPermission: $error');
-      }
+      AppLog.w('Notification', 'permission request failed', error);
 
       return false;
     }

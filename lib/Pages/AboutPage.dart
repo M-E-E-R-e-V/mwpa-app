@@ -1,3 +1,6 @@
+import 'dart:io' show Platform;
+
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mwpaapp/Components/Inputs/InputFrame.dart';
@@ -5,6 +8,8 @@ import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Controllers/SightingController.dart';
 import 'package:mwpaapp/Models/Sighting.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
+import 'package:mwpaapp/Util/AppLog.dart';
+import 'package:mwpaapp/Util/UtilShare.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -41,6 +46,47 @@ class _AboutPageState extends State<AboutPage> {
       _server = prefs.getString(Preference.URL) ?? '';
       _username = prefs.getString(Preference.USERNAME) ?? '';
     });
+  }
+
+  bool _sharing = false;
+
+  /// _shareLog - log file with app/device header via the share sheet
+  Future<void> _shareLog() async {
+    setState(() => _sharing = true);
+
+    try {
+      var device = '';
+
+      if (Platform.isAndroid) {
+        final info = await DeviceInfoPlugin().androidInfo;
+        device = '${info.manufacturer} ${info.model}, Android ${info.version.release} (SDK ${info.version.sdkInt})';
+      }
+
+      final header = [
+        'MWPA app $kAppVersion ($kAppBuild)',
+        'Device: $device',
+        'Server: $_server',
+        'User: $_username',
+        'Exported: ${DateTime.now()}',
+      ].join('\n');
+
+      AppLog.i('About', 'log shared');
+      final file = await AppLog.exportFile(header: header);
+
+      if (!await UtilShare.shareFile(file.path, subject: 'MWPA app log')) {
+        throw Exception('Sharing is not available on this device');
+      }
+    } catch (error, stack) {
+      AppLog.e('About', 'share log failed', error, stack);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Log could not be shared: $error')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _sharing = false);
+    }
   }
 
   /// _copy - no browser plugin in the app: links are copied
@@ -167,6 +213,29 @@ class _AboutPageState extends State<AboutPage> {
                   label: 'Software development',
                   value: '${AboutPage.developerName}\n${AboutPage.developerUrl}',
                   onTap: () => _copy(AboutPage.developerUrl),
+                ),
+              ],
+            ),
+
+            // support -------------------------------------------------------
+            InputSection(
+              title: 'Support',
+              icon: Icons.support_agent,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(top: 12, bottom: 12),
+                  child: Text(
+                    'If something does not work, share the app log with the '
+                    'MWPA team (e.g. by mail). It contains the app events and '
+                    'errors, but no passwords.',
+                  ),
+                ),
+                OutlinedButton.icon(
+                  onPressed: _sharing ? null : _shareLog,
+                  icon: _sharing
+                      ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                      : const Icon(Icons.share_outlined),
+                  label: const Text('Share app log'),
                 ),
               ],
             ),

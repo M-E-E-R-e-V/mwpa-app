@@ -1,7 +1,7 @@
-import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:mwpaapp/Util/UtilCheckJson.dart';
 import 'package:mwpaapp/Util/UtilTourFId.dart';
+import 'package:mwpaapp/Util/AppLog.dart';
 
 /// TourTracking
 class TourTracking {
@@ -43,10 +43,7 @@ class TourTracking {
       DateTime tDate = DateTime.parse(date!);
       date = DateFormat("yyyy-MM-dd HH:mm:ss").format(tDate.toLocal());
     } catch(e) {
-      if (kDebugMode) {
-        print('TourTracking::toJson: date parsing error:');
-        print(e);
-      }
+      AppLog.w('TourTracking', 'toJson: date parsing error', e);
     }
 
     data['uuid'] = uuid;

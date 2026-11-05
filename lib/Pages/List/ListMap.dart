@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
@@ -10,6 +9,7 @@ import 'package:mwpaapp/Controllers/SightingController.dart';
 import 'package:mwpaapp/Util/UtilPosition.dart';
 import 'package:mwpaapp/Util/UtilTileServer.dart';
 import 'package:provider/provider.dart';
+import 'package:mwpaapp/Util/AppLog.dart';
 
 /// ListMap - map with the home area, the sightings of the list and the
 /// current GPS position (flutter_map, works on Android and iOS).
@@ -109,9 +109,7 @@ class _ListMapState extends State<ListMap> {
           sighting.validateColor(),
         ));
       } catch (locExcept) {
-        if (kDebugMode) {
-          print(locExcept);
-        }
+        AppLog.w('Map', 'location not readable', locExcept);
       }
     }
 

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Controllers/BehaviouralStateController.dart';
 import 'package:mwpaapp/Controllers/EncounterCategoriesController.dart';
 import 'package:mwpaapp/Controllers/LocationController.dart';
@@ -20,6 +21,7 @@ import 'package:mwpaapp/Pages/ListPage.dart';
 import 'package:mwpaapp/Pages/LoginPage.dart';
 import 'package:mwpaapp/Pages/ProminentDisclosurePage.dart';
 import 'package:mwpaapp/Ui/Themes.dart';
+import 'package:mwpaapp/Util/AppLog.dart';
 import 'package:provider/provider.dart';
 
 /// _registerFontLicenses - the bundled fonts on the license page (packages
@@ -40,6 +42,20 @@ void _registerFontLicenses() {
 /// main
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await AppLog.init();
+  AppLog.i('App', 'start $kAppVersion ($kAppBuild)');
+
+  // uncaught errors go to the log file, so they can be shared from the field
+  FlutterError.onError = (details) {
+    AppLog.e('Flutter', details.exceptionAsString(), null, details.stack);
+    FlutterError.presentError(details);
+  };
+
+  PlatformDispatcher.instance.onError = (error, stack) {
+    AppLog.e('Uncaught', error, null, stack);
+    return false;
+  };
 
   if (kDebugMode) {
     // Allow self-signed certificates against local MWPA dev servers. Never

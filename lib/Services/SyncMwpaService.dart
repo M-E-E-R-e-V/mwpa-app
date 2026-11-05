@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Controllers/SpeciesController.dart';
 import 'package:mwpaapp/Db/DBHelper.dart';
@@ -22,6 +21,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import '../Mwpa/Models/SightingSaveResponse.dart';
 import '../Mwpa/MwpaAPI.dart';
+import 'package:mwpaapp/Util/AppLog.dart';
 
 /// SyncMwpaService
 class SyncMwpaService {
@@ -64,9 +64,7 @@ class SyncMwpaService {
       final tracks = rows.map((data) => TourTracking.fromJson(data)).toList();
 
       if (!await save(tracks)) {
-        if (kDebugMode) {
-          print('SyncMwpaService::uploadTourTracking: batch not accepted for $tourFId, retry with next sync');
-        }
+        AppLog.i('Sync', 'uploadTourTracking: batch not accepted for $tourFId, retry with next sync');
 
         break;
       }
@@ -87,9 +85,15 @@ class SyncMwpaService {
   /// sync
   Future<void> sync(Function(int, String)? update) async {
     MwpaApi? opened;
+    final watch = Stopwatch()..start();
+    AppLog.i('Sync', 'start');
 
     try {
       await _sync(update, (api) => opened = api);
+      AppLog.i('Sync', 'finished in ${watch.elapsedMilliseconds} ms');
+    } catch (error) {
+      AppLog.e('Sync', 'aborted after ${watch.elapsedMilliseconds} ms', error);
+      rethrow;
     } finally {
       // release the kept-alive connection to the server
       opened?.close();
@@ -150,10 +154,7 @@ class SyncMwpaService {
         }
       }
     } catch(e) {
-      if (kDebugMode) {
-        print('SyncMwpaService::sync:login:');
-        print(e);
-      }
+      AppLog.e('Sync', 'login failed', e);
 
       rethrow;
     }
@@ -170,10 +171,7 @@ class SyncMwpaService {
         await prefs.setInt(Preference.ORGID, userInfo.organization!.id);
       }
     } catch(e) {
-      if (kDebugMode) {
-        print('SyncMwpaService::sync:userdata:');
-        print(e);
-      }
+      AppLog.e('Sync', 'userdata failed', e);
 
       rethrow;
     }
@@ -194,10 +192,7 @@ class SyncMwpaService {
         }
       }
     } catch(e) {
-      if (kDebugMode) {
-        print('SyncMwpaService::sync:vehicle:');
-        print(e);
-      }
+      AppLog.e('Sync', 'vehicle failed', e);
 
       rethrow;
     }
@@ -223,10 +218,7 @@ class SyncMwpaService {
         }
       }
     } catch(e) {
-      if (kDebugMode) {
-        print('SyncMwpaService::sync:vehicleDriver:');
-        print(e);
-      }
+      AppLog.e('Sync', 'vehicleDriver failed', e);
 
       rethrow;
     }
@@ -255,10 +247,7 @@ class SyncMwpaService {
         }
       }
     } catch(e) {
-      if (kDebugMode) {
-        print('SyncMwpaService::sync:species:');
-        print(e);
-      }
+      AppLog.e('Sync', 'species failed', e);
 
       rethrow;
     }
@@ -283,10 +272,7 @@ class SyncMwpaService {
         }
       }
     } catch(e) {
-      if (kDebugMode) {
-        print('SyncMwpaService::sync:encounterCategorie:');
-        print(e);
-      }
+      AppLog.e('Sync', 'encounterCategorie failed', e);
 
       rethrow;
     }
@@ -311,10 +297,7 @@ class SyncMwpaService {
         }
       }
     } catch(e) {
-      if (kDebugMode) {
-        print('SyncMwpaService::sync:BehaviouralState:');
-        print(e);
-      }
+      AppLog.e('Sync', 'BehaviouralState failed', e);
 
       rethrow;
     }
@@ -372,10 +355,7 @@ class SyncMwpaService {
         }
       }
     } catch(e) {
-      if (kDebugMode) {
-        print('SyncMwpaService::sync:TrackingAreaHomeData:');
-        print(e);
-      }
+      AppLog.e('Sync', 'TrackingAreaHomeData failed', e);
 
       rethrow;
     }
@@ -419,10 +399,7 @@ class SyncMwpaService {
             await DBHelper.updateSighting(sighting);
           }
         } catch(ei) {
-          if (kDebugMode) {
-            print('SyncMwpaService::sync:sightingUpdate: ');
-            print(sighting.id);
-          }
+          AppLog.e('Sync', 'sightingUpdate failed for sighting ${sighting.id}', ei);
 
           rethrow;
         }
@@ -439,10 +416,7 @@ class SyncMwpaService {
               await api.saveSightingImage(sighting.unid!, sighting.image!);
             }
           } catch(ei) {
-            if (kDebugMode) {
-              print('SyncMwpaService::sync:image: ');
-              print(ei);
-            }
+            AppLog.w('Sync', 'image upload failed', ei);
           }
         }
 
@@ -453,40 +427,27 @@ class SyncMwpaService {
             if (saveResponse.canDelete != null) {
               if (saveResponse.canDelete!) {
                 if (sighting.image != null && sighting.image != "") {
-                  if (kDebugMode) {
-                    print('SyncMwpaService::sync:tracking: delete image from sighting: ${sighting.image}');
-                  }
+                  AppLog.i('Sync', 'tracking: delete image from sighting: ${sighting.image}');
 
                   File(sighting.image!).delete();
                 }
 
-                if (kDebugMode) {
-                  print('SyncMwpaService::sync:tracking: delete sighting: ${sighting.unid}');
-                }
+                AppLog.i('Sync', 'tracking: delete sighting: ${sighting.unid}');
 
                 DBHelper.deleteSighting(sighting);
               }
             } else {
-              if (kDebugMode) {
-                print('SyncMwpaService::sync:tracking: SightingSaveResponse canDelete is empty');
-              }
+              AppLog.d('Sync', 'sighting ${sighting.unid}: canDelete not set');
             }
           } else {
-            if (kDebugMode) {
-              print('SyncMwpaService::sync:tracking: SightingSaveResponse unid is empty');
-            }
+            AppLog.i('Sync', 'tracking: SightingSaveResponse unid is empty');
           }
         } else {
-          if (kDebugMode) {
-            print('SyncMwpaService::sync:tracking: SightingSaveResponse is empty');
-          }
+          AppLog.i('Sync', 'tracking: SightingSaveResponse is empty');
         }
       }
     } catch(e) {
-      if (kDebugMode) {
-        print('SyncMwpaService::sync:');
-        print(e);
-      }
+      AppLog.e('Sync', 'sightings upload failed', e);
 
       rethrow;
     }
@@ -519,9 +480,7 @@ class SyncMwpaService {
               },
             );
           } else {
-            if (kDebugMode) {
-              print('SyncMwpaService::sync:tracking: SightingTourTrackingCheck isComplete: $isComplete');
-            }
+            AppLog.d('Sync', 'tracking $tourFId: isComplete $isComplete');
 
             await DBHelper.setTourTrackingSynced(tourFId, true);
 
@@ -536,23 +495,16 @@ class SyncMwpaService {
             );
 
             if (canDeleteLocal) {
-              if (kDebugMode) {
-                print('SyncMwpaService::sync:tracking: delete tracking entries by tourFId: $tourFId');
-              }
+              AppLog.i('Sync', 'tracking: delete tracking entries by tourFId: $tourFId');
 
               await DBHelper.deleteTourTrackingEntries(tourFId);
             }
           }
         } else {
-          if (kDebugMode) {
-            print('SyncMwpaService::sync:tracking: SightingTourTrackingCheck return null');
-          }
+          AppLog.i('Sync', 'tracking: SightingTourTrackingCheck return null');
         }
       } catch(e) {
-        if (kDebugMode) {
-          print('SyncMwpaService::sync:tracking:');
-          print(e);
-        }
+        AppLog.e('Sync', 'tracking failed', e);
 
         rethrow;
       }

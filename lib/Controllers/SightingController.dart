@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:mwpaapp/Db/DBHelper.dart';
 import 'package:mwpaapp/Models/Sighting.dart';
+import 'package:mwpaapp/Util/AppLog.dart';
 
 /// SightingController
 class SightingController extends ChangeNotifier {
@@ -21,11 +22,9 @@ class SightingController extends ChangeNotifier {
 
   /// delete
   Future<void> delete(Sighting oldSighting) async {
-    var val = await DBHelper.deleteSighting(oldSighting);
+    await DBHelper.deleteSighting(oldSighting);
 
-    if (kDebugMode) {
-      print(val);
-    }
+    AppLog.i('Sightings', 'deleted sighting ${oldSighting.id}');
   }
 
   /// updateSighting

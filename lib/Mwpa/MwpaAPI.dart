@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:mwpaapp/Models/BehaviouralState.dart';
@@ -35,6 +34,7 @@ import 'package:mwpaapp/Mwpa/MwpaException.dart';
 import 'package:path/path.dart' as p;
 
 import '../Models/TourTracking.dart';
+import 'package:mwpaapp/Util/AppLog.dart';
 
 /// MwpaApi
 class MwpaApi {
@@ -128,9 +128,7 @@ class MwpaApi {
         }
       }
     } on PlatformException {
-      if (kDebugMode) {
-        print('Failed to get platform version');
-      }
+      AppLog.w('Api', 'device details not available');
     }
 
     return [deviceName, deviceVersion, identifier];
@@ -284,9 +282,7 @@ class MwpaApi {
       final objResponse = DefaultReturn.fromJson(jsonDecode(response.body));
       return objResponse.statusCode == StatusCodes.OK;
     } catch (error) {
-      if (kDebugMode) {
-        print(error);
-      }
+      AppLog.w('Api', 'image upload failed: ${p.basename(imgFile)}', error);
     }
 
     return false;
@@ -315,9 +311,7 @@ class MwpaApi {
         return objResponse.isExist ?? false;
       }
     } catch (error) {
-      if (kDebugMode) {
-        print(error);
-      }
+      AppLog.w('Api', 'image exist check failed: ${p.basename(imgFile)}', error);
     }
 
     return false;
@@ -399,15 +393,11 @@ class MwpaApi {
     } on MwpaException {
       rethrow;
     } on TimeoutException catch (error) {
-      if (kDebugMode) {
-        print(error);
-      }
+      AppLog.w('Api', 'request timeout', error);
 
       throw Exception('Connection timeout, the server did not respond');
     } catch (error) {
-      if (kDebugMode) {
-        print(error);
-      }
+      AppLog.w('Api', 'connection error', error);
 
       throw Exception('Connection error');
     }

@@ -1,7 +1,7 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mwpaapp/Util/AppLog.dart';
 
 /// CredentialStore - keeps the login password in the platform's secure
 /// storage (Android Keystore / iOS Keychain) instead of plain
@@ -29,9 +29,7 @@ class CredentialStore {
         await prefs.remove(Preference.PASSWORD);
       } catch (error) {
         // keep the legacy value, the move is retried with the next read
-        if (kDebugMode) {
-          print(error);
-        }
+        AppLog.e('Credentials', error);
       }
 
       return legacy;
@@ -40,9 +38,7 @@ class CredentialStore {
     try {
       return await _storage.read(key: _passwordKey);
     } catch (error) {
-      if (kDebugMode) {
-        print(error);
-      }
+      AppLog.e('Credentials', error);
 
       return null;
     }
@@ -62,9 +58,7 @@ class CredentialStore {
     try {
       await _storage.delete(key: _passwordKey);
     } catch (error) {
-      if (kDebugMode) {
-        print(error);
-      }
+      AppLog.e('Credentials', error);
     }
 
     final prefs = await SharedPreferences.getInstance();

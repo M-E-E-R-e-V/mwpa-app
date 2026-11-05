@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
@@ -14,6 +13,7 @@ import 'package:mwpaapp/Models/Sighting.dart';
 import 'package:mwpaapp/Ui/AppIcons.dart';
 import 'package:mwpaapp/Util/UtilPosition.dart';
 import 'package:provider/provider.dart';
+import 'package:mwpaapp/Util/AppLog.dart';
 
 /// Completeness of a sighting as shown in the list (from
 /// [Sighting.validateColor]).
@@ -54,14 +54,19 @@ class ListSightingTile extends StatelessWidget {
         "Do you want to set the end location/duration time for this sighting?",
         (p0) {
           if (p0 == 'ok') {
+            final watch = Stopwatch()..start();
             sighting.location_end = jsonEncode(locationController.currentPosition?.toJson());
 
             if ( sighting.duration_until == null || sighting.duration_until == 'null' || sighting.duration_until == '') {
               sighting.duration_until = DateFormat('HH:mm').format(DateTime.now());
             }
 
-            sightingController.updateSighting(tSighting: sighting);
-            sightingController.getSightings();
+            sightingController
+                .updateSighting(tSighting: sighting)
+                .then((_) => sightingController.getSightings())
+                .then((_) => AppLog.i('List',
+                    'end location set for sighting ${sighting.id} in ${watch.elapsedMilliseconds} ms '
+                    '(${sightingController.sightingList.length} sightings)'));
           }
         });
     }
@@ -95,9 +100,7 @@ class ListSightingTile extends StatelessWidget {
         final tPos = Position.fromMap(jsonDecode(sighting.location_begin!));
         locationString = UtilPosition.getStr(tPos);
       } catch(locExp) {
-        if (kDebugMode) {
-          print(locExp);
-        }
+        AppLog.w('List', 'begin location not readable', locExp);
       }
     }
 

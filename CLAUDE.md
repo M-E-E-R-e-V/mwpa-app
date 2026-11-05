@@ -77,6 +77,10 @@ The edit pages build their forms from `lib/Components/Inputs/` (import the barre
 - `distance_coast` is stored in **meters** (app GPS value, and the backend exports it as meters). `DistanceInput` shows/accepts nautical miles and converts via `UtilDistanceCoast.metersToNmText` / `nmTextToMeters` — never store a typed nm value directly.
 - Photos: `ImageInput` copies the picked file into app storage with `UtilImage.persist` (image_picker returns cache files that Android may clear before the next sync); `EditSightingPage` also persists legacy cache paths on save.
 
+### Logging
+
+Use `AppLog` (`lib/Util/AppLog.dart`) instead of `print`: `AppLog.d/i/w/e(tag, message, [error, stack])`. `d` only goes to the console of debug builds; `i/w/e` are also written to `<app support>/logs/mwpa.log` (rotated at 512 KB, one old file kept). Uncaught errors are logged via `FlutterError.onError` / `PlatformDispatcher.onError` in `main.dart`. Users share the log from the About page ("Share app log" → own MethodChannel `mwpa/share` + `FileProvider` `${applicationId}.share`, cache dir only). Never log passwords, cookies or other credentials. Per-item noise in loops belongs in `d`.
+
 ### Utilities of note
 
 `lib/Util/` contains pure helpers — `UtilPosition`, `UtilLocation`, `UtilDistanceCoast`, `UtilTourFId` (tour foreign-ID generation), `UtilTourTracking` (when local tracking points may be deleted after sync), `UtilTileServer` (map tile config), `UtilSighting`, `UtilDate`, `UtilCheckJson`, `UtilImage`. Prefer extending these over inlining geo/date logic in widgets or controllers.

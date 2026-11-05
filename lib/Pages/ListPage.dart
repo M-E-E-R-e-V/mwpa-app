@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:mwpaapp/Components/Inputs/DynInputValue.dart';
@@ -32,6 +31,7 @@ import 'package:provider/provider.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'List/ListMap.dart';
 import 'package:mwpaapp/Ui/AppIcons.dart';
+import 'package:mwpaapp/Util/AppLog.dart';
 
 /// ListPage
 class ListPage extends StatefulWidget {
@@ -172,6 +172,7 @@ class _ListPageState extends State<ListPage>
 
     ConfirmDialog.show(context, "Logout", message, destructive: unsynced > 0, okLabel: 'Logout', (p0) async {
       if (p0 == "ok") {
+        AppLog.i('List', 'logout ($unsynced unsynced sightings)');
         await CredentialStore().deletePassword();
         await _prefController.logout();
         _locationController.resetTour();
@@ -195,9 +196,7 @@ class _ListPageState extends State<ListPage>
             UtilSighting.setCurrentEndTour(_sightingController, UtilTourFid.createTTourFId(_prefController.prefToru!));
             _loadController();
           } else {
-            if (kDebugMode) {
-              print("_ListPageState:_setEndTour - prefToru is empty!");
-            }
+            AppLog.w('List', 'setEndTour: no default tour set');
           }
         }
       }
@@ -418,10 +417,7 @@ class _ListPageState extends State<ListPage>
         }
       }
     } catch(e) {
-      if (kDebugMode) {
-        print('ListPage::_addTaskBar: date parsing error:');
-        print(e);
-      }
+      AppLog.w('List', 'tour date parsing error', e);
     }
   }
 

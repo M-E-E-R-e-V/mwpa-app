@@ -8,6 +8,7 @@ import 'package:mwpaapp/Models/TrackingAreaHome.dart';
 import 'package:mwpaapp/Models/Vehicle.dart';
 import 'package:mwpaapp/Models/VehicleDriver.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:mwpaapp/Util/AppLog.dart';
 
 /// DBHelper
 class DBHelper {
@@ -34,6 +35,7 @@ class DBHelper {
           path,
           version: _version,
           onUpgrade: (db, oldVersion, newVersion) async {
+            AppLog.i('DB', 'upgrade from v$oldVersion to v$newVersion');
             var batch = db.batch();
 
             if (oldVersion <= 1) {
@@ -187,9 +189,7 @@ class DBHelper {
           }
       );
     } catch (e) {
-      if (kDebugMode) {
-        print(e);
-      }
+      AppLog.e('DB', 'open/upgrade database failed', e);
     }
   }
 
