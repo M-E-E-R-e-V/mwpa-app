@@ -28,6 +28,7 @@ import 'package:mwpaapp/Pages/LoginPage.dart';
 import 'package:mwpaapp/Pages/ProminentDisclosurePage.dart';
 import 'package:mwpaapp/Ui/Themes.dart';
 import 'package:mwpaapp/Util/AppLog.dart';
+import 'package:mwpaapp/Util/UtilTileCache.dart';
 import 'package:mwpaapp/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:mwpaapp/l10n/l10n.dart';
@@ -61,6 +62,9 @@ void main() async {
 
   await AppLog.init();
   AppLog.i('App', 'start $kAppVersion ($kAppBuild)');
+
+  // before the first map: tiles in app storage instead of the cache dir
+  await UtilTileCache.init();
 
   // uncaught errors go to the log file, so they can be shared from the field
   FlutterError.onError = (details) {

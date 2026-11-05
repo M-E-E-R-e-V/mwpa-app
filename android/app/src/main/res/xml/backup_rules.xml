@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Auto Backup up to Android 11: the map tile cache (UtilTileCache) can be
+     hundreds of MB and is re-downloadable; it would exceed the backup quota. -->
+<full-backup-content>
+    <exclude domain="file" path="map_tiles/" />
+</full-backup-content>
