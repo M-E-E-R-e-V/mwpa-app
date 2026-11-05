@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:mwpaapp/Ui/Fonts.dart';
 import 'package:mwpaapp/Constants.dart';
 
 class Themes {
@@ -29,9 +29,10 @@ class Themes {
       scaffoldBackgroundColor: scheme.brightness == Brightness.dark
           ? kPrimaryDarkBackgroundColor
           : kPrimaryBackgroundColor,
-      textTheme: GoogleFonts.latoTextTheme(
-        ThemeData(brightness: scheme.brightness).textTheme,
-      ),
+      fontFamily: kFontFamily,
+      textTheme: ThemeData(brightness: scheme.brightness)
+          .textTheme
+          .apply(fontFamily: kFontFamily),
     );
 
     return base.copyWith(
@@ -41,7 +42,7 @@ class Themes {
         elevation: 0,
         scrolledUnderElevation: 2,
         centerTitle: false,
-        titleTextStyle: GoogleFonts.lato(
+        titleTextStyle: latoStyle(
           textStyle: const TextStyle(
             color: kButtonFontColor,
             fontSize: 20,
@@ -76,7 +77,7 @@ class Themes {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: GoogleFonts.lato(
+          textStyle: latoStyle(
             fontWeight: FontWeight.w700,
             fontSize: 16,
           ),
@@ -90,7 +91,7 @@ class Themes {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: GoogleFonts.lato(
+          textStyle: latoStyle(
             fontWeight: FontWeight.w700,
             fontSize: 16,
           ),
@@ -101,7 +102,7 @@ class Themes {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: scheme.primary,
-          textStyle: GoogleFonts.lato(fontWeight: FontWeight.w600),
+          textStyle: latoStyle(fontWeight: FontWeight.w600),
         ),
       ),
       cardTheme: CardThemeData(

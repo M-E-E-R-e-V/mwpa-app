@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:mwpaapp/Ui/Fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:mwpaapp/Components/DefaultButton.dart';
 import 'package:mwpaapp/Controllers/LocationController.dart';
@@ -128,7 +128,7 @@ class ListSightingTile extends StatelessWidget {
           size: 18,
         );
       } else {
-        Color nColor = Colors.green.value == backgroundColor.value ? Colors.white : Colors.green;
+        Color nColor = Colors.green.toARGB32() == backgroundColor.toARGB32() ? Colors.white : Colors.green;
 
         syncStatus = Icon(
           Icons.cloud,
@@ -216,7 +216,7 @@ class ListSightingTile extends StatelessWidget {
                           // species name --------------------------------------
                           Text(
                             speciesName,
-                            style: GoogleFonts.lato(
+                            style: latoStyle(
                                 textStyle: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -243,7 +243,7 @@ class ListSightingTile extends StatelessWidget {
                         const SizedBox(width: 4),
                         Text(
                           timeString,
-                          style: GoogleFonts.lato(
+                          style: latoStyle(
                             textStyle: TextStyle(
                               fontSize: 13,
                               color: backgroundColor.computeLuminance() < 0.5 ? Colors.grey[100] : Colors.grey[700]
@@ -261,7 +261,7 @@ class ListSightingTile extends StatelessWidget {
                         const SizedBox(width: 4),
                         Text(
                           "$speciesCount",
-                          style: GoogleFonts.lato(
+                          style: latoStyle(
                               textStyle: TextStyle(
                                   fontSize: 13,
                                   color: backgroundColor.computeLuminance() < 0.5 ? Colors.grey[100] : Colors.grey[700]
@@ -283,7 +283,7 @@ class ListSightingTile extends StatelessWidget {
                         const SizedBox(width: 4),
                         Text(
                           locationString,
-                          style: GoogleFonts.lato(
+                          style: latoStyle(
                               textStyle: TextStyle(
                                   fontSize: 13,
                                   color: backgroundColor.computeLuminance() < 0.5 ? Colors.grey[100] : Colors.grey[700]
@@ -299,7 +299,7 @@ class ListSightingTile extends StatelessWidget {
               margin: const EdgeInsets.symmetric(horizontal: 10),
               height: 60,
               width: 0.5,
-              color: backgroundColor.computeLuminance() < 0.5 ? Colors.grey[200]!.withOpacity(0.7) : Colors.grey[800]!.withOpacity(0.7),
+              color: backgroundColor.computeLuminance() < 0.5 ? Colors.grey[200]!.withValues(alpha: 0.7) : Colors.grey[800]!.withValues(alpha: 0.7),
             ),
             Column(
               children: !endLocationEmpty ? symbols : [

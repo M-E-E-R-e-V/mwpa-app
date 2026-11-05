@@ -60,21 +60,13 @@ The app is implemented with Flutter (Dart) and should support the following plat
   * Flutter -> Flutter Pub Upgrade
   * Flutter -> Flutter Upgrade
 
-* Add for Debugger 2 Task:
+* Add for Debugger Task:
   * Edit Configuration main.dart
     * Add "Create Tool" with:
       * Name: Flutter icon
       * Group: External Tools
       * Program: /home/user/flutter/bin/flutter
-      * Arguments: pub run flutter_launcher_icons:main
-      * Working directory: /home/user/*/mwpa-app
-
-    * Add "Create Tool" with:
-      * Name: Flutter name
-      * Description: Flutter App Name
-      * Group: External Tools
-      * Program: /home/user/flutter/bin/flutter
-      * Arguments: pub run flutter_app_name
+      * Arguments: dart run flutter_launcher_icons
       * Working directory: /home/user/*/mwpa-app
 
 Now you can work with the project!

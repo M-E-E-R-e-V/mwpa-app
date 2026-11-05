@@ -1,6 +1,6 @@
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:mwpaapp/Ui/Fonts.dart';
 
 // Accepted backend API versions. The mobile app refuses to talk to a server
 // that returns a value outside these sets, because the wire shape may have
@@ -27,7 +27,7 @@ const kButtonBackgroundColor = Color(0xfff9901c);
 const kButtonFontColor = Color(0xffffffff);
 
 TextStyle subHeadingStyle(BuildContext context) {
-  return GoogleFonts.lato(
+  return latoStyle(
     textStyle: TextStyle(
       fontSize: 24,
       fontWeight: FontWeight.bold,
@@ -37,7 +37,7 @@ TextStyle subHeadingStyle(BuildContext context) {
 }
 
 TextStyle headingStyle(BuildContext context) {
-  return GoogleFonts.lato(
+  return latoStyle(
     textStyle: TextStyle(
       fontSize: 30,
       fontWeight: FontWeight.bold,
@@ -47,7 +47,7 @@ TextStyle headingStyle(BuildContext context) {
 }
 
 TextStyle titleStyle(BuildContext context) {
-  return GoogleFonts.lato(
+  return latoStyle(
     textStyle: TextStyle(
       fontSize: 16,
       fontWeight: FontWeight.w400,
@@ -57,7 +57,7 @@ TextStyle titleStyle(BuildContext context) {
 }
 
 TextStyle subTitleStyle(BuildContext context) {
-  return GoogleFonts.lato(
+  return latoStyle(
       textStyle: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w400,

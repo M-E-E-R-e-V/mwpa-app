@@ -291,8 +291,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
           tDate
       );
 
-      if (aPos != null) {
-        // TODO (do not use BuildContexts across async gaps)
+      if (aPos != null && context.mounted) {
         ConfirmDialog.show(
           context,
           "Position is found", "At this time a position was found for the current tour. Should this be used as the position?",

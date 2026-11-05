@@ -320,7 +320,8 @@ class _ListPageState extends State<ListPage>
 
           if (!diffTourDateIgnored) {
             if (!UtilDate.isCurrentDate(tDate)) {
-              Future.delayed(Duration.zero, () =>
+              Future.delayed(Duration.zero, () {
+                  if (!mounted) return;
                   ConfirmDialog.show(
                       context,
                       "Tour date",
@@ -334,7 +335,8 @@ class _ListPageState extends State<ListPage>
                           diffTourDateIgnored = true;
                         }
                       }
-                  ));
+                  );
+              });
             }
           }
 

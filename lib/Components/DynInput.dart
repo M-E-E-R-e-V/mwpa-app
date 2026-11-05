@@ -672,13 +672,13 @@ class _DynInputState extends State<DynInput> {
                                   isDense: true,
                                   focusedBorder: UnderlineInputBorder(
                                       borderSide: BorderSide(
-                                          color: Colors.redAccent.withOpacity(0.0),
+                                          color: Colors.redAccent.withValues(alpha: 0.0),
                                           width: 0
                                       )
                                   ),
                                   enabledBorder: UnderlineInputBorder(
                                       borderSide: BorderSide(
-                                          color: Colors.redAccent.withOpacity(0.0),
+                                          color: Colors.redAccent.withValues(alpha: 0.0),
                                           width: 0
                                       )
                                   ),
@@ -932,13 +932,13 @@ class _DynInputState extends State<DynInput> {
                       hintStyle: subTitleStyle(context),
                       focusedBorder: UnderlineInputBorder(
                           borderSide: BorderSide(
-                              color: Colors.redAccent.withOpacity(0.0),
+                              color: Colors.redAccent.withValues(alpha: 0.0),
                               width: 0
                           )
                       ),
                       enabledBorder: UnderlineInputBorder(
                           borderSide: BorderSide(
-                              color: Colors.redAccent.withOpacity(0.0),
+                              color: Colors.redAccent.withValues(alpha: 0.0),
                               width: 0
                           )
                       )
