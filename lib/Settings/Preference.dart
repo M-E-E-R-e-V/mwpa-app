@@ -11,6 +11,9 @@ class Preference {
   static const TOUR = "tour";
   static const PROMINENT_DISCLOSURE_CONFIRMED = "prominent_disclosure_confirmed";
   static const DARK_MODE = "isDarkMode";
+  /// tour started automatically by leaving the home area (resumed after an
+  /// app restart on the same day)
+  static const HOME_AREA_TOUR = "home_area_tour";
 
   SharedPreferences? prefs;
 

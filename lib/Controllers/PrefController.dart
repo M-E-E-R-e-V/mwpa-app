@@ -13,6 +13,9 @@ class PrefController extends ChangeNotifier {
   bool prominentDisclosureConfirmed = false;
   TourPref? prefToru;
 
+  /// running tour of the home-area mode, see Preference.HOME_AREA_TOUR
+  TourPref? homeAreaTour;
+
   /// load
   Future<void> load() async {
     try {
@@ -44,6 +47,14 @@ class PrefController extends ChangeNotifier {
           prefToru = TourPref.fromJson(jsonDecode(pTourStr));
         }
       }
+
+      // read running home area tour -------------------------------------------
+
+      final homeAreaTourStr = prefs.getString(Preference.HOME_AREA_TOUR);
+
+      if (homeAreaTourStr != null) {
+        homeAreaTour = TourPref.fromJson(jsonDecode(homeAreaTourStr));
+      }
     } catch(e) {
       if (kDebugMode) {
         print("PrefController:load");
@@ -68,6 +79,26 @@ class PrefController extends ChangeNotifier {
 
     prefToru = tour;
     notifyListeners();
+  }
+
+  /// saveHomeAreaTour - store the running home area tour, null removes it
+  Future<void> saveHomeAreaTour(TourPref? tour) async {
+    homeAreaTour = tour;
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      if (tour == null) {
+        await prefs.remove(Preference.HOME_AREA_TOUR);
+      } else {
+        await prefs.setString(Preference.HOME_AREA_TOUR, jsonEncode(tour.toJson()));
+      }
+    } catch(e) {
+      if (kDebugMode) {
+        print("PrefController:saveHomeAreaTour");
+        print(e);
+      }
+    }
   }
 
   /// saveProminentDisclosureConfirmed

@@ -13,6 +13,7 @@ import 'package:mwpaapp/Settings/Preference.dart';
 import 'package:mwpaapp/Util/UtilLocation.dart';
 import 'package:mwpaapp/Util/UtilSighting.dart';
 import 'package:mwpaapp/Util/UtilTourFId.dart';
+import 'package:mwpaapp/Util/UtilTourTracking.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
@@ -24,7 +25,29 @@ class LocationController extends ChangeNotifier {
   final PrefController _prefController;
   final SightingController _sightingController;
 
-  LocationController(this._prefController, this._sightingController);
+  LocationController(this._prefController, this._sightingController) {
+    _resumeHomeAreaTour();
+  }
+
+  /// continue a home area tour that was running before an app restart (crash,
+  /// reboot, app killed by Android) instead of starting a new tour
+  void _resumeHomeAreaTour() {
+    final stored = _prefController.homeAreaTour;
+
+    if (stored == null) {
+      return;
+    }
+
+    if (UtilTourTracking.canResumeHomeAreaTour(
+        stored: stored,
+        currentTour: _prefController.prefToru,
+        now: DateTime.now())) {
+      homeAreaToru = stored;
+    } else {
+      // tour of an earlier day or home area mode switched off
+      _prefController.saveHomeAreaTour(null);
+    }
+  }
 
   /// geoloactor android
   final GeolocatorPlatform geolocatorAndroid = GeolocatorPlatform.instance;
@@ -215,6 +238,7 @@ class LocationController extends ChangeNotifier {
 
               UtilSighting.setCurrentEndTour(_sightingController, UtilTourFid.createTTourFId(homeAreaToru!));
               homeAreaToru = null;
+              prefController.saveHomeAreaTour(null);
             }
 
             positionCount = 0;
@@ -231,6 +255,11 @@ class LocationController extends ChangeNotifier {
 
               prefController.prefToru?.date = homeAreaToru?.date;
               prefController.prefToru?.tour_start = homeAreaToru?.tour_start;
+              // end of the previous home area tour no longer applies
+              prefController.prefToru?.tour_end = "";
+
+              // keep it across app restarts
+              prefController.saveHomeAreaTour(homeAreaToru);
 
               // save the new tour info for sighting
               prefController.saveTour(prefController.prefToru!);

@@ -1,5 +1,29 @@
+import 'package:intl/intl.dart';
+import 'package:mwpaapp/Models/TourPref.dart';
+
 /// UtilTourTracking - rules for the local tour tracking points.
 class UtilTourTracking {
+
+  /// canResumeHomeAreaTour - whether the home area tour [stored] before an
+  /// app restart is continued instead of starting a new tour.
+  ///
+  /// Only a tour of today is resumed, and only while the current tour
+  /// settings ([currentTour]) still use the home area mode.
+  static bool canResumeHomeAreaTour({
+    required TourPref? stored,
+    required TourPref? currentTour,
+    required DateTime now,
+  }) {
+    if (stored == null || (currentTour?.use_home_area ?? 0) < 1) {
+      return false;
+    }
+
+    if ((stored.tour_start ?? '').isEmpty) {
+      return false;
+    }
+
+    return stored.date == DateFormat("yyyy-MM-dd").format(now);
+  }
 
   /// How long confirmed tracking points of a tour are kept on the device.
   static const Duration localRetention = Duration(days: 30);
