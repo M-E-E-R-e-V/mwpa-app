@@ -66,4 +66,4 @@ Two distinct persistence mechanisms — pick the right one:
 
 ### Utilities of note
 
-`lib/Util/` contains pure helpers — `UtilPosition`, `UtilLocation`, `UtilDistanceCoast`, `UtilTourFId` (tour foreign-ID generation), `UtilTileServer` (map tile config), `UtilSighting`, `UtilDate`, `UtilCheckJson`. Prefer extending these over inlining geo/date logic in widgets or controllers.
+`lib/Util/` contains pure helpers — `UtilPosition`, `UtilLocation`, `UtilDistanceCoast`, `UtilTourFId` (tour foreign-ID generation), `UtilTourTracking` (when local tracking points may be deleted after sync), `UtilTileServer` (map tile config), `UtilSighting`, `UtilDate`, `UtilCheckJson`. Prefer extending these over inlining geo/date logic in widgets or controllers.

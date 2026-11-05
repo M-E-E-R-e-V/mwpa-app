@@ -570,6 +570,18 @@ class DBHelper {
     )) ?? 0;
   }
 
+  /// latestTourTrackingDate - date of the newest tracking point of a tour
+  static Future<String?> latestTourTrackingDate(String tourFId) async {
+    final rows = await _db!.query(
+        _tableNameTourTracking,
+        columns: ['MAX(date) AS latest'],
+        where: "tour_fid = ?",
+        whereArgs: [tourFId]
+    );
+
+    return rows.isEmpty ? null : rows.first['latest'] as String?;
+  }
+
   /// deleteTourTrackingEntries
   static Future<int> deleteTourTrackingEntries(String tourFId) async {
     return await _db!.delete(

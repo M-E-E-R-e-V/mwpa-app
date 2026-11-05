@@ -83,4 +83,21 @@ void main() {
     expect(await DBHelper.readTourTracking('tour-a', '2026-06-08 10:07'), isEmpty);
     expect((await DBHelper.readTourTracking('tour-b', '2026-06-08 10:05'))['uuid'], 'b1');
   });
+
+  test('latestTourTrackingDate returns the newest point of the tour', () async {
+    await DBHelper.initDb();
+
+    expect(await DBHelper.latestTourTrackingDate('tour-a'), isNull);
+
+    for (final (uuid, tour, date) in [
+      ('a1', 'tour-a', '2026-06-08 10:04:50'),
+      ('a2', 'tour-a', '2026-06-08 16:30:00'),
+      ('b1', 'tour-b', '2026-06-09 09:00:00'),
+    ]) {
+      await DBHelper.insertTourTracking(
+          TourTracking(uuid: uuid, tour_fid: tour, location: '{}', date: date));
+    }
+
+    expect(await DBHelper.latestTourTrackingDate('tour-a'), '2026-06-08 16:30:00');
+  });
 }

@@ -16,6 +16,7 @@ import 'package:mwpaapp/Mwpa/Models/SightingTourTrackingCheck.dart';
 import 'package:mwpaapp/Mwpa/Models/TrackingAreaHomeData.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
 import 'package:mwpaapp/Util/UtilTourFId.dart';
+import 'package:mwpaapp/Util/UtilTourTracking.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import '../Mwpa/Models/SightingSaveResponse.dart';
@@ -460,21 +461,22 @@ class SyncMwpaService {
               print('SyncMwpaService::sync:tracking: SightingTourTrackingCheck isComplete: $isComplete');
             }
 
-            if (checkResponse.canDelete != null) {
-              var canDelete = checkResponse.canDelete ?? false;
+            // Delete the local copy once the server has all points and either
+            // allows it (canDelete) or the tour is older than the local
+            // retention - the server only sets canDelete for very old tours.
+            var canDeleteLocal = UtilTourTracking.canDeleteLocal(
+              isComplete: isComplete,
+              canDelete: checkResponse.canDelete,
+              latestDate: await DBHelper.latestTourTrackingDate(tourFId),
+              now: DateTime.now(),
+            );
 
-              if (canDelete) {
-                if (kDebugMode) {
-                  print('SyncMwpaService::sync:tracking: delete tracking entries by tourFId: $tourFId');
-                }
-
-                await DBHelper.deleteTourTrackingEntries(tourFId);
-              }
-            }
-            else {
+            if (canDeleteLocal) {
               if (kDebugMode) {
-                print('SyncMwpaService::sync:tracking: checkSightingTourTracking canDelete is empty');
+                print('SyncMwpaService::sync:tracking: delete tracking entries by tourFId: $tourFId');
               }
+
+              await DBHelper.deleteTourTrackingEntries(tourFId);
             }
           }
         } else {
