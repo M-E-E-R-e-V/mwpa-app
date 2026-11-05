@@ -367,6 +367,14 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get loginServerTimeout =>
+      'Der Server hat nicht rechtzeitig geantwortet. Bitte später erneut versuchen.';
+
+  @override
+  String get loginServerUnreachable =>
+      'Keine Verbindung zum Server. Bitte Netzverbindung und MWPA-URL prüfen.';
+
+  @override
   String get loginTitle => 'MWPA-Anmeldung';
 
   @override
@@ -537,6 +545,14 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get serverTimeout =>
+      'Der Server hat nicht rechtzeitig geantwortet. Bitte später erneut versuchen. Die Daten bleiben auf dem Gerät und werden später synchronisiert.';
+
+  @override
+  String get serverUnreachable =>
+      'Keine Verbindung zum Server. Bitte Netzverbindung und Server-URL prüfen. Die Daten bleiben auf dem Gerät und werden später synchronisiert.';
+
+  @override
   String get sessionNotStarted => 'Die Benutzersitzung wurde nicht gestartet!';
 
   @override
@@ -597,6 +613,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get switchToLightTheme => 'Helles Design';
 
   @override
+  String get syncAutoStopped =>
+      'Automatischer Sync gestoppt – Details antippen';
+
+  @override
   String get syncChanged => 'Geändert, wartet auf Sync';
 
   @override
@@ -606,7 +626,63 @@ class AppLocalizationsDe extends AppLocalizations {
   String get syncDone => 'Synchronisiert';
 
   @override
+  String get syncFailedRetry =>
+      'Sync fehlgeschlagen, wird automatisch wiederholt – Details antippen';
+
+  @override
+  String syncLastDate(String date) {
+    return 'Zuletzt synchronisiert $date';
+  }
+
+  @override
+  String syncLastHours(int hours) {
+    String _temp0 = intl.Intl.pluralLogic(
+      hours,
+      locale: localeName,
+      other: 'Vor $hours Stunden synchronisiert',
+      one: 'Vor 1 Stunde synchronisiert',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get syncLastJustNow => 'Gerade synchronisiert';
+
+  @override
+  String syncLastMinutes(int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: 'Vor $minutes Minuten synchronisiert',
+      one: 'Vor 1 Minute synchronisiert',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get syncLoginRejected =>
+      'Der Server hat die Anmeldung abgelehnt (Passwort geändert?). Bitte abmelden und neu anmelden. Die Daten bleiben auf dem Gerät.';
+
+  @override
   String get syncNotYet => 'Noch nicht synchronisiert';
+
+  @override
+  String syncOpenCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count offen',
+      one: '1 offen',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get syncRunning => 'Synchronisiere …';
+
+  @override
+  String get syncSignInAgain =>
+      'Für den Sync sind keine Anmeldedaten gespeichert. Bitte abmelden und mit Passwort neu anmelden.';
 
   @override
   String get syncStepBehaviouralStates => 'Verhaltenszustände';

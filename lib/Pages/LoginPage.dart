@@ -70,7 +70,14 @@ class _LoginPageState extends State<LoginPage> {
 
       if (!mounted) return;
 
-      if (error is MwpaException) {
+      if (error is MwpaConnectionException) {
+        InfoDialog.show(
+          context,
+          l10n.error,
+          error.timeout ? l10n.loginServerTimeout : l10n.loginServerUnreachable,
+          isError: true,
+        );
+      } else if (error is MwpaException) {
         setState(() {
           InfoDialog.show(context, l10n.error, error.toString(), isError: true);
         });
@@ -143,7 +150,14 @@ class _LoginPageState extends State<LoginPage> {
 
       if (!mounted) return;
 
-      if (error is MwpaException) {
+      if (error is MwpaConnectionException) {
+        InfoDialog.show(
+          context,
+          l10n.error,
+          error.timeout ? l10n.loginServerTimeout : l10n.loginServerUnreachable,
+          isError: true,
+        );
+      } else if (error is MwpaException) {
         setState(() {
           InfoDialog.show(context, l10n.error, error.toString(), isError: true);
         });

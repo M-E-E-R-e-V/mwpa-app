@@ -10,6 +10,7 @@ import 'package:mwpaapp/Controllers/EncounterCategoriesController.dart';
 import 'package:mwpaapp/Controllers/LocationController.dart';
 import 'package:mwpaapp/Controllers/PrefController.dart';
 import 'package:mwpaapp/Controllers/SightingController.dart';
+import 'package:mwpaapp/Controllers/SyncController.dart';
 import 'package:mwpaapp/Controllers/SpeciesController.dart';
 import 'package:mwpaapp/Controllers/VehicleController.dart';
 import 'package:mwpaapp/Controllers/VehicleDriverController.dart';
@@ -372,10 +373,21 @@ class _EditSightingPageState extends State<EditSightingPage> {
     );
   }
 
+  /// no automatic sync while the sighting is edited (the page keeps its
+  /// copy; see SyncController.hold)
+  late final SyncController _syncController = context.read<SyncController>();
+
   /// initState
   @override
   void initState() {
     super.initState();
+    _syncController.hold();
+  }
+
+  @override
+  void dispose() {
+    _syncController.release();
+    super.dispose();
   }
 
   /// build

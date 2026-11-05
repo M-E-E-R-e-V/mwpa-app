@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mwpaapp/Db/DBHelper.dart';
+import 'package:mwpaapp/Models/Sighting.dart';
 import 'package:mwpaapp/Models/TourTracking.dart';
 import 'package:mwpaapp/Services/SyncMwpaService.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -38,6 +39,24 @@ void main() {
   });
 
   tearDownAll(() => DBHelper.closeDb());
+
+  test('updateSighting never clears a unid set by the sync meanwhile', () async {
+    await DBHelper.initDb();
+    final id = await DBHelper.insertSighting(Sighting(unid: '', syncStatus: 0, note: 'a'));
+
+    // background sync uploads the sighting
+    await DBHelper.markSightingUploaded(id, 'server-1', 7);
+    expect(await DBHelper.countPendingSync(), 0);
+
+    // the UI saves a copy it read before the sync (empty unid)
+    await DBHelper.updateSighting(Sighting(id: id, unid: '', syncStatus: 0, note: 'b'));
+
+    final row = (await DBHelper.querySighting()).single;
+    expect(row['unid'], 'server-1');
+    expect(row['note'], 'b');
+    expect(row['creater_id'], 7);
+    expect(await DBHelper.countPendingSync(), 1);
+  });
 
   test('queryTourTrackingLocations: route of one tour, oldest first', () async {
     await DBHelper.initDb();

@@ -6,6 +6,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Controllers/BatteryController.dart';
+import 'package:mwpaapp/Controllers/SyncController.dart';
+import 'package:mwpaapp/Services/SyncMwpaService.dart';
 import 'package:mwpaapp/Controllers/BehaviouralStateController.dart';
 import 'package:mwpaapp/Controllers/EncounterCategoriesController.dart';
 import 'package:mwpaapp/Controllers/LocaleController.dart';
@@ -113,6 +115,34 @@ void main() async {
             context.read<PrefController>(),
             context.read<SightingController>(),
           )..initIfConfirmed(),
+        ),
+        // automatic background sync, started with the main screen
+        ChangeNotifierProvider(
+          create: (context) {
+            final species = context.read<SpeciesController>();
+            final vehicles = context.read<VehicleController>();
+            final drivers = context.read<VehicleDriverController>();
+            final categories = context.read<EncounterCategoriesController>();
+            final states = context.read<BehaviouralStateController>();
+            final location = context.read<LocationController>();
+            final sightings = context.read<SightingController>();
+
+            return SyncController(
+              prefs: context.read<PrefController>(),
+              runSync: (update) => SyncMwpaService(species).sync(update),
+              pendingCount: DBHelper.countPendingSync,
+              // reference data and sightings changed on the server side
+              afterSync: () async {
+                await vehicles.getVehicle();
+                await drivers.getVehicleDriver();
+                await species.getSpecies();
+                await categories.getEncounterCategorie();
+                await states.getBehaviouralStates();
+                await location.reloadSettings();
+                await sightings.getSightings();
+              },
+            )..start();
+          },
         ),
       ],
       child: const MWPAApp(),

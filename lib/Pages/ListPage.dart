@@ -22,6 +22,8 @@ import 'package:mwpaapp/Pages/EditSightingPage.dart';
 import 'package:mwpaapp/Components/LanguageSelector.dart';
 import 'package:mwpaapp/Pages/List/GpsStatusIndicator.dart';
 import 'package:mwpaapp/Pages/List/LowBatteryBanner.dart';
+import 'package:mwpaapp/Pages/List/SyncStatusLine.dart';
+import 'package:mwpaapp/Controllers/SyncController.dart';
 import 'package:mwpaapp/Pages/List/ListSightingTile.dart';
 import 'package:mwpaapp/Services/SyncMwpaService.dart';
 import 'package:mwpaapp/Settings/CredentialStore.dart';
@@ -30,7 +32,6 @@ import 'package:mwpaapp/Util/UtilDistanceCoast.dart';
 import 'package:mwpaapp/Util/UtilSighting.dart';
 import 'package:mwpaapp/Util/UtilTourFId.dart';
 import 'package:provider/provider.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'List/ListMap.dart';
 import 'package:mwpaapp/Ui/AppIcons.dart';
 import 'package:mwpaapp/Util/AppLog.dart';
@@ -57,11 +58,10 @@ class _ListPageState extends State<ListPage>
   late final EncounterCategoriesController _encounterCategoriesController = context.read<EncounterCategoriesController>();
   late final BehaviouralStateController _behaviouralStateController = context.read<BehaviouralStateController>();
 
-  late StreamSubscription subscription;
+  late final SyncController _sync = context.read<SyncController>();
   late final TabController _tabController;
 
   bool diffTourDateIgnored = false;
-  bool isSyncInProgress = false;
   /// shown tour: date and start of the default / home area tour, null
   /// when no tour date is set
   String? _tourDate;
@@ -77,9 +77,8 @@ class _ListPageState extends State<ListPage>
 
     _tabController = TabController(length: 2, vsync: this);
 
-    subscription = Connectivity().onConnectivityChanged.listen(
-        _syncCheckConnectivity
-    );
+    // creates the controller: the automatic sync starts with the main screen
+    _sync;
 
     _locationController.updateEvent.addListener(_updateTitle);
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadController());
@@ -90,75 +89,66 @@ class _ListPageState extends State<ListPage>
   void dispose() {
     _locationController.updateEvent.removeListener(_updateTitle);
     _tabController.dispose();
-    subscription.cancel();
 
     super.dispose();
   }
 
-  /// _syncCheckConnectivity
-  Future<void> _syncCheckConnectivity(List<ConnectivityResult> results) async {
-    final hasInternet = results.any((r) => r != ConnectivityResult.none);
+  /// _syncMwpa - sync by hand; [dialog]: progress dialog (menu), otherwise
+  /// the pull-to-refresh indicator shows it. Errors are shown in a dialog.
+  Future<void> _syncMwpa({bool dialog = true}) async {
+    SyncProgressDialog? progress;
 
-    if (hasInternet) {
-      if (_sightingController.sightingList.isNotEmpty) {
-        _syncMwpa();
+    void onProgress() {
+      final step = _sync.step;
+
+      if (progress != null && mounted && step != null) {
+        progress.update(_sync.percent, _syncStepLabel(context, step, _sync.detail));
       }
     }
-  }
 
-  /// _syncMwpa
-  Future<void> _syncMwpa() async {
-    if (isSyncInProgress) {
-      return;
+    if (dialog) {
+      progress = SyncProgressDialog()..show(context);
+      _sync.addListener(onProgress);
     }
 
-    final progress = SyncProgressDialog()..show(context);
-    SyncMwpaService service = SyncMwpaService(_speciesController);
+    final error = await _sync.syncNow();
 
-    try {
-      isSyncInProgress = true;
-
-      await service.sync((percent, step, [detail]) async {
-        if (!mounted) return;
-        progress.update(percent, _syncStepLabel(context, step, detail));
-      });
-
-      await _vehicleController.getVehicle();
-      await _vehicleDriverController.getVehicleDriver();
-      await _speciesController.getSpecies();
-      await _encounterCategoriesController.getEncounterCategorie();
-      await _behaviouralStateController.getBehaviouralStates();
-      await _locationController.reloadSettings();
-      await _sightingController.getSightings();
-
-      isSyncInProgress = false;
-      progress.close();
-    } catch(error) {
-      isSyncInProgress = false;
-      progress.close();
-
-      if (!mounted) return;
-
-      if (error is ApiVersionException) {
-        final server = error.server;
-        final accepted = error.accepted.join(', ');
-        InfoDialog.show(
-          context,
-          context.l10n.error,
-          error.sync
-              ? context.l10n.apiSyncChanged(server, accepted)
-              : context.l10n.apiLoginChanged(server, accepted),
-          isError: true,
-        );
-      } else if (error is MwpaException) {
-        InfoDialog.show(context, context.l10n.error, error.toString(), isError: true);
-      } else {
-        InfoDialog.show(context, context.l10n.internalError, error.toString(), isError: true);
-      }
-    }
+    _sync.removeListener(onProgress);
+    progress?.close();
 
     if (!mounted) return;
+
+    if (error != null) {
+      _showSyncError(error);
+    }
+
     setState(() { });
+  }
+
+  /// _showSyncError - error of a sync in the UI language where known
+  void _showSyncError(Object error) {
+    final l10n = context.l10n;
+
+    if (error is ApiVersionException) {
+      final server = error.server;
+      final accepted = error.accepted.join(', ');
+      InfoDialog.show(
+        context,
+        l10n.error,
+        error.sync ? l10n.apiSyncChanged(server, accepted) : l10n.apiLoginChanged(server, accepted),
+        isError: true,
+      );
+    } else if (error is MwpaConnectionException) {
+      InfoDialog.show(context, l10n.error, error.timeout ? l10n.serverTimeout : l10n.serverUnreachable, isError: true);
+    } else if (error is LoginRejectedException) {
+      InfoDialog.show(context, l10n.error, l10n.syncLoginRejected, isError: true);
+    } else if (error is MissingCredentialsException) {
+      InfoDialog.show(context, l10n.error, l10n.syncSignInAgain, isError: true);
+    } else if (error is MwpaException) {
+      InfoDialog.show(context, l10n.error, error.toString(), isError: true);
+    } else {
+      InfoDialog.show(context, l10n.internalError, error.toString(), isError: true);
+    }
   }
 
   /// _syncStepLabel - progress text of a sync step in the UI language
@@ -211,6 +201,7 @@ class _ListPageState extends State<ListPage>
         await CredentialStore().deletePassword();
         await _prefController.logout();
         _locationController.resetTour();
+        _sync.reset();
 
         if (!mounted) return;
         // the list of the old session must not stay underneath
@@ -662,8 +653,21 @@ class _ListPageState extends State<ListPage>
     );
   }
 
-  /// _sightingsTab — Tab 2: the full list of sightings.
+  /// _sightingsTab — Tab 2: sync status on top, the list of sightings.
   Widget _sightingsTab(BuildContext context) {
+    return Column(
+      children: [
+        SyncStatusLine(
+          onSync: _syncMwpa,
+          onShowError: _showSyncError,
+        ),
+        Expanded(child: _sightingsList(context)),
+      ],
+    );
+  }
+
+  /// _sightingsList — the full list of sightings.
+  Widget _sightingsList(BuildContext context) {
     final theme = Theme.of(context);
     return ListenableBuilder(
       listenable: _sightingController,
@@ -701,7 +705,7 @@ class _ListPageState extends State<ListPage>
 
       // pull down to sync with the server
       return RefreshIndicator(
-        onRefresh: _syncMwpa,
+        onRefresh: () => _syncMwpa(dialog: false),
         child: ListView.builder(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.fromLTRB(0, 12, 0, 16),
@@ -813,6 +817,16 @@ class _ListPageState extends State<ListPage>
             children: [
               const GpsOffBanner(),
               const LowBatteryBanner(),
+              // background sync: thin progress bar
+              ListenableBuilder(
+                listenable: _sync,
+                builder: (_, __) => _sync.running
+                    ? LinearProgressIndicator(
+                        minHeight: 3,
+                        value: _sync.percent <= 0 ? null : _sync.percent / 100,
+                      )
+                    : const SizedBox.shrink(),
+              ),
               Expanded(
                 child: TabBarView(
                   controller: _tabController,

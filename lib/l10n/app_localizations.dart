@@ -754,6 +754,18 @@ abstract class AppLocalizations {
   /// **'Log could not be shared: {error}'**
   String logShareFailed(String error);
 
+  /// No description provided for @loginServerTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'The server did not respond in time. Please try again later.'**
+  String get loginServerTimeout;
+
+  /// No description provided for @loginServerUnreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection to the server. Please check the network and the MWPA URL.'**
+  String get loginServerUnreachable;
+
   /// No description provided for @loginTitle.
   ///
   /// In en, this message translates to:
@@ -1066,6 +1078,18 @@ abstract class AppLocalizations {
   /// **'unknown by id: {id}'**
   String selectUnknownId(String id);
 
+  /// No description provided for @serverTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'The server did not respond in time. Please try again later. Your data stays on the device and is synced later.'**
+  String get serverTimeout;
+
+  /// No description provided for @serverUnreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection to the server. Please check the network and the server URL. Your data stays on the device and is synced later.'**
+  String get serverUnreachable;
+
   /// No description provided for @sessionNotStarted.
   ///
   /// In en, this message translates to:
@@ -1180,6 +1204,12 @@ abstract class AppLocalizations {
   /// **'Switch to light theme'**
   String get switchToLightTheme;
 
+  /// No description provided for @syncAutoStopped.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic sync stopped – tap for details'**
+  String get syncAutoStopped;
+
   /// No description provided for @syncChanged.
   ///
   /// In en, this message translates to:
@@ -1198,11 +1228,65 @@ abstract class AppLocalizations {
   /// **'Synced'**
   String get syncDone;
 
+  /// No description provided for @syncFailedRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync failed, retrying automatically – tap for details'**
+  String get syncFailedRetry;
+
+  /// No description provided for @syncLastDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Last synced {date}'**
+  String syncLastDate(String date);
+
+  /// No description provided for @syncLastHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours, plural, =1{Synced 1 hour ago} other{Synced {hours} hours ago}}'**
+  String syncLastHours(int hours);
+
+  /// No description provided for @syncLastJustNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced just now'**
+  String get syncLastJustNow;
+
+  /// No description provided for @syncLastMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes, plural, =1{Synced 1 minute ago} other{Synced {minutes} minutes ago}}'**
+  String syncLastMinutes(int minutes);
+
+  /// No description provided for @syncLoginRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'The server rejected the login (password changed?). Please log out and sign in again. Your data stays on the device.'**
+  String get syncLoginRejected;
+
   /// No description provided for @syncNotYet.
   ///
   /// In en, this message translates to:
   /// **'Not synced yet'**
   String get syncNotYet;
+
+  /// No description provided for @syncOpenCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 open} other{{count} open}}'**
+  String syncOpenCount(int count);
+
+  /// No description provided for @syncRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing …'**
+  String get syncRunning;
+
+  /// No description provided for @syncSignInAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'No login data stored for the sync. Please log out and sign in again with your password.'**
+  String get syncSignInAgain;
 
   /// No description provided for @syncStepBehaviouralStates.
   ///

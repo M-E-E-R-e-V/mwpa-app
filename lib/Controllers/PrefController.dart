@@ -128,6 +128,7 @@ class PrefController extends ChangeNotifier {
         Preference.ORGID,
         Preference.TOUR,
         Preference.HOME_AREA_TOUR,
+        Preference.LAST_SYNC,
       ]) {
         await prefs.remove(key);
       }

@@ -20,6 +20,8 @@ class Preference {
   static const HOME_AREA_TOUR = "home_area_tour";
   /// keep the display on while the app is in front (tour settings)
   static const KEEP_SCREEN_ON = "keep_screen_on";
+  /// end of the last successful sync (ISO 8601), see SyncController
+  static const LAST_SYNC = "last_sync";
 
   SharedPreferences? prefs;
 

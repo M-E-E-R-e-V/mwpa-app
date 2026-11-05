@@ -395,11 +395,11 @@ class MwpaApi {
     } on TimeoutException catch (error) {
       AppLog.w('Api', 'request timeout', error);
 
-      throw Exception('Connection timeout, the server did not respond');
+      throw const MwpaConnectionException(timeout: true);
     } catch (error) {
       AppLog.w('Api', 'connection error', error);
 
-      throw Exception('Connection error');
+      throw const MwpaConnectionException();
     }
   }
 

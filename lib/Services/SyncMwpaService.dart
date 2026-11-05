@@ -21,6 +21,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import '../Mwpa/Models/SightingSaveResponse.dart';
 import '../Mwpa/MwpaAPI.dart';
+import '../Mwpa/MwpaException.dart';
 import 'package:mwpaapp/Util/AppLog.dart';
 
 /// SyncStep - the phase a running sync reports; the UI shows it in the
@@ -53,6 +54,28 @@ class ApiVersionException implements Exception {
   String toString() =>
       "The API for ${sync ? 'syncing' : 'login'} has changed (server reports '$server', "
       "app accepts ${accepted.join(', ')}). Please update your app, the data will not be lost.";
+}
+
+/// MissingCredentialsException - URL, username or password is not stored
+/// (e.g. after a Quick Connect login); the user has to sign in again
+class MissingCredentialsException implements Exception {
+  final String message;
+
+  const MissingCredentialsException(this.message);
+
+  @override
+  String toString() => message;
+}
+
+/// LoginRejectedException - the server refused the stored credentials
+/// (password changed, user disabled); the user has to sign in again
+class LoginRejectedException implements Exception {
+  final String username;
+
+  const LoginRejectedException(this.username);
+
+  @override
+  String toString() => "Login to MWPA failed by Username: '$username' !";
 }
 
 /// SyncMwpaService
@@ -143,17 +166,17 @@ class SyncMwpaService {
       final prefs = await SharedPreferences.getInstance();
 
       if (!prefs.containsKey(Preference.URL)) {
-        throw Exception("Preference field 'URL' is not found!");
+        throw const MissingCredentialsException("Preference field 'URL' is not found!");
       }
 
       if (!prefs.containsKey(Preference.USERNAME)) {
-        throw Exception("Preference field 'USERNAME' is not found!");
+        throw const MissingCredentialsException("Preference field 'USERNAME' is not found!");
       }
 
       final password = await CredentialStore().readPassword();
 
       if (password == null) {
-        throw Exception("No password stored, please sign in again!");
+        throw const MissingCredentialsException("No password stored, please sign in again!");
       }
 
       String url = prefs.getString(Preference.URL)!;
@@ -175,10 +198,18 @@ class SyncMwpaService {
       }
 
       if (!await api.isLogin()) {
-        if (await api.login(username, password)) {
-          if (!await api.isLogin()) {
-            throw Exception("Login to MWPA failed by Username: '$username' !");
-          }
+        bool loggedIn;
+
+        try {
+          loggedIn = await api.login(username, password);
+        } on MwpaException catch (error) {
+          // the server answered and refused the credentials
+          AppLog.w('Sync', 'login refused by the server', error);
+          throw LoginRejectedException(username);
+        }
+
+        if (loggedIn && !await api.isLogin()) {
+          throw LoginRejectedException(username);
         }
       }
     } catch(e) {
@@ -424,7 +455,12 @@ class SyncMwpaService {
             }
 
             sighting.syncStatus = Sighting.SYNC_STATUS_FINISH;
-            await DBHelper.updateSighting(sighting);
+
+            if (sighting.id != null && (sighting.unid ?? '').isNotEmpty) {
+              // only unid/status/creator: the UI may have changed the row
+              // meanwhile (the sync runs in the background)
+              await DBHelper.markSightingUploaded(sighting.id!, sighting.unid!, sighting.creater_id);
+            }
           }
         } catch(ei) {
           AppLog.e('Sync', 'sightingUpdate failed for sighting ${sighting.id}', ei);

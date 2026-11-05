@@ -164,6 +164,8 @@
       }
     }
   },
+  "loginServerTimeout": "The server did not respond in time. Please try again later.",
+  "loginServerUnreachable": "No connection to the server. Please check the network and the MWPA URL.",
   "loginTitle": "MWPA Login",
   "logout": "Logout",
   "logoutQuestion": "Do you want to logout?",
@@ -247,6 +249,8 @@
       }
     }
   },
+  "serverTimeout": "The server did not respond in time. Please try again later. Your data stays on the device and is synced later.",
+  "serverUnreachable": "No connection to the server. Please check the network and the server URL. Your data stays on the device and is synced later.",
   "sessionNotStarted": "User session is not started!",
   "setDefaultTour": "Set default Tour",
   "setDefaultTourFirst": "Please set the default tour with date and start time beforehand. The entry cannot be added until then.",
@@ -266,10 +270,48 @@
   "switchCamera": "Switch camera",
   "switchToDarkTheme": "Switch to dark theme",
   "switchToLightTheme": "Switch to light theme",
+  "syncAutoStopped": "Automatic sync stopped – tap for details",
   "syncChanged": "Changed, waiting for sync",
   "syncConnecting": "Connecting ...",
   "syncDone": "Synced",
+  "syncFailedRetry": "Sync failed, retrying automatically – tap for details",
+  "syncLastDate": "Last synced {date}",
+  "@syncLastDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "syncLastHours": "{hours, plural, =1{Synced 1 hour ago} other{Synced {hours} hours ago}}",
+  "@syncLastHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "syncLastJustNow": "Synced just now",
+  "syncLastMinutes": "{minutes, plural, =1{Synced 1 minute ago} other{Synced {minutes} minutes ago}}",
+  "@syncLastMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "syncLoginRejected": "The server rejected the login (password changed?). Please log out and sign in again. Your data stays on the device.",
   "syncNotYet": "Not synced yet",
+  "syncOpenCount": "{count, plural, =1{1 open} other{{count} open}}",
+  "@syncOpenCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncRunning": "Syncing …",
+  "syncSignInAgain": "No login data stored for the sync. Please log out and sign in again with your password.",
   "syncStepBehaviouralStates": "Behavioural states",
   "syncStepEncounterCategories": "Encounter categories",
   "syncStepFinish": "Finished",

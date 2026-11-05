@@ -366,6 +366,14 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get loginServerTimeout =>
+      'The server did not respond in time. Please try again later.';
+
+  @override
+  String get loginServerUnreachable =>
+      'No connection to the server. Please check the network and the MWPA URL.';
+
+  @override
   String get loginTitle => 'MWPA Login';
 
   @override
@@ -533,6 +541,14 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get serverTimeout =>
+      'The server did not respond in time. Please try again later. Your data stays on the device and is synced later.';
+
+  @override
+  String get serverUnreachable =>
+      'No connection to the server. Please check the network and the server URL. Your data stays on the device and is synced later.';
+
+  @override
   String get sessionNotStarted => 'User session is not started!';
 
   @override
@@ -593,6 +609,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get switchToLightTheme => 'Switch to light theme';
 
   @override
+  String get syncAutoStopped => 'Automatic sync stopped – tap for details';
+
+  @override
   String get syncChanged => 'Changed, waiting for sync';
 
   @override
@@ -602,7 +621,63 @@ class AppLocalizationsEn extends AppLocalizations {
   String get syncDone => 'Synced';
 
   @override
+  String get syncFailedRetry =>
+      'Sync failed, retrying automatically – tap for details';
+
+  @override
+  String syncLastDate(String date) {
+    return 'Last synced $date';
+  }
+
+  @override
+  String syncLastHours(int hours) {
+    String _temp0 = intl.Intl.pluralLogic(
+      hours,
+      locale: localeName,
+      other: 'Synced $hours hours ago',
+      one: 'Synced 1 hour ago',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get syncLastJustNow => 'Synced just now';
+
+  @override
+  String syncLastMinutes(int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: 'Synced $minutes minutes ago',
+      one: 'Synced 1 minute ago',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get syncLoginRejected =>
+      'The server rejected the login (password changed?). Please log out and sign in again. Your data stays on the device.';
+
+  @override
   String get syncNotYet => 'Not synced yet';
+
+  @override
+  String syncOpenCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count open',
+      one: '1 open',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get syncRunning => 'Syncing …';
+
+  @override
+  String get syncSignInAgain =>
+      'No login data stored for the sync. Please log out and sign in again with your password.';
 
   @override
   String get syncStepBehaviouralStates => 'Behavioural states';

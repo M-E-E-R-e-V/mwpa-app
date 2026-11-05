@@ -277,11 +277,23 @@ class DBHelper {
         _tableNameSighting, where: 'id=?', whereArgs: [oldSighting.id]);
   }
 
-  /// updateSighting
+  /// updateSighting - a missing unid/creator never clears the stored one:
+  /// the object may have been read before a (background) sync assigned it,
+  /// an empty unid would upload the sighting a second time
   static Future<int> updateSighting(Sighting uSighting) async {
+    final data = uSighting.toJson(false, true, false);
+
+    if ((uSighting.unid ?? '').isEmpty) {
+      data.remove('unid');
+    }
+
+    if (uSighting.creater_id == null || uSighting.creater_id == 0) {
+      data.remove('creater_id');
+    }
+
     return await _db!.update(
         _tableNameSighting,
-        uSighting.toJson(false, true, false),
+        data,
         where: 'id=?',
         whereArgs: [uSighting.id]
     );
@@ -570,6 +582,34 @@ class DBHelper {
       limit: limit,
       offset: offset
     );
+  }
+
+  /// markSightingUploaded - only the fields the sync sets; changes the user
+  /// made while the sync was running stay (they are uploaded with the next
+  /// sync, which sends all local sightings)
+  static Future<int> markSightingUploaded(int id, String unid, int? createrId) async {
+    return await _db!.update(
+      _tableNameSighting,
+      {
+        'unid': unid,
+        'syncStatus': Sighting.SYNC_STATUS_FINISH,
+        if (createrId != null) 'creater_id': createrId,
+      },
+      where: 'id=?',
+      whereArgs: [id],
+    );
+  }
+
+  /// countPendingSync - sightings not confirmed by the server plus tracking
+  /// points not uploaded yet (decides whether an automatic sync is needed)
+  static Future<int> countPendingSync() async {
+    final sightings = Sqflite.firstIntValue(await _db!.rawQuery(
+        "SELECT COUNT(*) FROM $_tableNameSighting "
+        "WHERE unid IS NULL OR unid = '' OR syncStatus IS NULL OR syncStatus = 0")) ?? 0;
+    final points = Sqflite.firstIntValue(await _db!.rawQuery(
+        "SELECT COUNT(*) FROM $_tableNameTourTracking WHERE synced = 0")) ?? 0;
+
+    return sightings + points;
   }
 
   /// queryTourTrackingLocations - location JSON of all points of a tour,
