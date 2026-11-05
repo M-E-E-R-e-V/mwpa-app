@@ -193,6 +193,20 @@ class _ListMapState extends State<ListMap> {
                     ],
                   ),
 
+                // route of the running tour -----------------------------------
+                if (_locationController.route.length > 1)
+                  PolylineLayer(
+                    polylines: [
+                      Polyline(
+                        points: [for (final p in _locationController.route) LatLng(p.lat, p.lon)],
+                        strokeWidth: 4,
+                        color: kButtonBackgroundColor,
+                        borderStrokeWidth: 1.5,
+                        borderColor: Colors.white,
+                      ),
+                    ],
+                  ),
+
                 // sighting + current position markers -------------------------
                 MarkerLayer(
                   markers: [

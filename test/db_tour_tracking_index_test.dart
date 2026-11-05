@@ -39,6 +39,22 @@ void main() {
 
   tearDownAll(() => DBHelper.closeDb());
 
+  test('queryTourTrackingLocations: route of one tour, oldest first', () async {
+    await DBHelper.initDb();
+
+    for (final (uuid, fid, date) in [
+      ('b', 'tour-a', '2026-11-05 10:00:20.000Z'),
+      ('a', 'tour-a', '2026-11-05 10:00:10.000Z'),
+      ('c', 'tour-b', '2026-11-05 10:00:15.000Z'),
+    ]) {
+      await DBHelper.insertTourTracking(
+          TourTracking(uuid: uuid, tour_fid: fid, location: '{"id":"$uuid"}', date: date));
+    }
+
+    expect(await DBHelper.queryTourTrackingLocations('tour-a'), ['{"id":"a"}', '{"id":"b"}']);
+    expect(await DBHelper.queryTourTrackingLocations('none'), isEmpty);
+  });
+
   test('fresh install creates the tour_tracking (tour_fid, date) index', () async {
     await DBHelper.initDb();
 

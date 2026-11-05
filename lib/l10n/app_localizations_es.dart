@@ -125,6 +125,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get badgeSubgroups => 'Subgrupos';
 
   @override
+  String batteryLowBanner(int level) {
+    return 'Batería baja ($level %): conecta un cargador, el registro del recorrido se detiene si el móvil se apaga.';
+  }
+
+  @override
   String get camera => 'Cámara';
 
   @override
@@ -290,6 +295,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get labelJuveniles => 'Juveniles';
+
+  @override
+  String get labelKeepScreenOn => 'Mantener la pantalla encendida';
 
   @override
   String get labelNewborns => 'Recién nacidos';

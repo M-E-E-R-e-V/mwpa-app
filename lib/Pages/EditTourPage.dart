@@ -48,6 +48,9 @@ class _EditTourPageState extends State<EditTourPage> {
   late Widget sightUseHomeArea;
   DynInputValue sightUseHomeAreaValue = DynInputValue();
 
+  late Widget keepScreenOn;
+  DynInputValue keepScreenOnValue = DynInputValue();
+
   bool isInit = false;
 
   /// _confirmClose - asks before leaving the page without saving; used by
@@ -94,6 +97,7 @@ class _EditTourPageState extends State<EditTourPage> {
     );
 
     await _prefController.saveTour(tour);
+    await _prefController.setKeepScreenOn(keepScreenOnValue.getIntValue() >= 1);
     await _locationController.reloadSettings();
 
     if (!mounted) return;
@@ -104,6 +108,7 @@ class _EditTourPageState extends State<EditTourPage> {
   Widget build(BuildContext context) {
     if (!isInit) {
       isInit = true;
+      keepScreenOnValue.setIntValue(_prefController.keepScreenOn ? 1 : 0);
 
       if (_prefController.prefToru != null) {
         //  vehicle
@@ -186,6 +191,11 @@ class _EditTourPageState extends State<EditTourPage> {
         value: sightUseHomeAreaValue,
       );
 
+      keepScreenOn = SwitchInput(
+        title: context.l10n.labelKeepScreenOn,
+        value: keepScreenOnValue,
+      );
+
       return PopScope(
         canPop: false,
         // system back (button or gesture) asks like the app bar arrow
@@ -227,6 +237,7 @@ class _EditTourPageState extends State<EditTourPage> {
                     children: [
                       sightSetEndTour,
                       sightUseHomeArea,
+                      keepScreenOn,
                     ],
                   ),
                   const SizedBox(height: 8),

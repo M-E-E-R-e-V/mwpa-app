@@ -21,6 +21,7 @@ import 'package:mwpaapp/Mwpa/MwpaException.dart';
 import 'package:mwpaapp/Pages/EditSightingPage.dart';
 import 'package:mwpaapp/Components/LanguageSelector.dart';
 import 'package:mwpaapp/Pages/List/GpsStatusIndicator.dart';
+import 'package:mwpaapp/Pages/List/LowBatteryBanner.dart';
 import 'package:mwpaapp/Pages/List/ListSightingTile.dart';
 import 'package:mwpaapp/Services/SyncMwpaService.dart';
 import 'package:mwpaapp/Settings/CredentialStore.dart';
@@ -811,6 +812,7 @@ class _ListPageState extends State<ListPage>
           child: Column(
             children: [
               const GpsOffBanner(),
+              const LowBatteryBanner(),
               Expanded(
                 child: TabBarView(
                   controller: _tabController,

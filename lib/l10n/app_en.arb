@@ -69,6 +69,14 @@
   "badgeCalves": "Calves/newborns",
   "badgePicture": "Picture",
   "badgeSubgroups": "Subgroups",
+  "batteryLowBanner": "Battery low ({level} %) – connect a charger, the route recording stops when the phone switches off.",
+  "@batteryLowBanner": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
   "camera": "Camera",
   "cancel": "Cancel",
   "choiceNo": "No",
@@ -127,6 +135,7 @@
   "labelFreqBehaviour": "Frequent behaviours of individuals",
   "labelGroupStructure": "Group Structure",
   "labelJuveniles": "Juveniles",
+  "labelKeepScreenOn": "Keep screen on",
   "labelNewborns": "Newborns",
   "labelNote": "Note",
   "labelOther": "Other",

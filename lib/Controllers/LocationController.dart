@@ -103,6 +103,12 @@ class LocationController extends ChangeNotifier {
   /// a tour by home area
   TourPref? homeAreaToru;
 
+  /// recorded route of the running tour (oldest first), drawn on the map
+  final List<UtilLocationDouble> route = [];
+
+  /// tour the [route] belongs to
+  String? _routeFid;
+
   /// event manager for updates
   final EventManagerService updateEvent = EventManagerService();
 
@@ -285,6 +291,8 @@ class LocationController extends ChangeNotifier {
   void resetTour() {
     homeAreaToru = null;
     homeArea = [];
+    route.clear();
+    _routeFid = null;
     notifyListeners();
   }
 
@@ -347,6 +355,10 @@ class LocationController extends ChangeNotifier {
 
               UtilSighting.setCurrentEndTour(_sightingController, UtilTourFid.createTTourFId(homeAreaToru!));
               homeAreaToru = null;
+
+              // back home: the tour is over, its route leaves the map
+              route.clear();
+              _routeFid = null;
               prefController.saveHomeAreaTour(null);
             }
 
@@ -395,6 +407,8 @@ class LocationController extends ChangeNotifier {
       String uuidStr = uuid.v4();
       String timeStr = cTime.toUtc().toString();
 
+      final point = UtilLocationDouble.positionToLocationDouble(currentPosition!);
+
       DBHelper.insertTourTracking(
           TourTracking(
               uuid: uuidStr,
@@ -402,9 +416,50 @@ class LocationController extends ChangeNotifier {
               location: jsonEncode(currentPosition!.toJson()),
               date: timeStr
           )
-      );
+      ).then((_) => _addRoutePoint(tourFid, point)).catchError((Object error) {
+        AppLog.e('Location', 'save tracking point failed', error);
+      });
     }
 
+    notifyListeners();
+  }
+
+  /// _addRoutePoint - appends a saved point; for a new tour (or after an app
+  /// restart) the route is read from the DB once, including this point
+  Future<void> _addRoutePoint(String tourFid, UtilLocationDouble point) async {
+    if (tourFid == _routeFid) {
+      route.add(point);
+      notifyListeners();
+      return;
+    }
+
+    _routeFid = tourFid;
+    final loaded = <UtilLocationDouble>[];
+
+    try {
+      for (final json in await DBHelper.queryTourTrackingLocations(tourFid)) {
+        final map = jsonDecode(json);
+        loaded.add(UtilLocationDouble(
+          lat: (map['latitude'] as num).toDouble(),
+          lon: (map['longitude'] as num).toDouble(),
+        ));
+      }
+    } catch (error) {
+      AppLog.w('Location', 'route not readable', error);
+      loaded
+        ..clear()
+        ..add(point);
+    }
+
+    // another tour started while reading
+    if (_routeFid != tourFid) {
+      return;
+    }
+
+    route
+      ..clear()
+      ..addAll(loaded);
+    AppLog.d('Location', 'route of $tourFid: ${route.length} points');
     notifyListeners();
   }
 

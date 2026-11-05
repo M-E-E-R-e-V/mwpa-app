@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
+import 'package:mwpaapp/Util/UtilDevice.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Models/TourPref.dart';
@@ -16,6 +17,9 @@ class PrefController extends ChangeNotifier {
 
   /// running tour of the home-area mode, see Preference.HOME_AREA_TOUR
   TourPref? homeAreaTour;
+
+  /// display stays on while the app is in front, see Preference.KEEP_SCREEN_ON
+  bool keepScreenOn = false;
 
   /// load
   Future<void> load() async {
@@ -56,6 +60,9 @@ class PrefController extends ChangeNotifier {
       if (homeAreaTourStr != null) {
         homeAreaTour = TourPref.fromJson(jsonDecode(homeAreaTourStr));
       }
+
+      keepScreenOn = prefs.getBool(Preference.KEEP_SCREEN_ON) ?? false;
+      await UtilDevice.setKeepScreenOn(keepScreenOn);
     } catch(e) {
       AppLog.e('Pref', 'load failed', e);
     }
@@ -73,6 +80,21 @@ class PrefController extends ChangeNotifier {
     }
 
     prefToru = tour;
+    notifyListeners();
+  }
+
+  /// setKeepScreenOn - stores the setting and applies it right away
+  Future<void> setKeepScreenOn(bool on) async {
+    keepScreenOn = on;
+    await UtilDevice.setKeepScreenOn(on);
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(Preference.KEEP_SCREEN_ON, on);
+    } catch(e) {
+      AppLog.e('Pref', 'setKeepScreenOn failed', e);
+    }
+
     notifyListeners();
   }
 

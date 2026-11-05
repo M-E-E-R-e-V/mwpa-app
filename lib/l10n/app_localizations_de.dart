@@ -124,6 +124,11 @@ class AppLocalizationsDe extends AppLocalizations {
   String get badgeSubgroups => 'Untergruppen';
 
   @override
+  String batteryLowBanner(int level) {
+    return 'Akku schwach ($level %) – bitte Ladegerät anschließen, die Routenaufzeichnung endet, wenn das Handy ausgeht.';
+  }
+
+  @override
   String get camera => 'Kamera';
 
   @override
@@ -290,6 +295,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get labelJuveniles => 'Jungtiere';
+
+  @override
+  String get labelKeepScreenOn => 'Bildschirm anlassen';
 
   @override
   String get labelNewborns => 'Neugeborene';

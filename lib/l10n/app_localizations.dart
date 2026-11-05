@@ -310,6 +310,12 @@ abstract class AppLocalizations {
   /// **'Subgroups'**
   String get badgeSubgroups;
 
+  /// No description provided for @batteryLowBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery low ({level} %) – connect a charger, the route recording stops when the phone switches off.'**
+  String batteryLowBanner(int level);
+
   /// No description provided for @camera.
   ///
   /// In en, this message translates to:
@@ -615,6 +621,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Juveniles'**
   String get labelJuveniles;
+
+  /// No description provided for @labelKeepScreenOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep screen on'**
+  String get labelKeepScreenOn;
 
   /// No description provided for @labelNewborns.
   ///

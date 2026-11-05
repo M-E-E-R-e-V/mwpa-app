@@ -572,6 +572,23 @@ class DBHelper {
     );
   }
 
+  /// queryTourTrackingLocations - location JSON of all points of a tour,
+  /// oldest first (route on the map)
+  static Future<List<String>> queryTourTrackingLocations(String tourFId) async {
+    final rows = await _db!.query(
+      _tableNameTourTracking,
+      columns: ['location'],
+      where: "tour_fid = ?",
+      whereArgs: [tourFId],
+      orderBy: "date",
+    );
+
+    return [
+      for (final row in rows)
+        if (row['location'] is String) row['location'] as String,
+    ];
+  }
+
   /// queryUnsyncedTourTracking - oldest [limit] points of the tour that
   /// were not uploaded yet
   static Future<List<Map<String, dynamic>>> queryUnsyncedTourTracking(String tourFId, int limit) async {

@@ -18,6 +18,8 @@ class Preference {
   /// tour started automatically by leaving the home area (resumed after an
   /// app restart on the same day)
   static const HOME_AREA_TOUR = "home_area_tour";
+  /// keep the display on while the app is in front (tour settings)
+  static const KEEP_SCREEN_ON = "keep_screen_on";
 
   SharedPreferences? prefs;
 

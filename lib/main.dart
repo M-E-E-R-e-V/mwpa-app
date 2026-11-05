@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:mwpaapp/Constants.dart';
+import 'package:mwpaapp/Controllers/BatteryController.dart';
 import 'package:mwpaapp/Controllers/BehaviouralStateController.dart';
 import 'package:mwpaapp/Controllers/EncounterCategoriesController.dart';
 import 'package:mwpaapp/Controllers/LocaleController.dart';
@@ -98,6 +99,7 @@ void main() async {
         ChangeNotifierProvider<ThemeController>.value(value: themeController),
         ChangeNotifierProvider<LocaleController>.value(value: localeController),
         ChangeNotifierProvider(create: (_) => SightingController()..getSightings()),
+        ChangeNotifierProvider(create: (_) => BatteryController()),
         ChangeNotifierProvider(create: (_) => VehicleController()..getVehicle()),
         ChangeNotifierProvider(create: (_) => VehicleDriverController()..getVehicleDriver()),
         ChangeNotifierProvider(create: (_) => SpeciesController()..getSpecies()),

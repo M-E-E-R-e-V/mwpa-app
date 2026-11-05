@@ -3,6 +3,9 @@ package com.meer.mwpaapp
 import android.Manifest
 import android.content.ClipData
 import android.content.Intent
+import android.content.IntentFilter
+import android.os.BatteryManager
+import android.view.WindowManager
 import android.content.pm.PackageManager
 import android.os.Build
 import io.flutter.embedding.android.FlutterActivity
@@ -47,6 +50,41 @@ class MainActivity : FlutterActivity() {
                     else -> result.notImplemented()
                 }
             }
+
+        // see lib/Util/UtilDevice.dart
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, DEVICE_CHANNEL)
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "setKeepScreenOn" -> {
+                        if (call.argument<Boolean>("on") == true) {
+                            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                        } else {
+                            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                        }
+                        result.success(true)
+                    }
+                    "battery" -> result.success(batteryState())
+                    else -> result.notImplemented()
+                }
+            }
+    }
+
+    /// batteryState - level in percent and whether a charger is connected
+    /// (sticky broadcast: no receiver needs to stay registered)
+    private fun batteryState(): Map<String, Any>? {
+        val intent = registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED)) ?: return null
+        val level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
+        val scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
+
+        if (level < 0 || scale <= 0) {
+            return null
+        }
+
+        val status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
+        val charging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
+            status == BatteryManager.BATTERY_STATUS_FULL
+
+        return mapOf("level" to level * 100 / scale, "charging" to charging)
     }
 
     /// shareFile - system share sheet for a file in the cache dir
@@ -107,6 +145,7 @@ class MainActivity : FlutterActivity() {
     companion object {
         private const val CHANNEL = "mwpa/notification_permission"
         private const val SHARE_CHANNEL = "mwpa/share"
+        private const val DEVICE_CHANNEL = "mwpa/device"
         private const val REQUEST_CODE = 4711
     }
 }
