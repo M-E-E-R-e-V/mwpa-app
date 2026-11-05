@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mwpaapp/Components/TagInput.dart';
+import 'package:mwpaapp/Components/Inputs/TagChipField.dart';
 
 void main() {
   late List<String> reported;
@@ -10,7 +10,7 @@ void main() {
     reported = initial;
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
-        body: TagInput(
+        body: TagChipField(
           initialTags: initial,
           suggestions: suggestions,
           onChanged: (tags) => reported = tags,

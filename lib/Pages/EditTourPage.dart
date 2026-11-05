@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mwpaapp/Components/DynInput.dart';
+import 'package:mwpaapp/Components/Inputs/Inputs.dart';
 import 'package:mwpaapp/Controllers/BeaufortController.dart';
 import 'package:mwpaapp/Controllers/LocationController.dart';
 import 'package:mwpaapp/Controllers/PrefController.dart';
@@ -23,28 +23,28 @@ class _EditTourPageState extends State<EditTourPage> {
   late final VehicleDriverController _vehicleDriverController = context.read<VehicleDriverController>();
   late final LocationController _locationController = context.read<LocationController>();
 
-  late DynInput sightVehicle;
+  late Widget sightVehicle;
   DynInputValue sightVehicleValue = DynInputValue();
 
-  late DynInput sightVehicleDriver;
+  late Widget sightVehicleDriver;
   DynInputValue sightVehicleDriverValue = DynInputValue();
 
-  late DynInput sightBeaufort;
+  late Widget sightBeaufort;
   DynInputValue sightBeaufortValue = DynInputValue();
 
-  late DynInput sightDate;
+  late Widget sightDate;
   DynInputValue sightDateValue = DynInputValue();
 
-  late DynInput sightTourStart;
+  late Widget sightTourStart;
   DynInputValue sightTourStartValue = DynInputValue();
 
-  late DynInput sightTourEnd;
+  late Widget sightTourEnd;
   DynInputValue sightTourEndValue = DynInputValue();
 
-  late DynInput sightSetEndTour;
+  late Widget sightSetEndTour;
   DynInputValue sightSetEndTourValue = DynInputValue();
 
-  late DynInput sightUseHomeArea;
+  late Widget sightUseHomeArea;
   DynInputValue sightUseHomeAreaValue = DynInputValue();
 
   bool isInit = false;
@@ -78,15 +78,14 @@ class _EditTourPageState extends State<EditTourPage> {
   /// save the settings
   Future<void> _saveTourToPref() async {
     TourPref tour = TourPref(
-        vehicle_id: sightVehicle.dynValue?.getStrValueAsInt(),
-        vehicle_driver_id: sightVehicleDriver.dynValue
-            ?.getStrValueAsInt(),
-        beaufort_wind: sightBeaufort.dynValue?.getValue(),
-        date: sightDate.dynValue?.getDateTime(),
-        tour_start: sightTourStart.dynValue?.getTimeOfDay(),
-        tour_end: sightTourEnd.dynValue?.getTimeOfDay(),
-        set_end_tour: sightSetEndTour.dynValue?.getIntValue(),
-        use_home_area: sightUseHomeArea.dynValue?.getIntValue()
+        vehicle_id: sightVehicleValue.getStrValueAsInt(),
+        vehicle_driver_id: sightVehicleDriverValue.getStrValueAsInt(),
+        beaufort_wind: sightBeaufortValue.getValue(),
+        date: sightDateValue.getDateTime(),
+        tour_start: sightTourStartValue.getTimeOfDay(),
+        tour_end: sightTourEndValue.getTimeOfDay(),
+        set_end_tour: sightSetEndTourValue.getIntValue(),
+        use_home_area: sightUseHomeAreaValue.getIntValue()
     );
 
     await _prefController.saveTour(tour);
@@ -128,13 +127,10 @@ class _EditTourPageState extends State<EditTourPage> {
     return ListenableBuilder(
       listenable: Listenable.merge([_vehicleController, _vehicleDriverController]),
       builder: (_, __) {
-      sightVehicle = DynInput(
-        context: context,
+      sightVehicle = SelectInput(
         title: "Boat",
-        hint: "",
-        inputType: DynInputType.select,
-        dynValue: sightVehicleValue,
-        selectList: _vehicleController.vehicleList.map((element) {
+        value: sightVehicleValue,
+        items: _vehicleController.vehicleList.map((element) {
           return DynInputSelectItem(
               value: element.id!.toString(),
               label: element.name!
@@ -142,13 +138,10 @@ class _EditTourPageState extends State<EditTourPage> {
         }).toList(),
       );
 
-      sightVehicleDriver = DynInput(
-        context: context,
+      sightVehicleDriver = SelectInput(
         title: "Skipper",
-        hint: "",
-        inputType: DynInputType.select,
-        dynValue: sightVehicleDriverValue,
-        selectList: _vehicleDriverController.vehicleDriverList.map((element) {
+        value: sightVehicleDriverValue,
+        items: _vehicleDriverController.vehicleDriverList.map((element) {
           return DynInputSelectItem(
               value: element.id!.toString(),
               label: element.username!
@@ -156,53 +149,35 @@ class _EditTourPageState extends State<EditTourPage> {
         }).toList(),
       );
 
-      sightBeaufort = DynInput(
-          context: context,
-          title: "Wind/Sea-state (Beaufort)",
-          hint: "",
-          inputType: DynInputType.select,
-          dynValue: sightBeaufortValue,
-          selectList: BeaufortController.beaufortSelectList
+      sightBeaufort = SelectInput(
+        title: "Wind/Sea-state (Beaufort)",
+        value: sightBeaufortValue,
+        items: BeaufortController.beaufortSelectList,
       );
 
-      sightDate = DynInput(
-        context: context,
+      sightDate = DateInput(
         title: "Date",
-        hint: "",
-        inputType: DynInputType.date,
-        dynValue: sightDateValue,
+        value: sightDateValue,
       );
 
-      sightTourStart = DynInput(
-        context: context,
+      sightTourStart = TimeInput(
         title: "Start of trip",
-        hint: "",
-        inputType: DynInputType.time,
-        dynValue: sightTourStartValue,
+        value: sightTourStartValue,
       );
 
-      sightTourEnd = DynInput(
-        context: context,
+      sightTourEnd = TimeInput(
         title: "End of trip",
-        hint: "",
-        inputType: DynInputType.time,
-        dynValue: sightTourEndValue,
+        value: sightTourEndValue,
       );
 
-      sightSetEndTour = DynInput(
-        context: context,
-        hint: "",
-        inputType: DynInputType.switcher,
+      sightSetEndTour = SwitchInput(
         title: 'Allow tour end time button for all sightings',
-        dynValue: sightSetEndTourValue,
+        value: sightSetEndTourValue,
       );
 
-      sightUseHomeArea = DynInput(
-        context: context,
-        hint: "",
-        inputType: DynInputType.switcher,
+      sightUseHomeArea = SwitchInput(
         title: 'Use Home Area auto-tracking tour start and end',
-        dynValue: sightUseHomeAreaValue,
+        value: sightUseHomeAreaValue,
       );
 
       return PopScope(

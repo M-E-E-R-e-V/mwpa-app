@@ -1,4 +1,4 @@
-import 'package:mwpaapp/Components/DynInput.dart';
+import 'package:mwpaapp/Components/Inputs/DynInputValue.dart';
 
 /// BeaufortController - static select list for beaufort wind values
 class BeaufortController {

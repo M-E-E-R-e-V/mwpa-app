@@ -64,6 +64,10 @@ Two distinct persistence mechanisms — pick the right one:
 
 `lib/Pages/` — Welcome → Login → ProminentDisclosure (Android location-tracking consent gate, required for Play Store compliance) → List (main screen with sighting list + `flutter_map` map in `Pages/List/ListMap.dart`, OSM tiles configured in `UtilTileServer`) → Edit (sighting/tour editors). The prominent-disclosure step must run before any background-location capability is activated.
 
+### Form inputs
+
+The edit pages build their forms from `lib/Components/Inputs/` (import the barrel `Inputs.dart`): one widget per input kind — `SelectInput`, `MultiSelectInput`, `DateInput`, `TimeInput`, `LocationInput`, `SwitchInput`, `YesNoUnknownInput`, `TextValueInput` (`TextValueKind.textarea/decimal/digits`), `TagInput`, `ImageInput` — all laid out via `InputFrame`/`InputBox`/`ValueBox`. Each takes a `DynInputValue` (mutable holder owned by the page; the input writes its own slot — `strValue`, `timeValue`, `intValue`, `posValue`, …) plus an optional `onChange`. The pages read values back from their `…Value` fields, not from the widgets. Add a new input kind as a new widget, not as a mode of an existing one.
+
 ### Utilities of note
 
 `lib/Util/` contains pure helpers — `UtilPosition`, `UtilLocation`, `UtilDistanceCoast`, `UtilTourFId` (tour foreign-ID generation), `UtilTourTracking` (when local tracking points may be deleted after sync), `UtilTileServer` (map tile config), `UtilSighting`, `UtilDate`, `UtilCheckJson`. Prefer extending these over inlining geo/date logic in widgets or controllers.

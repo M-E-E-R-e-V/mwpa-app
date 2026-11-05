@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:mwpaapp/Constants.dart';
 
-/// TagInput - free text tags as Material chips with autocomplete.
+/// TagChipField - free text tags as Material chips with autocomplete.
 ///
 /// A tag is added on Enter, on a separator (space or comma) or by picking a
 /// suggestion from [suggestions]; the chip's delete icon removes it. Every
 /// change is reported through [onChanged] with the full tag list.
-class TagInput extends StatefulWidget {
+class TagChipField extends StatefulWidget {
   final List<String> initialTags;
   final List<String> suggestions;
   final ValueChanged<List<String>> onChanged;
   final String hintText;
 
-  const TagInput({
+  const TagChipField({
     super.key,
     required this.initialTags,
     required this.onChanged,
@@ -21,10 +21,10 @@ class TagInput extends StatefulWidget {
   });
 
   @override
-  State<TagInput> createState() => _TagInputState();
+  State<TagChipField> createState() => _TagChipFieldState();
 }
 
-class _TagInputState extends State<TagInput> {
+class _TagChipFieldState extends State<TagChipField> {
   static const _separators = [' ', ','];
 
   late final List<String> _tags = widget.initialTags
