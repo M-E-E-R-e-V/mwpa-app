@@ -120,6 +120,7 @@ class TagInput extends StatelessWidget {
     return InputFrame(
       title: title,
       child: InputBox(
+        width: double.infinity,
         minHeight: kInputHeight,
         padding: const EdgeInsets.symmetric(horizontal: 14),
         child: TagChipField(

@@ -675,12 +675,16 @@ class _ListPageState extends State<ListPage>
       canPop: false,
       child: Scaffold(
         appBar: _appBar(),
-        body: TabBarView(
-          controller: _tabController,
-          children: [
-            _tourTab(context),
-            _sightingsTab(context),
-          ],
+        // edge-to-edge (Android 15+): keep content clear of the gesture bar
+        body: SafeArea(
+          top: false,
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              _tourTab(context),
+              _sightingsTab(context),
+            ],
+          ),
         ),
       ),
     );

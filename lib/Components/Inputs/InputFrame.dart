@@ -31,6 +31,7 @@ class InputFrame extends StatelessWidget {
 /// InputBox - the rounded, bordered box around an input.
 class InputBox extends StatelessWidget {
   final Widget child;
+  final double? width;
   final double? height;
   final double? minHeight;
   final EdgeInsetsGeometry padding;
@@ -39,6 +40,7 @@ class InputBox extends StatelessWidget {
   const InputBox({
     super.key,
     required this.child,
+    this.width,
     this.height,
     this.minHeight,
     this.padding = const EdgeInsets.only(left: 14),
@@ -48,7 +50,9 @@ class InputBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: width,
       height: height,
+      alignment: width == null ? null : Alignment.centerLeft,
       constraints: minHeight == null ? null : BoxConstraints(minHeight: minHeight!),
       margin: const EdgeInsets.only(top: 8.0),
       padding: padding,

@@ -46,10 +46,6 @@ class _TextValueInputState extends State<TextValueInput> {
     final isTextarea = widget.kind == TextValueKind.textarea;
     final display = widget.onFormat?.call(widget.value) ?? widget.value.strValue;
 
-    const hiddenBorder = UnderlineInputBorder(
-      borderSide: BorderSide(color: Colors.transparent, width: 0),
-    );
-
     final field = TextFormField(
       autofocus: false,
       cursorColor: Colors.grey[700],
@@ -66,12 +62,18 @@ class _TextValueInputState extends State<TextValueInput> {
       textInputAction: isTextarea ? TextInputAction.newline : null,
       minLines: isTextarea ? 20 : null,
       maxLines: isTextarea ? 20 : null,
+      // plain field inside the input box: no theme border/fill/padding, so
+      // the text lines up with the other inputs
       decoration: InputDecoration(
         counterText: isTextarea ? '' : null,
         hintText: display,
         hintStyle: subTitleStyle(context),
-        focusedBorder: hiddenBorder,
-        enabledBorder: hiddenBorder,
+        filled: false,
+        isDense: true,
+        contentPadding: EdgeInsets.zero,
+        border: InputBorder.none,
+        enabledBorder: InputBorder.none,
+        focusedBorder: InputBorder.none,
       ),
       onChanged: (text) {
         setState(() => widget.value.strValue = text);

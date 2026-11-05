@@ -62,7 +62,13 @@ class DefaultButton extends StatelessWidget {
         backgroundColor: background,
         foregroundColor: kButtonFontColor,
         disabledBackgroundColor: background.withValues(alpha: 0.5),
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+        // icon-only buttons are often narrow (e.g. 44 px): no M3 minimum size
+        // and padding, otherwise the icon gets clipped
+        padding: label == null
+            ? EdgeInsets.zero
+            : const EdgeInsets.symmetric(horizontal: 12),
+        minimumSize: label == null ? Size.zero : null,
+        tapTargetSize: label == null ? MaterialTapTargetSize.shrinkWrap : null,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),

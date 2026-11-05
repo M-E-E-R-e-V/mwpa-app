@@ -64,4 +64,15 @@ void main() {
     expect(reported, ['SLP']);
     expect(tester.widget<TextField>(find.byType(TextField)).controller!.text, isEmpty);
   });
+
+  testWidgets('tapping the empty area of the field starts typing', (tester) async {
+    await pump(tester);
+
+    final box = tester.getRect(find.byType(TagChipField));
+    await tester.tapAt(Offset(box.right - 10, box.center.dy));
+    await tester.pump();
+
+    final field = tester.widget<TextField>(find.byType(TextField));
+    expect(field.focusNode!.hasFocus, isTrue);
+  });
 }

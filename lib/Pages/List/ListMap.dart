@@ -34,6 +34,9 @@ class _ListMapState extends State<ListMap> {
   bool _mapReady = false;
   bool _followPosition = true;
 
+  /// false until the map was zoomed in on the first GPS fix
+  bool _zoomedToPosition = false;
+
   @override
   void initState() {
     super.initState();
@@ -60,9 +63,14 @@ class _ListMapState extends State<ListMap> {
   void _onLocationChanged() {
     final latLng = _currentLatLng();
 
-    if (_mapReady && _followPosition && latLng != null) {
-      _mapController.move(latLng, _mapController.camera.zoom);
+    if (!_mapReady || !_followPosition || latLng == null) {
+      return;
     }
+
+    // first fix: zoom in from the world view, afterwards keep the user's zoom
+    final zoom = _zoomedToPosition ? _mapController.camera.zoom : _defaultZoom;
+    _zoomedToPosition = true;
+    _mapController.move(latLng, zoom);
   }
 
   void _gotoDefault() {
@@ -71,6 +79,7 @@ class _ListMapState extends State<ListMap> {
     final latLng = _currentLatLng();
 
     if (_mapReady && latLng != null) {
+      _zoomedToPosition = true;
       _mapController.move(latLng, _defaultZoom);
     }
   }

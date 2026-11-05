@@ -317,7 +317,7 @@ class ListSightingTile extends StatelessWidget {
                     const SizedBox(width: 4),
                     DefaultButton(
                       buttonIcon: Icons.add_location_alt,
-                      width: 22,
+                      width: 44,
                       onTab: () {
                         _setEndLocation(context);
                       },

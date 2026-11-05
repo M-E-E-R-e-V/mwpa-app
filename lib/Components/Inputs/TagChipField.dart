@@ -81,42 +81,59 @@ class _TagChipFieldState extends State<TagChipField> {
             option.toLowerCase().contains(query) && !_tags.contains(option));
       },
       fieldViewBuilder: (context, field, focusNode, onFieldSubmitted) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          child: Wrap(
-            spacing: 6,
-            runSpacing: 4,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              for (final tag in _tags)
-                InputChip(
-                  label: Text(tag, style: const TextStyle(color: Colors.white)),
-                  backgroundColor: kPrimaryColor,
-                  deleteIconColor: Colors.white,
-                  side: BorderSide.none,
-                  visualDensity: VisualDensity.compact,
-                  onDeleted: () => _removeTag(tag),
-                ),
-              ConstrainedBox(
-                constraints: const BoxConstraints(minWidth: 80, maxWidth: 220),
-                child: IntrinsicWidth(
-                  child: TextField(
-                    controller: field,
-                    focusNode: focusNode,
-                    decoration: InputDecoration(
-                      isDense: true,
-                      border: InputBorder.none,
-                      hintText: _tags.isEmpty ? widget.hintText : '',
+        // a tap anywhere in the box (not only on the small text field)
+        // starts typing
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: focusNode.requestFocus,
+          child: SizedBox(
+            width: double.infinity,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: Wrap(
+                spacing: 6,
+                runSpacing: 4,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  for (final tag in _tags)
+                    InputChip(
+                      label: Text(tag,
+                          style: const TextStyle(color: Colors.white)),
+                      backgroundColor: kPrimaryColor,
+                      deleteIconColor: Colors.white,
+                      side: BorderSide.none,
+                      visualDensity: VisualDensity.compact,
+                      onDeleted: () => _removeTag(tag),
                     ),
-                    onChanged: _onTextChanged,
-                    onSubmitted: (text) {
-                      _addTag(text);
-                      focusNode.requestFocus();
-                    },
+                  ConstrainedBox(
+                    constraints:
+                        const BoxConstraints(minWidth: 80, maxWidth: 220),
+                    child: IntrinsicWidth(
+                      child: TextField(
+                        controller: field,
+                        focusNode: focusNode,
+                        // plain field inside the input box: no theme border/fill
+                        decoration: InputDecoration(
+                          isDense: true,
+                          filled: false,
+                          contentPadding:
+                              const EdgeInsets.symmetric(vertical: 8),
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          hintText: _tags.isEmpty ? widget.hintText : '',
+                        ),
+                        onChanged: _onTextChanged,
+                        onSubmitted: (text) {
+                          _addTag(text);
+                          focusNode.requestFocus();
+                        },
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
         );
       },
