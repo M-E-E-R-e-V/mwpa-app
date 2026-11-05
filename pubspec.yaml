@@ -40,7 +40,6 @@ dependencies:
   latlong_to_osgrid: ^1.3.2
   uuid: ^4.4.0
   gpx: ^2.5.0
-  flutter_easyloading:
   connectivity_plus: ^7.3.1
   image_picker:
   app_settings: ^9.0.1

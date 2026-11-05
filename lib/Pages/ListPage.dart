@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:mwpaapp/Components/Inputs/DynInputValue.dart';
 import 'package:mwpaapp/Constants.dart';
@@ -17,6 +16,7 @@ import 'package:mwpaapp/Controllers/VehicleController.dart';
 import 'package:mwpaapp/Controllers/VehicleDriverController.dart';
 import 'package:mwpaapp/Dialog/ConfirmDialog.dart';
 import 'package:mwpaapp/Dialog/InfoDialog.dart';
+import 'package:mwpaapp/Dialog/SyncProgressDialog.dart';
 import 'package:mwpaapp/Models/Sighting.dart';
 import 'package:mwpaapp/Mwpa/MwpaException.dart';
 import 'package:mwpaapp/Pages/EditSightingPage.dart';
@@ -71,11 +71,15 @@ class _ListPageState extends State<ListPage>
     subscription = Connectivity().onConnectivityChanged.listen(
         _syncCheckConnectivity
     );
+
+    _locationController.updateEvent.addListener(_updateTitle);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadController());
   }
 
   /// dispose
   @override
   void dispose() {
+    _locationController.updateEvent.removeListener(_updateTitle);
     _tabController.dispose();
     subscription.cancel();
 
@@ -99,16 +103,14 @@ class _ListPageState extends State<ListPage>
       return;
     }
 
-    EasyLoading.instance.dismissOnTap = false;
-    EasyLoading.instance.maskType = EasyLoadingMaskType.black;
-
+    final progress = SyncProgressDialog()..show(context);
     SyncMwpaService service = SyncMwpaService(_speciesController);
 
     try {
       isSyncInProgress = true;
 
       await service.sync((p0, p1) async {
-        EasyLoading.showProgress(p0.round() / 100, status: '$p1 ... ${p0.round()}%');
+        progress.update(p0.round(), p1);
       });
 
       await _vehicleController.getVehicle();
@@ -117,12 +119,13 @@ class _ListPageState extends State<ListPage>
       await _encounterCategoriesController.getEncounterCategorie();
       await _behaviouralStateController.getBehaviouralStates();
       await _locationController.reloadSettings();
+      await _sightingController.getSightings();
 
       isSyncInProgress = false;
-      EasyLoading.dismiss();
+      progress.close();
     } catch(error) {
       isSyncInProgress = false;
-      EasyLoading.dismiss();
+      progress.close();
 
       if (!mounted) return;
 
@@ -138,10 +141,10 @@ class _ListPageState extends State<ListPage>
   }
 
   /// _loadController
+  ///
+  /// Reloads reference data, settings and sightings from the local DB; called
+  /// once on start and after returning from pages that change them.
   Future<void> _loadController() async {
-    _locationController.updateEvent.removeListener(_updateTitle);
-    _locationController.updateEvent.addListener(_updateTitle);
-
     await _speciesController.getSpecies();
     await _vehicleController.getVehicle();
     await _vehicleDriverController.getVehicleDriver();
@@ -149,7 +152,8 @@ class _ListPageState extends State<ListPage>
     await _behaviouralStateController.getBehaviouralStates();
     await _locationController.reloadSettings();
 
-    _sightingController.getSightings();
+    await _sightingController.getSightings();
+    _updateTitle();
   }
 
   /// _logout
@@ -237,7 +241,7 @@ class _ListPageState extends State<ListPage>
             switch (value) {
               case 'settour':
                 await Navigator.of(context).pushNamed('/setTour');
-                _sightingController.getSightings();
+                _loadController();
                 break;
               case 'sync':
                 _syncMwpa();
@@ -255,9 +259,24 @@ class _ListPageState extends State<ListPage>
         indicatorWeight: 3,
         labelColor: kButtonFontColor,
         unselectedLabelColor: Colors.white70,
-        tabs: const [
-          Tab(icon: Icon(Icons.tour_outlined), text: 'Tour'),
-          Tab(icon: Icon(Icons.list_alt), text: 'Sightings'),
+        tabs: [
+          const Tab(icon: Icon(Icons.tour_outlined), text: 'Tour'),
+          Tab(
+            icon: ListenableBuilder(
+              listenable: _sightingController,
+              builder: (_, __) {
+                final count = _sightingController.sightingList.length;
+
+                return Badge(
+                  isLabelVisible: count > 0,
+                  label: Text('$count'),
+                  backgroundColor: kButtonBackgroundColor,
+                  child: const Icon(Icons.list_alt),
+                );
+              },
+            ),
+            text: 'Sightings',
+          ),
         ],
       ),
     );
@@ -265,35 +284,44 @@ class _ListPageState extends State<ListPage>
 
   /// _addShortSighting
   Future<void> _addShortSighting(String otherName, BuildContext context) async {
-    DynInputValue tOD = DynInputValue();
-    tOD.timeValue = TimeOfDay.now();
-    Position pos = _locationController.currentPosition!;
-    String location = jsonEncode(pos.toJson());
-    var distance = UtilDistanceCoast.getDistance(pos);
+    final tour = UtilSighting.shortSightingTour(
+      prefTour: _prefController.prefToru,
+      homeAreaTour: _locationController.homeAreaToru,
+    );
 
-    if (_prefController.prefToru == null) {
-      if (kDebugMode) {
-        print("_ListPageState:_addShortSighting - prefToru is empty!");
-      }
-
+    if (tour == null) {
       InfoDialog.show(
           context,
-          "Error",
-          "Please set the standard tour dates beforehand. The entry cannot be added until then."
+          "Info",
+          (_prefController.prefToru?.use_home_area ?? 0) >= 1
+              ? "The tour has not started yet (still in the home area). The entry cannot be added until then."
+              : "Please set the default tour with date and start time beforehand. The entry cannot be added until then."
       );
 
       return;
     }
 
+    final Position? pos = _locationController.currentPosition;
+
+    if (pos == null) {
+      InfoDialog.show(context, 'Info', "Please wait for the GPS signal.");
+      return;
+    }
+
+    DynInputValue tOD = DynInputValue();
+    tOD.timeValue = TimeOfDay.now();
+    String location = jsonEncode(pos.toJson());
+    var distance = UtilDistanceCoast.getDistance(pos);
+
     await _sightingController.addSighting(newSighting: Sighting(
       unid: '',
-      tour_fid: UtilTourFid.createTTourFId(_prefController.prefToru!),
-      vehicle_id: _prefController.prefToru!.vehicle_id!,
-      vehicle_driver_id: _prefController.prefToru!.vehicle_driver_id,
-      tour_start: _prefController.prefToru!.tour_start,
-      tour_end: _prefController.prefToru!.tour_end,
-      beaufort_wind: _prefController.prefToru!.beaufort_wind,
-      date: _prefController.prefToru!.date,
+      tour_fid: UtilTourFid.createTTourFId(tour),
+      vehicle_id: tour.vehicle_id!,
+      vehicle_driver_id: tour.vehicle_driver_id,
+      tour_start: tour.tour_start,
+      tour_end: tour.tour_end,
+      beaufort_wind: tour.beaufort_wind,
+      date: tour.date,
       duration_from: tOD.getTimeOfDay(),
       duration_until: tOD.getTimeOfDay(),
       location_begin: location,
@@ -306,7 +334,12 @@ class _ListPageState extends State<ListPage>
       sightingType: Sighting.TYPE_SHORT
     ));
 
-    _loadController();
+    await _sightingController.getSightings();
+
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Added: $otherName')),
+    );
   }
 
   void _updateTitle() {
@@ -329,7 +362,7 @@ class _ListPageState extends State<ListPage>
                         if (select == "ok") {
                           if (!mounted) return;
                           await Navigator.of(context).pushNamed('/setTour');
-                          _sightingController.getSightings();
+                          _loadController();
                         } else {
                           diffTourDateIgnored = true;
                         }
@@ -379,10 +412,10 @@ class _ListPageState extends State<ListPage>
           children: [
             CircleAvatar(
               radius: 22,
-              backgroundColor: theme.colorScheme.primary,
-              child: Icon(
+              backgroundColor: kButtonBackgroundColor,
+              child: const Icon(
                 Icons.tour_outlined,
-                color: theme.colorScheme.onPrimary,
+                color: kButtonFontColor,
               ),
             ),
             const SizedBox(width: 14),
@@ -579,19 +612,24 @@ class _ListPageState extends State<ListPage>
         );
       }
 
-      return ListView.builder(
-        padding: const EdgeInsets.fromLTRB(0, 8, 0, 16),
-        itemCount: sightings.length,
-        itemBuilder: (_, index) {
-          final sighting = sightings[index];
-          return _FadeSlideIn(
-            delay: Duration(milliseconds: 50 * index.clamp(0, 8)),
-            child: GestureDetector(
-              onTap: () => _showBottomSheet(context, sighting),
-              child: ListSightingTile(sighting),
-            ),
-          );
-        },
+      // pull down to sync with the server
+      return RefreshIndicator(
+        onRefresh: _syncMwpa,
+        child: ListView.builder(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(0, 12, 0, 16),
+          itemCount: sightings.length,
+          itemBuilder: (_, index) {
+            final sighting = sightings[index];
+            return _FadeSlideIn(
+              delay: Duration(milliseconds: 50 * index.clamp(0, 8)),
+              child: ListSightingTile(
+                sighting,
+                onTap: () => _showBottomSheet(context, sighting),
+              ),
+            );
+          },
+        ),
       );
     });
   }
@@ -602,6 +640,7 @@ class _ListPageState extends State<ListPage>
 
     showModalBottomSheet<void>(
       context: context,
+      showDragHandle: true,
       backgroundColor: theme.colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -609,20 +648,16 @@ class _ListPageState extends State<ListPage>
       builder: (sheetContext) => SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Center(
-                child: Container(
-                  height: 4,
-                  width: 48,
-                  margin: const EdgeInsets.only(bottom: 12),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: Text(
+                  '${sighting.date ?? ''} · ${sighting.duration_from ?? ''}',
+                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
                 ),
               ),
               ListTile(
@@ -648,10 +683,21 @@ class _ListPageState extends State<ListPage>
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                onTap: () async {
+                onTap: () {
                   Navigator.of(sheetContext).pop();
-                  await _sightingController.delete(sighting);
-                  _sightingController.getSightings();
+                  ConfirmDialog.show(
+                    context,
+                    'Delete sighting',
+                    'Delete this sighting from the device? Already synced data stays on the server.',
+                    (value) async {
+                      if (value == 'ok') {
+                        await _sightingController.delete(sighting);
+                        _sightingController.getSightings();
+                      }
+                    },
+                    destructive: true,
+                    okLabel: 'Delete',
+                  );
                 },
               ),
               const SizedBox(height: 8),
@@ -669,8 +715,6 @@ class _ListPageState extends State<ListPage>
   /// build
   @override
   Widget build(BuildContext context) {
-    _loadController();
-
     return PopScope(
       canPop: false,
       child: Scaffold(

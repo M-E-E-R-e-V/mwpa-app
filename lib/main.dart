@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:mwpaapp/Controllers/BehaviouralStateController.dart';
 import 'package:mwpaapp/Controllers/EncounterCategoriesController.dart';
 import 'package:mwpaapp/Controllers/LocationController.dart';
@@ -97,7 +96,6 @@ class MWPAApp extends StatelessWidget {
         '/Edit': (_) => const EditSightingPage(),
         '/setTour': (_) => const EditTourPage(),
       },
-      builder: EasyLoading.init(),
     );
   }
 }
