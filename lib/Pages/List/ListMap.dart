@@ -17,9 +17,15 @@ import 'package:mwpaapp/l10n/l10n.dart';
 ///
 /// The map follows the GPS position until the user pans/zooms by hand; the
 /// "My Location" button switches following back on.
+///
+/// The map fills the whole widget; [top] and [bottom] float above it (e.g.
+/// the tour card and the quick actions). Empty space between them passes the
+/// gestures through to the map.
 class ListMap extends StatefulWidget {
+  final Widget? top;
+  final Widget? bottom;
 
-  const ListMap({super.key});
+  const ListMap({super.key, this.top, this.bottom});
 
   @override
   State<ListMap> createState() => _ListMapState();
@@ -126,8 +132,8 @@ class _ListMapState extends State<ListMap> {
         final currentLatLng = _currentLatLng();
         final homeArea = _locationController.homeArea;
 
-        return Scaffold(
-          body: Stack(
+        return Stack(
+            fit: StackFit.expand,
             children: [
               FlutterMap(
                 mapController: _mapController,
@@ -176,42 +182,86 @@ class _ListMapState extends State<ListMap> {
                         _buildMarker(currentLatLng, Colors.red, Icons.my_location),
                     ],
                   ),
-
-                  const SimpleAttributionWidget(
-                    source: Text('OpenStreetMap contributors'),
-                    alignment: Alignment.topRight,
-                  ),
                 ],
               ),
 
-              // GPS Information -------------------------------------------------
-              PositionedDirectional(
-                bottom: 5,
-                start: 5,
-                child: Container(
-                  padding: const EdgeInsets.only(left: 4, right: 4),
-                  decoration: const BoxDecoration(
-                    color: kPrimaryHeaderColor,
-                    borderRadius: BorderRadius.all(Radius.circular(8)),
-                  ),
-                  child: Text(
-                    position == null
-                        ? context.l10n.mapWaitForGps
-                        : context.l10n.mapPositionPoints(UtilPosition.getStr(position), _locationController.positionCount),
-                    style: subTitleStyle(context).copyWith(color: kButtonFontColor),
+              // overlays ------------------------------------------------------
+              SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (widget.top != null) widget.top!,
+                      const SizedBox(height: 8),
+                      const Align(
+                        alignment: AlignmentDirectional.centerEnd,
+                        child: _MapPill(child: Text('© OpenStreetMap contributors')),
+                      ),
+                      const Spacer(),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Flexible(
+                            child: _MapPill(
+                              child: Text(
+                                position == null
+                                    ? context.l10n.mapWaitForGps
+                                    : context.l10n.mapPositionPoints(
+                                        UtilPosition.getStr(position), _locationController.positionCount),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          FloatingActionButton(
+                            heroTag: null,
+                            onPressed: _gotoDefault,
+                            tooltip: context.l10n.myLocation,
+                            backgroundColor: kButtonBackgroundColor,
+                            foregroundColor: kButtonFontColor,
+                            child: Icon(_followPosition ? Icons.my_location : Icons.location_searching),
+                          ),
+                        ],
+                      ),
+                      if (widget.bottom != null) ...[
+                        const SizedBox(height: 12),
+                        widget.bottom!,
+                      ],
+                    ],
                   ),
                 ),
               ),
             ],
-          ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: _gotoDefault,
-            tooltip: context.l10n.myLocation,
-            backgroundColor: kButtonBackgroundColor,
-            child: Icon(_followPosition ? Icons.my_location : Icons.location_searching),
-          ),
-        );
+          );
       },
+    );
+  }
+}
+
+/// _MapPill - small translucent label on the map (attribution, GPS info)
+class _MapPill extends StatelessWidget {
+  final Widget child;
+
+  const _MapPill({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: scheme.surface.withValues(alpha: 0.85),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 1))],
+      ),
+      child: DefaultTextStyle.merge(
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(color: scheme.onSurface),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        child: child,
+      ),
     );
   }
 }

@@ -460,11 +460,15 @@ class _ListPageState extends State<ListPage>
   /// _statusCard
   Widget _statusCard(BuildContext context) {
     final theme = Theme.of(context);
+    // floats on the map: slightly translucent, with shadow
     return Card(
-      color: theme.colorScheme.primaryContainer,
-      elevation: 0,
+      margin: EdgeInsets.zero,
+      color: theme.colorScheme.primaryContainer.withValues(alpha: 0.93),
+      elevation: 4,
+      shadowColor: Colors.black45,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
         child: Row(
           children: [
             CircleAvatar(
@@ -627,28 +631,12 @@ class _ListPageState extends State<ListPage>
     );
   }
 
-  /// _tourTab — Tab 1: Status card, quick actions, map.
+  /// _tourTab — Tab 1: map over the whole tab, the tour card floats on top,
+  /// the quick actions at the bottom.
   Widget _tourTab(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _statusCard(context),
-          const SizedBox(height: 12),
-          _actionRow(context),
-          const SizedBox(height: 12),
-          Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: Container(
-                color: kButtonBackgroundColor,
-                child: const ListMap(),
-              ),
-            ),
-          ),
-        ],
-      ),
+    return ListMap(
+      top: _statusCard(context),
+      bottom: _actionRow(context),
     );
   }
 
@@ -844,8 +832,8 @@ class _ActionTile extends StatelessWidget {
 
     return Material(
       color: color,
-      elevation: 2,
-      shadowColor: color.withValues(alpha: 0.5),
+      elevation: 4,
+      shadowColor: Colors.black45,
       borderRadius: BorderRadius.circular(18),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
