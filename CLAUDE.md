@@ -17,10 +17,11 @@ flutter test --name "matches description"         # run a single test by name
 flutter run                                       # run on attached device/emulator
 flutter build apk                                 # build Android release APK
 
-dart run flutter_launcher_icons                   # regenerate launcher icons from assets/images/logo.png
+dart run flutter_launcher_icons                   # regenerate launcher icons (adaptive icon from assets/splash/)
+dart run flutter_native_splash:create             # regenerate the native launch screen (Android 12+, older Android, iOS)
 ```
 
-The `flutter_launcher_icons` run is also configured as an External Tool in Android Studio (see README). Re-run it after changing the `flutter_launcher_icons:` section in `pubspec.yaml`. The app display name and id are set directly in `android/app/src/main/AndroidManifest.xml` (`android:label`) and `android/app/build.gradle` (`applicationId`).
+The `flutter_launcher_icons` run is also configured as an External Tool in Android Studio (see README). Re-run it after changing the `flutter_launcher_icons:` section in `pubspec.yaml`; likewise `flutter_native_splash` after changing its section. The artwork (white/blue whale tail on transparent) lives in `assets/splash/` and was derived from `assets/images/logo_512.png`. The app's first route is decided in `MWPAApp.initialRoute` from the preloaded `PrefController` (disclosure → list/login). The app display name and id are set directly in `android/app/src/main/AndroidManifest.xml` (`android:label`) and `android/app/build.gradle` (`applicationId`).
 
 Fonts: Lato is bundled under `assets/fonts/` (SIL OFL) and used via `kFontFamily` / `latoStyle()` in `lib/Ui/Fonts.dart` — `google_fonts` was removed so the app renders correctly offline.
 

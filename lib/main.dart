@@ -79,6 +79,16 @@ class _DevHttpOverrides extends HttpOverrides {
 class MWPAApp extends StatelessWidget {
   const MWPAApp({super.key});
 
+  /// initialRoute - first page: the location disclosure until it was
+  /// accepted, then the list when logged in, else the login.
+  static String initialRoute(PrefController prefs) {
+    if (!prefs.prominentDisclosureConfirmed) {
+      return '/ProminentDisclosure';
+    }
+
+    return prefs.isLogin ? '/List' : '/Login';
+  }
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -88,7 +98,9 @@ class MWPAApp extends StatelessWidget {
       theme: Themes.light,
       darkTheme: Themes.dark,
       themeMode: context.watch<ThemeController>().themeMode,
-      initialRoute: '/Login',
+      // prefs are loaded before runApp, so the first page is known right
+      // away - no login form flashing up before the list
+      initialRoute: initialRoute(context.read<PrefController>()),
       routes: {
         '/ProminentDisclosure': (_) => const ProminentDisclosurePage(),
         '/Login': (_) => const LoginPage(),

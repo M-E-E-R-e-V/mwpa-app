@@ -59,6 +59,7 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
   sqflite_common_ffi: ^2.4.5
+  flutter_native_splash: ^2.4.8
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -116,6 +117,20 @@ flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
   min_sdk_android: 21 # android min sdk min:16, default 21
-  image_path: "assets/images/logo.png"
-  # optionally, as transparency is not allowed on app store
-  # remove_alpha_ios: true
+  # legacy icon (Android < 8) and iOS: opaque white square with the logo
+  image_path: "assets/images/logo_512.png"
+  remove_alpha_ios: true
+  # adaptive icon (Android 8+), monochrome for themed icons (Android 13+)
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/splash/launcher_foreground.png"
+  adaptive_icon_monochrome: "assets/splash/launcher_monochrome.png"
+  adaptive_icon_foreground_inset: 8
+
+# native launch screen - regenerate with: dart run flutter_native_splash:create
+flutter_native_splash:
+  color: "#0b4297"
+  image: assets/splash/splash_logo.png
+  android_12:
+    color: "#0b4297"
+    image: assets/splash/splash_logo_android12.png
+  web: false
