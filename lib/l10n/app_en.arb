@@ -87,6 +87,28 @@
   },
   "camera": "Camera",
   "cancel": "Cancel",
+  "checkBeginAfterTourEnd": "The sighting starts after the tour end.",
+  "checkBeginBeforeTourStart": "The sighting starts before the tour start.",
+  "checkBeginFarFromTrack": "The start position is {distance} away from the recorded route at that time.",
+  "@checkBeginFarFromTrack": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "checkDateInFuture": "The date is in the future.",
+  "checkEndBeforeBegin": "The sighting ends before it starts.",
+  "checkEndFarFromTrack": "The end position is {distance} away from the recorded route at that time.",
+  "@checkEndFarFromTrack": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "checkTitle": "Please check",
+  "checkTourEndBeforeStart": "The tour ends before it starts (over midnight?).",
   "choiceNo": "No",
   "choiceUnknown": "Unknown",
   "choiceYes": "Yes",

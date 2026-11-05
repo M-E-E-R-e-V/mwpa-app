@@ -146,6 +146,37 @@ class AppLocalizationsDe extends AppLocalizations {
   String get cancel => 'Abbrechen';
 
   @override
+  String get checkBeginAfterTourEnd =>
+      'Die Sichtung beginnt nach dem Tourende.';
+
+  @override
+  String get checkBeginBeforeTourStart =>
+      'Die Sichtung beginnt vor dem Tourbeginn.';
+
+  @override
+  String checkBeginFarFromTrack(String distance) {
+    return 'Die Startposition ist $distance von der aufgezeichneten Route zu dieser Zeit entfernt.';
+  }
+
+  @override
+  String get checkDateInFuture => 'Das Datum liegt in der Zukunft.';
+
+  @override
+  String get checkEndBeforeBegin => 'Die Sichtung endet vor ihrem Beginn.';
+
+  @override
+  String checkEndFarFromTrack(String distance) {
+    return 'Die Endposition ist $distance von der aufgezeichneten Route zu dieser Zeit entfernt.';
+  }
+
+  @override
+  String get checkTitle => 'Bitte prüfen';
+
+  @override
+  String get checkTourEndBeforeStart =>
+      'Die Tour endet vor ihrem Beginn (über Mitternacht?).';
+
+  @override
   String get choiceNo => 'Nein';
 
   @override

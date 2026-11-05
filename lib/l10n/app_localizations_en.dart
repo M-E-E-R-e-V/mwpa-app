@@ -146,6 +146,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cancel => 'Cancel';
 
   @override
+  String get checkBeginAfterTourEnd =>
+      'The sighting starts after the tour end.';
+
+  @override
+  String get checkBeginBeforeTourStart =>
+      'The sighting starts before the tour start.';
+
+  @override
+  String checkBeginFarFromTrack(String distance) {
+    return 'The start position is $distance away from the recorded route at that time.';
+  }
+
+  @override
+  String get checkDateInFuture => 'The date is in the future.';
+
+  @override
+  String get checkEndBeforeBegin => 'The sighting ends before it starts.';
+
+  @override
+  String checkEndFarFromTrack(String distance) {
+    return 'The end position is $distance away from the recorded route at that time.';
+  }
+
+  @override
+  String get checkTitle => 'Please check';
+
+  @override
+  String get checkTourEndBeforeStart =>
+      'The tour ends before it starts (over midnight?).';
+
+  @override
   String get choiceNo => 'No';
 
   @override

@@ -334,6 +334,54 @@ abstract class AppLocalizations {
   /// **'Cancel'**
   String get cancel;
 
+  /// No description provided for @checkBeginAfterTourEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'The sighting starts after the tour end.'**
+  String get checkBeginAfterTourEnd;
+
+  /// No description provided for @checkBeginBeforeTourStart.
+  ///
+  /// In en, this message translates to:
+  /// **'The sighting starts before the tour start.'**
+  String get checkBeginBeforeTourStart;
+
+  /// No description provided for @checkBeginFarFromTrack.
+  ///
+  /// In en, this message translates to:
+  /// **'The start position is {distance} away from the recorded route at that time.'**
+  String checkBeginFarFromTrack(String distance);
+
+  /// No description provided for @checkDateInFuture.
+  ///
+  /// In en, this message translates to:
+  /// **'The date is in the future.'**
+  String get checkDateInFuture;
+
+  /// No description provided for @checkEndBeforeBegin.
+  ///
+  /// In en, this message translates to:
+  /// **'The sighting ends before it starts.'**
+  String get checkEndBeforeBegin;
+
+  /// No description provided for @checkEndFarFromTrack.
+  ///
+  /// In en, this message translates to:
+  /// **'The end position is {distance} away from the recorded route at that time.'**
+  String checkEndFarFromTrack(String distance);
+
+  /// No description provided for @checkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Please check'**
+  String get checkTitle;
+
+  /// No description provided for @checkTourEndBeforeStart.
+  ///
+  /// In en, this message translates to:
+  /// **'The tour ends before it starts (over midnight?).'**
+  String get checkTourEndBeforeStart;
+
   /// No description provided for @choiceNo.
   ///
   /// In en, this message translates to:

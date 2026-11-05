@@ -17,6 +17,9 @@ import 'package:mwpaapp/Controllers/VehicleDriverController.dart';
 import 'package:mwpaapp/Dialog/ConfirmDialog.dart';
 import 'package:mwpaapp/Models/Sighting.dart';
 import 'package:mwpaapp/Pages/EditSighting/MissingFields.dart';
+import 'package:mwpaapp/Pages/EditSighting/PlausibilityHints.dart';
+import 'package:mwpaapp/Util/UtilLocation.dart';
+import 'package:mwpaapp/Util/UtilPlausibility.dart';
 import 'package:mwpaapp/Models/TourPref.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
 import 'package:mwpaapp/Util/UtilDistanceCoast.dart';
@@ -229,6 +232,64 @@ class _EditSightingPageState extends State<EditSightingPage> {
         alignment: 0.2,
       );
     }
+  }
+
+  /// positions compared with the recorded route (async, see
+  /// _scheduleTrackCheck)
+  List<SightingCheckResult> _trackResults = const [];
+
+  /// input values the [_trackResults] belong to
+  String? _trackSignature;
+
+  /// _scheduleTrackCheck - re-checks the positions against the tour route
+  /// when times, positions or the tour changed
+  void _scheduleTrackCheck(Sighting s) {
+    String? tourFid;
+
+    try {
+      tourFid = UtilTourFid.createSTourFId(s);
+    } catch (_) {
+      tourFid = null;
+    }
+
+    final signature = [tourFid, s.date, s.duration_from, s.duration_until, s.location_begin, s.location_end].join('|');
+
+    if (signature == _trackSignature) {
+      return;
+    }
+
+    _trackSignature = signature;
+
+    if (tourFid == null) {
+      _trackResults = const [];
+      return;
+    }
+
+    final fid = tourFid;
+
+    Future<UtilLocationDouble?> trackAt(DateTime minute) async {
+      final pos = await _locationController.getLocationBy(fid, minute);
+      return pos == null ? null : UtilLocationDouble.positionToLocationDouble(pos);
+    }
+
+    Future.wait([
+      UtilPlausibility.checkTrack(
+        check: SightingCheck.beginFarFromTrack,
+        positionJson: s.location_begin,
+        at: UtilPlausibility.timeOn(s.date, s.duration_from),
+        trackAt: trackAt,
+      ),
+      UtilPlausibility.checkTrack(
+        check: SightingCheck.endFarFromTrack,
+        positionJson: s.location_end,
+        at: UtilPlausibility.timeOn(s.date, s.duration_until),
+        trackAt: trackAt,
+      ),
+    ]).then((results) {
+      if (!mounted || _trackSignature != signature) return;
+
+      setState(() => _trackResults = results.whereType<SightingCheckResult>().toList());
+    });
   }
 
   /// _mark - input of a required field with the "missing" hint
@@ -470,7 +531,13 @@ class _EditSightingPageState extends State<EditSightingPage> {
         _behaviouralStateController,
       ]),
       builder: (_, __) {
-        final missing = _formSighting().missingFields();
+        final formSighting = _formSighting();
+        final missing = formSighting.missingFields();
+        final checks = [
+          for (final c in UtilPlausibility.checkTimes(formSighting, DateTime.now())) SightingCheckResult(c),
+          ..._trackResults,
+        ];
+        _scheduleTrackCheck(formSighting);
         void refresh() => setState(() {});
 
         sightVehicle = SelectInput(
@@ -505,6 +572,8 @@ class _EditSightingPageState extends State<EditSightingPage> {
         sightDate = DateInput(
           title: context.l10n.fieldDate,
           value: sightDateValue,
+          // plausibility hints (date in the future, route lookup)
+          onChange: refresh,
         );
 
          sightTourStart = _mark(SightingField.tourStart, missing, TimeInput(
@@ -552,6 +621,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
            title: context.l10n.labelUntil,
            value: sightDurationUntilValue,
            onChange: () async {
+             refresh();
              _setLocationByTime(
                  context,
                  sightDurationUntilValue.timeValue!,
@@ -572,6 +642,8 @@ class _EditSightingPageState extends State<EditSightingPage> {
                var distance = UtilDistanceCoast.getDistance(sightLocationBeginValue.posValue!);
                // rebuild, so the distance field shows the new value
                setState(() => sightDistanceCoastValue.setValue("$distance"));
+             } else {
+               refresh();
              }
            },
          ));
@@ -745,6 +817,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
                    crossAxisAlignment: CrossAxisAlignment.stretch,
                    children: [
                      MissingFieldsSummary(missing: missing, onTap: _scrollTo),
+                     PlausibilityHints(results: checks, onTap: _scrollTo),
                      InputSection(
                        title: context.l10n.sectionTour,
                        icon: Icons.directions_boat_outlined,
