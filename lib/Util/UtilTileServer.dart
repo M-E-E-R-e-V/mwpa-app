@@ -1,17 +1,11 @@
+/// UtilTileServer - tile source configuration for the map (flutter_map).
 class UtilTileServer {
-  static const yourMapBoxAccessToken = '';
+  /// OpenStreetMap standard tiles (HTTPS - plain HTTP is blocked by iOS ATS
+  /// and Android cleartext rules). Usage policy:
+  /// https://operations.osmfoundation.org/policies/tiles/
+  static const openStreetMapUrlTemplate =
+      'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 
-  static String mapbox(int z, int x, int y) {
-    //Mapbox Streets
-    final url =
-        'https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/$z/$x/$y?access_token=$yourMapBoxAccessToken';
-
-    return url;
-  }
-
-  static String openstreetmap(int z, int x, int y) {
-    final url = 'http://a.tile.openstreetmap.org/$z/$x/$y.png';
-
-    return url;
-  }
+  /// Identifies the app towards the tile server (required by the OSM policy).
+  static const userAgentPackageName = 'com.meer.mwpaapp';
 }

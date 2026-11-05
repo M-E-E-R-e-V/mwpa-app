@@ -1,21 +1,21 @@
 import 'dart:convert';
-import 'dart:math';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:latlng/latlng.dart';
-import 'package:map/map.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Controllers/LocationController.dart';
 import 'package:mwpaapp/Controllers/SightingController.dart';
-import 'package:mwpaapp/Pages/List/Map/PolygonPainter.dart';
-import 'package:mwpaapp/Util/UtilLocation.dart';
 import 'package:mwpaapp/Util/UtilPosition.dart';
 import 'package:mwpaapp/Util/UtilTileServer.dart';
 import 'package:provider/provider.dart';
 
+/// ListMap - map with the home area, the sightings of the list and the
+/// current GPS position (flutter_map, works on Android and iOS).
+///
+/// The map follows the GPS position until the user pans/zooms by hand; the
+/// "My Location" button switches following back on.
 class ListMap extends StatefulWidget {
 
   const ListMap({super.key});
@@ -28,267 +28,182 @@ class _ListMapState extends State<ListMap> {
   late final LocationController _locationController = context.read<LocationController>();
   late final SightingController _sightingController = context.read<SightingController>();
 
-  final controller = MapController(location: LatLng.degree(0, 0), zoom: 6);
+  static const double _defaultZoom = 14;
 
-  double _clamp(double x, double min, double max) {
-    if (x < min) x = min;
-    if (x > max) x = max;
+  final MapController _mapController = MapController();
+  bool _mapReady = false;
+  bool _followPosition = true;
 
-    return x;
+  @override
+  void initState() {
+    super.initState();
+    _locationController.addListener(_onLocationChanged);
   }
 
-  void _onDoubleTap(MapTransformer transformer, Offset position) {
-    const delta = 0.5;
-    final zoom = _clamp(controller.zoom + delta, 2, 18);
-
-    transformer.setZoomInPlace(zoom, position);
-    setState(() {});
+  @override
+  void dispose() {
+    _locationController.removeListener(_onLocationChanged);
+    _mapController.dispose();
+    super.dispose();
   }
 
-  Offset? _dragStart;
+  LatLng? _currentLatLng() {
+    final position = _locationController.currentPosition;
 
-  double _scaleStart = 3.0;
-
-  void _onScaleStart(ScaleStartDetails details) {
-    _dragStart = details.focalPoint;
-    _scaleStart = 1.0;
-  }
-
-  void _onScaleUpdate(ScaleUpdateDetails details, MapTransformer transformer) {
-    final scaleDiff = details.scale - _scaleStart;
-    _scaleStart = details.scale;
-
-    if (scaleDiff > 0) {
-      controller.zoom += 0.02;
-
-      setState(() {});
-    } else if (scaleDiff < 0) {
-      controller.zoom -= 0.02;
-      if (controller.zoom < 1) {
-        controller.zoom = 1;
-      }
-      setState(() {});
-    } else {
-      final now = details.focalPoint;
-      var diff = now - _dragStart!;
-      _dragStart = now;
-      final h = transformer.constraints.maxHeight;
-
-      final vp = transformer.getViewport();
-      if (diff.dy < 0 && vp.bottom - diff.dy < h) {
-        diff = Offset(diff.dx, 0);
-      }
-
-      if (diff.dy > 0 && vp.top - diff.dy > 0) {
-        diff = Offset(diff.dx, 0);
-      }
-
-      transformer.drag(diff.dx, diff.dy);
-      setState(() {});
+    if (position == null) {
+      return null;
     }
+
+    return LatLng(position.latitude, position.longitude);
   }
 
-  Widget _buildMarkerWidget(
-      MapTransformer transformer,
-      LatLng location,
-      Color color,
-      [IconData icon = Icons.location_on]
-      ) {
+  void _onLocationChanged() {
+    final latLng = _currentLatLng();
 
-    Offset pos = transformer.toOffset(location);
-
-    return Positioned(
-      left: pos.dx - 12,
-      top: pos.dy - 12,
-      width: 24,
-      height: 24,
-      child: GestureDetector(
-        child: Icon(
-          icon,
-          color: color,
-          size: 24,
-        ),
-        onTap: () {
-          /*showDialog(
-            context: context,
-            builder: (context) => const AlertDialog(
-              content: Text('You have clicked a marker!'),
-            ),
-          );*/
-        },
-      ),
-    );
+    if (_mapReady && _followPosition && latLng != null) {
+      _mapController.move(latLng, _mapController.camera.zoom);
+    }
   }
 
   void _gotoDefault() {
-    var position = _locationController.currentPosition;
+    setState(() => _followPosition = true);
 
-    if (position != null) {
-      controller.center = LatLng.degree(position.latitude, position.longitude);
+    final latLng = _currentLatLng();
+
+    if (_mapReady && latLng != null) {
+      _mapController.move(latLng, _defaultZoom);
+    }
+  }
+
+  Marker _buildMarker(LatLng point, Color color, [IconData icon = Icons.location_on]) {
+    return Marker(
+      point: point,
+      width: 24,
+      height: 24,
+      child: Icon(icon, color: color, size: 24),
+    );
+  }
+
+  List<Marker> _sightingMarkers() {
+    final markers = <Marker>[];
+
+    for (var sighting in _sightingController.sightingList) {
+      if (sighting.location_begin == null) {
+        continue;
+      }
+
+      try {
+        Position tPos = Position.fromMap(jsonDecode(sighting.location_begin!));
+
+        markers.add(_buildMarker(
+          LatLng(tPos.latitude, tPos.longitude),
+          sighting.validateColor(),
+        ));
+      } catch (locExcept) {
+        if (kDebugMode) {
+          print(locExcept);
+        }
+      }
     }
 
-    controller.zoom = 14;
-    setState(() {});
+    return markers;
   }
 
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: _locationController,
-      builder: (_, __) {
-      final locationController = _locationController;
-      var position = locationController.currentPosition;
+      listenable: Listenable.merge([_locationController, _sightingController]),
+      builder: (context, _) {
+        final position = _locationController.currentPosition;
+        final currentLatLng = _currentLatLng();
+        final homeArea = _locationController.homeArea;
 
-      if (position != null) {
-        controller.center = LatLng.degree(position.latitude, position.longitude);
-      }
-
-      return Scaffold(
-        body: MapLayout(
-          controller: controller,
-          builder: (context, transformer) {
-            List<Widget> markerWidgets = [];
-
-            // Home Area Polygon -----------------------------------------------
-
-            if (_locationController.homeArea.isNotEmpty) {
-              markerWidgets.add(
-                  CustomPaint(
-                    painter: PolygonPainter(
-                        _convertToOffsets(
-                            _locationController.homeArea,
-                          transformer
-                        )
-                    )
-                  )
-              );
-            }
-
-            // sighting markers ------------------------------------------------
-
-            for (var sighting in _sightingController.sightingList) {
-              if (sighting.location_begin != null) {
-                try {
-                  Position tPos = Position.fromMap(jsonDecode(sighting.location_begin!));
-                  Color backgroundColor = sighting.validateColor();
-
-                  markerWidgets.add(
-                      _buildMarkerWidget(
-                          transformer,
-                          LatLng.degree(tPos.latitude, tPos.longitude),
-                          backgroundColor
-                      )
-                  );
-                }
-                catch(locExcept) {
-                  if (kDebugMode) {
-                    print(locExcept);
-                  }
-                }
-              }
-            }
-
-            // current position markers ----------------------------------------
-
-            if (position != null) {
-              markerWidgets.add(
-                _buildMarkerWidget(
-                  transformer,
-                  LatLng.degree(
-                    position.latitude,
-                    position.longitude
+        return Scaffold(
+          body: Stack(
+            children: [
+              FlutterMap(
+                mapController: _mapController,
+                options: MapOptions(
+                  initialCenter: currentLatLng ?? const LatLng(0, 0),
+                  initialZoom: currentLatLng == null ? 2 : _defaultZoom,
+                  minZoom: 2,
+                  maxZoom: 18,
+                  interactionOptions: const InteractionOptions(
+                    flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
                   ),
-                  Colors.red,
-                  Icons.my_location
-                )
-              );
-            }
+                  onMapReady: () {
+                    _mapReady = true;
+                    _onLocationChanged();
+                  },
+                  onPositionChanged: (camera, hasGesture) {
+                    if (hasGesture && _followPosition) {
+                      setState(() => _followPosition = false);
+                    }
+                  },
+                ),
+                children: [
+                  TileLayer(
+                    urlTemplate: UtilTileServer.openStreetMapUrlTemplate,
+                    userAgentPackageName: UtilTileServer.userAgentPackageName,
+                  ),
 
-            // GPS Information -------------------------------------------------
+                  // Home Area Polygon -------------------------------------------
+                  if (homeArea.isNotEmpty)
+                    PolygonLayer(
+                      polygons: [
+                        Polygon(
+                          points: homeArea.map((l) => LatLng(l.lat, l.lon)).toList(),
+                          color: Colors.blue.withValues(alpha: 0.3),
+                          borderColor: Colors.blue,
+                          borderStrokeWidth: 2,
+                        ),
+                      ],
+                    ),
 
-            Widget gpsInfo = Container();
+                  // sighting + current position markers -------------------------
+                  MarkerLayer(
+                    markers: [
+                      ..._sightingMarkers(),
+                      if (currentLatLng != null)
+                        _buildMarker(currentLatLng, Colors.red, Icons.my_location),
+                    ],
+                  ),
 
-            gpsInfo = PositionedDirectional(
+                  const SimpleAttributionWidget(
+                    source: Text('OpenStreetMap contributors'),
+                    alignment: Alignment.topRight,
+                  ),
+                ],
+              ),
+
+              // GPS Information -------------------------------------------------
+              PositionedDirectional(
                 bottom: 5,
                 start: 5,
                 child: Container(
-                    padding: const EdgeInsets.only(left: 4, right: 4),
-                    decoration: const BoxDecoration(
-                      color: kPrimaryHeaderColor,
-                      borderRadius: BorderRadius.all(Radius.circular(8)),
-                    ),
-                    child: Text(
-                      position == null ? "wait for GPS ..." : "${UtilPosition.getStr(position)} / Points: ${locationController.positionCount}",
-                      style: subTitleStyle(context).copyWith(color: kButtonFontColor),
-                    )
-                )
-            );
-
-            return GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onDoubleTapDown: (details) => _onDoubleTap(
-                transformer,
-                details.localPosition,
-              ),
-              onScaleStart: _onScaleStart,
-              onScaleUpdate: (details) => _onScaleUpdate(details, transformer),
-              child: Listener(
-                behavior: HitTestBehavior.opaque,
-                onPointerSignal: (event) {
-                  if (event is PointerScrollEvent) {
-                    final delta = event.scrollDelta.dy / -1000.0;
-                    final zoom = _clamp(controller.zoom + delta, 2, 18);
-
-                    transformer.setZoomInPlace(zoom, event.localPosition);
-                    setState(() {});
-                  }
-                },
-                child: Stack(
-                  children: [
-                    TileLayer(
-                      builder: (context, x, y, z) {
-                        final tilesInZoom = pow(2.0, z).floor();
-
-                        while (x < 0) {
-                          x += tilesInZoom;
-                        }
-                        while (y < 0) {
-                          y += tilesInZoom;
-                        }
-
-                        x %= tilesInZoom;
-                        y %= tilesInZoom;
-
-                        return CachedNetworkImage(
-                          imageUrl: UtilTileServer.openstreetmap(z, x, y),
-                          fit: BoxFit.cover,
-                        );
-                      },
-                    ),
-                    ...markerWidgets,
-                    gpsInfo
-                  ],
+                  padding: const EdgeInsets.only(left: 4, right: 4),
+                  decoration: const BoxDecoration(
+                    color: kPrimaryHeaderColor,
+                    borderRadius: BorderRadius.all(Radius.circular(8)),
+                  ),
+                  child: Text(
+                    position == null
+                        ? "wait for GPS ..."
+                        : "${UtilPosition.getStr(position)} / Points: ${_locationController.positionCount}",
+                    style: subTitleStyle(context).copyWith(color: kButtonFontColor),
+                  ),
                 ),
               ),
-            );
-          },
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: _gotoDefault,
-          tooltip: 'My Location',
-          backgroundColor: kButtonBackgroundColor,
-          child: const Icon(Icons.my_location),
-        ),
-      );
-    });
+            ],
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: _gotoDefault,
+            tooltip: 'My Location',
+            backgroundColor: kButtonBackgroundColor,
+            child: Icon(_followPosition ? Icons.my_location : Icons.location_searching),
+          ),
+        );
+      },
+    );
   }
-
-  /// convert
-  List<Offset> _convertToOffsets(List<UtilLocationDouble> locations, MapTransformer transformer) {
-    return locations.map((location) {
-      final latLng = LatLng.degree(location.lat, location.lon);
-      return transformer.toOffset(latLng);
-    }).toList();
-  }
-
 }

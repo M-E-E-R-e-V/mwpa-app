@@ -10,8 +10,6 @@ import 'package:mwpaapp/Components/DefaultButton.dart';
 import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Controllers/LocationController.dart';
 import 'package:mwpaapp/Util/UtilPosition.dart';
-import 'package:switcher/core/switcher_size.dart';
-import 'package:switcher/switcher.dart';
 import 'package:textfield_tags/textfield_tags.dart';
 import 'package:provider/provider.dart';
 
@@ -470,21 +468,18 @@ class _DynInputState extends State<DynInput> {
         mainWidget = Container(
             margin: const EdgeInsets.only(top: 8.0),
             padding: const EdgeInsets.only(left: 14),
-            child: Switcher(
+            alignment: Alignment.centerLeft,
+            child: Switch(
                 value: dynValue!.intValue >= 1,
-                size: SwitcherSize.large,
-                switcherButtonRadius: 50,
-                enabledSwitcherButtonRotate: true,
-                iconOff: Icons.radio_button_unchecked,
-                iconOn: Icons.radio_button_checked,
-                colorOff: kPrimaryColor,
-                colorOn: kButtonBackgroundColor,
+                activeTrackColor: kButtonBackgroundColor,
+                thumbIcon: WidgetStateProperty.resolveWith((states) =>
+                    Icon(states.contains(WidgetState.selected)
+                        ? Icons.radio_button_checked
+                        : Icons.radio_button_unchecked)),
                 onChanged: (bool state) {
-                  if (state) {
-                    dynValue!.intValue = 1;
-                  } else {
-                    dynValue!.intValue = 0;
-                  }
+                  setState(() {
+                    dynValue!.intValue = state ? 1 : 0;
+                  });
 
                   if (widget.onChange != null) {
                     widget.onChange!();

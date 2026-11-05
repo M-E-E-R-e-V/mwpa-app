@@ -32,7 +32,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'List/ListMap.dart';
-import 'package:flutter_icons_null_safety/flutter_icons_null_safety.dart';
+import 'package:mwpaapp/Ui/AppIcons.dart';
 
 /// ListPage
 class ListPage extends StatefulWidget {
@@ -457,7 +457,7 @@ class _ListPageState extends State<ListPage>
             foregroundColor: Colors.white,
           ),
           onPressed: () => _showTortoiseDialog(context),
-          icon: const Icon(MaterialCommunityIcons.tortoise),
+          icon: const Icon(AppIcons.tortoise),
           label: const Text('Add Tortoise'),
         ),
       ],
@@ -482,7 +482,7 @@ class _ListPageState extends State<ListPage>
       context: context,
       builder: (BuildContext dialogCtx) {
         return AlertDialog(
-          icon: const Icon(MaterialCommunityIcons.tortoise,
+          icon: const Icon(AppIcons.tortoise,
               size: 32, color: Colors.green),
           title: const Text('Add tortoise sighting'),
           contentPadding: const EdgeInsets.fromLTRB(8, 16, 8, 8),
@@ -495,7 +495,7 @@ class _ListPageState extends State<ListPage>
               itemBuilder: (_, i) {
                 final t = turtles[i];
                 return ListTile(
-                  leading: const Icon(MaterialCommunityIcons.tortoise,
+                  leading: const Icon(AppIcons.tortoise,
                       color: Colors.green),
                   title: Text(t.scientific),
                   subtitle: Text(t.common),

@@ -62,7 +62,7 @@ Two distinct persistence mechanisms — pick the right one:
 
 ### Pages and navigation flow
 
-`lib/Pages/` — Welcome → Login → ProminentDisclosure (Android location-tracking consent gate, required for Play Store compliance) → List (main screen with sighting list + map under `Pages/List/Map/`) → Edit (sighting/tour editors). The prominent-disclosure step must run before any background-location capability is activated.
+`lib/Pages/` — Welcome → Login → ProminentDisclosure (Android location-tracking consent gate, required for Play Store compliance) → List (main screen with sighting list + `flutter_map` map in `Pages/List/ListMap.dart`, OSM tiles configured in `UtilTileServer`) → Edit (sighting/tour editors). The prominent-disclosure step must run before any background-location capability is activated.
 
 ### Utilities of note
 

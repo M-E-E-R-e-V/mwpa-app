@@ -47,6 +47,10 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Your location is used to record the position of sightings and the track of the current tour.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Your location is used to record the track of the current tour, also while the app is in the background.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Camera access is needed to scan the MWPA Quick Connect QR code on the web portal.</string>
 </dict>
