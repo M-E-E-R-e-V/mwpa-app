@@ -1,10 +1,10 @@
-import 'package:get/get.dart';
 import 'package:mwpaapp/Components/DynInput.dart';
 
-class BeaufortController extends GetxController {
+/// BeaufortController - static select list for beaufort wind values
+class BeaufortController {
 
 
-  static var beaufortSelectList = <DynInputSelectItem>[
+  static final beaufortSelectList = <DynInputSelectItem>[
     DynInputSelectItem(value: "", label: "not selected"),
     DynInputSelectItem(value: "0", label: "0"),
     DynInputSelectItem(value: "0.5", label: "0.5"),
@@ -31,5 +31,5 @@ class BeaufortController extends GetxController {
     DynInputSelectItem(value: "11", label: "11"),
     DynInputSelectItem(value: "11.5", label: "11.5"),
     DynInputSelectItem(value: "12", label: "12")
-  ].obs;
+  ];
 }

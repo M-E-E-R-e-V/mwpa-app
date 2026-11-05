@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:mwpaapp/Controllers/PrefController.dart';
+import 'package:mwpaapp/Controllers/SightingController.dart';
 import 'package:mwpaapp/Db/DBHelper.dart';
 import 'package:mwpaapp/Models/TourPref.dart';
 import 'package:mwpaapp/Models/TrackingAreaHome.dart';
@@ -19,7 +19,12 @@ import 'package:uuid/uuid.dart';
 import '../Models/TourTracking.dart';
 
 /// LocationController
-class LocationController extends GetxController {
+class LocationController extends ChangeNotifier {
+
+  final PrefController _prefController;
+  final SightingController _sightingController;
+
+  LocationController(this._prefController, this._sightingController);
 
   /// geoloactor android
   final GeolocatorPlatform geolocatorAndroid = GeolocatorPlatform.instance;
@@ -48,24 +53,34 @@ class LocationController extends GetxController {
   /// event manager for updates
   final EventManagerService updateEvent = EventManagerService();
 
-  @override
-  void onReady() {
-    super.onReady();
-
+  /// start location tracking only when the prominent disclosure was accepted
+  void initIfConfirmed() {
     if (!isLocationInit) {
-      // init self when is accept
-      PrefController prefController = Get.find<PrefController>();
-
-      if (prefController.prominentDisclosureConfirmed) {
+      if (_prefController.prominentDisclosureConfirmed) {
         initLocation();
       }
-
-      return;
     }
   }
 
+  @override
+  void dispose() {
+    _positionStreamSubscription?.cancel();
+    locationTimer?.cancel();
+    super.dispose();
+  }
+
+  /// running initLocation call, prevents two concurrent position streams
+  Future<bool>? _initLocationFuture;
+
   /// initLocation
-  Future<bool> initLocation() async {
+  Future<bool> initLocation() {
+    return _initLocationFuture ??= _initLocation().whenComplete(() {
+      _initLocationFuture = null;
+    });
+  }
+
+  /// _initLocation
+  Future<bool> _initLocation() async {
     if (_positionStreamSubscription == null) {
       bool serviceEnabled;
       LocationPermission permission;
@@ -181,7 +196,7 @@ class LocationController extends GetxController {
     var savePoint = false;
     var tourFid = "";
 
-    PrefController prefController = Get.find<PrefController>();
+    PrefController prefController = _prefController;
 
     if (prefController.prefToru != null) {
       if ((prefController.prefToru!.use_home_area != null) && (prefController.prefToru!.use_home_area! > 0)) {
@@ -198,7 +213,7 @@ class LocationController extends GetxController {
               prefController.prefToru?.tour_end = DateFormat("HH:mm").format(DateTime.now());
               prefController.saveTour(prefController.prefToru!);
 
-              UtilSighting.setCurrentEndTour(UtilTourFid.createTTourFId(homeAreaToru!));
+              UtilSighting.setCurrentEndTour(_sightingController, UtilTourFid.createTTourFId(homeAreaToru!));
               homeAreaToru = null;
             }
 
@@ -252,7 +267,7 @@ class LocationController extends GetxController {
       );
     }
 
-    update();
+    notifyListeners();
   }
 
   /// getLocationBy

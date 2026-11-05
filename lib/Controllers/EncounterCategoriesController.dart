@@ -1,16 +1,11 @@
-import 'package:get/get.dart';
+import 'package:flutter/foundation.dart';
 import 'package:mwpaapp/Db/DBHelper.dart';
 import 'package:mwpaapp/Models/EncounterCategorie.dart';
 
-class EncounterCategoriesController extends GetxController {
+/// EncounterCategoriesController
+class EncounterCategoriesController extends ChangeNotifier {
 
-  @override
-  void onReady() {
-    super.onReady();
-    getEncounterCategorie();
-  }
-
-  var encounterCategorieList = <EncounterCategorie>[].obs;
+  List<EncounterCategorie> encounterCategorieList = <EncounterCategorie>[];
 
   Future<int> addEncounterCategorie({required EncounterCategorie encCate}) async {
     return await DBHelper.insertEncounterCategorie(encCate);
@@ -18,6 +13,7 @@ class EncounterCategoriesController extends GetxController {
 
   Future<void> getEncounterCategorie() async {
     List<Map<String, dynamic>> encCats = await DBHelper.queryEncounterCategorie(false);
-    encounterCategorieList.assignAll(encCats.map((data) => EncounterCategorie.fromJson(data)).toList());
+    encounterCategorieList = encCats.map((data) => EncounterCategorie.fromJson(data)).toList();
+    notifyListeners();
   }
 }

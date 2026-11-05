@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:mwpaapp/Components/DefaultButton.dart';
@@ -14,6 +13,7 @@ import 'package:mwpaapp/Dialog/ConfirmDialog.dart';
 import 'package:mwpaapp/Dialog/InfoDialog.dart';
 import 'package:mwpaapp/Models/Sighting.dart';
 import 'package:mwpaapp/Util/UtilPosition.dart';
+import 'package:provider/provider.dart';
 
 import '../../Constants.dart';
 
@@ -21,14 +21,13 @@ class ListSightingTile extends StatelessWidget {
 
   final Sighting sighting;
 
-  ListSightingTile(this.sighting, {super.key});
-
-  final LocationController _locationController = Get.find<LocationController>();
-  final SpeciesController _speciesController = Get.find<SpeciesController>();
-  final SightingController _sightingController = Get.find<SightingController>();
+  const ListSightingTile(this.sighting, {super.key});
 
   _setEndLocation(BuildContext context) {
-    if (_locationController.currentPosition == null) {
+    final LocationController locationController = context.read<LocationController>();
+    final SightingController sightingController = context.read<SightingController>();
+
+    if (locationController.currentPosition == null) {
       InfoDialog.show(context, 'Info', "Please wait for the GPS signal.");
     } else {
       ConfirmDialog.show(
@@ -37,7 +36,7 @@ class ListSightingTile extends StatelessWidget {
         "Do you want to set the end location/duration time for this sighting?",
         (p0) {
           if (p0 == 'ok') {
-            sighting.location_end = jsonEncode(_locationController.currentPosition?.toJson());
+            sighting.location_end = jsonEncode(locationController.currentPosition?.toJson());
 
             if ( sighting.duration_until == null || sighting.duration_until == 'null' || sighting.duration_until == '') {
               var timeValue = TimeOfDay.now();
@@ -55,8 +54,8 @@ class ListSightingTile extends StatelessWidget {
               sighting.duration_until = "$hour:$min";
             }
 
-            _sightingController.updateSighting(tSighting: sighting);
-            _sightingController.getSightings();
+            sightingController.updateSighting(tSighting: sighting);
+            sightingController.getSightings();
           }
         });
     }
@@ -94,7 +93,7 @@ class ListSightingTile extends StatelessWidget {
     }
 
     Color backgroundColor = sighting.validateColor();
-    String? speciesName = _speciesController.getSpeciesName(sighting.species_id!);
+    String? speciesName = context.read<SpeciesController>().getSpeciesName(sighting.species_id!);
 
     if (speciesName == null && sighting.other != null && sighting.other!.trim() != "") {
       speciesName = sighting.other?.trim();

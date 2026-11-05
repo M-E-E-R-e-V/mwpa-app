@@ -1,18 +1,11 @@
-import 'package:get/get.dart';
+import 'package:flutter/foundation.dart';
 import 'package:mwpaapp/Db/DBHelper.dart';
 import 'package:mwpaapp/Models/Species.dart';
 
 /// SpeciesController
-class SpeciesController extends GetxController {
+class SpeciesController extends ChangeNotifier {
 
-  /// onReady
-  @override
-  void onReady() {
-    super.onReady();
-    getSpecies();
-  }
-
-  var speciesList = <Species>[].obs;
+  List<Species> speciesList = <Species>[];
 
   /// addSpecies
   Future<int> addSpecies({required Species species}) async {
@@ -22,7 +15,8 @@ class SpeciesController extends GetxController {
   /// getSpecies
   Future<void> getSpecies() async {
     List<Map<String, dynamic>> species = await DBHelper.querySpecies(false);
-    speciesList.assignAll(species.map((data) => Species.fromDbJson(data)).toList());
+    speciesList = species.map((data) => Species.fromDbJson(data)).toList();
+    notifyListeners();
   }
 
   Species? getSpeciesById(int id) {

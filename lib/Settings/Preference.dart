@@ -10,6 +10,7 @@ class Preference {
   static const ORGID = 'orgid';
   static const TOUR = "tour";
   static const PROMINENT_DISCLOSURE_CONFIRMED = "prominent_disclosure_confirmed";
+  static const DARK_MODE = "isDarkMode";
 
   SharedPreferences? prefs;
 

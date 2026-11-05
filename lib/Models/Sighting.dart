@@ -2,13 +2,12 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Util/UtilCheckJson.dart';
 import 'package:mwpaapp/Util/UtilTourFId.dart';
 
-import '../Controllers/SpeciesController.dart';
+import 'package:mwpaapp/Models/Species.dart';
 
 /// Sighting
 class Sighting {
@@ -139,7 +138,10 @@ class Sighting {
   }
 
   /// toJson
-  Map<String, dynamic> toJson(bool withId, bool withSyncStatus, bool? forSync) {
+  ///
+  /// [speciesById] is required when [forSync] is true: other_species is stored
+  /// with local species ids and must be translated to the server org ids.
+  Map<String, dynamic> toJson(bool withId, bool withSyncStatus, bool? forSync, {Species? Function(int id)? speciesById}) {
     final Map<String, dynamic> data = <String, dynamic>{};
 
     if (withId) {
@@ -201,11 +203,13 @@ class Sighting {
       if (forSync && (other_species != "")) {
         Map<String, dynamic> newdata = {};
         Map<String, dynamic> olddata = jsonDecode(other_species!);
-        final SpeciesController speciesController = Get.find<SpeciesController>();
+        if (speciesById == null) {
+          throw ArgumentError('Sighting.toJson: speciesById is required for sync');
+        }
 
         olddata.forEach((key, value) {
           if (value != "") {
-            var species = speciesController.getSpeciesById(int.parse(value));
+            var species = speciesById(int.parse(value));
 
             if (species != null) {
               var orgid = species.orgid;

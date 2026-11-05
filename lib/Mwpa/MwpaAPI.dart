@@ -492,11 +492,11 @@ class MwpaApi {
   }
 
   /// saveSighting
-  Future<SightingSaveResponse?> saveSighting(Sighting sigh) async {
+  Future<SightingSaveResponse?> saveSighting(Sighting sigh, Species? Function(int id) speciesById) async {
     try {
       var url = getUrl(MwpaApi.URL_SIGHTING_SAVE);
 
-      var postBody = jsonEncode(sigh.toJson(false, false, true));
+      var postBody = jsonEncode(sigh.toJson(false, false, true, speciesById: speciesById));
 
       var response = await http.post(
         Uri.parse(url),

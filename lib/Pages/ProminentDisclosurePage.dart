@@ -2,10 +2,10 @@ import 'dart:io' show Platform, exit;
 import 'package:app_settings/app_settings.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:mwpaapp/Controllers/LocationController.dart';
 import 'package:mwpaapp/Controllers/PrefController.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// ProminentDisclosurePage
@@ -37,10 +37,12 @@ class _ProminentDisclosurePageState extends State<ProminentDisclosurePage> {
     }
 
     if (isAccept) {
-      LocationController locationController = Get.put(LocationController());
+      if (!mounted) return;
+      LocationController locationController = context.read<LocationController>();
 
       if (await locationController.initLocation()) {
-        Get.toNamed('/Login');
+        if (!mounted) return;
+        Navigator.of(context).pushNamed('/Login');
       } else {
         if (!mounted) return;
         showDialog<void>(
@@ -58,7 +60,7 @@ class _ProminentDisclosurePageState extends State<ProminentDisclosurePage> {
                 OutlinedButton(
                   onPressed: () {
                     Navigator.of(context).pop();
-                    Get.toNamed('/ProminentDisclosure');
+                    Navigator.of(context).pushNamed('/ProminentDisclosure');
                   },
                   child: const Text('Back'),
                 ),
@@ -79,7 +81,7 @@ class _ProminentDisclosurePageState extends State<ProminentDisclosurePage> {
 
   /// acceptDisclosure
   Future<void> acceptDisclosure() async {
-    PrefController prefController = Get.find<PrefController>();
+    PrefController prefController = context.read<PrefController>();
     await prefController.saveProminentDisclosureConfirmed(true);
     _isAccept();
   }
@@ -97,7 +99,7 @@ class _ProminentDisclosurePageState extends State<ProminentDisclosurePage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    PrefController prefController = Get.find<PrefController>();
+    PrefController prefController = context.read<PrefController>();
     prefController.saveProminentDisclosureConfirmed(false);
 
     return Scaffold(

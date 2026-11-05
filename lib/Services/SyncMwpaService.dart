@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:mwpaapp/Constants.dart';
+import 'package:mwpaapp/Controllers/SpeciesController.dart';
 import 'package:mwpaapp/Db/DBHelper.dart';
 import 'package:mwpaapp/Models/BehaviouralState.dart';
 import 'package:mwpaapp/Models/EncounterCategorie.dart';
@@ -22,6 +23,11 @@ import '../Mwpa/MwpaAPI.dart';
 
 /// SyncMwpaService
 class SyncMwpaService {
+
+  /// species lookup for translating local species ids (other_species)
+  final SpeciesController speciesController;
+
+  SyncMwpaService(this.speciesController);
 
   /// sync
   Future<void> sync(Function(int, String)? update) async {
@@ -328,7 +334,7 @@ class SyncMwpaService {
         SightingSaveResponse? saveResponse;
 
         try {
-          saveResponse = await api.saveSighting(sighting);
+          saveResponse = await api.saveSighting(sighting, speciesController.getSpeciesById);
 
           if (saveResponse != null) {
             sighting.unid = saveResponse.unid;

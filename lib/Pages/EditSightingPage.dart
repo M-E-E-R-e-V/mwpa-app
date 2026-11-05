@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:get/get.dart';
 import 'package:mwpaapp/Components/DefaultButton.dart';
 import 'package:mwpaapp/Components/DynInput.dart';
 import 'package:mwpaapp/Controllers/BeaufortController.dart';
@@ -22,6 +21,7 @@ import 'package:mwpaapp/Settings/Preference.dart';
 import 'package:mwpaapp/Util/UtilDistanceCoast.dart';
 import 'package:mwpaapp/Util/UtilTourFId.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
 
 /// EditSightingPage
 class EditSightingPage extends StatefulWidget {
@@ -35,14 +35,14 @@ class EditSightingPage extends StatefulWidget {
 
 /// _EditSightingPageState
 class _EditSightingPageState extends State<EditSightingPage> {
-  final PrefController _prefController = Get.find<PrefController>();
-  final LocationController _locationController = Get.find<LocationController>();
-  final SightingController _sightingController = Get.find<SightingController>();
-  final VehicleController _vehicleController = Get.find<VehicleController>();
-  final VehicleDriverController _vehicleDriverController = Get.find<VehicleDriverController>();
-  final SpeciesController _speciesController = Get.find<SpeciesController>();
-  final EncounterCategoriesController _encounterCategoriesController = Get.find<EncounterCategoriesController>();
-  final BehaviouralStateController _behaviouralStateController = Get.find<BehaviouralStateController>();
+  late final PrefController _prefController = context.read<PrefController>();
+  late final LocationController _locationController = context.read<LocationController>();
+  late final SightingController _sightingController = context.read<SightingController>();
+  late final VehicleController _vehicleController = context.read<VehicleController>();
+  late final VehicleDriverController _vehicleDriverController = context.read<VehicleDriverController>();
+  late final SpeciesController _speciesController = context.read<SpeciesController>();
+  late final EncounterCategoriesController _encounterCategoriesController = context.read<EncounterCategoriesController>();
+  late final BehaviouralStateController _behaviouralStateController = context.read<BehaviouralStateController>();
 
   bool isInit = false;
 
@@ -148,7 +148,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
             'Close sighting without saving? All changes will be lost!',
             (value) {
               if (value == 'ok') {
-                Get.back();
+                Navigator.of(context).pop();
               }
             },
           );
@@ -230,7 +230,8 @@ class _EditSightingPageState extends State<EditSightingPage> {
       await _sightingController.addSighting(newSighting: tSigh);
     }
 
-    Get.back();
+    if (!mounted) return;
+    Navigator.of(context).pop();
   }
 
   /// _loadPref
@@ -383,7 +384,15 @@ class _EditSightingPageState extends State<EditSightingPage> {
       }
     }
 
-    return Obx(() {
+    return ListenableBuilder(
+      listenable: Listenable.merge([
+        _vehicleController,
+        _vehicleDriverController,
+        _speciesController,
+        _encounterCategoriesController,
+        _behaviouralStateController,
+      ]),
+      builder: (_, __) {
         sightVehicle = DynInput(
            context: context,
            title: "Boat",
@@ -531,7 +540,8 @@ class _EditSightingPageState extends State<EditSightingPage> {
                  var fValue = double.parse(value.strValue.replaceAll(RegExp(r'[^0-9.]'), ''));
                  fValue = 0.5399568035 * (fValue / 1000);
 
-                 return "${fValue.toPrecision(2)}";
+                 // same as GetX toPrecision(2): round to 2 digits, drop trailing zeros
+                 return "${double.parse(fValue.toStringAsFixed(2))}";
                }
              } catch(e) {
                if (kDebugMode) {

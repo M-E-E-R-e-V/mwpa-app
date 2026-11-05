@@ -1,28 +1,20 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:get/get.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Models/TourPref.dart';
 
 /// PrefController
-class PrefController extends GetxController {
+class PrefController extends ChangeNotifier {
 
   bool isLogin = false;
   bool prominentDisclosureConfirmed = false;
   TourPref? prefToru;
 
-  /// onReady
-  @override
-  void onReady() {
-    super.onReady();
-    load();
-  }
-
   /// load
-  load() async {
+  Future<void> load() async {
     try {
       final prefs = await SharedPreferences.getInstance();
 
@@ -59,11 +51,11 @@ class PrefController extends GetxController {
       }
     }
 
-    update();
+    notifyListeners();
   }
 
   /// saveTour
-  saveTour(TourPref tour) async {
+  Future<void> saveTour(TourPref tour) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(Preference.TOUR, jsonEncode(tour.toJson()));
@@ -75,11 +67,11 @@ class PrefController extends GetxController {
     }
 
     prefToru = tour;
-    update();
+    notifyListeners();
   }
 
   /// saveProminentDisclosureConfirmed
-  saveProminentDisclosureConfirmed(bool confirmed) async {
+  Future<void> saveProminentDisclosureConfirmed(bool confirmed) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(Preference.PROMINENT_DISCLOSURE_CONFIRMED, confirmed);

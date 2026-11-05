@@ -5,7 +5,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:get/get.dart';
 import 'package:latlng/latlng.dart';
 import 'package:map/map.dart';
 import 'package:mwpaapp/Constants.dart';
@@ -15,6 +14,7 @@ import 'package:mwpaapp/Pages/List/Map/PolygonPainter.dart';
 import 'package:mwpaapp/Util/UtilLocation.dart';
 import 'package:mwpaapp/Util/UtilPosition.dart';
 import 'package:mwpaapp/Util/UtilTileServer.dart';
+import 'package:provider/provider.dart';
 
 class ListMap extends StatefulWidget {
 
@@ -25,8 +25,8 @@ class ListMap extends StatefulWidget {
 }
 
 class _ListMapState extends State<ListMap> {
-  final LocationController _locationController = Get.find<LocationController>();
-  final SightingController _sightingController = Get.find<SightingController>();
+  late final LocationController _locationController = context.read<LocationController>();
+  late final SightingController _sightingController = context.read<SightingController>();
 
   final controller = MapController(location: LatLng.degree(0, 0), zoom: 6);
 
@@ -133,7 +133,10 @@ class _ListMapState extends State<ListMap> {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<LocationController>(builder: (locationController) {
+    return ListenableBuilder(
+      listenable: _locationController,
+      builder: (_, __) {
+      final locationController = _locationController;
       var position = locationController.currentPosition;
 
       if (position != null) {
@@ -216,7 +219,7 @@ class _ListMapState extends State<ListMap> {
                     ),
                     child: Text(
                       position == null ? "wait for GPS ..." : "${UtilPosition.getStr(position)} / Points: ${locationController.positionCount}",
-                      style: subTitleStyle.copyWith(color: kButtonFontColor),
+                      style: subTitleStyle(context).copyWith(color: kButtonFontColor),
                     )
                 )
             );

@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:get/get.dart';
 import 'package:mwpaapp/Components/DynInput.dart';
 import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Controllers/BehaviouralStateController.dart';
@@ -14,6 +13,7 @@ import 'package:mwpaapp/Controllers/LocationController.dart';
 import 'package:mwpaapp/Controllers/PrefController.dart';
 import 'package:mwpaapp/Controllers/SightingController.dart';
 import 'package:mwpaapp/Controllers/SpeciesController.dart';
+import 'package:mwpaapp/Controllers/ThemeController.dart';
 import 'package:mwpaapp/Controllers/VehicleController.dart';
 import 'package:mwpaapp/Controllers/VehicleDriverController.dart';
 import 'package:mwpaapp/Dialog/ConfirmDialog.dart';
@@ -23,12 +23,12 @@ import 'package:mwpaapp/Mwpa/MwpaException.dart';
 import 'package:mwpaapp/Pages/EditSightingPage.dart';
 import 'package:mwpaapp/Pages/List/ListSightingTile.dart';
 import 'package:mwpaapp/Services/SyncMwpaService.dart';
-import 'package:mwpaapp/Services/ThemeService.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
 import 'package:mwpaapp/Util/UtilDate.dart';
 import 'package:mwpaapp/Util/UtilDistanceCoast.dart';
 import 'package:mwpaapp/Util/UtilSighting.dart';
 import 'package:mwpaapp/Util/UtilTourFId.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'List/ListMap.dart';
@@ -46,14 +46,14 @@ class ListPage extends StatefulWidget {
 /// _ListPageState
 class _ListPageState extends State<ListPage>
     with SingleTickerProviderStateMixin {
-  final PrefController _prefController = Get.find<PrefController>();
-  final LocationController _locationController = Get.put(LocationController());
-  final SightingController _sightingController = Get.put(SightingController());
-  final VehicleController _vehicleController = Get.put(VehicleController());
-  final VehicleDriverController _vehicleDriverController = Get.put(VehicleDriverController());
-  final SpeciesController _speciesController = Get.put(SpeciesController());
-  final EncounterCategoriesController _encounterCategoriesController = Get.put(EncounterCategoriesController());
-  final BehaviouralStateController _behaviouralStateController = Get.put(BehaviouralStateController());
+  late final PrefController _prefController = context.read<PrefController>();
+  late final LocationController _locationController = context.read<LocationController>();
+  late final SightingController _sightingController = context.read<SightingController>();
+  late final VehicleController _vehicleController = context.read<VehicleController>();
+  late final VehicleDriverController _vehicleDriverController = context.read<VehicleDriverController>();
+  late final SpeciesController _speciesController = context.read<SpeciesController>();
+  late final EncounterCategoriesController _encounterCategoriesController = context.read<EncounterCategoriesController>();
+  late final BehaviouralStateController _behaviouralStateController = context.read<BehaviouralStateController>();
 
   late StreamSubscription subscription;
   late final TabController _tabController;
@@ -103,7 +103,7 @@ class _ListPageState extends State<ListPage>
     EasyLoading.instance.dismissOnTap = false;
     EasyLoading.instance.maskType = EasyLoadingMaskType.black;
 
-    SyncMwpaService service = SyncMwpaService();
+    SyncMwpaService service = SyncMwpaService(_speciesController);
 
     try {
       isSyncInProgress = true;
@@ -125,6 +125,8 @@ class _ListPageState extends State<ListPage>
       isSyncInProgress = false;
       EasyLoading.dismiss();
 
+      if (!mounted) return;
+
       if (error is MwpaException) {
         InfoDialog.show(context, 'Error', error.toString());
       } else {
@@ -132,6 +134,7 @@ class _ListPageState extends State<ListPage>
       }
     }
 
+    if (!mounted) return;
     setState(() { });
   }
 
@@ -158,7 +161,8 @@ class _ListPageState extends State<ListPage>
         prefs.remove(Preference.PASSWORD);
         prefs.remove(Preference.USERID);
 
-        await Get.toNamed('/Login');
+        if (!mounted) return;
+        await Navigator.of(context).pushNamed('/Login');
       }
     });
   }
@@ -172,7 +176,7 @@ class _ListPageState extends State<ListPage>
       (value) async {
         if (value == "ok") {
           if (_prefController.prefToru != null) {
-            UtilSighting.setCurrentEndTour(UtilTourFid.createTTourFId(_prefController.prefToru!));
+            UtilSighting.setCurrentEndTour(_sightingController, UtilTourFid.createTTourFId(_prefController.prefToru!));
             _loadController();
           } else {
             if (kDebugMode) {
@@ -186,17 +190,17 @@ class _ListPageState extends State<ListPage>
 
   /// _appBar
   _appBar() {
+    final dark = isDarkMode(context);
+
     return AppBar(
       title: const Text('MWPA'),
       leading: IconButton(
-        tooltip: Get.isDarkMode ? 'Switch to light theme' : 'Switch to dark theme',
+        tooltip: dark ? 'Switch to light theme' : 'Switch to dark theme',
         onPressed: () {
-          setState(() {
-            ThemeService().switchTheme();
-          });
+          context.read<ThemeController>().switchTheme();
         },
         icon: Icon(
-          Get.isDarkMode ? Icons.wb_sunny_outlined : Icons.nightlight_round,
+          dark ? Icons.wb_sunny_outlined : Icons.nightlight_round,
         ),
       ),
       actions: [
@@ -233,7 +237,7 @@ class _ListPageState extends State<ListPage>
           onSelected: (value) async {
             switch (value) {
               case 'settour':
-                await Get.toNamed('/setTour');
+                await Navigator.of(context).pushNamed('/setTour');
                 _sightingController.getSightings();
                 break;
               case 'sync':
@@ -323,7 +327,8 @@ class _ListPageState extends State<ListPage>
                       "The tour date is not current, please check!",
                           (select) async {
                         if (select == "ok") {
-                          await Get.toNamed('/setTour');
+                          if (!mounted) return;
+                          await Navigator.of(context).pushNamed('/setTour');
                           _sightingController.getSightings();
                         } else {
                           diffTourDateIgnored = true;
@@ -417,7 +422,7 @@ class _ListPageState extends State<ListPage>
       spacing: 8,
       runSpacing: 8,
       children: [
-        GetBuilder<PrefController>(builder: (prefController) {
+        Consumer<PrefController>(builder: (_, prefController, __) {
           if (prefController.prefToru != null) {
             final setEndTour = (prefController.prefToru!.set_end_tour ?? 0) >= 1;
             final useHomeArea = (prefController.prefToru!.use_home_area ?? 0) >= 1;
@@ -437,7 +442,7 @@ class _ListPageState extends State<ListPage>
             foregroundColor: kButtonFontColor,
           ),
           onPressed: () async {
-            await Get.toNamed('/Edit');
+            await Navigator.of(context).pushNamed('/Edit');
             _sightingController.getSightings();
           },
           icon: const Icon(Icons.add),
@@ -539,7 +544,9 @@ class _ListPageState extends State<ListPage>
   /// _sightingsTab — Tab 2: the full list of sightings.
   Widget _sightingsTab(BuildContext context) {
     final theme = Theme.of(context);
-    return Obx(() {
+    return ListenableBuilder(
+      listenable: _sightingController,
+      builder: (_, __) {
       final sightings = _sightingController.sightingList;
       if (sightings.isEmpty) {
         return Center(
@@ -596,8 +603,13 @@ class _ListPageState extends State<ListPage>
   _showBottomSheet(BuildContext context, Sighting sighting) {
     final theme = Theme.of(context);
 
-    Get.bottomSheet(
-      SafeArea(
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: theme.colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (sheetContext) => SafeArea(
         top: false,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
@@ -623,8 +635,10 @@ class _ListPageState extends State<ListPage>
                   borderRadius: BorderRadius.circular(12),
                 ),
                 onTap: () async {
-                  Get.back();
-                  await Get.to(() => EditSightingPage(sighting: sighting));
+                  Navigator.of(sheetContext).pop();
+                  await Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => EditSightingPage(sighting: sighting),
+                  ));
                   _sightingController.getSightings();
                 },
               ),
@@ -638,23 +652,19 @@ class _ListPageState extends State<ListPage>
                   borderRadius: BorderRadius.circular(12),
                 ),
                 onTap: () async {
-                  Get.back();
+                  Navigator.of(sheetContext).pop();
                   await _sightingController.delete(sighting);
                   _sightingController.getSightings();
                 },
               ),
               const SizedBox(height: 8),
               OutlinedButton(
-                onPressed: () => Get.back(),
+                onPressed: () => Navigator.of(sheetContext).pop(),
                 child: const Text('Close'),
               ),
             ],
           ),
         ),
-      ),
-      backgroundColor: theme.colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
     );
   }

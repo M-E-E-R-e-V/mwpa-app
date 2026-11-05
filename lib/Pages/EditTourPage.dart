@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:mwpaapp/Components/DynInput.dart';
 import 'package:mwpaapp/Controllers/BeaufortController.dart';
 import 'package:mwpaapp/Controllers/LocationController.dart';
@@ -8,6 +7,7 @@ import 'package:mwpaapp/Controllers/VehicleController.dart';
 import 'package:mwpaapp/Controllers/VehicleDriverController.dart';
 import 'package:mwpaapp/Dialog/ConfirmDialog.dart';
 import 'package:mwpaapp/Models/TourPref.dart';
+import 'package:provider/provider.dart';
 
 class EditTourPage extends StatefulWidget {
 
@@ -18,10 +18,10 @@ class EditTourPage extends StatefulWidget {
 }
 
 class _EditTourPageState extends State<EditTourPage> {
-  final PrefController _prefController = Get.find<PrefController>();
-  final VehicleController _vehicleController = Get.find<VehicleController>();
-  final VehicleDriverController _vehicleDriverController = Get.find<VehicleDriverController>();
-  final LocationController _locationController = Get.find<LocationController>();
+  late final PrefController _prefController = context.read<PrefController>();
+  late final VehicleController _vehicleController = context.read<VehicleController>();
+  late final VehicleDriverController _vehicleDriverController = context.read<VehicleDriverController>();
+  late final LocationController _locationController = context.read<LocationController>();
 
   late DynInput sightVehicle;
   DynInputValue sightVehicleValue = DynInputValue();
@@ -61,7 +61,7 @@ class _EditTourPageState extends State<EditTourPage> {
             'Close tour without saving? All changes will be lost!',
             (value) {
               if (value == 'ok') {
-                Get.back();
+                Navigator.of(context).pop();
               }
             },
           );
@@ -92,7 +92,8 @@ class _EditTourPageState extends State<EditTourPage> {
     await _prefController.saveTour(tour);
     await _locationController.reloadSettings();
 
-    Get.back();
+    if (!mounted) return;
+    Navigator.of(context).pop();
   }
 
   @override
@@ -124,7 +125,9 @@ class _EditTourPageState extends State<EditTourPage> {
       }
     }
 
-    return Obx(() {
+    return ListenableBuilder(
+      listenable: Listenable.merge([_vehicleController, _vehicleDriverController]),
+      builder: (_, __) {
       sightVehicle = DynInput(
         context: context,
         title: "Boat",

@@ -1,13 +1,12 @@
 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:mwpaapp/Controllers/SightingController.dart';
 
 /// Sighting Helper
 class UtilSighting {
 
   /// set the End Tour date and save all sightings
-  static Future<void> setCurrentEndTour(String tourFid) async {
+  static Future<void> setCurrentEndTour(SightingController sightingController, String tourFid) async {
     TimeOfDay timeValue = TimeOfDay.now();
     var hour = "${timeValue.hour}";
     var min = "${timeValue.minute}";
@@ -22,7 +21,6 @@ class UtilSighting {
 
     var tourEndTime = "$hour:$min";
 
-    final SightingController sightingController = Get.put(SightingController());
     await sightingController.updateSightingEndtour(
         tourFid,
         tourEndTime

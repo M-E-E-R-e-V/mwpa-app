@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:mwpaapp/Components/DefaultButton.dart';
 import 'package:mwpaapp/Constants.dart';
@@ -14,6 +13,7 @@ import 'package:mwpaapp/Util/UtilPosition.dart';
 import 'package:switcher/core/switcher_size.dart';
 import 'package:switcher/switcher.dart';
 import 'package:textfield_tags/textfield_tags.dart';
+import 'package:provider/provider.dart';
 
 enum DynInputType {
   text,
@@ -226,7 +226,7 @@ class DynInput extends StatefulWidget {
 
 class _DynInputState extends State<DynInput> {
   double _distanceToField = 0;
-  final LocationController _locationController = Get.find<LocationController>();
+  late final LocationController _locationController = context.read<LocationController>();
   TextfieldTagsController<String>? _tagController;
 
   File? _image;
@@ -350,7 +350,7 @@ class _DynInputState extends State<DynInput> {
         tWidget = IconButton(
           icon: Icon(
             Icons.calendar_today_outlined,
-            color: Get.isDarkMode ? kPrimaryDarkFontColor :  kPrimaryFontColor,
+            color: isDarkMode(context) ? kPrimaryDarkFontColor :  kPrimaryFontColor,
           ),
           onPressed: () {
             _getDateFromUser();
@@ -366,7 +366,7 @@ class _DynInputState extends State<DynInput> {
         tWidget = IconButton(
             icon: Icon(
               Icons.access_time_rounded,
-              color: Get.isDarkMode ? kPrimaryDarkFontColor :  kPrimaryFontColor,
+              color: isDarkMode(context) ? kPrimaryDarkFontColor :  kPrimaryFontColor,
             ),
             onPressed: () {
               _getTimeFromUser();
@@ -390,12 +390,12 @@ class _DynInputState extends State<DynInput> {
         tWidget = DropdownButton(
           icon: Icon(
             Icons.keyboard_arrow_down,
-            color: Get.isDarkMode ? kPrimaryDarkFontColor :  kPrimaryFontColor,
+            color: isDarkMode(context) ? kPrimaryDarkFontColor :  kPrimaryFontColor,
           ),
           iconSize: 32,
           elevation: 0,
           isExpanded: true,
-          style: subTitleStyle,
+          style: subTitleStyle(context),
           itemHeight: null,
           dropdownColor: kPrimaryHeaderColor,
           borderRadius: BorderRadius.circular(12),
@@ -415,7 +415,7 @@ class _DynInputState extends State<DynInput> {
                       width: 1.0
                     ),
                     borderRadius: BorderRadius.circular(12),
-                    color: Get.isDarkMode ? kPrimaryDarkBackgroundColor : kPrimaryBackgroundColor,
+                    color: isDarkMode(context) ? kPrimaryDarkBackgroundColor : kPrimaryBackgroundColor,
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -497,7 +497,7 @@ class _DynInputState extends State<DynInput> {
         tWidget = IconButton(
             icon: Icon(
               Icons.edit_location,
-              color: Get.isDarkMode ? kPrimaryDarkFontColor :  kPrimaryFontColor,
+              color: isDarkMode(context) ? kPrimaryDarkFontColor :  kPrimaryFontColor,
             ),
             onPressed: () async {
               _getLocationFromUser();
@@ -866,7 +866,7 @@ class _DynInputState extends State<DynInput> {
                 }
               });
             },
-            color: Get.isDarkMode ? kPrimaryDarkFontColor :  kPrimaryFontColor,
+            color: isDarkMode(context) ? kPrimaryDarkFontColor :  kPrimaryFontColor,
             selectedColor: Colors.grey[700],
             selectedBorderColor: kPrimaryColor,
             fillColor: kButtonBackgroundColor,
@@ -920,7 +920,7 @@ class _DynInputState extends State<DynInput> {
                     }
                   },
                   initialValue: widget.inputType == DynInputType.textarea ? tHint : null,
-                  style: subTitleStyle,
+                  style: subTitleStyle(context),
                   keyboardType: textInputType,
                   inputFormatters: inputFormatters,
                   textInputAction: widget.inputType == DynInputType.textarea ? TextInputAction.newline : null,
@@ -929,7 +929,7 @@ class _DynInputState extends State<DynInput> {
                   decoration: InputDecoration(
                       counterText: widget.inputType == DynInputType.textarea ? '' : null,
                       hintText: tHint,
-                      hintStyle: subTitleStyle,
+                      hintStyle: subTitleStyle(context),
                       focusedBorder: UnderlineInputBorder(
                           borderSide: BorderSide(
                               color: Colors.redAccent.withOpacity(0.0),
@@ -1038,7 +1038,7 @@ class _DynInputState extends State<DynInput> {
       children = [
         Text(
           title,
-          style: titleStyle,
+          style: titleStyle(context),
         ),
         ...children,
       ];

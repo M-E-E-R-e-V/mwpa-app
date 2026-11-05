@@ -2,13 +2,13 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Controllers/PrefController.dart';
 import 'package:mwpaapp/Dialog/InfoDialog.dart';
 import 'package:mwpaapp/Mwpa/Models/Info.dart';
 import 'package:mwpaapp/Pages/QuickConnectScanPage.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Mwpa/MwpaAPI.dart';
@@ -24,7 +24,7 @@ class LoginPage extends StatefulWidget {
 
 /// _LoginPageState
 class _LoginPageState extends State<LoginPage> {
-  final PrefController _prefController = Get.find<PrefController>();
+  late final PrefController _prefController = context.read<PrefController>();
   final _urlController = TextEditingController();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -166,7 +166,8 @@ class _LoginPageState extends State<LoginPage> {
         await prefs.setInt(Preference.USERID, userInfo.user!.id);
         await prefs.setInt(Preference.ORGID, userInfo.organization!.id);
 
-        Get.toNamed('/List');
+        if (!mounted) return;
+        Navigator.of(context).pushNamed('/List');
       } else {
         if (userInfo.organization == null) {
           throw Exception('Please update the user, all user need a organization.');
@@ -193,7 +194,8 @@ class _LoginPageState extends State<LoginPage> {
         await prefs.setInt(Preference.USERID, userInfo.user!.id);
         await prefs.setInt(Preference.ORGID, userInfo.organization!.id);
 
-        Get.toNamed('/List');
+        if (!mounted) return;
+        Navigator.of(context).pushNamed('/List');
       } else {
         if (userInfo.organization == null) {
           throw Exception("Please update the user, all user need a organization.");
@@ -235,13 +237,15 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _isLogin() async {
     await _prefController.load();
 
+    if (!mounted) return;
+
     if (_prefController.prominentDisclosureConfirmed == false) {
-      Get.toNamed('/ProminentDisclosure');
+      Navigator.of(context).pushNamed('/ProminentDisclosure');
       return;
     }
 
     if (_prefController.isLogin) {
-      Get.toNamed('/List');
+      Navigator.of(context).pushNamed('/List');
     }
 
     return;

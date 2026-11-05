@@ -1,6 +1,5 @@
 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 // Accepted backend API versions. The mobile app refuses to talk to a server
@@ -9,6 +8,11 @@ import 'package:google_fonts/google_fonts.dart';
 // version string here when the server bumps but stays wire-compatible.
 const Set<String> versionApiMobileLogin = {'1.0.1'};
 const Set<String> versionApiMobileSync = {'1.0.2', '1.0.3'};
+
+/// isDarkMode - true when the active theme of [context] is dark
+bool isDarkMode(BuildContext context) {
+  return Theme.of(context).brightness == Brightness.dark;
+}
 
 // primary
 const kPrimaryColor = Color(0xff022b55);
@@ -22,7 +26,7 @@ const kPrimaryDarkFontColor = Color(0xffffffff);
 const kButtonBackgroundColor = Color(0xfff9901c);
 const kButtonFontColor = Color(0xffffffff);
 
-TextStyle get subHeadingStyle {
+TextStyle subHeadingStyle(BuildContext context) {
   return GoogleFonts.lato(
     textStyle: TextStyle(
       fontSize: 24,
@@ -32,32 +36,32 @@ TextStyle get subHeadingStyle {
   );
 }
 
-TextStyle get headingStyle {
+TextStyle headingStyle(BuildContext context) {
   return GoogleFonts.lato(
     textStyle: TextStyle(
       fontSize: 30,
       fontWeight: FontWeight.bold,
-      color: Get.isDarkMode ? kPrimaryDarkFontColor : kPrimaryFontColor
+      color: isDarkMode(context) ? kPrimaryDarkFontColor : kPrimaryFontColor
     )
   );
 }
 
-TextStyle get titleStyle {
+TextStyle titleStyle(BuildContext context) {
   return GoogleFonts.lato(
     textStyle: TextStyle(
       fontSize: 16,
       fontWeight: FontWeight.w400,
-      color: Get.isDarkMode ? kPrimaryDarkFontColor : kPrimaryFontColor
+      color: isDarkMode(context) ? kPrimaryDarkFontColor : kPrimaryFontColor
     )
   );
 }
 
-TextStyle get subTitleStyle {
+TextStyle subTitleStyle(BuildContext context) {
   return GoogleFonts.lato(
       textStyle: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w400,
-          color: Get.isDarkMode ? kPrimaryDarkFontColor : kPrimaryFontColor,
+          color: isDarkMode(context) ? kPrimaryDarkFontColor : kPrimaryFontColor,
       )
   );
 }
