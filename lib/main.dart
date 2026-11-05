@@ -22,6 +22,7 @@ import 'package:mwpaapp/Db/DBHelper.dart';
 import 'package:mwpaapp/Pages/AboutPage.dart';
 import 'package:mwpaapp/Pages/EditSightingPage.dart';
 import 'package:mwpaapp/Pages/EditTourPage.dart';
+import 'package:mwpaapp/Pages/HelpPage.dart';
 import 'package:mwpaapp/Pages/ListPage.dart';
 import 'package:mwpaapp/Pages/LoginPage.dart';
 import 'package:mwpaapp/Pages/ProminentDisclosurePage.dart';
@@ -196,6 +197,7 @@ class MWPAApp extends StatelessWidget {
       routes: {
         '/ProminentDisclosure': (_) => const ProminentDisclosurePage(),
         '/About': (_) => const AboutPage(),
+        '/Help': (_) => const HelpPage(),
         '/Login': (_) => const LoginPage(),
         '/List': (_) => const ListPage(),
         '/Edit': (_) => const EditSightingPage(),

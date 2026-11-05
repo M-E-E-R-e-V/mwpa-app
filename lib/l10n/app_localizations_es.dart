@@ -314,6 +314,111 @@ class AppLocalizationsEs extends AppLocalizations {
   String get groupWidelyDispersed => 'muy dispersos';
 
   @override
+  String get help => 'Ayuda';
+
+  @override
+  String get helpBattery =>
+      'Por debajo del 20 % de batería aparece un aviso durante la salida; conecta un cargador o el registro se detendrá si el móvil se apaga.';
+
+  @override
+  String get helpCloudDone => 'En el servidor.';
+
+  @override
+  String get helpCloudOff => 'Aún no sincronizado.';
+
+  @override
+  String get helpCloudUpload =>
+      'Modificado, se enviará con la próxima sincronización.';
+
+  @override
+  String get helpColorBlue => 'Azul: el avistamiento está completo.';
+
+  @override
+  String get helpColorGreen => 'Verde: entrada rápida de una tortuga.';
+
+  @override
+  String get helpColorRed =>
+      'Rojo: falta un campo obligatorio (p. ej. el número de animales).';
+
+  @override
+  String get helpColorYellow =>
+      'Amarillo: solo falta el final (fin de la salida, posición final) o la especie no es conocida en la app; suele completarse más tarde.';
+
+  @override
+  String get helpColorsTitle => 'Colores y símbolos de la lista';
+
+  @override
+  String get helpGpsBackground =>
+      'El recorrido también se registra en segundo plano; la notificación indica que el registro está activo.';
+
+  @override
+  String get helpGpsIcon =>
+      'El símbolo de GPS arriba: verde = posición correcta, amarillo = buscando, rojo = GPS apagado. Con el GPS apagado no se registra el recorrido.';
+
+  @override
+  String get helpGpsTitle => 'GPS, batería y pantalla';
+
+  @override
+  String get helpMissingHints =>
+      'En el formulario, una tarjeta arriba muestra los campos obligatorios vacíos y los valores que parecen incorrectos. Toca un aviso para ir al campo. Siempre puedes guardar.';
+
+  @override
+  String get helpQuick =>
+      '«Tortuga» guarda una tortuga con la posición y la hora actuales en dos toques. «Avistamiento» abre el formulario completo.';
+
+  @override
+  String get helpQuickEnd =>
+      'Cuando los animales se hayan ido, toca el botón de chincheta del avistamiento en la lista para fijar la posición y la hora finales.';
+
+  @override
+  String get helpQuickTitle => 'Entrada rápida';
+
+  @override
+  String get helpScreen =>
+      '«Mantener la pantalla encendida» en los ajustes de la salida mantiene la pantalla activa mientras la app está abierta.';
+
+  @override
+  String get helpShowIntro => 'Mostrar la introducción de nuevo';
+
+  @override
+  String get helpSyncAuto =>
+      'La app se sincroniza sola cuando vuelve la red y cada 15 minutos. La línea superior de la pestaña de avistamientos muestra la última sincronización y lo pendiente.';
+
+  @override
+  String get helpSyncManual =>
+      'Para sincronizar ya: desliza la lista hacia abajo, toca el botón de sincronizar o usa Menú → «Sincronizar con el servidor».';
+
+  @override
+  String get helpSyncMap =>
+      'Las zonas del mapa que has visto se guardan y se muestran también sin conexión.';
+
+  @override
+  String get helpSyncOffline =>
+      'Todo se guarda primero en el móvil. Puedes registrar avistamientos sin red; no se pierde nada.';
+
+  @override
+  String get helpSyncTitle => 'Sincronización y trabajo sin conexión';
+
+  @override
+  String get helpTourDefault =>
+      'Indica barco, patrón y viento una vez al día en Menú → «Definir salida por defecto». Los avistamientos nuevos toman estos valores.';
+
+  @override
+  String get helpTourEnd =>
+      'Sin zona base, termina la salida con el botón «Fin de la salida»; después verás un resumen.';
+
+  @override
+  String get helpTourHomeArea =>
+      'Con la «zona base» activada, la salida empieza automáticamente al salir del puerto y termina al volver.';
+
+  @override
+  String get helpTourRoute =>
+      'La línea naranja del mapa es el recorrido registrado de la salida. La pestaña de avistamientos los agrupa por salida con duración, distancia y especies.';
+
+  @override
+  String get helpTourTitle => 'Salida y zona base';
+
+  @override
   String get imageNotFound => 'Imagen no encontrada';
 
   @override
@@ -321,6 +426,36 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get internalError => 'Error interno';
+
+  @override
+  String get intro1Text =>
+      '«Avistamiento» abre el formulario completo, «Tortuga» guarda una tortuga en dos toques. Los colores de la lista indican lo que falta.';
+
+  @override
+  String get intro1Title => 'Registrar avistamientos';
+
+  @override
+  String get intro2Text =>
+      'Define la salida por defecto una vez al día. La app registra el recorrido en el mapa; con zona base, la salida incluso empieza y termina sola.';
+
+  @override
+  String get intro2Title => 'Salida y recorrido';
+
+  @override
+  String get intro3Text =>
+      'Todo se guarda en el móvil y se sincroniza automáticamente en cuanto hay red. Encontrarás esto y más en Menú → Ayuda.';
+
+  @override
+  String get intro3Title => 'Funciona sin conexión';
+
+  @override
+  String get introDone => '¡Vamos!';
+
+  @override
+  String get introNext => 'Siguiente';
+
+  @override
+  String get introSkip => 'Saltar';
 
   @override
   String get labelAllowTourEnd =>

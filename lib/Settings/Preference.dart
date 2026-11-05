@@ -22,6 +22,8 @@ class Preference {
   static const KEEP_SCREEN_ON = "keep_screen_on";
   /// end of the last successful sync (ISO 8601), see SyncController
   static const LAST_SYNC = "last_sync";
+  /// the introduction (IntroPage) was shown or skipped once
+  static const INTRO_SEEN = "intro_seen";
 
   SharedPreferences? prefs;
 

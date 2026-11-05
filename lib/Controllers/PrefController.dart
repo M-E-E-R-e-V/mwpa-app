@@ -21,6 +21,9 @@ class PrefController extends ChangeNotifier {
   /// display stays on while the app is in front, see Preference.KEEP_SCREEN_ON
   bool keepScreenOn = false;
 
+  /// the introduction was shown once, see Preference.INTRO_SEEN
+  bool introSeen = false;
+
   /// load
   Future<void> load() async {
     try {
@@ -61,6 +64,7 @@ class PrefController extends ChangeNotifier {
         homeAreaTour = TourPref.fromJson(jsonDecode(homeAreaTourStr));
       }
 
+      introSeen = prefs.getBool(Preference.INTRO_SEEN) ?? false;
       keepScreenOn = prefs.getBool(Preference.KEEP_SCREEN_ON) ?? false;
       await UtilDevice.setKeepScreenOn(keepScreenOn);
     } catch(e) {
@@ -80,6 +84,20 @@ class PrefController extends ChangeNotifier {
     }
 
     prefToru = tour;
+    notifyListeners();
+  }
+
+  /// setIntroSeen - the introduction was shown (or skipped)
+  Future<void> setIntroSeen() async {
+    introSeen = true;
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(Preference.INTRO_SEEN, true);
+    } catch(e) {
+      AppLog.e('Pref', 'setIntroSeen failed', e);
+    }
+
     notifyListeners();
   }
 

@@ -616,6 +616,180 @@ abstract class AppLocalizations {
   /// **'widely dispersed'**
   String get groupWidelyDispersed;
 
+  /// No description provided for @help.
+  ///
+  /// In en, this message translates to:
+  /// **'Help'**
+  String get help;
+
+  /// No description provided for @helpBattery.
+  ///
+  /// In en, this message translates to:
+  /// **'Below 20 % battery a warning appears during a tour – connect a charger, otherwise the recording stops when the phone switches off.'**
+  String get helpBattery;
+
+  /// No description provided for @helpCloudDone.
+  ///
+  /// In en, this message translates to:
+  /// **'On the server.'**
+  String get helpCloudDone;
+
+  /// No description provided for @helpCloudOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Not synced yet.'**
+  String get helpCloudOff;
+
+  /// No description provided for @helpCloudUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Changed, will be sent with the next sync.'**
+  String get helpCloudUpload;
+
+  /// No description provided for @helpColorBlue.
+  ///
+  /// In en, this message translates to:
+  /// **'Blue: the sighting is complete.'**
+  String get helpColorBlue;
+
+  /// No description provided for @helpColorGreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Green: quick entry of a turtle.'**
+  String get helpColorGreen;
+
+  /// No description provided for @helpColorRed.
+  ///
+  /// In en, this message translates to:
+  /// **'Red: a required field is still empty (e.g. number of animals).'**
+  String get helpColorRed;
+
+  /// No description provided for @helpColorYellow.
+  ///
+  /// In en, this message translates to:
+  /// **'Yellow: only the end is missing (end of tour, end position) or the species is unknown in the app – usually completed later.'**
+  String get helpColorYellow;
+
+  /// No description provided for @helpColorsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Colors and symbols in the list'**
+  String get helpColorsTitle;
+
+  /// No description provided for @helpGpsBackground.
+  ///
+  /// In en, this message translates to:
+  /// **'The route is also recorded when the app is in the background; the notification shows that tracking is running.'**
+  String get helpGpsBackground;
+
+  /// No description provided for @helpGpsIcon.
+  ///
+  /// In en, this message translates to:
+  /// **'The GPS symbol at the top: green = position OK, yellow = searching, red = GPS off. With GPS off, the route is not recorded.'**
+  String get helpGpsIcon;
+
+  /// No description provided for @helpGpsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'GPS, battery and screen'**
+  String get helpGpsTitle;
+
+  /// No description provided for @helpMissingHints.
+  ///
+  /// In en, this message translates to:
+  /// **'In the form, a card at the top lists the empty required fields and values that look wrong. Tap a hint to jump to the field. You can always save anyway.'**
+  String get helpMissingHints;
+
+  /// No description provided for @helpQuick.
+  ///
+  /// In en, this message translates to:
+  /// **'\"Add Tortoise\" saves a turtle with the current position and time in two taps. \"Add Sighting\" opens the full form.'**
+  String get helpQuick;
+
+  /// No description provided for @helpQuickEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'When the animals are gone, tap the pin button on the sighting in the list to set the end position and time.'**
+  String get helpQuickEnd;
+
+  /// No description provided for @helpQuickTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick entry'**
+  String get helpQuickTitle;
+
+  /// No description provided for @helpScreen.
+  ///
+  /// In en, this message translates to:
+  /// **'\"Keep screen on\" in the tour settings keeps the display on while the app is open.'**
+  String get helpScreen;
+
+  /// No description provided for @helpShowIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Show introduction again'**
+  String get helpShowIntro;
+
+  /// No description provided for @helpSyncAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'The app syncs by itself when the network is back and every 15 minutes. The line at the top of the sightings tab shows the last sync and what is still open.'**
+  String get helpSyncAuto;
+
+  /// No description provided for @helpSyncManual.
+  ///
+  /// In en, this message translates to:
+  /// **'To sync right away: pull the list down, tap the sync button or use Menu → \"Sync with server\".'**
+  String get helpSyncManual;
+
+  /// No description provided for @helpSyncMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Map areas you have looked at are kept and also shown offline.'**
+  String get helpSyncMap;
+
+  /// No description provided for @helpSyncOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything is stored on the phone first. You can record sightings without network – nothing is lost.'**
+  String get helpSyncOffline;
+
+  /// No description provided for @helpSyncTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync and working offline'**
+  String get helpSyncTitle;
+
+  /// No description provided for @helpTourDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Set boat, skipper and wind once per day under Menu → \"Set default tour\". New sightings take these values.'**
+  String get helpTourDefault;
+
+  /// No description provided for @helpTourEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'Without home area, end the tour with the \"Tour End\" button – you then see a summary of the tour.'**
+  String get helpTourEnd;
+
+  /// No description provided for @helpTourHomeArea.
+  ///
+  /// In en, this message translates to:
+  /// **'With \"home area\" switched on, the tour starts automatically when the boat leaves the harbour area and ends when it comes back.'**
+  String get helpTourHomeArea;
+
+  /// No description provided for @helpTourRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'The orange line on the map is the route recorded on this tour. The sightings tab groups the sightings by tour with duration, distance and species.'**
+  String get helpTourRoute;
+
+  /// No description provided for @helpTourTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tour and home area'**
+  String get helpTourTitle;
+
   /// No description provided for @imageNotFound.
   ///
   /// In en, this message translates to:
@@ -633,6 +807,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Internal Error'**
   String get internalError;
+
+  /// No description provided for @intro1Text.
+  ///
+  /// In en, this message translates to:
+  /// **'\"Add Sighting\" opens the full form, \"Add Tortoise\" saves a turtle in two taps. Colors in the list show what is still missing.'**
+  String get intro1Text;
+
+  /// No description provided for @intro1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Record sightings'**
+  String get intro1Title;
+
+  /// No description provided for @intro2Text.
+  ///
+  /// In en, this message translates to:
+  /// **'Set the default tour once a day. The app records the route on the map – with home area even starting and ending the tour by itself.'**
+  String get intro2Text;
+
+  /// No description provided for @intro2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Tour and route'**
+  String get intro2Title;
+
+  /// No description provided for @intro3Text.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything is saved on the phone and synced automatically as soon as there is network. You find this and more under Menu → Help.'**
+  String get intro3Text;
+
+  /// No description provided for @intro3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Works offline'**
+  String get intro3Title;
+
+  /// No description provided for @introDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Let\'s go'**
+  String get introDone;
+
+  /// No description provided for @introNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get introNext;
+
+  /// No description provided for @introSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get introSkip;
 
   /// No description provided for @labelAllowTourEnd.
   ///

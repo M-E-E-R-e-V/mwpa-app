@@ -19,6 +19,7 @@ import 'package:mwpaapp/Dialog/SyncProgressDialog.dart';
 import 'package:mwpaapp/Models/Sighting.dart';
 import 'package:mwpaapp/Mwpa/MwpaException.dart';
 import 'package:mwpaapp/Pages/EditSightingPage.dart';
+import 'package:mwpaapp/Pages/IntroPage.dart';
 import 'package:mwpaapp/Components/LanguageSelector.dart';
 import 'package:mwpaapp/Pages/List/GpsStatusIndicator.dart';
 import 'package:mwpaapp/Pages/List/LowBatteryBanner.dart';
@@ -83,7 +84,14 @@ class _ListPageState extends State<ListPage>
     _sync;
 
     _locationController.updateEvent.addListener(_updateTitle);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadController());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadController();
+
+      // first start: short introduction (skippable, again under Help)
+      if (mounted && !context.read<PrefController>().introSeen) {
+        IntroPage.show(context);
+      }
+    });
   }
 
   /// dispose
@@ -315,6 +323,14 @@ class _ListPageState extends State<ListPage>
               ),
             ),
             PopupMenuItem(
+              value: 'help',
+              child: ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(Icons.help_outline),
+                title: Text(context.l10n.help),
+              ),
+            ),
+            PopupMenuItem(
               value: 'about',
               child: ListTile(
                 contentPadding: EdgeInsets.zero,
@@ -341,6 +357,9 @@ class _ListPageState extends State<ListPage>
                 break;
               case 'sync':
                 _syncMwpa();
+                break;
+              case 'help':
+                Navigator.of(context).pushNamed('/Help');
                 break;
               case 'about':
                 Navigator.of(context).pushNamed('/About');

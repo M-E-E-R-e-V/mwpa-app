@@ -314,6 +314,111 @@ class AppLocalizationsDe extends AppLocalizations {
   String get groupWidelyDispersed => 'weit verstreut';
 
   @override
+  String get help => 'Hilfe';
+
+  @override
+  String get helpBattery =>
+      'Unter 20 % Akku erscheint während einer Tour eine Warnung – Ladegerät anschließen, sonst endet die Aufzeichnung, wenn das Handy ausgeht.';
+
+  @override
+  String get helpCloudDone => 'Auf dem Server.';
+
+  @override
+  String get helpCloudOff => 'Noch nicht synchronisiert.';
+
+  @override
+  String get helpCloudUpload =>
+      'Geändert, wird mit dem nächsten Sync gesendet.';
+
+  @override
+  String get helpColorBlue => 'Blau: Die Sichtung ist vollständig.';
+
+  @override
+  String get helpColorGreen => 'Grün: Schnelleintrag einer Schildkröte.';
+
+  @override
+  String get helpColorRed =>
+      'Rot: Ein Pflichtfeld ist noch leer (z. B. Anzahl der Tiere).';
+
+  @override
+  String get helpColorYellow =>
+      'Gelb: Nur das Ende fehlt (Tourende, Endposition) oder die Art ist der App unbekannt – wird meist später ergänzt.';
+
+  @override
+  String get helpColorsTitle => 'Farben und Symbole in der Liste';
+
+  @override
+  String get helpGpsBackground =>
+      'Die Route wird auch im Hintergrund aufgezeichnet; die Benachrichtigung zeigt, dass die Aufzeichnung läuft.';
+
+  @override
+  String get helpGpsIcon =>
+      'Das GPS-Symbol oben: grün = Position OK, gelb = wird gesucht, rot = GPS aus. Bei ausgeschaltetem GPS wird die Route nicht aufgezeichnet.';
+
+  @override
+  String get helpGpsTitle => 'GPS, Akku und Bildschirm';
+
+  @override
+  String get helpMissingHints =>
+      'Im Formular zeigt oben eine Karte die leeren Pflichtfelder und auffällige Werte. Ein Tipp auf einen Hinweis springt zum Feld. Speichern geht immer.';
+
+  @override
+  String get helpQuick =>
+      '„Schildkröte“ speichert eine Schildkröte mit aktueller Position und Uhrzeit mit zwei Tipps. „Sichtung“ öffnet das vollständige Formular.';
+
+  @override
+  String get helpQuickEnd =>
+      'Sind die Tiere weg, setzt der Stecknadel-Knopf an der Sichtung in der Liste Endposition und -zeit.';
+
+  @override
+  String get helpQuickTitle => 'Schnelleintrag';
+
+  @override
+  String get helpScreen =>
+      '„Bildschirm anlassen“ in den Tour-Einstellungen hält das Display an, solange die App offen ist.';
+
+  @override
+  String get helpShowIntro => 'Einführung erneut anzeigen';
+
+  @override
+  String get helpSyncAuto =>
+      'Die App synchronisiert von selbst, sobald wieder Netz da ist, und alle 15 Minuten. Die Zeile oben im Tab Sichtungen zeigt den letzten Sync und was noch offen ist.';
+
+  @override
+  String get helpSyncManual =>
+      'Sofort synchronisieren: Liste nach unten ziehen, den Sync-Knopf antippen oder Menü → „Mit Server synchronisieren“.';
+
+  @override
+  String get helpSyncMap =>
+      'Angesehene Kartenbereiche werden gespeichert und auch offline angezeigt.';
+
+  @override
+  String get helpSyncOffline =>
+      'Alles wird zuerst auf dem Handy gespeichert. Sichtungen lassen sich ohne Netz erfassen – es geht nichts verloren.';
+
+  @override
+  String get helpSyncTitle => 'Sync und offline arbeiten';
+
+  @override
+  String get helpTourDefault =>
+      'Boot, Skipper und Wind einmal am Tag unter Menü → „Standard-Tour festlegen“ eintragen. Neue Sichtungen übernehmen diese Werte.';
+
+  @override
+  String get helpTourEnd =>
+      'Ohne Heimatgebiet wird die Tour mit dem Knopf „Tour-Ende“ beendet – danach erscheint eine Zusammenfassung.';
+
+  @override
+  String get helpTourHomeArea =>
+      'Mit eingeschaltetem „Heimatgebiet“ beginnt die Tour automatisch, wenn das Boot den Hafenbereich verlässt, und endet bei der Rückkehr.';
+
+  @override
+  String get helpTourRoute =>
+      'Die orange Linie auf der Karte ist die aufgezeichnete Route der Tour. Der Tab Sichtungen gruppiert die Sichtungen nach Tour mit Dauer, Strecke und Arten.';
+
+  @override
+  String get helpTourTitle => 'Tour und Heimatgebiet';
+
+  @override
   String get imageNotFound => 'Bild nicht gefunden';
 
   @override
@@ -321,6 +426,36 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get internalError => 'Interner Fehler';
+
+  @override
+  String get intro1Text =>
+      '„Sichtung“ öffnet das vollständige Formular, „Schildkröte“ speichert eine Schildkröte mit zwei Tipps. Farben in der Liste zeigen, was noch fehlt.';
+
+  @override
+  String get intro1Title => 'Sichtungen erfassen';
+
+  @override
+  String get intro2Text =>
+      'Einmal am Tag die Standard-Tour festlegen. Die App zeichnet die Route auf der Karte auf – mit Heimatgebiet beginnt und endet die Tour sogar von selbst.';
+
+  @override
+  String get intro2Title => 'Tour und Route';
+
+  @override
+  String get intro3Text =>
+      'Alles wird auf dem Handy gespeichert und automatisch synchronisiert, sobald Netz da ist. Dies und mehr steht unter Menü → Hilfe.';
+
+  @override
+  String get intro3Title => 'Funktioniert offline';
+
+  @override
+  String get introDone => 'Los geht\'s';
+
+  @override
+  String get introNext => 'Weiter';
+
+  @override
+  String get introSkip => 'Überspringen';
 
   @override
   String get labelAllowTourEnd =>

@@ -313,6 +313,110 @@ class AppLocalizationsEn extends AppLocalizations {
   String get groupWidelyDispersed => 'widely dispersed';
 
   @override
+  String get help => 'Help';
+
+  @override
+  String get helpBattery =>
+      'Below 20 % battery a warning appears during a tour – connect a charger, otherwise the recording stops when the phone switches off.';
+
+  @override
+  String get helpCloudDone => 'On the server.';
+
+  @override
+  String get helpCloudOff => 'Not synced yet.';
+
+  @override
+  String get helpCloudUpload => 'Changed, will be sent with the next sync.';
+
+  @override
+  String get helpColorBlue => 'Blue: the sighting is complete.';
+
+  @override
+  String get helpColorGreen => 'Green: quick entry of a turtle.';
+
+  @override
+  String get helpColorRed =>
+      'Red: a required field is still empty (e.g. number of animals).';
+
+  @override
+  String get helpColorYellow =>
+      'Yellow: only the end is missing (end of tour, end position) or the species is unknown in the app – usually completed later.';
+
+  @override
+  String get helpColorsTitle => 'Colors and symbols in the list';
+
+  @override
+  String get helpGpsBackground =>
+      'The route is also recorded when the app is in the background; the notification shows that tracking is running.';
+
+  @override
+  String get helpGpsIcon =>
+      'The GPS symbol at the top: green = position OK, yellow = searching, red = GPS off. With GPS off, the route is not recorded.';
+
+  @override
+  String get helpGpsTitle => 'GPS, battery and screen';
+
+  @override
+  String get helpMissingHints =>
+      'In the form, a card at the top lists the empty required fields and values that look wrong. Tap a hint to jump to the field. You can always save anyway.';
+
+  @override
+  String get helpQuick =>
+      '\"Add Tortoise\" saves a turtle with the current position and time in two taps. \"Add Sighting\" opens the full form.';
+
+  @override
+  String get helpQuickEnd =>
+      'When the animals are gone, tap the pin button on the sighting in the list to set the end position and time.';
+
+  @override
+  String get helpQuickTitle => 'Quick entry';
+
+  @override
+  String get helpScreen =>
+      '\"Keep screen on\" in the tour settings keeps the display on while the app is open.';
+
+  @override
+  String get helpShowIntro => 'Show introduction again';
+
+  @override
+  String get helpSyncAuto =>
+      'The app syncs by itself when the network is back and every 15 minutes. The line at the top of the sightings tab shows the last sync and what is still open.';
+
+  @override
+  String get helpSyncManual =>
+      'To sync right away: pull the list down, tap the sync button or use Menu → \"Sync with server\".';
+
+  @override
+  String get helpSyncMap =>
+      'Map areas you have looked at are kept and also shown offline.';
+
+  @override
+  String get helpSyncOffline =>
+      'Everything is stored on the phone first. You can record sightings without network – nothing is lost.';
+
+  @override
+  String get helpSyncTitle => 'Sync and working offline';
+
+  @override
+  String get helpTourDefault =>
+      'Set boat, skipper and wind once per day under Menu → \"Set default tour\". New sightings take these values.';
+
+  @override
+  String get helpTourEnd =>
+      'Without home area, end the tour with the \"Tour End\" button – you then see a summary of the tour.';
+
+  @override
+  String get helpTourHomeArea =>
+      'With \"home area\" switched on, the tour starts automatically when the boat leaves the harbour area and ends when it comes back.';
+
+  @override
+  String get helpTourRoute =>
+      'The orange line on the map is the route recorded on this tour. The sightings tab groups the sightings by tour with duration, distance and species.';
+
+  @override
+  String get helpTourTitle => 'Tour and home area';
+
+  @override
   String get imageNotFound => 'Image not found';
 
   @override
@@ -320,6 +424,36 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get internalError => 'Internal Error';
+
+  @override
+  String get intro1Text =>
+      '\"Add Sighting\" opens the full form, \"Add Tortoise\" saves a turtle in two taps. Colors in the list show what is still missing.';
+
+  @override
+  String get intro1Title => 'Record sightings';
+
+  @override
+  String get intro2Text =>
+      'Set the default tour once a day. The app records the route on the map – with home area even starting and ending the tour by itself.';
+
+  @override
+  String get intro2Title => 'Tour and route';
+
+  @override
+  String get intro3Text =>
+      'Everything is saved on the phone and synced automatically as soon as there is network. You find this and more under Menu → Help.';
+
+  @override
+  String get intro3Title => 'Works offline';
+
+  @override
+  String get introDone => 'Let\'s go';
+
+  @override
+  String get introNext => 'Next';
+
+  @override
+  String get introSkip => 'Skip';
 
   @override
   String get labelAllowTourEnd =>
