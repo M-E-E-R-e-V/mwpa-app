@@ -471,48 +471,62 @@ class _ListPageState extends State<ListPage>
     );
   }
 
-  /// _actionRow
+  /// _actionRow - the two quick actions side by side, equal width; "Tour
+  /// End" (if enabled for the default tour) below them
   Widget _actionRow(BuildContext context) {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        Row(
+          children: [
+            Expanded(
+              child: _ActionTile(
+                icon: Icons.add,
+                title: 'Add Sighting',
+                subtitle: 'Full form',
+                color: kButtonBackgroundColor,
+                foreground: kButtonFontColor,
+                onTap: () async {
+                  await Navigator.of(context).pushNamed('/Edit');
+                  _sightingController.getSightings();
+                },
+              ),
+            ),
+            const SizedBox(width: 12),
+            // TODO, fast button animals should come from the database in the future
+            Expanded(
+              child: _ActionTile(
+                icon: AppIcons.tortoise,
+                title: 'Add Tortoise',
+                subtitle: 'Quick entry',
+                color: Colors.green.shade600,
+                foreground: Colors.white,
+                onTap: () => _showTortoiseDialog(context),
+              ),
+            ),
+          ],
+        ),
         Consumer<PrefController>(builder: (_, prefController, __) {
           if (prefController.prefToru != null) {
             final setEndTour = (prefController.prefToru!.set_end_tour ?? 0) >= 1;
             final useHomeArea = (prefController.prefToru!.use_home_area ?? 0) >= 1;
             if (setEndTour && !useHomeArea) {
-              return FilledButton.tonalIcon(
-                onPressed: () => _setEndTour(context),
-                icon: const Icon(Icons.flag_outlined),
-                label: const Text('Tour End'),
+              return Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: FilledButton.tonalIcon(
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(48),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  ),
+                  onPressed: () => _setEndTour(context),
+                  icon: const Icon(Icons.flag_outlined),
+                  label: const Text('Tour End'),
+                ),
               );
             }
           }
           return const SizedBox.shrink();
         }),
-        FilledButton.icon(
-          style: FilledButton.styleFrom(
-            backgroundColor: kButtonBackgroundColor,
-            foregroundColor: kButtonFontColor,
-          ),
-          onPressed: () async {
-            await Navigator.of(context).pushNamed('/Edit');
-            _sightingController.getSightings();
-          },
-          icon: const Icon(Icons.add),
-          label: const Text('Add Sighting'),
-        ),
-        // TODO, fast button animals should come from the database in the future
-        FilledButton.icon(
-          style: FilledButton.styleFrom(
-            backgroundColor: Colors.green.shade600,
-            foregroundColor: Colors.white,
-          ),
-          onPressed: () => _showTortoiseDialog(context),
-          icon: const Icon(AppIcons.tortoise),
-          label: const Text('Add Tortoise'),
-        ),
       ],
     );
   }
@@ -753,6 +767,75 @@ class _ListPageState extends State<ListPage>
                     _tourTab(context),
                     _sightingsTab(context),
                   ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// _ActionTile - large quick action on the tour tab: icon in a circle,
+/// title and a short hint, content centered
+class _ActionTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Color color;
+  final Color foreground;
+  final VoidCallback onTap;
+
+  const _ActionTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.color,
+    required this.foreground,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Material(
+      color: color,
+      elevation: 2,
+      shadowColor: color.withValues(alpha: 0.5),
+      borderRadius: BorderRadius.circular(18),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircleAvatar(
+                radius: 22,
+                backgroundColor: foreground.withValues(alpha: 0.2),
+                child: Icon(icon, color: foreground, size: 26),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: foreground,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              Text(
+                subtitle,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: foreground.withValues(alpha: 0.85),
                 ),
               ),
             ],
