@@ -1,9 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:mwpaapp/Models/Sighting.dart';
+import 'package:mwpaapp/l10n/l10n.dart';
 
 /// colors of the hints: required = error color, "at the end" = amber (same
 /// as the status stripe in the sightings list)
 const Color kAtEndColor = Color(0xffe0a200);
+
+/// localizedLabel - the field name in the UI language
+extension SightingFieldL10n on SightingField {
+  String localizedLabel(BuildContext context) {
+    final l10n = context.l10n;
+
+    return switch (this) {
+      SightingField.date => l10n.fieldDate,
+      SightingField.tourStart => l10n.fieldTourStart,
+      SightingField.tourEnd => l10n.fieldTourEnd,
+      SightingField.beginTime => l10n.fieldBeginTime,
+      SightingField.beginPosition => l10n.fieldBeginPosition,
+      SightingField.endPosition => l10n.fieldEndPosition,
+      SightingField.count => l10n.fieldCount,
+    };
+  }
+}
 
 Color _fieldColor(BuildContext context, SightingField field) =>
     field.atEnd ? kAtEndColor : Theme.of(context).colorScheme.error;
@@ -26,9 +44,9 @@ class MissingFieldsSummary extends StatelessWidget {
       return Card(
         margin: const EdgeInsets.only(bottom: 16),
         color: const Color(0xff2e9e48).withValues(alpha: 0.12),
-        child: const ListTile(
-          leading: Icon(Icons.check_circle_outline, color: Color(0xff2e9e48)),
-          title: Text('All required fields are filled in'),
+        child: ListTile(
+          leading: const Icon(Icons.check_circle_outline, color: Color(0xff2e9e48)),
+          title: Text(context.l10n.allRequiredFilled),
         ),
       );
     }
@@ -53,17 +71,17 @@ class MissingFieldsSummary extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    '${missing.length} field${missing.length == 1 ? '' : 's'} still empty',
+                    context.l10n.fieldsStillEmpty(missing.length),
                     style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
                   ),
                 ),
               ],
             ),
-            if (required.isNotEmpty) _group(context, 'Required', required),
-            if (atEnd.isNotEmpty) _group(context, 'At the end of the sighting', atEnd),
+            if (required.isNotEmpty) _group(context, context.l10n.required, required),
+            if (atEnd.isNotEmpty) _group(context, context.l10n.atEndOfSighting, atEnd),
             const SizedBox(height: 6),
             Text(
-              'You can save anyway and complete it later.',
+              context.l10n.saveAnywayHint,
               style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
             ),
           ],
@@ -87,7 +105,7 @@ class MissingFieldsSummary extends StatelessWidget {
               for (final field in fields)
                 ActionChip(
                   avatar: Icon(Icons.arrow_downward, size: 16, color: _fieldColor(context, field)),
-                  label: Text(field.label),
+                  label: Text(field.localizedLabel(context)),
                   side: BorderSide(color: _fieldColor(context, field)),
                   onPressed: () => onTap(field),
                 ),
@@ -135,7 +153,7 @@ class MissingFieldMark extends StatelessWidget {
                       const SizedBox(width: 6),
                       Flexible(
                         child: Text(
-                          field.atEnd ? 'Still open - fill in at the end' : 'Required',
+                          field.atEnd ? context.l10n.stillOpenAtEnd : context.l10n.required,
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(color: color),
                         ),
                       ),

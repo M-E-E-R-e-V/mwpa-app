@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:mwpaapp/Controllers/LocationController.dart';
 import 'package:provider/provider.dart';
+import 'package:mwpaapp/l10n/l10n.dart';
 
 const Color _okColor = Color(0xff4cd964);
 const Color _searchingColor = Color(0xffffc233);
@@ -16,21 +17,21 @@ class GpsStatusIcon extends StatelessWidget {
     final status = context.select<LocationController, GpsStatus>((c) => c.gpsStatus);
 
     final (icon, color, text) = switch (status) {
-      GpsStatus.ok => (Icons.gps_fixed, _okColor, 'GPS is running, the route is recorded.'),
+      GpsStatus.ok => (Icons.gps_fixed, _okColor, context.l10n.gpsOk),
       GpsStatus.searching => (
           Icons.gps_not_fixed,
           _searchingColor,
-          'GPS is running, but there is no current position fix (e.g. indoors).',
+          context.l10n.gpsSearching,
         ),
       GpsStatus.off => (
           Icons.gps_off,
           Theme.of(context).colorScheme.error,
-          'GPS is off: no position and no route recording.',
+          context.l10n.gpsOff,
         ),
     };
 
     return IconButton(
-      tooltip: 'GPS status',
+      tooltip: context.l10n.gpsStatus,
       icon: Icon(icon, color: color),
       onPressed: () {
         ScaffoldMessenger.of(context)
@@ -76,14 +77,14 @@ class GpsOffBanner extends StatelessWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'GPS is off - no position, the route is not recorded.',
+                        context.l10n.gpsOffBanner,
                         style: TextStyle(color: scheme.onErrorContainer),
                       ),
                     ),
                     TextButton(
                       onPressed: _openSettings,
                       style: TextButton.styleFrom(foregroundColor: scheme.onErrorContainer),
-                      child: const Text('Settings'),
+                      child: Text(context.l10n.settings),
                     ),
                   ],
                 ),

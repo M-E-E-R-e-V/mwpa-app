@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:mwpaapp/Components/Inputs/DynInputValue.dart';
 import 'package:mwpaapp/Components/Inputs/InputFrame.dart';
 import 'package:mwpaapp/Util/UtilDistanceCoast.dart';
+import 'package:mwpaapp/l10n/l10n.dart';
 
 /// Kind of a [TextValueInput].
 enum TextValueKind {
@@ -140,7 +141,7 @@ class _DistanceInputState extends State<DistanceInput> {
     final meters = UtilDistanceCoast.nmTextToMeters(text);
 
     if (meters == null) {
-      setState(() => _error = 'Not a valid number');
+      setState(() => _error = context.l10n.notAValidNumber);
       return;
     }
 
@@ -160,7 +161,7 @@ class _DistanceInputState extends State<DistanceInput> {
         inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))],
         textInputAction: TextInputAction.done,
         decoration: InputDecoration(
-          suffixText: 'nm',
+          suffixText: context.l10n.nauticalMilesUnit,
           errorText: _error,
         ),
         onChanged: _onChanged,

@@ -19,6 +19,7 @@ import 'package:mwpaapp/Dialog/SyncProgressDialog.dart';
 import 'package:mwpaapp/Models/Sighting.dart';
 import 'package:mwpaapp/Mwpa/MwpaException.dart';
 import 'package:mwpaapp/Pages/EditSightingPage.dart';
+import 'package:mwpaapp/Components/LanguageSelector.dart';
 import 'package:mwpaapp/Pages/List/GpsStatusIndicator.dart';
 import 'package:mwpaapp/Pages/List/ListSightingTile.dart';
 import 'package:mwpaapp/Services/SyncMwpaService.dart';
@@ -32,6 +33,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'List/ListMap.dart';
 import 'package:mwpaapp/Ui/AppIcons.dart';
 import 'package:mwpaapp/Util/AppLog.dart';
+import 'package:mwpaapp/l10n/l10n.dart';
 
 /// ListPage
 class ListPage extends StatefulWidget {
@@ -59,7 +61,13 @@ class _ListPageState extends State<ListPage>
 
   bool diffTourDateIgnored = false;
   bool isSyncInProgress = false;
-  String statusTitle = "Tour: default date is not set";
+  /// shown tour: date and start of the default / home area tour, null
+  /// when no tour date is set
+  String? _tourDate;
+  String? _tourStart;
+
+  /// home area mode, tour not started yet
+  bool _waitingInHomeArea = false;
 
   /// initState
   @override
@@ -109,8 +117,9 @@ class _ListPageState extends State<ListPage>
     try {
       isSyncInProgress = true;
 
-      await service.sync((p0, p1) async {
-        progress.update(p0.round(), p1);
+      await service.sync((percent, step, [detail]) async {
+        if (!mounted) return;
+        progress.update(percent, _syncStepLabel(context, step, detail));
       });
 
       await _vehicleController.getVehicle();
@@ -129,15 +138,42 @@ class _ListPageState extends State<ListPage>
 
       if (!mounted) return;
 
-      if (error is MwpaException) {
-        InfoDialog.show(context, 'Error', error.toString());
+      if (error is ApiVersionException) {
+        final server = error.server;
+        final accepted = error.accepted.join(', ');
+        InfoDialog.show(
+          context,
+          context.l10n.error,
+          error.sync
+              ? context.l10n.apiSyncChanged(server, accepted)
+              : context.l10n.apiLoginChanged(server, accepted),
+          isError: true,
+        );
+      } else if (error is MwpaException) {
+        InfoDialog.show(context, context.l10n.error, error.toString(), isError: true);
       } else {
-        InfoDialog.show(context, 'Internal Error', error.toString());
+        InfoDialog.show(context, context.l10n.internalError, error.toString(), isError: true);
       }
     }
 
     if (!mounted) return;
     setState(() { });
+  }
+
+  /// _syncStepLabel - progress text of a sync step in the UI language
+  static String _syncStepLabel(BuildContext context, SyncStep step, String? detail) {
+    final l10n = context.l10n;
+
+    return switch (step) {
+      SyncStep.vehicles => l10n.syncStepVehicles,
+      SyncStep.species => l10n.syncStepSpecies,
+      SyncStep.encounterCategories => l10n.syncStepEncounterCategories,
+      SyncStep.behaviouralStates => l10n.syncStepBehaviouralStates,
+      SyncStep.sightings => l10n.syncStepSightings,
+      SyncStep.sightingImages => l10n.syncStepImages,
+      SyncStep.tracking => l10n.syncStepTracking(detail ?? ''),
+      SyncStep.finish => l10n.syncStepFinish,
+    };
   }
 
   /// _loadController
@@ -165,12 +201,10 @@ class _ListPageState extends State<ListPage>
         .length;
 
     final message = unsynced == 0
-        ? "Do you want to logout?"
-        : "$unsynced sighting(s) are not synced yet. Please sync before you "
-          "logout, otherwise they are uploaded with the next login.\n\n"
-          "Logout anyway?";
+        ? context.l10n.logoutQuestion
+        : context.l10n.logoutUnsynced(unsynced);
 
-    ConfirmDialog.show(context, "Logout", message, destructive: unsynced > 0, okLabel: 'Logout', (p0) async {
+    ConfirmDialog.show(context, context.l10n.logout, message, destructive: unsynced > 0, okLabel: context.l10n.logout, (p0) async {
       if (p0 == "ok") {
         AppLog.i('List', 'logout ($unsynced unsynced sightings)');
         await CredentialStore().deletePassword();
@@ -188,8 +222,8 @@ class _ListPageState extends State<ListPage>
   void _setEndTour(BuildContext context) {
     ConfirmDialog.show(
       context,
-      "Tour End",
-      "Update the tour end time for all sighting entries from the current tour?",
+      context.l10n.tourEnd,
+      context.l10n.tourEndQuestion,
       (value) async {
         if (value == "ok") {
           if (_prefController.prefToru != null) {
@@ -210,7 +244,7 @@ class _ListPageState extends State<ListPage>
     return AppBar(
       title: const Text('MWPA'),
       leading: IconButton(
-        tooltip: dark ? 'Switch to light theme' : 'Switch to dark theme',
+        tooltip: dark ? context.l10n.switchToLightTheme : context.l10n.switchToDarkTheme,
         onPressed: () {
           context.read<ThemeController>().switchTheme();
         },
@@ -219,16 +253,17 @@ class _ListPageState extends State<ListPage>
         ),
       ),
       actions: [
+        const LanguageSelector(),
         const GpsStatusIcon(),
         PopupMenuButton<String>(
-          tooltip: 'Menu',
-          itemBuilder: (context) => const [
+          tooltip: context.l10n.menu,
+          itemBuilder: (context) => [
             PopupMenuItem(
               value: 'settour',
               child: ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: Icon(Icons.event_note_outlined),
-                title: Text('Set default Tour'),
+                title: Text(context.l10n.setDefaultTour),
               ),
             ),
             PopupMenuItem(
@@ -236,7 +271,7 @@ class _ListPageState extends State<ListPage>
               child: ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: Icon(Icons.sync),
-                title: Text('Sync with Server'),
+                title: Text(context.l10n.syncWithServer),
               ),
             ),
             PopupMenuItem(
@@ -244,7 +279,7 @@ class _ListPageState extends State<ListPage>
               child: ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: Icon(Icons.info_outline),
-                title: Text('About'),
+                title: Text(context.l10n.about),
               ),
             ),
             PopupMenuDivider(),
@@ -253,7 +288,7 @@ class _ListPageState extends State<ListPage>
               child: ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: Icon(Icons.logout),
-                title: Text('Logout'),
+                title: Text(context.l10n.logout),
               ),
             ),
           ],
@@ -284,7 +319,7 @@ class _ListPageState extends State<ListPage>
         labelColor: kButtonFontColor,
         unselectedLabelColor: Colors.white70,
         tabs: [
-          const Tab(icon: Icon(Icons.tour_outlined), text: 'Tour'),
+          Tab(icon: const Icon(Icons.tour_outlined), text: context.l10n.tabTour),
           Tab(
             icon: ListenableBuilder(
               listenable: _sightingController,
@@ -299,7 +334,7 @@ class _ListPageState extends State<ListPage>
                 );
               },
             ),
-            text: 'Sightings',
+            text: context.l10n.tabSightings,
           ),
         ],
       ),
@@ -316,10 +351,10 @@ class _ListPageState extends State<ListPage>
     if (tour == null) {
       InfoDialog.show(
           context,
-          "Info",
+          context.l10n.info,
           (_prefController.prefToru?.use_home_area ?? 0) >= 1
-              ? "The tour has not started yet (still in the home area). The entry cannot be added until then."
-              : "Please set the default tour with date and start time beforehand. The entry cannot be added until then."
+              ? context.l10n.tourNotStartedHomeArea
+              : context.l10n.setDefaultTourFirst
       );
 
       return;
@@ -328,7 +363,7 @@ class _ListPageState extends State<ListPage>
     final Position? pos = _locationController.currentPosition;
 
     if (pos == null) {
-      InfoDialog.show(context, 'Info', "Please wait for the GPS signal.");
+      InfoDialog.show(context, context.l10n.info, context.l10n.waitForGps);
       return;
     }
 
@@ -362,7 +397,7 @@ class _ListPageState extends State<ListPage>
 
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Added: $otherName')),
+      SnackBar(content: Text(context.l10n.addedSnack(otherName))),
     );
   }
 
@@ -380,8 +415,8 @@ class _ListPageState extends State<ListPage>
                   if (!mounted) return;
                   ConfirmDialog.show(
                       context,
-                      "Tour date",
-                      "The tour date is not current, please check!",
+                      context.l10n.tourDateTitle,
+                      context.l10n.tourDateNotCurrent,
                           (select) async {
                         if (select == "ok") {
                           if (!mounted) return;
@@ -397,21 +432,22 @@ class _ListPageState extends State<ListPage>
           }
 
           setState(() {
-            statusTitle =
-            "Tour: ${_prefController.prefToru!.date!} - ${_prefController
-                .prefToru!.tour_start!}";
+            _waitingInHomeArea = false;
+            _tourDate = _prefController.prefToru!.date!;
+            _tourStart = _prefController.prefToru!.tour_start!;
           });
         } else {
           // with Home area ----------------------------------------------------
 
           if (_locationController.homeAreaToru == null) {
             setState(() {
-              statusTitle = "Tour: In Home-Area, wait for start";
+              _waitingInHomeArea = true;
             });
           } else {
             setState(() {
-              statusTitle = "Tour: ${_locationController.homeAreaToru!
-                  .date!} - ${_locationController.homeAreaToru!.tour_start!}";
+              _waitingInHomeArea = false;
+              _tourDate = _locationController.homeAreaToru!.date!;
+              _tourStart = _locationController.homeAreaToru!.tour_start!;
             });
           }
         }
@@ -445,7 +481,7 @@ class _ListPageState extends State<ListPage>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Current tour',
+                    context.l10n.currentTour,
                     style: theme.textTheme.labelMedium?.copyWith(
                       color: theme.colorScheme.onPrimaryContainer
                           .withValues(alpha: 0.7),
@@ -454,7 +490,11 @@ class _ListPageState extends State<ListPage>
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    statusTitle,
+                    _waitingInHomeArea
+                        ? context.l10n.tourWaitingHomeArea
+                        : _tourDate == null
+                            ? context.l10n.tourDateNotSet
+                            : context.l10n.tourLabel(_tourDate!, _tourStart ?? ''),
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
                       color: theme.colorScheme.onPrimaryContainer,
@@ -482,8 +522,8 @@ class _ListPageState extends State<ListPage>
             Expanded(
               child: _ActionTile(
                 icon: Icons.add,
-                title: 'Add Sighting',
-                subtitle: 'Full form',
+                title: context.l10n.addSighting,
+                subtitle: context.l10n.addSightingHint,
                 color: kButtonBackgroundColor,
                 foreground: kButtonFontColor,
                 onTap: () async {
@@ -497,8 +537,8 @@ class _ListPageState extends State<ListPage>
             Expanded(
               child: _ActionTile(
                 icon: AppIcons.tortoise,
-                title: 'Add Tortoise',
-                subtitle: 'Quick entry',
+                title: context.l10n.addTortoise,
+                subtitle: context.l10n.addTortoiseHint,
                 color: Colors.green.shade600,
                 foreground: Colors.white,
                 onTap: () => _showTortoiseDialog(context),
@@ -520,7 +560,7 @@ class _ListPageState extends State<ListPage>
                   ),
                   onPressed: () => _setEndTour(context),
                   icon: const Icon(Icons.flag_outlined),
-                  label: const Text('Tour End'),
+                  label: Text(context.l10n.tourEnd),
                 ),
               );
             }
@@ -533,16 +573,18 @@ class _ListPageState extends State<ListPage>
 
   /// _showTortoiseDialog
   void _showTortoiseDialog(BuildContext context) {
-    const turtles = <_TurtleChoice>[
-      _TurtleChoice('Caretta caretta', 'Loggerhead sea turtle',
+    // payload is stored with the sighting: always English
+    final l10n = context.l10n;
+    final turtles = <_TurtleChoice>[
+      _TurtleChoice('Caretta caretta', l10n.turtleLoggerhead,
           'Caretta caretta - Loggerhead sea turtle'),
-      _TurtleChoice('Dermochelys coriacea', 'Leatherback sea turtle',
+      _TurtleChoice('Dermochelys coriacea', l10n.turtleLeatherback,
           'Dermochelys coriacea - Leatherback sea turtle'),
-      _TurtleChoice('Chelonia mydas', 'Green sea turtle',
+      _TurtleChoice('Chelonia mydas', l10n.turtleGreen,
           'Chelonia mydas - Green sea turtle'),
-      _TurtleChoice('Eretmochelys imbricata', 'Hawksbill sea turtle',
+      _TurtleChoice('Eretmochelys imbricata', l10n.turtleHawksbill,
           'Eretmochelys imbricata - Hawksbill sea turtle'),
-      _TurtleChoice('Unknown', 'Sea turtle', 'Unknown sea turtle'),
+      _TurtleChoice(l10n.turtleUnknown, l10n.turtleSeaTurtle, 'Unknown sea turtle'),
     ];
 
     showDialog<void>(
@@ -551,7 +593,7 @@ class _ListPageState extends State<ListPage>
         return AlertDialog(
           icon: const Icon(AppIcons.tortoise,
               size: 32, color: Colors.green),
-          title: const Text('Add tortoise sighting'),
+          title: Text(context.l10n.addTortoiseTitle),
           contentPadding: const EdgeInsets.fromLTRB(8, 16, 8, 8),
           content: SizedBox(
             width: double.maxFinite,
@@ -577,7 +619,7 @@ class _ListPageState extends State<ListPage>
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogCtx).pop(),
-              child: const Text('Cancel'),
+              child: Text(context.l10n.cancel),
             ),
           ],
         );
@@ -631,12 +673,12 @@ class _ListPageState extends State<ListPage>
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'No sightings yet',
+                  context.l10n.noSightingsYet,
                   style: theme.textTheme.titleMedium,
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Tap "Add Sighting" to record one.',
+                  context.l10n.noSightingsHint,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -697,7 +739,7 @@ class _ListPageState extends State<ListPage>
               ),
               ListTile(
                 leading: Icon(Icons.edit_outlined, color: theme.colorScheme.primary),
-                title: const Text('Edit'),
+                title: Text(context.l10n.edit),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -712,7 +754,7 @@ class _ListPageState extends State<ListPage>
               ListTile(
                 leading: Icon(Icons.delete_outline, color: theme.colorScheme.error),
                 title: Text(
-                  'Delete',
+                  context.l10n.delete,
                   style: TextStyle(color: theme.colorScheme.error),
                 ),
                 shape: RoundedRectangleBorder(
@@ -722,8 +764,8 @@ class _ListPageState extends State<ListPage>
                   Navigator.of(sheetContext).pop();
                   ConfirmDialog.show(
                     context,
-                    'Delete sighting',
-                    'Delete this sighting from the device? Already synced data stays on the server.',
+                    context.l10n.deleteSightingTitle,
+                    context.l10n.deleteSightingQuestion,
                     (value) async {
                       if (value == 'ok') {
                         await _sightingController.delete(sighting);
@@ -731,14 +773,14 @@ class _ListPageState extends State<ListPage>
                       }
                     },
                     destructive: true,
-                    okLabel: 'Delete',
+                    okLabel: context.l10n.delete,
                   );
                 },
               ),
               const SizedBox(height: 8),
               OutlinedButton(
                 onPressed: () => Navigator.of(sheetContext).pop(),
-                child: const Text('Close'),
+                child: Text(context.l10n.close),
               ),
             ],
           ),

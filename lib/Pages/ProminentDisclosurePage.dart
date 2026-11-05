@@ -2,11 +2,13 @@ import 'dart:io' show Platform, exit;
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:mwpaapp/Components/LanguageSelector.dart';
 import 'package:mwpaapp/Controllers/LocationController.dart';
 import 'package:mwpaapp/Controllers/PrefController.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mwpaapp/l10n/l10n.dart';
 
 /// ProminentDisclosurePage
 class ProminentDisclosurePage extends StatefulWidget {
@@ -51,16 +53,14 @@ class _ProminentDisclosurePageState extends State<ProminentDisclosurePage> {
           builder: (BuildContext context) {
             return AlertDialog(
               icon: const Icon(Icons.location_off_outlined, size: 32),
-              title: const Text('Location permission required'),
-              content: const Text(
-                'Please go to the system settings and allow the app access to the location.',
-              ),
+              title: Text(context.l10n.locationPermissionTitle),
+              content: Text(context.l10n.locationPermissionText),
               actionsAlignment: MainAxisAlignment.spaceBetween,
               actions: [
                 OutlinedButton(
                   // back to the disclosure underneath; "accept" retries
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Back'),
+                  child: Text(context.l10n.back),
                 ),
                 FilledButton.icon(
                   // location service off -> system location settings,
@@ -73,7 +73,7 @@ class _ProminentDisclosurePageState extends State<ProminentDisclosurePage> {
                     }
                   },
                   icon: const Icon(Icons.settings),
-                  label: const Text('Open settings'),
+                  label: Text(context.l10n.openSettings),
                 ),
               ],
             );
@@ -104,6 +104,12 @@ class _ProminentDisclosurePageState extends State<ProminentDisclosurePage> {
     final theme = Theme.of(context);
 
     return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        backgroundColor: Colors.transparent,
+        scrolledUnderElevation: 0,
+        actions: const [LanguageSelector()],
+      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -119,7 +125,7 @@ class _ProminentDisclosurePageState extends State<ProminentDisclosurePage> {
                   ),
                   const SizedBox(height: 32),
                   Text(
-                    'MWPA Disclosure',
+                    context.l10n.disclosureTitle,
                     textAlign: TextAlign.center,
                     style: theme.textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.w700,
@@ -127,7 +133,7 @@ class _ProminentDisclosurePageState extends State<ProminentDisclosurePage> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Mammal watching. Processing. Analysing.',
+                    context.l10n.appTagline,
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
@@ -148,7 +154,7 @@ class _ProminentDisclosurePageState extends State<ProminentDisclosurePage> {
                               ),
                               const SizedBox(width: 10),
                               Text(
-                                'How we use your location',
+                                context.l10n.disclosureHeading,
                                 style: theme.textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -157,18 +163,12 @@ class _ProminentDisclosurePageState extends State<ProminentDisclosurePage> {
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            'The MWPA app collects location data to auto-fill '
-                            'sighting data and track routes for movement '
-                            'activated even if the app is closed or not in use.',
+                            context.l10n.disclosureText1,
                             style: theme.textTheme.bodyMedium,
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            'The app can only be used with position/location '
-                            'determination, otherwise the recorded data is '
-                            'useless. The data is only sent to the portal that '
-                            'is entered during login. For further questions you '
-                            'can contact or view the source code:',
+                            context.l10n.disclosureText2,
                             style: theme.textTheme.bodyMedium,
                           ),
                           const SizedBox(height: 12),
@@ -187,17 +187,17 @@ class _ProminentDisclosurePageState extends State<ProminentDisclosurePage> {
                   FilledButton.icon(
                     onPressed: acceptDisclosure,
                     icon: const Icon(Icons.check_circle_outline),
-                    label: const Text('Ok, sure and save'),
+                    label: Text(context.l10n.disclosureAccept),
                   ),
                   const SizedBox(height: 12),
                   OutlinedButton.icon(
                     onPressed: rejectDisclosure,
                     icon: const Icon(Icons.close),
-                    label: const Text('No, thanks and close'),
+                    label: Text(context.l10n.disclosureReject),
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    'A project of the M.E.E.R. e.V. association.',
+                    context.l10n.projectOfMeer,
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,

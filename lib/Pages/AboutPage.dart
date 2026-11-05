@@ -12,6 +12,7 @@ import 'package:mwpaapp/Util/AppLog.dart';
 import 'package:mwpaapp/Util/UtilShare.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mwpaapp/l10n/l10n.dart';
 
 /// AboutPage - app version, connection, local data and project links; the
 /// open source licenses via the Flutter license page.
@@ -81,7 +82,7 @@ class _AboutPageState extends State<AboutPage> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Log could not be shared: $error')),
+          SnackBar(content: Text(context.l10n.logShareFailed('$error'))),
         );
       }
     } finally {
@@ -94,7 +95,7 @@ class _AboutPageState extends State<AboutPage> {
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(const SnackBar(content: Text('Copied to clipboard')));
+      ..showSnackBar(SnackBar(content: Text(context.l10n.copiedToClipboard)));
   }
 
   @override
@@ -106,7 +107,7 @@ class _AboutPageState extends State<AboutPage> {
         .length;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('About')),
+      appBar: AppBar(title: Text(context.l10n.about)),
       body: SafeArea(
         top: false,
         child: ListView(
@@ -127,7 +128,7 @@ class _AboutPageState extends State<AboutPage> {
             ),
             const SizedBox(height: 4),
             Text(
-              'Mammal Watching. Processing. Analysing.',
+              context.l10n.appTagline,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant),
             ),
@@ -135,29 +136,29 @@ class _AboutPageState extends State<AboutPage> {
             Center(
               child: Chip(
                 avatar: const Icon(Icons.verified_outlined, size: 18),
-                label: const Text('Version $kAppVersion ($kAppBuild)'),
+                label: Text(context.l10n.versionLabel('$kAppVersion ($kAppBuild)')),
               ),
             ),
             const SizedBox(height: 20),
 
             // connection ---------------------------------------------------
             InputSection(
-              title: 'Connection',
+              title: context.l10n.aboutConnection,
               icon: Icons.cloud_outlined,
               children: [
                 _InfoTile(
                   icon: Icons.dns_outlined,
-                  label: 'Server',
-                  value: _server.isEmpty ? 'not set' : _server,
+                  label: context.l10n.aboutServer,
+                  value: _server.isEmpty ? context.l10n.notSet : _server,
                 ),
                 _InfoTile(
                   icon: Icons.person_outline,
-                  label: 'User',
-                  value: _username.isEmpty ? 'not logged in' : _username,
+                  label: context.l10n.aboutUser,
+                  value: _username.isEmpty ? context.l10n.notLoggedIn : _username,
                 ),
                 _InfoTile(
                   icon: Icons.api_outlined,
-                  label: 'Supported server API',
+                  label: context.l10n.aboutSupportedApi,
                   value: 'Login ${versionApiMobileLogin.join(', ')} · '
                       'Sync ${versionApiMobileSync.join(', ')}',
                 ),
@@ -166,17 +167,17 @@ class _AboutPageState extends State<AboutPage> {
 
             // local data ---------------------------------------------------
             InputSection(
-              title: 'Data on this device',
+              title: context.l10n.aboutLocalData,
               icon: Icons.storage_outlined,
               children: [
                 _InfoTile(
                   icon: Icons.list_alt,
-                  label: 'Sightings',
+                  label: context.l10n.aboutSightings,
                   value: '${sightings.length}',
                 ),
                 _InfoTile(
                   icon: unsynced == 0 ? Icons.cloud_done_outlined : Icons.cloud_upload_outlined,
-                  label: 'Not synced yet',
+                  label: context.l10n.aboutNotSynced,
                   value: '$unsynced',
                 ),
               ],
@@ -184,33 +185,28 @@ class _AboutPageState extends State<AboutPage> {
 
             // project ------------------------------------------------------
             InputSection(
-              title: 'Project',
+              title: context.l10n.aboutProject,
               icon: Icons.info_outline,
               children: [
-                const Padding(
-                  padding: EdgeInsets.only(top: 12),
-                  child: Text(
-                    'MWPA collects and analyses data of whale and dolphin '
-                    'watching. This app records sightings and tour tracks, '
-                    'also offline, and syncs them with an MWPA server. '
-                    'A project of M.E.E.R. e.V.',
-                  ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: Text(context.l10n.aboutProjectText),
                 ),
                 _InfoTile(
                   icon: Icons.code,
-                  label: 'MWPA project',
+                  label: context.l10n.aboutMwpaProject,
                   value: AboutPage.projectUrl,
                   onTap: () => _copy(AboutPage.projectUrl),
                 ),
                 _InfoTile(
                   icon: Icons.phone_android,
-                  label: 'App source code',
+                  label: context.l10n.aboutAppSource,
                   value: AboutPage.appUrl,
                   onTap: () => _copy(AboutPage.appUrl),
                 ),
                 _InfoTile(
                   icon: Icons.business_outlined,
-                  label: 'Software development',
+                  label: context.l10n.aboutDevelopment,
                   value: '${AboutPage.developerName}\n${AboutPage.developerUrl}',
                   onTap: () => _copy(AboutPage.developerUrl),
                 ),
@@ -219,23 +215,19 @@ class _AboutPageState extends State<AboutPage> {
 
             // support -------------------------------------------------------
             InputSection(
-              title: 'Support',
+              title: context.l10n.aboutSupport,
               icon: Icons.support_agent,
               children: [
-                const Padding(
-                  padding: EdgeInsets.only(top: 12, bottom: 12),
-                  child: Text(
-                    'If something does not work, share the app log with the '
-                    'MWPA team (e.g. by mail). It contains the app events and '
-                    'errors, but no passwords.',
-                  ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 12, bottom: 12),
+                  child: Text(context.l10n.aboutSupportText),
                 ),
                 OutlinedButton.icon(
                   onPressed: _sharing ? null : _shareLog,
                   icon: _sharing
                       ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
                       : const Icon(Icons.share_outlined),
-                  label: const Text('Share app log'),
+                  label: Text(context.l10n.shareAppLog),
                 ),
               ],
             ),
@@ -251,7 +243,7 @@ class _AboutPageState extends State<AboutPage> {
                 ),
               ),
               icon: const Icon(Icons.description_outlined),
-              label: const Text('Open source licenses'),
+              label: Text(context.l10n.openSourceLicenses),
             ),
           ],
         ),

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:mwpaapp/l10n/l10n.dart';
 
 /// InfoDialog - message with a single "Ok" button; follows the app theme
 /// (light/dark).
 class InfoDialog {
-  static void show(BuildContext context, String dTitle, String msg) {
-    final isError = dTitle.toLowerCase().contains('error');
+  /// show - [isError] shows the error icon/color
+  static void show(BuildContext context, String dTitle, String msg, {bool isError = false}) {
 
     showDialog<void>(
       context: context,
@@ -21,7 +22,7 @@ class InfoDialog {
           content: Text(msg),
           actions: <Widget>[
             FilledButton(
-              child: const Text('Ok'),
+              child: Text(context.l10n.ok),
               onPressed: () => Navigator.of(context).pop(),
             ),
           ],

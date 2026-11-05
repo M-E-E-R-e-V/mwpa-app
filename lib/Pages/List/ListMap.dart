@@ -10,6 +10,7 @@ import 'package:mwpaapp/Util/UtilPosition.dart';
 import 'package:mwpaapp/Util/UtilTileServer.dart';
 import 'package:provider/provider.dart';
 import 'package:mwpaapp/Util/AppLog.dart';
+import 'package:mwpaapp/l10n/l10n.dart';
 
 /// ListMap - map with the home area, the sightings of the list and the
 /// current GPS position (flutter_map, works on Android and iOS).
@@ -195,8 +196,8 @@ class _ListMapState extends State<ListMap> {
                   ),
                   child: Text(
                     position == null
-                        ? "wait for GPS ..."
-                        : "${UtilPosition.getStr(position)} / Points: ${_locationController.positionCount}",
+                        ? context.l10n.mapWaitForGps
+                        : context.l10n.mapPositionPoints(UtilPosition.getStr(position), _locationController.positionCount),
                     style: subTitleStyle(context).copyWith(color: kButtonFontColor),
                   ),
                 ),
@@ -205,7 +206,7 @@ class _ListMapState extends State<ListMap> {
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: _gotoDefault,
-            tooltip: 'My Location',
+            tooltip: context.l10n.myLocation,
             backgroundColor: kButtonBackgroundColor,
             child: Icon(_followPosition ? Icons.my_location : Icons.location_searching),
           ),

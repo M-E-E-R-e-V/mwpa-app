@@ -23,6 +23,38 @@ import '../Mwpa/Models/SightingSaveResponse.dart';
 import '../Mwpa/MwpaAPI.dart';
 import 'package:mwpaapp/Util/AppLog.dart';
 
+/// SyncStep - the phase a running sync reports; the UI shows it in the
+/// user's language (the service itself has no BuildContext)
+enum SyncStep {
+  vehicles,
+  species,
+  encounterCategories,
+  behaviouralStates,
+  sightings,
+  sightingImages,
+  tracking,
+  finish,
+}
+
+/// SyncUpdate - progress callback: [percent] 0..100, the current [step] and
+/// an optional [detail] (e.g. "120/450" while uploading tracking points)
+typedef SyncUpdate = Future<void> Function(int percent, SyncStep step, [String? detail]);
+
+/// ApiVersionException - the server's mobile API version is not accepted
+/// by this app build ([sync] false = login API, true = sync API)
+class ApiVersionException implements Exception {
+  final bool sync;
+  final String server;
+  final List<String> accepted;
+
+  const ApiVersionException({required this.sync, required this.server, required this.accepted});
+
+  @override
+  String toString() =>
+      "The API for ${sync ? 'syncing' : 'login'} has changed (server reports '$server', "
+      "app accepts ${accepted.join(', ')}). Please update your app, the data will not be lost.";
+}
+
 /// SyncMwpaService
 class SyncMwpaService {
 
@@ -83,7 +115,7 @@ class SyncMwpaService {
   SyncMwpaService(this.speciesController);
 
   /// sync
-  Future<void> sync(Function(int, String)? update) async {
+  Future<void> sync(SyncUpdate? update) async {
     MwpaApi? opened;
     final watch = Stopwatch()..start();
     AppLog.i('Sync', 'start');
@@ -101,7 +133,7 @@ class SyncMwpaService {
   }
 
   /// _sync - the sync steps; [onApi] receives the API client once created
-  Future<void> _sync(Function(int, String)? update, void Function(MwpaApi api) onApi) async {
+  Future<void> _sync(SyncUpdate? update, void Function(MwpaApi api) onApi) async {
     MwpaApi api;
 
     // load userdata and login
@@ -133,17 +165,13 @@ class SyncMwpaService {
       Info apiInfo = await api.getInfo();
 
       if (!versionApiMobileLogin.contains(apiInfo.version_api_login)) {
-        throw Exception(
-            "The API for login has changed (server reports '${apiInfo.version_api_login}', "
-            "app accepts ${versionApiMobileLogin.join(', ')}). Please update your app, "
-            "the data will not be lost.");
+        throw ApiVersionException(
+            sync: false, server: '${apiInfo.version_api_login}', accepted: versionApiMobileLogin.toList());
       }
 
       if (!versionApiMobileSync.contains(apiInfo.version_api_sync)) {
-        throw Exception(
-            "The API for syncing has changed (server reports '${apiInfo.version_api_sync}', "
-            "app accepts ${versionApiMobileSync.join(', ')}). Please update your app, "
-            "the data will not be lost.");
+        throw ApiVersionException(
+            sync: true, server: '${apiInfo.version_api_sync}', accepted: versionApiMobileSync.toList());
       }
 
       if (!await api.isLogin()) {
@@ -199,7 +227,7 @@ class SyncMwpaService {
 
 
     if (update != null) {
-      await update(5, 'vehicle driver sync');
+      await update(5, SyncStep.vehicles);
     }
 
     // vehicle driver sync
@@ -224,7 +252,7 @@ class SyncMwpaService {
     }
 
     if (update != null) {
-      await update(10, 'species sync');
+      await update(10, SyncStep.species);
     }
 
     // species
@@ -253,7 +281,7 @@ class SyncMwpaService {
     }
 
     if (update != null) {
-      await update(15, 'encounter categories sync');
+      await update(15, SyncStep.encounterCategories);
     }
 
     // encounter categories
@@ -278,7 +306,7 @@ class SyncMwpaService {
     }
 
     if (update != null) {
-      await update(20, 'behavioural state sync');
+      await update(20, SyncStep.behaviouralStates);
     }
 
     // behavioural state
@@ -303,7 +331,7 @@ class SyncMwpaService {
     }
 
     if (update != null) {
-      await update(25, 'sightings sync');
+      await update(25, SyncStep.sightings);
     }
 
     /// home tracking area
@@ -377,7 +405,7 @@ class SyncMwpaService {
         if (update != null) {
           var percentStep = 100*(index*2-1)/(count*2);
           var percentUpdate = (percentStep*75)/100;
-          await update(percentUpdate.toInt(), 'sightings sync');
+          await update(percentUpdate.toInt(), SyncStep.sightings);
         }
 
         SightingSaveResponse? saveResponse;
@@ -407,7 +435,7 @@ class SyncMwpaService {
         if (update != null) {
           var percentStep2 = 100*(index*2)/(count*2);
           var percentUpdate2 = (percentStep2*75)/100;
-          await update(percentUpdate2.toInt(), 'sightings image sync');
+          await update(percentUpdate2.toInt(), SyncStep.sightingImages);
         }
 
         if (sighting.image != null && sighting.image != "") {
@@ -475,7 +503,7 @@ class SyncMwpaService {
               api.saveSightingTourTracking,
               progress: (sent, total) async {
                 if (update != null) {
-                  await update(90, 'sightings tracking sync $sent/$total');
+                  await update(90, SyncStep.tracking, '$sent/$total');
                 }
               },
             );
@@ -513,7 +541,7 @@ class SyncMwpaService {
     /// ------------------------------------------------------------------------
 
     if (update != null) {
-      await update(100, 'finish');
+      await update(100, SyncStep.finish);
     }
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mwpaapp/l10n/l10n.dart';
 
 /// Progress of a running sync: [percent] 0..100 and a status [message].
 class SyncProgress {
@@ -12,7 +13,7 @@ class SyncProgress {
 /// progress published through [progress]; close it with [close].
 class SyncProgressDialog {
   final ValueNotifier<SyncProgress> progress =
-      ValueNotifier(const SyncProgress(0, 'Connecting ...'));
+      ValueNotifier(const SyncProgress(0, ''));
 
   NavigatorState? _navigator;
 
@@ -28,7 +29,7 @@ class SyncProgressDialog {
         canPop: false,
         child: AlertDialog(
           icon: const Icon(Icons.cloud_sync_outlined, size: 32),
-          title: const Text('Syncing with server'),
+          title: Text(context.l10n.syncTitle),
           content: ValueListenableBuilder<SyncProgress>(
             valueListenable: progress,
             builder: (context, p, _) => Column(
@@ -47,7 +48,7 @@ class SyncProgressDialog {
                   children: [
                     Expanded(
                       child: Text(
-                        p.message,
+                        p.message.isEmpty ? context.l10n.syncConnecting : p.message,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),

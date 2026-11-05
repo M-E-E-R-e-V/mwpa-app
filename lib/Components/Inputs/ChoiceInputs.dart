@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mwpaapp/Components/Inputs/DynInputValue.dart';
 import 'package:mwpaapp/Components/Inputs/InputFrame.dart';
 import 'package:mwpaapp/Constants.dart';
+import 'package:mwpaapp/l10n/l10n.dart';
 
 /// SwitchInput - on/off (value.intValue: 1 = on, 0 = off); the [title] is
 /// shown inside the tile, the whole tile toggles.
@@ -87,10 +88,10 @@ class _YesNoUnknownInputState extends State<YesNoUnknownInput> {
           minimumSize: const Size(0, 48),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
-        segments: const [
-          ButtonSegment(value: -1, label: Text('Unknown')),
-          ButtonSegment(value: 1, label: Text('Yes')),
-          ButtonSegment(value: 0, label: Text('No')),
+        segments: [
+          ButtonSegment(value: -1, label: Text(context.l10n.choiceUnknown)),
+          ButtonSegment(value: 1, label: Text(context.l10n.choiceYes)),
+          ButtonSegment(value: 0, label: Text(context.l10n.choiceNo)),
         ],
         selected: {selected},
         onSelectionChanged: (Set<int> s) {

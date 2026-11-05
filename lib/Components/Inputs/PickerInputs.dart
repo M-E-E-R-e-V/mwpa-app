@@ -5,6 +5,7 @@ import 'package:mwpaapp/Components/Inputs/InputFrame.dart';
 import 'package:mwpaapp/Controllers/LocationController.dart';
 import 'package:mwpaapp/Util/UtilPosition.dart';
 import 'package:provider/provider.dart';
+import 'package:mwpaapp/l10n/l10n.dart';
 
 /// DateInput - date picked with the date picker (value.dateValue).
 class DateInput extends StatefulWidget {
@@ -119,7 +120,7 @@ class _LocationInputState extends State<LocationInput> {
     // no GPS fix yet - nothing to take over
     if (position == null) {
       ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-        const SnackBar(content: Text('No GPS position available yet')),
+        SnackBar(content: Text(context.l10n.noGpsPositionYet)),
       );
       return;
     }
@@ -139,15 +140,15 @@ class _LocationInputState extends State<LocationInput> {
         isEmpty: pos == null,
         decoration: InputDecoration(
           prefixIcon: Icon(Icons.place_outlined, color: inputAccentColor(context)),
-          helperText: pos == null ? null : 'Accuracy: ${pos.accuracy.toInt()} m',
+          helperText: pos == null ? null : context.l10n.accuracyMeters(pos.accuracy.toInt()),
           suffixIcon: IconButton(
             icon: Icon(Icons.my_location, color: inputAccentColor(context)),
-            tooltip: 'Use current position',
+            tooltip: context.l10n.useCurrentPosition,
             onPressed: _takeCurrentPosition,
           ),
         ),
         child: Text(
-          pos == null ? 'No position' : UtilPosition.getStr(pos),
+          pos == null ? context.l10n.noPosition : UtilPosition.getStr(pos),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(

@@ -7,10 +7,15 @@ import 'package:mwpaapp/Components/Inputs/Inputs.dart';
 import 'package:mwpaapp/Controllers/LocationController.dart';
 import 'package:mwpaapp/Controllers/PrefController.dart';
 import 'package:mwpaapp/Controllers/SightingController.dart';
+import 'package:mwpaapp/l10n/l10n.dart';
 import 'package:provider/provider.dart';
 
 Future<void> pumpInput(WidgetTester tester, Widget input, {LocationController? location}) {
-  Widget app = MaterialApp(home: Scaffold(body: SingleChildScrollView(child: input)));
+  Widget app = MaterialApp(
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    home: Scaffold(body: SingleChildScrollView(child: input)),
+  );
 
   if (location != null) {
     app = ChangeNotifierProvider<LocationController>.value(value: location, child: app);

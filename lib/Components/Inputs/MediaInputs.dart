@@ -7,6 +7,7 @@ import 'package:mwpaapp/Components/Inputs/InputFrame.dart';
 import 'package:mwpaapp/Components/Inputs/TagChipField.dart';
 import 'package:mwpaapp/Util/UtilImage.dart';
 import 'package:mwpaapp/Util/AppLog.dart';
+import 'package:mwpaapp/l10n/l10n.dart';
 
 /// ImageInput - photo from gallery or camera (value.imgPath); the picked
 /// file is copied to app storage (see [UtilImage.persist]).
@@ -71,7 +72,7 @@ class _ImageInputState extends State<ImageInput> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (path == "")
-            _placeholder(context, Icons.add_photo_alternate_outlined, 'No image selected')
+            _placeholder(context, Icons.add_photo_alternate_outlined, context.l10n.noImageSelected)
           else
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
@@ -80,7 +81,7 @@ class _ImageInputState extends State<ImageInput> {
                 height: 240,
                 fit: BoxFit.cover,
                 errorBuilder: (context, _, __) =>
-                    _placeholder(context, Icons.broken_image_outlined, 'Image not found'),
+                    _placeholder(context, Icons.broken_image_outlined, context.l10n.imageNotFound),
               ),
             ),
           const SizedBox(height: 12),
@@ -89,7 +90,7 @@ class _ImageInputState extends State<ImageInput> {
               Expanded(
                 child: OutlinedButton.icon(
                   icon: const Icon(Icons.photo_library_outlined),
-                  label: const Text('Gallery'),
+                  label: Text(context.l10n.gallery),
                   onPressed: () => _pick(ImageSource.gallery),
                 ),
               ),
@@ -97,7 +98,7 @@ class _ImageInputState extends State<ImageInput> {
               Expanded(
                 child: OutlinedButton.icon(
                   icon: const Icon(Icons.photo_camera_outlined),
-                  label: const Text('Camera'),
+                  label: Text(context.l10n.camera),
                   onPressed: () => _pick(ImageSource.camera),
                 ),
               ),
@@ -105,7 +106,7 @@ class _ImageInputState extends State<ImageInput> {
                 const SizedBox(width: 4),
                 IconButton(
                   icon: const Icon(Icons.delete_outline),
-                  tooltip: 'Remove image',
+                  tooltip: context.l10n.removeImage,
                   onPressed: () => setState(() => widget.value.imgPath = ""),
                 ),
               ],
@@ -157,7 +158,7 @@ class TagInput extends StatelessWidget {
           contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         ),
         child: TagChipField(
-          hintText: 'Add tag ...',
+          hintText: context.l10n.addTagHint,
           initialTags: parseTags(value.strValue),
           suggestions: suggestions,
           onChanged: (tags) {

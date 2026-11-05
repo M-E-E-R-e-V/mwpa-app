@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mwpaapp/Components/Inputs/DynInputValue.dart';
 import 'package:mwpaapp/Components/Inputs/InputFrame.dart';
+import 'package:mwpaapp/l10n/l10n.dart';
 
 /// SelectInput - one entry out of [items] (value.strValue = item value).
 ///
@@ -62,18 +63,18 @@ class SelectField extends StatelessWidget {
     this.searchable,
   });
 
-  String _hint(DynInputSelectItem? selected) {
+  String _hint(BuildContext context, DynInputSelectItem? selected) {
     if (items.isEmpty) {
-      return "<empty list>";
+      return context.l10n.selectEmptyList;
     }
 
     final current = value.strValue;
 
     if (selected == null && current != "" && current != "0") {
-      return "unknown by id: $current";
+      return context.l10n.selectUnknownId(current);
     }
 
-    return "<please select>";
+    return context.l10n.selectPlease;
   }
 
   @override
@@ -97,7 +98,7 @@ class SelectField extends StatelessWidget {
       initialSelection: selected?.value,
       expandedInsets: EdgeInsets.zero,
       menuHeight: 360,
-      hintText: _hint(selected),
+      hintText: _hint(context, selected),
       enabled: items.isNotEmpty,
       enableFilter: searchable,
       requestFocusOnTap: searchable,
@@ -173,7 +174,7 @@ class _MultiSelectInputState extends State<MultiSelectInput> {
                   if (values.length > 1)
                     IconButton(
                       icon: const Icon(Icons.remove_circle_outline),
-                      tooltip: 'Remove',
+                      tooltip: context.l10n.remove,
                       onPressed: () => setState(() => values.remove(entry)),
                     ),
                 ],
@@ -185,7 +186,7 @@ class _MultiSelectInputState extends State<MultiSelectInput> {
               padding: const EdgeInsets.only(top: 4),
               child: TextButton.icon(
                 icon: const Icon(Icons.add),
-                label: const Text('Add'),
+                label: Text(context.l10n.add),
                 onPressed: () => setState(() => values.add(DynInputValue())),
               ),
             ),

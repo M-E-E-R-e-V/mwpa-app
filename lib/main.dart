@@ -3,9 +3,11 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Controllers/BehaviouralStateController.dart';
 import 'package:mwpaapp/Controllers/EncounterCategoriesController.dart';
+import 'package:mwpaapp/Controllers/LocaleController.dart';
 import 'package:mwpaapp/Controllers/LocationController.dart';
 import 'package:mwpaapp/Controllers/PrefController.dart';
 import 'package:mwpaapp/Controllers/SightingController.dart';
@@ -22,6 +24,7 @@ import 'package:mwpaapp/Pages/LoginPage.dart';
 import 'package:mwpaapp/Pages/ProminentDisclosurePage.dart';
 import 'package:mwpaapp/Ui/Themes.dart';
 import 'package:mwpaapp/Util/AppLog.dart';
+import 'package:mwpaapp/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
 /// _registerFontLicenses - the bundled fonts on the license page (packages
@@ -76,11 +79,15 @@ void main() async {
   final themeController = ThemeController();
   await themeController.load();
 
+  final localeController = LocaleController();
+  await localeController.load();
+
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider<PrefController>.value(value: prefController),
         ChangeNotifierProvider<ThemeController>.value(value: themeController),
+        ChangeNotifierProvider<LocaleController>.value(value: localeController),
         ChangeNotifierProvider(create: (_) => SightingController()..getSightings()),
         ChangeNotifierProvider(create: (_) => VehicleController()..getVehicle()),
         ChangeNotifierProvider(create: (_) => VehicleDriverController()..getVehicleDriver()),
@@ -133,6 +140,15 @@ class MWPAApp extends StatelessWidget {
       theme: Themes.light,
       darkTheme: Themes.dark,
       themeMode: context.watch<ThemeController>().themeMode,
+      // UI language from the flag selection (default English)
+      locale: context.watch<LocaleController>().locale,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       // prefs are loaded before runApp, so the first page is known right
       // away - no login form flashing up before the list
       initialRoute: initialRoute(context.read<PrefController>()),

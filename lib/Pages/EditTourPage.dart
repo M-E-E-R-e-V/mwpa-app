@@ -8,6 +8,7 @@ import 'package:mwpaapp/Controllers/VehicleDriverController.dart';
 import 'package:mwpaapp/Dialog/ConfirmDialog.dart';
 import 'package:mwpaapp/Models/TourPref.dart';
 import 'package:provider/provider.dart';
+import 'package:mwpaapp/l10n/l10n.dart';
 
 class EditTourPage extends StatefulWidget {
 
@@ -54,8 +55,8 @@ class _EditTourPageState extends State<EditTourPage> {
   void _confirmClose() {
     ConfirmDialog.show(
       context,
-      'Tour close',
-      'Close tour without saving? All changes will be lost!',
+      context.l10n.tourCloseTitle,
+      context.l10n.tourCloseQuestion,
       (value) {
         if (value == 'ok' && mounted) {
           Navigator.of(context).pop();
@@ -66,7 +67,7 @@ class _EditTourPageState extends State<EditTourPage> {
 
   AppBar _appBar(BuildContext context) {
     return AppBar(
-      title: const Text('Set default Tour'),
+      title: Text(context.l10n.setDefaultTour),
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
         onPressed: _confirmClose,
@@ -132,7 +133,7 @@ class _EditTourPageState extends State<EditTourPage> {
       listenable: Listenable.merge([_vehicleController, _vehicleDriverController]),
       builder: (_, __) {
       sightVehicle = SelectInput(
-        title: "Boat",
+        title: context.l10n.labelBoat,
         value: sightVehicleValue,
         items: _vehicleController.vehicleList.map((element) {
           return DynInputSelectItem(
@@ -143,7 +144,7 @@ class _EditTourPageState extends State<EditTourPage> {
       );
 
       sightVehicleDriver = SelectInput(
-        title: "Skipper",
+        title: context.l10n.labelSkipper,
         value: sightVehicleDriverValue,
         items: _vehicleDriverController.vehicleDriverList.map((element) {
           return DynInputSelectItem(
@@ -154,34 +155,34 @@ class _EditTourPageState extends State<EditTourPage> {
       );
 
       sightBeaufort = SelectInput(
-        title: "Wind/Sea-state (Beaufort)",
+        title: context.l10n.labelBeaufort,
         value: sightBeaufortValue,
-        items: BeaufortController.beaufortSelectList,
+        items: BeaufortController.selectList(context.l10n.notSelected),
           searchable: false,
       );
 
       sightDate = DateInput(
-        title: "Date",
+        title: context.l10n.fieldDate,
         value: sightDateValue,
       );
 
       sightTourStart = TimeInput(
-        title: "Start of trip",
+        title: context.l10n.fieldTourStart,
         value: sightTourStartValue,
       );
 
       sightTourEnd = TimeInput(
-        title: "End of trip",
+        title: context.l10n.fieldTourEnd,
         value: sightTourEndValue,
       );
 
       sightSetEndTour = SwitchInput(
-        title: 'Allow tour end time button for all sightings',
+        title: context.l10n.labelAllowTourEnd,
         value: sightSetEndTourValue,
       );
 
       sightUseHomeArea = SwitchInput(
-        title: 'Use Home Area auto-tracking tour start and end',
+        title: context.l10n.labelUseHomeArea,
         value: sightUseHomeAreaValue,
       );
 
@@ -203,7 +204,7 @@ class _EditTourPageState extends State<EditTourPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   InputSection(
-                    title: 'Tour',
+                    title: context.l10n.sectionTour,
                     icon: Icons.directions_boat_outlined,
                     children: [
                       sightVehicle,
@@ -221,7 +222,7 @@ class _EditTourPageState extends State<EditTourPage> {
                     ],
                   ),
                   InputSection(
-                    title: 'Settings',
+                    title: context.l10n.sectionSettings,
                     icon: Icons.tune,
                     children: [
                       sightSetEndTour,
@@ -232,7 +233,7 @@ class _EditTourPageState extends State<EditTourPage> {
                   FilledButton.icon(
                     onPressed: _saveTourToPref,
                     icon: const Icon(Icons.save_alt),
-                    label: const Text('Save default Tour'),
+                    label: Text(context.l10n.saveDefaultTour),
                   ),
                 ],
               ),

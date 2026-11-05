@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mwpaapp/l10n/l10n.dart';
 
 /// ConfirmDialog - question with "Cancel" / "Ok"; [onClick] gets 'ok',
 /// 'cancel' or null (dismissed).
@@ -11,7 +12,7 @@ class ConfirmDialog {
     String msg,
     Function(String?) onClick, {
     bool destructive = false,
-    String okLabel = 'Ok',
+    String? okLabel,
   }) {
     showDialog<String>(
       context: context,
@@ -23,7 +24,7 @@ class ConfirmDialog {
           content: Text(msg),
           actions: <Widget>[
             TextButton(
-              child: const Text('Cancel'),
+              child: Text(context.l10n.cancel),
               onPressed: () => Navigator.pop(context, 'cancel'),
             ),
             FilledButton(
@@ -33,7 +34,7 @@ class ConfirmDialog {
                       foregroundColor: scheme.onError,
                     )
                   : null,
-              child: Text(okLabel),
+              child: Text(okLabel ?? context.l10n.ok),
               onPressed: () => Navigator.pop(context, 'ok'),
             ),
           ],

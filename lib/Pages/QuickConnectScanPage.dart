@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:mwpaapp/l10n/l10n.dart';
 
 /// QuickConnectScanPage
 ///
@@ -46,13 +47,13 @@ class _QuickConnectScanPageState extends State<QuickConnectScanPage> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('Quick Connect'),
+        title: Text(context.l10n.quickConnect),
         backgroundColor: Colors.black.withValues(alpha: 0.4),
         foregroundColor: Colors.white,
         elevation: 0,
         actions: [
           IconButton(
-            tooltip: 'Toggle torch',
+            tooltip: context.l10n.toggleTorch,
             onPressed: () => _controller.toggleTorch(),
             icon: ValueListenableBuilder<MobileScannerState>(
               valueListenable: _controller,
@@ -63,7 +64,7 @@ class _QuickConnectScanPageState extends State<QuickConnectScanPage> {
             ),
           ),
           IconButton(
-            tooltip: 'Switch camera',
+            tooltip: context.l10n.switchCamera,
             onPressed: () => _controller.switchCamera(),
             icon: const Icon(Icons.cameraswitch_outlined),
           ),
@@ -78,16 +79,16 @@ class _QuickConnectScanPageState extends State<QuickConnectScanPage> {
             onDetect: _onDetect,
           ),
           const _ScanReticle(),
-          const Positioned(
+          Positioned(
             left: 0,
             right: 0,
             bottom: 40,
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 32),
+              padding: const EdgeInsets.symmetric(horizontal: 32),
               child: Text(
-                'Point at the QR code in the MWPA web portal.',
+                context.l10n.qcPointAtCode,
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 16,
                   fontWeight: FontWeight.w600,

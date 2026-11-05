@@ -14,6 +14,7 @@ import 'package:mwpaapp/Ui/AppIcons.dart';
 import 'package:mwpaapp/Util/UtilPosition.dart';
 import 'package:provider/provider.dart';
 import 'package:mwpaapp/Util/AppLog.dart';
+import 'package:mwpaapp/l10n/l10n.dart';
 
 /// Completeness of a sighting as shown in the list (from
 /// [Sighting.validateColor]).
@@ -46,12 +47,12 @@ class ListSightingTile extends StatelessWidget {
     final SightingController sightingController = context.read<SightingController>();
 
     if (locationController.currentPosition == null) {
-      InfoDialog.show(context, 'Info', "Please wait for the GPS signal.");
+      InfoDialog.show(context, context.l10n.info, context.l10n.waitForGps);
     } else {
       ConfirmDialog.show(
         context,
-        "Set end location/duration",
-        "Do you want to set the end location/duration time for this sighting?",
+        context.l10n.setEndLocationTitle,
+        context.l10n.setEndLocationQuestion,
         (p0) {
           if (p0 == 'ok') {
             final watch = Stopwatch()..start();
@@ -82,7 +83,7 @@ class ListSightingTile extends StatelessWidget {
 
     // texts -------------------------------------------------------------------
 
-    var timeString = "not set";
+    var timeString = context.l10n.notSet;
 
     if (sighting.date != null) {
       try {
@@ -93,7 +94,7 @@ class ListSightingTile extends StatelessWidget {
       }
     }
 
-    var locationString = "no position";
+    var locationString = context.l10n.noPositionLower;
 
     if (_isSet(sighting.location_begin)) {
       try {
@@ -118,7 +119,7 @@ class ListSightingTile extends StatelessWidget {
     }
 
     if (speciesName == null) {
-      speciesName = "Species not found";
+      speciesName = context.l10n.speciesNotFound;
 
       if (state == SightingState.complete) {
         state = SightingState.unknownSpecies;
@@ -137,9 +138,9 @@ class ListSightingTile extends StatelessWidget {
     };
 
     final stateLabel = switch (state) {
-      SightingState.incomplete => 'Incomplete',
-      SightingState.endMissing => 'End missing',
-      SightingState.unknownSpecies => 'Unknown species',
+      SightingState.incomplete => context.l10n.stateIncomplete,
+      SightingState.endMissing => context.l10n.stateEndMissing,
+      SightingState.unknownSpecies => context.l10n.stateUnknownSpecies,
       SightingState.complete => null,
     };
 
@@ -213,11 +214,11 @@ class ListSightingTile extends StatelessWidget {
                           children: [
                             if (stateLabel != null) _StateChip(stateLabel, stateColor),
                             if ((sighting.subgroups ?? 0) > 0)
-                              _Badge(Icons.groups_outlined, 'Subgroups'),
+                              _Badge(Icons.groups_outlined, context.l10n.badgeSubgroups),
                             if ((sighting.calves ?? 0) > 0 || (sighting.newborns ?? 0) > 0)
-                              _Badge(Icons.child_care, 'Calves/newborns'),
+                              _Badge(Icons.child_care, context.l10n.badgeCalves),
                             if (_isSet(sighting.image))
-                              _Badge(Icons.photo_outlined, 'Picture'),
+                              _Badge(Icons.photo_outlined, context.l10n.badgePicture),
                           ],
                         ),
                       ],
@@ -231,7 +232,7 @@ class ListSightingTile extends StatelessWidget {
                   child: Center(
                     child: IconButton.filledTonal(
                       icon: const Icon(Icons.add_location_alt_outlined),
-                      tooltip: 'Set end location',
+                      tooltip: context.l10n.setEndLocation,
                       onPressed: () => _setEndLocation(context),
                     ),
                   ),
@@ -261,10 +262,10 @@ class _SyncIcon extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
 
     final (icon, color, tooltip) = sighting.unid == ''
-        ? (Icons.cloud_off_outlined, scheme.onSurfaceVariant, 'Not synced yet')
+        ? (Icons.cloud_off_outlined, scheme.onSurfaceVariant, context.l10n.syncNotYet)
         : sighting.syncStatus == Sighting.SYNC_STATUS_OPEN
-            ? (Icons.cloud_upload_outlined, ListSightingTile._warningColor, 'Changed, waiting for sync')
-            : (Icons.cloud_done_outlined, ListSightingTile._turtleColor, 'Synced');
+            ? (Icons.cloud_upload_outlined, ListSightingTile._warningColor, context.l10n.syncChanged)
+            : (Icons.cloud_done_outlined, ListSightingTile._turtleColor, context.l10n.syncDone);
 
     return Tooltip(
       message: tooltip,

@@ -24,6 +24,7 @@ import 'package:mwpaapp/Util/UtilTourFId.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 import 'package:mwpaapp/Util/AppLog.dart';
+import 'package:mwpaapp/l10n/l10n.dart';
 
 /// EditSightingPage
 class EditSightingPage extends StatefulWidget {
@@ -48,7 +49,6 @@ class _EditSightingPageState extends State<EditSightingPage> {
 
   bool isInit = false;
 
-  String title = "";
 
   late Widget sightVehicle;
   DynInputValue sightVehicleValue = DynInputValue();
@@ -142,8 +142,8 @@ class _EditSightingPageState extends State<EditSightingPage> {
   void _confirmClose() {
     ConfirmDialog.show(
       context,
-      'Sighting close',
-      'Close sighting without saving? All changes will be lost!',
+      context.l10n.sightingCloseTitle,
+      context.l10n.sightingCloseQuestion,
       (value) {
         if (value == 'ok' && mounted) {
           Navigator.of(context).pop();
@@ -155,7 +155,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
   /// _appBar
   AppBar _appBar(BuildContext context) {
     return AppBar(
-      title: Text(title.isEmpty ? 'Sighting' : title),
+      title: Text(widget.sighting == null ? context.l10n.addSightingTitle : context.l10n.editSightingTitle),
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
         onPressed: _confirmClose,
@@ -166,7 +166,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
           child: DefaultButton(
             buttonIcon: Icons.save_alt,
             height: 40,
-            label: 'Save',
+            label: context.l10n.save,
             onTab: _saveSightingToDb,
           ),
         ),
@@ -275,7 +275,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
 
     if (missing.isNotEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Saved. Still empty: ${missing.map((f) => f.label).join(', ')}'),
+        content: Text(context.l10n.savedStillEmpty(missing.map((f) => f.localizedLabel(context)).join(', '))),
       ));
     }
 
@@ -348,7 +348,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
       if (aPos != null && context.mounted) {
         ConfirmDialog.show(
           context,
-          "Position is found", "At this time a position was found for the current tour. Should this be used as the position?",
+          context.l10n.positionFoundTitle, context.l10n.positionFoundQuestion,
               (p0) {
             AppLog.i('EditSighting', 'position by time: ${p0 ?? 'dismissed'}');
 
@@ -385,10 +385,8 @@ class _EditSightingPageState extends State<EditSightingPage> {
       isInit = true;
       Sighting? sighting = widget.sighting;
 
-      title = "Add Sighting";
 
       if (sighting != null) {
-        title = "Edit Sighting";
         sightVehicleValue.setStrValueByInt(sighting.vehicle_id!);
         sightVehicleDriverValue.setStrValueByInt(sighting.vehicle_driver_id!);
         sightBeaufortValue.setValue(sighting.beaufort_wind!);
@@ -464,7 +462,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
         void refresh() => setState(() {});
 
         sightVehicle = SelectInput(
-          title: "Boat",
+          title: context.l10n.labelBoat,
           value: sightVehicleValue,
           items: _vehicleController.vehicleList.map((element) {
              return DynInputSelectItem(
@@ -475,7 +473,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
         );
 
          sightVehicleDriver = SelectInput(
-           title: "Skipper",
+           title: context.l10n.labelSkipper,
            value: sightVehicleDriverValue,
            items: _vehicleDriverController.vehicleDriverList.map((element) {
              return DynInputSelectItem(
@@ -486,31 +484,31 @@ class _EditSightingPageState extends State<EditSightingPage> {
          );
 
         sightBeaufort = SelectInput(
-          title: "Wind/Sea-state (Beaufort)",
+          title: context.l10n.labelBeaufort,
           value: sightBeaufortValue,
-          items: BeaufortController.beaufortSelectList,
+          items: BeaufortController.selectList(context.l10n.notSelected),
           searchable: false,
         );
 
         sightDate = DateInput(
-          title: "Date",
+          title: context.l10n.fieldDate,
           value: sightDateValue,
         );
 
          sightTourStart = _mark(SightingField.tourStart, missing, TimeInput(
-           title: "Start of trip",
+           title: context.l10n.fieldTourStart,
            value: sightTourStartValue,
            onChange: refresh,
          ));
 
          sightTourEnd = _mark(SightingField.tourEnd, missing, TimeInput(
-           title: "End of trip",
+           title: context.l10n.fieldTourEnd,
            value: sightTourEndValue,
            onChange: refresh,
          ));
 
          sightDurationFrom = _mark(SightingField.beginTime, missing, TimeInput(
-           title: "Sighting duration: from",
+           title: context.l10n.labelSightingFrom,
            value: sightDurationFromValue,
            onChange: () {
              refresh();
@@ -539,7 +537,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
          ));
 
          sightDurationUntil = TimeInput(
-           title: "until",
+           title: context.l10n.labelUntil,
            value: sightDurationUntilValue,
            onChange: () async {
              _setLocationByTime(
@@ -555,7 +553,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
          );
 
          sightLocationBegin = _mark(SightingField.beginPosition, missing, LocationInput(
-           title: "Position begin",
+           title: context.l10n.fieldBeginPosition,
            value: sightLocationBeginValue,
            onChange: () {
              if (sightLocationBeginValue.posValue != null) {
@@ -567,28 +565,28 @@ class _EditSightingPageState extends State<EditSightingPage> {
          ));
 
          sightLocationEnd = _mark(SightingField.endPosition, missing, LocationInput(
-           title: "Position end",
+           title: context.l10n.fieldEndPosition,
            value: sightLocationEndValue,
            onChange: refresh,
          ));
 
          sightPhotoTaken = SwitchInput(
-           title: "Photos taken",
+           title: context.l10n.labelPhotosTaken,
            value: sightPhotoTakenValue,
          );
 
          sightDistanceCoast = DistanceInput(
-           title: "Distance to nearest coast",
+           title: context.l10n.labelDistanceCoast,
            value: sightDistanceCoastValue,
          );
 
          sightDistanceCoastEstimationGps = SwitchInput(
-           title: "Estimation without GPS",
+           title: context.l10n.labelEstimationNoGps,
            value: sightDistanceCoastEstimationGpsValue,
          );
 
          sightSpecies = SelectInput(
-           title: "Species",
+           title: context.l10n.labelSpecies,
            value: sightSpeciesValue,
            items: _speciesController.speciesList.map((element) {
              var labelName = element.name!;
@@ -605,29 +603,29 @@ class _EditSightingPageState extends State<EditSightingPage> {
          );
 
          sightSpeciesNum = _mark(SightingField.count, missing, TextValueInput(
-           title: "Number of animals",
+           title: context.l10n.fieldCount,
            value: sightSpeciesNumValue,
            kind: TextValueKind.digits,
            onChange: refresh,
          ));
 
          sightJuveniles = YesNoUnknownInput(
-           title: 'Juveniles',
+           title: context.l10n.labelJuveniles,
            value: sightJuvenilesValue,
          );
 
          sightCalves = YesNoUnknownInput(
-           title: 'Calves',
+           title: context.l10n.labelCalves,
            value: sightCalvesValue,
          );
 
          sightNewborns = YesNoUnknownInput(
-           title: 'Newborns',
+           title: context.l10n.labelNewborns,
            value: sightNewbornsValue,
          );
 
          sightBehaviour = MultiSelectInput(
-           title: 'Behaviour',
+           title: context.l10n.labelBehaviour,
            value: sightBehaviourValue,
            items: _behaviouralStateController.behaviouralStateList.map((element) {
              return DynInputSelectItem(
@@ -638,23 +636,23 @@ class _EditSightingPageState extends State<EditSightingPage> {
          );
 
          sightSubgroups = YesNoUnknownInput(
-           title: 'Subgroups',
+           title: context.l10n.labelSubgroups,
            value: sightSubgroupsValue,
          );
 
         sightGroupStructure = SelectInput(
-          title: 'Group Structure',
+          title: context.l10n.labelGroupStructure,
           value: sightGroupStructureValue,
           items: [
-            DynInputSelectItem(value: "1", label: "widely dispersed"),
-            DynInputSelectItem(value: "2", label: "dispersed"),
-            DynInputSelectItem(value: "3", label: "loose"),
-            DynInputSelectItem(value: "4", label: "tight"),
+            DynInputSelectItem(value: "1", label: context.l10n.groupWidelyDispersed),
+            DynInputSelectItem(value: "2", label: context.l10n.groupDispersed),
+            DynInputSelectItem(value: "3", label: context.l10n.groupLoose),
+            DynInputSelectItem(value: "4", label: context.l10n.groupTight),
           ],
         );
 
          sightReaction = SelectInput(
-           title: 'Reaction',
+           title: context.l10n.labelReaction,
            value: sightReactionValue,
            items: _encounterCategoriesController.encounterCategorieList.map((element) {
             return DynInputSelectItem(
@@ -665,19 +663,19 @@ class _EditSightingPageState extends State<EditSightingPage> {
          );
 
         sightFreqBehaviour = TagInput(
-          title: "Frequent behaviours of individuals",
+          title: context.l10n.labelFreqBehaviour,
           value: sightFreqBehaviourValue,
           suggestions: const ['Test', 'SLP', 'SPY'],
         );
 
         sightRecAnimals = TextValueInput(
-          title: "Recognizable animals",
+          title: context.l10n.labelRecAnimals,
           value: sightRecAnimalsValue,
           kind: TextValueKind.textarea,
         );
 
         sightOtherSpecies = MultiSelectInput(
-          title: 'Other Species',
+          title: context.l10n.labelOtherSpecies,
           value: sightOtherSpeciesValue,
           items: _speciesController.speciesList.map((element) {
             var labelName = element.name!;
@@ -694,7 +692,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
         );
 
         sightOther = TextValueInput(
-          title: "Other",
+          title: context.l10n.labelOther,
           value: sightOtherValue,
           kind: TextValueKind.textarea,
           // a tortoise name here makes the count optional
@@ -702,13 +700,13 @@ class _EditSightingPageState extends State<EditSightingPage> {
         );
 
         sightOtherVehicle = TextValueInput(
-          title: "Other boats present",
+          title: context.l10n.labelOtherBoats,
           value: sightOtherVehicleValue,
           kind: TextValueKind.textarea,
         );
 
         sightNote = TextValueInput(
-          title: "Note",
+          title: context.l10n.labelNote,
           value: sightNoteValue,
           kind: TextValueKind.textarea,
         );
@@ -736,7 +734,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
                    children: [
                      MissingFieldsSummary(missing: missing, onTap: _scrollTo),
                      InputSection(
-                       title: 'Tour',
+                       title: context.l10n.sectionTour,
                        icon: Icons.directions_boat_outlined,
                        children: [
                          sightVehicle,
@@ -747,7 +745,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
                        ],
                      ),
                      InputSection(
-                       title: 'Time & position',
+                       title: context.l10n.sectionTimePosition,
                        icon: Icons.place_outlined,
                        children: [
                          _pair(sightDurationFrom, sightDurationUntil),
@@ -759,7 +757,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
                        ],
                      ),
                      InputSection(
-                       title: 'Animals',
+                       title: context.l10n.sectionAnimals,
                        icon: Icons.pets_outlined,
                        children: [
                          sightSpecies,
@@ -772,7 +770,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
                        ],
                      ),
                      InputSection(
-                       title: 'Behaviour & identification',
+                       title: context.l10n.sectionBehaviour,
                        icon: Icons.waves_outlined,
                        children: [
                          sightBehaviour,
@@ -782,7 +780,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
                        ],
                      ),
                      InputSection(
-                       title: 'Further notes',
+                       title: context.l10n.sectionNotes,
                        icon: Icons.notes_outlined,
                        children: [
                          sightOtherSpecies,
@@ -792,7 +790,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
                        ],
                      ),
                      InputSection(
-                       title: 'Picture',
+                       title: context.l10n.sectionPicture,
                        icon: Icons.photo_camera_outlined,
                        children: [sightImage],
                      ),
@@ -800,7 +798,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
                      FilledButton.icon(
                        onPressed: _saveSightingToDb,
                        icon: const Icon(Icons.save_alt),
-                       label: const Text('Save Sighting'),
+                       label: Text(context.l10n.saveSighting),
                      ),
                    ],
                  ),
