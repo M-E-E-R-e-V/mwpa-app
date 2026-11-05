@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mwpaapp/Controllers/LocaleController.dart';
 import 'package:mwpaapp/Controllers/PrefController.dart';
 import 'package:mwpaapp/Pages/HelpPage.dart';
 import 'package:mwpaapp/Pages/IntroPage.dart';
@@ -9,13 +10,21 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Widget _app(PrefController prefs, Widget home, {Locale locale = const Locale('en')}) {
-  return ChangeNotifierProvider.value(
-    value: prefs,
-    child: MaterialApp(
-      locale: locale,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: home,
+  final language = AppLanguage.values.firstWhere((l) => l.name == locale.languageCode);
+
+  return MultiProvider(
+    providers: [
+      ChangeNotifierProvider.value(value: prefs),
+      ChangeNotifierProvider(create: (_) => LocaleController()..setLanguage(language)),
+    ],
+    // the app's locale follows the LocaleController, like in main.dart
+    child: Builder(
+      builder: (context) => MaterialApp(
+        locale: context.watch<LocaleController>().locale,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: home,
+      ),
     ),
   );
 }
@@ -84,6 +93,23 @@ void main() {
 
     expect(find.byType(IntroPage), findsNothing);
     expect(prefs.introSeen, isTrue);
+  });
+
+  testWidgets('language can be switched in the introduction', (tester) async {
+    final prefs = PrefController();
+    await tester.pumpWidget(_app(prefs, const _Opener()));
+
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    expect(find.text('Record sightings'), findsOneWidget);
+
+    await tester.tap(find.text(AppLanguage.en.flag));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Deutsch'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Sichtungen erfassen'), findsOneWidget);
+    expect(find.text('Überspringen'), findsOneWidget);
   });
 
   testWidgets('help page opens sections and the introduction', (tester) async {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mwpaapp/Components/LanguageSelector.dart';
 import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Controllers/PrefController.dart';
 import 'package:mwpaapp/l10n/l10n.dart';
@@ -54,16 +55,23 @@ class _IntroPageState extends State<IntroPage> {
       body: SafeArea(
         child: Column(
           children: [
-            Align(
-              alignment: Alignment.centerRight,
-              child: AnimatedOpacity(
-                opacity: last ? 0 : 1,
-                duration: const Duration(milliseconds: 150),
-                child: TextButton(
-                  onPressed: last ? null : _close,
-                  child: Text(l10n.introSkip),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // first start: pick the language before reading
+                const Padding(
+                  padding: EdgeInsets.only(left: 8),
+                  child: LanguageSelector(),
                 ),
-              ),
+                AnimatedOpacity(
+                  opacity: last ? 0 : 1,
+                  duration: const Duration(milliseconds: 150),
+                  child: TextButton(
+                    onPressed: last ? null : _close,
+                    child: Text(l10n.introSkip),
+                  ),
+                ),
+              ],
             ),
             Expanded(
               child: PageView(
