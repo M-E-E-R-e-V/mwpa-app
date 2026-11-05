@@ -32,6 +32,11 @@ class DynInputValue {
   }
 
   int getStrValueAsInt() {
+    // nothing entered / selected yet
+    if (strValue.trim().isEmpty) {
+      return 0;
+    }
+
     try {
       return int.parse(strValue.replaceAll(RegExp(r'[^0-9.]'), ''));
     } catch(e) {

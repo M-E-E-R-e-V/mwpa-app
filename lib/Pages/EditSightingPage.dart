@@ -15,6 +15,7 @@ import 'package:mwpaapp/Controllers/VehicleController.dart';
 import 'package:mwpaapp/Controllers/VehicleDriverController.dart';
 import 'package:mwpaapp/Dialog/ConfirmDialog.dart';
 import 'package:mwpaapp/Models/Sighting.dart';
+import 'package:mwpaapp/Pages/EditSighting/MissingFields.dart';
 import 'package:mwpaapp/Models/TourPref.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
 import 'package:mwpaapp/Util/UtilDistanceCoast.dart';
@@ -173,20 +174,11 @@ class _EditSightingPageState extends State<EditSightingPage> {
     );
   }
 
-  /// _saveSightingToDb
-  Future<void> _saveSightingToDb() async {
-    var mUnid = "";
-
-    if (widget.sighting != null) {
-      mUnid = widget.sighting?.unid ?? "";
-    }
-
-    var pref = Preference();
-    await pref.load();
-
-    Sighting tSigh = Sighting(
-      unid: mUnid,
-      creater_id: pref.getUserId(),
+  /// _formSighting - the sighting as currently entered in the form (image
+  /// path not yet persisted)
+  Sighting _formSighting({String unid = ''}) {
+    return Sighting(
+      unid: unid,
       vehicle_id: sightVehicleValue.getStrValueAsInt(),
       vehicle_driver_id: sightVehicleDriverValue.getStrValueAsInt(),
       beaufort_wind: sightBeaufortValue.getValue(),
@@ -216,10 +208,53 @@ class _EditSightingPageState extends State<EditSightingPage> {
       other: sightOtherValue.getValue(),
       other_vehicle: sightOtherVehicleValue.getValue(),
       note: sightNoteValue.getValue(),
-      // older sightings may still point into the cache directory
-      image: await UtilImage.persist(sightImageValue.getImagePath()),
+      image: sightImageValue.getImagePath(),
       syncStatus: Sighting.SYNC_STATUS_OPEN
     );
+  }
+
+  /// one key per required field, to scroll to it from the summary
+  final Map<SightingField, GlobalKey> _fieldKeys = {
+    for (final field in SightingField.values) field: GlobalKey(),
+  };
+
+  void _scrollTo(SightingField field) {
+    final target = _fieldKeys[field]?.currentContext;
+
+    if (target != null) {
+      Scrollable.ensureVisible(
+        target,
+        duration: const Duration(milliseconds: 300),
+        alignment: 0.2,
+      );
+    }
+  }
+
+  /// _mark - input of a required field with the "missing" hint
+  Widget _mark(SightingField field, List<SightingField> missing, Widget input) {
+    return MissingFieldMark(
+      key: _fieldKeys[field],
+      field: field,
+      missing: missing.contains(field),
+      child: input,
+    );
+  }
+
+  /// _saveSightingToDb - saves also when required fields are missing
+  Future<void> _saveSightingToDb() async {
+    var mUnid = "";
+
+    if (widget.sighting != null) {
+      mUnid = widget.sighting?.unid ?? "";
+    }
+
+    var pref = Preference();
+    await pref.load();
+
+    Sighting tSigh = _formSighting(unid: mUnid)
+      ..creater_id = pref.getUserId()
+      // older sightings may still point into the cache directory
+      ..image = await UtilImage.persist(sightImageValue.getImagePath());
 
     tSigh.tour_fid = UtilTourFid.createSTourFId(tSigh);
 
@@ -234,6 +269,16 @@ class _EditSightingPageState extends State<EditSightingPage> {
     }
 
     if (!mounted) return;
+
+    // saved anyway - remind which fields are still open
+    final missing = tSigh.missingFields();
+
+    if (missing.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Saved. Still empty: ${missing.map((f) => f.label).join(', ')}'),
+      ));
+    }
+
     Navigator.of(context).pop();
   }
 
@@ -415,6 +460,9 @@ class _EditSightingPageState extends State<EditSightingPage> {
         _behaviouralStateController,
       ]),
       builder: (_, __) {
+        final missing = _formSighting().missingFields();
+        void refresh() => setState(() {});
+
         sightVehicle = SelectInput(
           title: "Boat",
           value: sightVehicleValue,
@@ -449,20 +497,24 @@ class _EditSightingPageState extends State<EditSightingPage> {
           value: sightDateValue,
         );
 
-         sightTourStart = TimeInput(
+         sightTourStart = _mark(SightingField.tourStart, missing, TimeInput(
            title: "Start of trip",
            value: sightTourStartValue,
-         );
+           onChange: refresh,
+         ));
 
-         sightTourEnd = TimeInput(
+         sightTourEnd = _mark(SightingField.tourEnd, missing, TimeInput(
            title: "End of trip",
            value: sightTourEndValue,
-         );
+           onChange: refresh,
+         ));
 
-         sightDurationFrom = TimeInput(
+         sightDurationFrom = _mark(SightingField.beginTime, missing, TimeInput(
            title: "Sighting duration: from",
            value: sightDurationFromValue,
            onChange: () {
+             refresh();
+
              if (sightLocationBeginValue.posValue == null) {
                final current = _locationController.currentPosition;
 
@@ -484,7 +536,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
                );
              }
            },
-         );
+         ));
 
          sightDurationUntil = TimeInput(
            title: "until",
@@ -502,7 +554,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
            },
          );
 
-         sightLocationBegin = LocationInput(
+         sightLocationBegin = _mark(SightingField.beginPosition, missing, LocationInput(
            title: "Position begin",
            value: sightLocationBeginValue,
            onChange: () {
@@ -512,12 +564,13 @@ class _EditSightingPageState extends State<EditSightingPage> {
                setState(() => sightDistanceCoastValue.setValue("$distance"));
              }
            },
-         );
+         ));
 
-         sightLocationEnd = LocationInput(
+         sightLocationEnd = _mark(SightingField.endPosition, missing, LocationInput(
            title: "Position end",
            value: sightLocationEndValue,
-         );
+           onChange: refresh,
+         ));
 
          sightPhotoTaken = SwitchInput(
            title: "Photos taken",
@@ -551,11 +604,12 @@ class _EditSightingPageState extends State<EditSightingPage> {
            }).toList(),
          );
 
-         sightSpeciesNum = TextValueInput(
+         sightSpeciesNum = _mark(SightingField.count, missing, TextValueInput(
            title: "Number of animals",
            value: sightSpeciesNumValue,
            kind: TextValueKind.digits,
-         );
+           onChange: refresh,
+         ));
 
          sightJuveniles = YesNoUnknownInput(
            title: 'Juveniles',
@@ -643,6 +697,8 @@ class _EditSightingPageState extends State<EditSightingPage> {
           title: "Other",
           value: sightOtherValue,
           kind: TextValueKind.textarea,
+          // a tortoise name here makes the count optional
+          onChange: refresh,
         );
 
         sightOtherVehicle = TextValueInput(
@@ -678,6 +734,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
                  child: Column(
                    crossAxisAlignment: CrossAxisAlignment.stretch,
                    children: [
+                     MissingFieldsSummary(missing: missing, onTap: _scrollTo),
                      InputSection(
                        title: 'Tour',
                        icon: Icons.directions_boat_outlined,

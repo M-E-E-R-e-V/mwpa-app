@@ -240,48 +240,64 @@ class Sighting {
     return data;
   }
 
+  /// tortoises added with the quick button: no animal count needed
+  static const List<String> tortoiseSpecies = [
+    'Caretta caretta',
+    'Dermochelys coriacea',
+    'Chelonia mydas',
+    'Eretmochelys imbricata'
+  ];
+
+  static bool _isEmpty(String? value) => value == null || value == '' || value == 'null';
+
+  /// missingFields - fields still to fill in, in form order; the base of
+  /// the list status and the hint on the edit page (saving is never
+  /// blocked)
+  List<SightingField> missingFields() {
+    return [
+      if (_isEmpty(date)) SightingField.date,
+      if (_isEmpty(tour_start)) SightingField.tourStart,
+      if (_isEmpty(tour_end)) SightingField.tourEnd,
+      if (_isEmpty(duration_from)) SightingField.beginTime,
+      if (_isEmpty(location_begin)) SightingField.beginPosition,
+      if (_isEmpty(location_end)) SightingField.endPosition,
+      if (!tortoiseSpecies.contains(other) && (species_count ?? 0) <= 0) SightingField.count,
+    ];
+  }
+
+  /// validateColor - red: a required field is missing, yellow: only the
+  /// end of trip / end position are open, green: tortoise
   Color validateColor() {
-    if (date == null || date == "") {
+    final missing = missingFields();
+
+    if (missing.any((f) => !f.atEnd)) {
       return Colors.red;
     }
 
-    if (tour_start == null || tour_start == "" || tour_start == "null") {
-      return Colors.red;
-    }
-
-    if (tour_end == null || tour_end == "" || tour_end == "null") {
+    if (missing.isNotEmpty) {
       return Colors.yellow;
     }
 
-    if (duration_from == null || duration_from == "" || duration_from == "null") {
-      return Colors.red;
-    }
-
-    if (location_begin == null || location_begin == "" || location_begin == "null") {
-      return Colors.red;
-    }
-
-    if (location_end == null || location_end == "" || location_end == "null") {
-      return Colors.yellow;
-    }
-
-    if (other != null) {
-      List<String> tortoiseList = [
-        'Caretta caretta',
-        'Dermochelys coriacea',
-        'Chelonia mydas',
-        'Eretmochelys imbricata'
-      ];
-
-      if (tortoiseList.contains(other!)) {
-        return Colors.green;
-      }
-    }
-
-    if (species_count == 0) {
-      return Colors.red;
+    if (tortoiseSpecies.contains(other)) {
+      return Colors.green;
     }
 
     return kPrimaryHeaderColor;
   }
+}
+/// SightingField - a field the sighting needs; [atEnd] fields are usually
+/// only known at the end of the sighting / tour
+enum SightingField {
+  date('Date'),
+  tourStart('Start of trip'),
+  tourEnd('End of trip', atEnd: true),
+  beginTime('Sighting from'),
+  beginPosition('Position begin'),
+  endPosition('Position end', atEnd: true),
+  count('Number of animals');
+
+  final String label;
+  final bool atEnd;
+
+  const SightingField(this.label, {this.atEnd = false});
 }
