@@ -49,23 +49,27 @@ class _EditTourPageState extends State<EditTourPage> {
 
   bool isInit = false;
 
+  /// _confirmClose - asks before leaving the page without saving; used by
+  /// the app bar back button and the system back gesture/button
+  void _confirmClose() {
+    ConfirmDialog.show(
+      context,
+      'Tour close',
+      'Close tour without saving? All changes will be lost!',
+      (value) {
+        if (value == 'ok' && mounted) {
+          Navigator.of(context).pop();
+        }
+      },
+    );
+  }
+
   AppBar _appBar(BuildContext context) {
     return AppBar(
       title: const Text('Set default Tour'),
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
-        onPressed: () async {
-          ConfirmDialog.show(
-            context,
-            'Tour close',
-            'Close tour without saving? All changes will be lost!',
-            (value) {
-              if (value == 'ok') {
-                Navigator.of(context).pop();
-              }
-            },
-          );
-        },
+        onPressed: _confirmClose,
       ),
     );
   }
@@ -183,6 +187,12 @@ class _EditTourPageState extends State<EditTourPage> {
 
       return PopScope(
         canPop: false,
+        // system back (button or gesture) asks like the app bar arrow
+        onPopInvokedWithResult: (didPop, _) {
+          if (!didPop) {
+            _confirmClose();
+          }
+        },
         child: Scaffold(
           appBar: _appBar(context),
           body: SafeArea(
