@@ -7,6 +7,10 @@ class VehicleController extends ChangeNotifier {
 
   List<Vehicle> vehicleList = <Vehicle>[];
 
+  /// marked as deleted on the server: not selectable any more, but old
+  /// sightings still show them
+  List<Vehicle> deletedVehicles = <Vehicle>[];
+
   Future<int> addVehicle({required Vehicle vehicle}) async {
     return await DBHelper.insertVehicle(vehicle);
   }
@@ -18,6 +22,10 @@ class VehicleController extends ChangeNotifier {
       Vehicle(id: 0, name: 'Unknown'),
       ...vehicles.map((data) => Vehicle.fromJson(data)),
     ];
+    deletedVehicles = (await DBHelper.queryVehicle(true))
+        .where((data) => data['isdeleted'] == 1)
+        .map((data) => Vehicle.fromJson(data))
+        .toList();
     notifyListeners();
   }
 }

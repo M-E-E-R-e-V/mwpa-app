@@ -63,8 +63,8 @@ class SelectField extends StatelessWidget {
     this.searchable,
   });
 
-  String _hint(BuildContext context, DynInputSelectItem? selected) {
-    if (items.isEmpty) {
+  String _hint(BuildContext context, DynInputSelectItem? selected, List<DynInputSelectItem> visible) {
+    if (visible.isEmpty) {
       return context.l10n.selectEmptyList;
     }
 
@@ -82,14 +82,21 @@ class SelectField extends StatelessWidget {
     final current = value.strValue;
     DynInputSelectItem? selected;
 
-    for (final item in items) {
+    // deleted entries only as the current value of an old sighting
+    final visible = [
+      for (final item in items)
+        if (!item.deleted || item.value == current) item,
+    ];
+
+    for (final item in visible) {
       if (item.value == current) {
         selected = item;
         break;
       }
     }
 
-    final searchable = this.searchable ?? items.length > SelectInput.searchThreshold;
+    final searchable = this.searchable ??
+        visible.where((item) => !item.deleted).length > SelectInput.searchThreshold;
 
     return DropdownMenu<String>(
       // the page may set the value from outside (e.g. tour defaults loaded
@@ -98,8 +105,8 @@ class SelectField extends StatelessWidget {
       initialSelection: selected?.value,
       expandedInsets: EdgeInsets.zero,
       menuHeight: 360,
-      hintText: _hint(context, selected),
-      enabled: items.isNotEmpty,
+      hintText: _hint(context, selected, visible),
+      enabled: visible.isNotEmpty,
       enableFilter: searchable,
       requestFocusOnTap: searchable,
       leadingIcon: searchable ? const Icon(Icons.search) : null,
@@ -111,8 +118,12 @@ class SelectField extends StatelessWidget {
         ),
       ),
       dropdownMenuEntries: [
-        for (final item in items)
-          DropdownMenuEntry<String>(value: item.value, label: item.label),
+        for (final item in visible)
+          DropdownMenuEntry<String>(
+            value: item.value,
+            label: item.deleted ? context.l10n.selectDeletedLabel(item.label) : item.label,
+            enabled: !item.deleted,
+          ),
       ],
       onSelected: (String? selectedValue) {
         if (selectedValue == null) {
@@ -132,12 +143,14 @@ class MultiSelectInput extends StatefulWidget {
   final String? title;
   final DynInputValue value;
   final List<DynInputSelectItem> items;
+  final VoidCallback? onChange;
 
   const MultiSelectInput({
     super.key,
     this.title,
     required this.value,
     required this.items,
+    this.onChange,
   });
 
   @override
@@ -168,14 +181,20 @@ class _MultiSelectInputState extends State<MultiSelectInput> {
                       key: ObjectKey(entry),
                       value: entry,
                       items: widget.items,
-                      onChange: () => setState(() {}),
+                      onChange: () {
+                        setState(() {});
+                        widget.onChange?.call();
+                      },
                     ),
                   ),
                   if (values.length > 1)
                     IconButton(
                       icon: const Icon(Icons.remove_circle_outline),
                       tooltip: context.l10n.remove,
-                      onPressed: () => setState(() => values.remove(entry)),
+                      onPressed: () {
+                        setState(() => values.remove(entry));
+                        widget.onChange?.call();
+                      },
                     ),
                 ],
               ),

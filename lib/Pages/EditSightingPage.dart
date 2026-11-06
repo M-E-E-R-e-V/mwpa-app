@@ -17,8 +17,10 @@ import 'package:mwpaapp/Controllers/VehicleDriverController.dart';
 import 'package:mwpaapp/Dialog/ConfirmDialog.dart';
 import 'package:mwpaapp/Models/Sighting.dart';
 import 'package:mwpaapp/Pages/EditSighting/MissingFields.dart';
+import 'package:mwpaapp/Pages/EditSighting/DeletedEntriesHint.dart';
 import 'package:mwpaapp/Pages/EditSighting/PlausibilityHints.dart';
 import 'package:mwpaapp/Util/UtilLocation.dart';
+import 'package:mwpaapp/Util/UtilDeletedEntries.dart';
 import 'package:mwpaapp/Util/UtilPlausibility.dart';
 import 'package:mwpaapp/Models/TourPref.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
@@ -224,6 +226,24 @@ class _EditSightingPageState extends State<EditSightingPage> {
 
   void _scrollTo(SightingField field) {
     final target = _fieldKeys[field]?.currentContext;
+
+    if (target != null) {
+      Scrollable.ensureVisible(
+        target,
+        duration: const Duration(milliseconds: 300),
+        alignment: 0.2,
+      );
+    }
+  }
+
+  /// one key per reference field, to scroll to it from the deleted-entries
+  /// card
+  final Map<DeletedEntryKind, GlobalKey> _entryKeys = {
+    for (final kind in DeletedEntryKind.values) kind: GlobalKey(),
+  };
+
+  void _scrollToEntry(DeletedEntryKind kind) {
+    final target = _entryKeys[kind]?.currentContext;
 
     if (target != null) {
       Scrollable.ensureVisible(
@@ -538,29 +558,36 @@ class _EditSightingPageState extends State<EditSightingPage> {
           ..._trackResults,
         ];
         _scheduleTrackCheck(formSighting);
+        // only a sighting still to be sent must not use deleted entries
+        final original = widget.sighting;
+        final deletedEntries = original == null || UtilDeletedEntries.isUnsynced(original)
+            ? UtilDeletedEntries.check(formSighting, deletedEntriesOf(context))
+            : const <DeletedEntry>[];
         void refresh() => setState(() {});
 
-        sightVehicle = SelectInput(
+        sightVehicle = KeyedSubtree(key: _entryKeys[DeletedEntryKind.vehicle], child: SelectInput(
           title: context.l10n.labelBoat,
           value: sightVehicleValue,
-          items: _vehicleController.vehicleList.map((element) {
+          onChange: refresh,
+          items: DynInputSelectItem.withDeleted(_vehicleController.vehicleList, _vehicleController.deletedVehicles, (element) {
              return DynInputSelectItem(
                  value: element.id!.toString(),
                  label: element.name!
              );
-           }).toList(),
-        );
+           }),
+        ));
 
-         sightVehicleDriver = SelectInput(
+         sightVehicleDriver = KeyedSubtree(key: _entryKeys[DeletedEntryKind.driver], child: SelectInput(
            title: context.l10n.labelSkipper,
            value: sightVehicleDriverValue,
-           items: _vehicleDriverController.vehicleDriverList.map((element) {
+           onChange: refresh,
+           items: DynInputSelectItem.withDeleted(_vehicleDriverController.vehicleDriverList, _vehicleDriverController.deletedVehicleDrivers, (element) {
              return DynInputSelectItem(
                  value: element.id!.toString(),
                  label: element.username!
              );
-           }).toList(),
-         );
+           }),
+         ));
 
         sightBeaufort = SelectInput(
           title: context.l10n.labelBeaufort,
@@ -669,10 +696,11 @@ class _EditSightingPageState extends State<EditSightingPage> {
            value: sightDistanceCoastEstimationGpsValue,
          );
 
-         sightSpecies = SelectInput(
+         sightSpecies = KeyedSubtree(key: _entryKeys[DeletedEntryKind.species], child: SelectInput(
            title: context.l10n.labelSpecies,
            value: sightSpeciesValue,
-           items: _speciesController.speciesList.map((element) {
+           onChange: refresh,
+           items: DynInputSelectItem.withDeleted(_speciesController.speciesList, _speciesController.deletedSpecies, (element) {
              var labelName = element.name!;
 
              if (element.name!.indexOf(',') > 0) {
@@ -683,8 +711,8 @@ class _EditSightingPageState extends State<EditSightingPage> {
                  value: element.orgid!.toString(),
                  label: labelName
              );
-           }).toList(),
-         );
+           }),
+         ));
 
          sightSpeciesNum = _mark(SightingField.count, missing, TextValueInput(
            title: context.l10n.fieldCount,
@@ -708,16 +736,17 @@ class _EditSightingPageState extends State<EditSightingPage> {
            value: sightNewbornsValue,
          );
 
-         sightBehaviour = MultiSelectInput(
+         sightBehaviour = KeyedSubtree(key: _entryKeys[DeletedEntryKind.behaviour], child: MultiSelectInput(
            title: context.l10n.labelBehaviour,
            value: sightBehaviourValue,
-           items: _behaviouralStateController.behaviouralStateList.map((element) {
+           onChange: refresh,
+           items: DynInputSelectItem.withDeleted(_behaviouralStateController.behaviouralStateList, _behaviouralStateController.deletedBehaviouralStates, (element) {
              return DynInputSelectItem(
                  value: element.id!.toString(),
                  label: element.name!
              );
-           }).toList(),
-         );
+           }),
+         ));
 
          sightSubgroups = YesNoUnknownInput(
            title: context.l10n.labelSubgroups,
@@ -735,16 +764,17 @@ class _EditSightingPageState extends State<EditSightingPage> {
           ],
         );
 
-         sightReaction = SelectInput(
+         sightReaction = KeyedSubtree(key: _entryKeys[DeletedEntryKind.reaction], child: SelectInput(
            title: context.l10n.labelReaction,
            value: sightReactionValue,
-           items: _encounterCategoriesController.encounterCategorieList.map((element) {
+           onChange: refresh,
+           items: DynInputSelectItem.withDeleted(_encounterCategoriesController.encounterCategorieList, _encounterCategoriesController.deletedEncounterCategories, (element) {
             return DynInputSelectItem(
               value: element.id!.toString(),
               label: element.name!
             );
-          }).toList(),
-         );
+          }),
+         ));
 
         sightFreqBehaviour = TagInput(
           title: context.l10n.labelFreqBehaviour,
@@ -758,10 +788,11 @@ class _EditSightingPageState extends State<EditSightingPage> {
           kind: TextValueKind.textarea,
         );
 
-        sightOtherSpecies = MultiSelectInput(
+        sightOtherSpecies = KeyedSubtree(key: _entryKeys[DeletedEntryKind.otherSpecies], child: MultiSelectInput(
           title: context.l10n.labelOtherSpecies,
           value: sightOtherSpeciesValue,
-          items: _speciesController.speciesList.map((element) {
+          onChange: refresh,
+          items: DynInputSelectItem.withDeleted(_speciesController.speciesList, _speciesController.deletedSpecies, (element) {
             var labelName = element.name!;
 
             if (element.name!.indexOf(',') > 0) {
@@ -773,8 +804,8 @@ class _EditSightingPageState extends State<EditSightingPage> {
                 value: element.orgid!.toString(),
                 label: labelName
             );
-          }).toList(),
-        );
+          }),
+        ));
 
         sightOther = TextValueInput(
           title: context.l10n.labelOther,
@@ -817,6 +848,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
                  child: Column(
                    crossAxisAlignment: CrossAxisAlignment.stretch,
                    children: [
+                     DeletedEntriesHint(entries: deletedEntries, onTap: _scrollToEntry),
                      MissingFieldsSummary(missing: missing, onTap: _scrollTo),
                      PlausibilityHints(results: checks, onTap: _scrollTo),
                      InputSection(

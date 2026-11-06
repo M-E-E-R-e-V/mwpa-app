@@ -35,6 +35,7 @@ class HelpPage extends StatelessWidget {
               initiallyExpanded: true,
               children: [
                 _Stripe(color: scheme.error, text: l10n.helpColorRed),
+                _Stripe(color: scheme.error, text: l10n.helpColorRedDeleted),
                 _Stripe(color: _warningColor, text: l10n.helpColorYellow),
                 _Stripe(color: _turtleColor, text: l10n.helpColorGreen),
                 _Stripe(color: inputAccentColor(context), text: l10n.helpColorBlue),

@@ -56,6 +56,29 @@ void main() {
       expect(find.text('<empty list>'), findsOneWidget);
     });
 
+    testWidgets('a deleted entry shows only as the current value, not selectable', (tester) async {
+      final items = DynInputSelectItem.withDeleted<(String, String)>(
+        [('1', 'Boat A')],
+        [('2', 'Boat B'), ('3', 'Boat C')],
+        (e) => DynInputSelectItem(value: e.$1, label: e.$2),
+      );
+
+      // old sighting with the deleted boat B
+      await pumpInput(tester, SelectInput(value: DynInputValue()..strValue = '2', items: items));
+      expect(_menuText(tester), 'Boat B (deleted)');
+
+      await tester.tap(find.byType(TextField));
+      await tester.pumpAndSettle();
+
+      final entries = tester.widget<DropdownMenu<String>>(find.byType(DropdownMenu<String>)).dropdownMenuEntries;
+      expect(entries.map((e) => (e.value, e.enabled)), [('1', true), ('2', false)]);
+
+      // a new sighting does not offer deleted entries at all
+      await pumpInput(tester, SelectInput(value: DynInputValue(), items: items));
+      final fresh = tester.widget<DropdownMenu<String>>(find.byType(DropdownMenu<String>)).dropdownMenuEntries;
+      expect(fresh.map((e) => e.value), ['1']);
+    });
+
     testWidgets('selecting an item stores its value and notifies', (tester) async {
       final value = DynInputValue();
       var changed = 0;

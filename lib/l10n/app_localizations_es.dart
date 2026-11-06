@@ -758,6 +758,11 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String selectDeletedLabel(String label) {
+    return '$label (eliminado)';
+  }
+
+  @override
   String get serverTimeout =>
       'El servidor no respondió a tiempo. Inténtalo más tarde. Los datos se quedan en el dispositivo y se sincronizarán más tarde.';
 
@@ -1056,4 +1061,23 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get settingsNoData =>
       'Todavía no hay barcos ni patrones cargados: sincroniza con el servidor.';
+
+  @override
+  String get deletedEntriesTitle => 'Eliminado en el servidor';
+
+  @override
+  String get deletedEntriesInfo =>
+      'Este avistamiento aún no está sincronizado. Elige una entrada activa en su lugar.';
+
+  @override
+  String deletedEntryLine(String field, String name) {
+    return '$field: $name';
+  }
+
+  @override
+  String get stateDeletedEntry => 'Entrada eliminada';
+
+  @override
+  String get helpColorRedDeleted =>
+      'Rojo con «Entrada eliminada»: el avistamiento aún no está sincronizado y usa un barco, patrón, especie, etc. eliminado en el servidor – elige uno activo.';
 }

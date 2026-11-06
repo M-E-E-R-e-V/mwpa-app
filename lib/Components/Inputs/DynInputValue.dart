@@ -8,7 +8,22 @@ class DynInputSelectItem {
   String value = "";
   String label = "";
 
-  DynInputSelectItem({required this.value, required this.label});
+  /// marked as deleted on the server: only shown when it is the current
+  /// value (old sightings keep their entry), never selectable again
+  final bool deleted;
+
+  DynInputSelectItem({required this.value, required this.label, this.deleted = false});
+
+  /// withDeleted - select items of the [active] entries plus the [deleted]
+  /// ones (marked, see [deleted]), both built by [toItem]
+  static List<DynInputSelectItem> withDeleted<T>(
+      List<T> active, List<T> deleted, DynInputSelectItem Function(T element) toItem) {
+    return [
+      ...active.map(toItem),
+      ...deleted.map(toItem).map(
+          (item) => DynInputSelectItem(value: item.value, label: item.label, deleted: true)),
+    ];
+  }
 }
 
 /// DynInputValue - mutable value holder shared by the page and its input

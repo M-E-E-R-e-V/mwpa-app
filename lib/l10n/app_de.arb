@@ -220,6 +220,7 @@
   "selectEmptyList": "<leere Liste>",
   "selectPlease": "<bitte wählen>",
   "selectUnknownId": "unbekannte ID: {id}",
+  "selectDeletedLabel": "{label} (gelöscht)",
   "serverTimeout": "Der Server hat nicht rechtzeitig geantwortet. Bitte später erneut versuchen. Die Daten bleiben auf dem Gerät und werden später synchronisiert.",
   "serverUnreachable": "Keine Verbindung zum Server. Bitte Netzverbindung und Server-URL prüfen. Die Daten bleiben auf dem Gerät und werden später synchronisiert.",
   "sessionNotStarted": "Die Benutzersitzung wurde nicht gestartet!",
@@ -298,5 +299,10 @@
   "homeAreaHint": "Fahr aus dem Heimatgebiet hinaus, dann werden Datum, Tourbeginn und Tourende automatisch ausgefüllt.",
   "homeAreaMissing": "Noch kein Heimatgebiet geladen – bitte mit dem Server synchronisieren.",
   "settingsLoadingData": "Boote und Skipper werden vom Server geladen …",
-  "settingsNoData": "Noch keine Boote und Skipper geladen – bitte mit dem Server synchronisieren."
+  "settingsNoData": "Noch keine Boote und Skipper geladen – bitte mit dem Server synchronisieren.",
+  "deletedEntriesTitle": "Auf dem Server gelöscht",
+  "deletedEntriesInfo": "Die Sichtung ist noch nicht synchronisiert. Bitte wähle stattdessen einen aktiven Eintrag.",
+  "deletedEntryLine": "{field}: {name}",
+  "stateDeletedEntry": "Gelöschter Eintrag",
+  "helpColorRedDeleted": "Rot mit „Gelöschter Eintrag“: Die Sichtung ist noch nicht synchronisiert und verwendet ein Boot, einen Skipper, eine Art o. Ä., das auf dem Server gelöscht wurde – wähle einen aktiven Eintrag."
 }

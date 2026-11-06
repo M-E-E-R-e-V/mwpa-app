@@ -759,6 +759,11 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String selectDeletedLabel(String label) {
+    return '$label (gelöscht)';
+  }
+
+  @override
   String get serverTimeout =>
       'Der Server hat nicht rechtzeitig geantwortet. Bitte später erneut versuchen. Die Daten bleiben auf dem Gerät und werden später synchronisiert.';
 
@@ -1057,4 +1062,23 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get settingsNoData =>
       'Noch keine Boote und Skipper geladen – bitte mit dem Server synchronisieren.';
+
+  @override
+  String get deletedEntriesTitle => 'Auf dem Server gelöscht';
+
+  @override
+  String get deletedEntriesInfo =>
+      'Die Sichtung ist noch nicht synchronisiert. Bitte wähle stattdessen einen aktiven Eintrag.';
+
+  @override
+  String deletedEntryLine(String field, String name) {
+    return '$field: $name';
+  }
+
+  @override
+  String get stateDeletedEntry => 'Gelöschter Eintrag';
+
+  @override
+  String get helpColorRedDeleted =>
+      'Rot mit „Gelöschter Eintrag“: Die Sichtung ist noch nicht synchronisiert und verwendet ein Boot, einen Skipper, eine Art o. Ä., das auf dem Server gelöscht wurde – wähle einen aktiven Eintrag.';
 }

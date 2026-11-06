@@ -3,8 +3,12 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mwpaapp/Db/DBHelper.dart';
+import 'package:mwpaapp/Models/BehaviouralState.dart';
+import 'package:mwpaapp/Models/EncounterCategorie.dart';
 import 'package:mwpaapp/Models/Sighting.dart';
 import 'package:mwpaapp/Models/TourTracking.dart';
+import 'package:mwpaapp/Models/Vehicle.dart';
+import 'package:mwpaapp/Models/VehicleDriver.dart';
 import 'package:mwpaapp/Services/SyncMwpaService.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -72,6 +76,24 @@ void main() {
     expect(rows[3], '');
     expect(rows[4], isNull);
     expect(rows[5], 'not json');
+  });
+
+  test('reference data keeps the server id also with gaps in the ids', () async {
+    await DBHelper.initDb();
+    // server ids 1, 2, 4 (3 does not exist): AUTOINCREMENT alone would
+    // store server id 4 as local id 3
+    for (final id in [1, 2, 4]) {
+      await DBHelper.insertVehicle(Vehicle(id: id, name: 'Boat $id', isdeleted: 0));
+      await DBHelper.insertVehicleDriver(VehicleDriver(id: id, username: 'Skipper $id', isdeleted: 0));
+      await DBHelper.insertEncounterCategorie(EncounterCategorie(id: id, name: 'Cat $id', isdeleted: 0));
+      await DBHelper.insertBehaviouralState(BehaviouralState(id: id, name: 'State $id', isdeleted: 0));
+    }
+
+    expect((await DBHelper.readVehicle(4))['name'], 'Boat 4');
+    expect((await DBHelper.readVehicle(3)), isEmpty);
+    expect((await DBHelper.readVehicleDriver(4))['username'], 'Skipper 4');
+    expect((await DBHelper.readEncounterCategorie(4))['name'], 'Cat 4');
+    expect((await DBHelper.readBehaviouralState(4))['name'], 'State 4');
   });
 
   test('updateSighting never clears a unid set by the sync meanwhile', () async {

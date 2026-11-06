@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:mwpaapp/Pages/EditSighting/DeletedEntriesHint.dart';
+import 'package:mwpaapp/Util/UtilDeletedEntries.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:mwpaapp/Components/Inputs/InputFrame.dart';
@@ -28,6 +30,9 @@ enum SightingState {
 
   /// species could not be resolved
   unknownSpecies,
+
+  /// not synced yet and uses an entry deleted on the server
+  deletedEntry,
 
   complete,
 }
@@ -126,10 +131,16 @@ class ListSightingTile extends StatelessWidget {
       }
     }
 
+    // would be sent with an entry deleted on the server: must be corrected
+    if (UtilDeletedEntries.isUnsynced(sighting) &&
+        UtilDeletedEntries.check(sighting, deletedEntriesOf(context)).isNotEmpty) {
+      state = SightingState.deletedEntry;
+    }
+
     final isTurtle = sighting.sightingType == Sighting.TYPE_SHORT;
 
     final stateColor = switch (state) {
-      SightingState.incomplete => scheme.error,
+      SightingState.incomplete || SightingState.deletedEntry => scheme.error,
       SightingState.endMissing || SightingState.unknownSpecies => warningColor,
       SightingState.complete => isTurtle ? turtleColor : inputAccentColor(context),
     };
@@ -138,6 +149,7 @@ class ListSightingTile extends StatelessWidget {
       SightingState.incomplete => context.l10n.stateIncomplete,
       SightingState.endMissing => context.l10n.stateEndMissing,
       SightingState.unknownSpecies => context.l10n.stateUnknownSpecies,
+      SightingState.deletedEntry => context.l10n.stateDeletedEntry,
       SightingState.complete => null,
     };
 

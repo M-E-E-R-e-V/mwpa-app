@@ -351,6 +351,15 @@
       }
     }
   },
+  "selectDeletedLabel": "{label} (deleted)",
+  "@selectDeletedLabel": {
+    "description": "Select entry deleted on the server, shown only as the current value of an old sighting",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
   "serverTimeout": "The server did not respond in time. Please try again later. Your data stays on the device and is synced later.",
   "serverUnreachable": "No connection to the server. Please check the network and the server URL. Your data stays on the device and is synced later.",
   "sessionNotStarted": "User session is not started!",
@@ -503,5 +512,20 @@
   "homeAreaHint": "Leave the home area and date, tour start and tour end are filled in automatically.",
   "homeAreaMissing": "No home area loaded yet – please sync with the server.",
   "settingsLoadingData": "Boats and skippers are being loaded from the server …",
-  "settingsNoData": "No boats and skippers loaded yet – please sync with the server."
+  "settingsNoData": "No boats and skippers loaded yet – please sync with the server.",
+  "deletedEntriesTitle": "Deleted on the server",
+  "deletedEntriesInfo": "This sighting is not synced yet. Please choose an active entry instead.",
+  "deletedEntryLine": "{field}: {name}",
+  "@deletedEntryLine": {
+    "placeholders": {
+      "field": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "stateDeletedEntry": "Deleted entry",
+  "helpColorRedDeleted": "Red with \"Deleted entry\": the sighting is not synced yet and uses a boat, skipper, species etc. that was deleted on the server – choose an active one."
 }

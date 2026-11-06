@@ -208,23 +208,23 @@ class _EditTourPageState extends State<EditTourPage> {
       sightVehicle = SelectInput(
         title: context.l10n.labelBoat,
         value: sightVehicleValue,
-        items: _vehicleController.vehicleList.map((element) {
+        items: DynInputSelectItem.withDeleted(_vehicleController.vehicleList, _vehicleController.deletedVehicles, (element) {
           return DynInputSelectItem(
               value: element.id!.toString(),
               label: element.name!
           );
-        }).toList(),
+        }),
       );
 
       sightVehicleDriver = SelectInput(
         title: context.l10n.labelSkipper,
         value: sightVehicleDriverValue,
-        items: _vehicleDriverController.vehicleDriverList.map((element) {
+        items: DynInputSelectItem.withDeleted(_vehicleDriverController.vehicleDriverList, _vehicleDriverController.deletedVehicleDrivers, (element) {
           return DynInputSelectItem(
               value: element.id!.toString(),
               label: element.username!
           );
-        }).toList(),
+        }),
       );
 
       sightBeaufort = SelectInput(

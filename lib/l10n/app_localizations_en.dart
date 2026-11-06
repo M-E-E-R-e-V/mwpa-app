@@ -754,6 +754,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String selectDeletedLabel(String label) {
+    return '$label (deleted)';
+  }
+
+  @override
   String get serverTimeout =>
       'The server did not respond in time. Please try again later. Your data stays on the device and is synced later.';
 
@@ -1051,4 +1056,23 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsNoData =>
       'No boats and skippers loaded yet – please sync with the server.';
+
+  @override
+  String get deletedEntriesTitle => 'Deleted on the server';
+
+  @override
+  String get deletedEntriesInfo =>
+      'This sighting is not synced yet. Please choose an active entry instead.';
+
+  @override
+  String deletedEntryLine(String field, String name) {
+    return '$field: $name';
+  }
+
+  @override
+  String get stateDeletedEntry => 'Deleted entry';
+
+  @override
+  String get helpColorRedDeleted =>
+      'Red with \"Deleted entry\": the sighting is not synced yet and uses a boat, skipper, species etc. that was deleted on the server – choose an active one.';
 }

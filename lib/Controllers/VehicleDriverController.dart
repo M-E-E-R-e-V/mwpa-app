@@ -7,6 +7,10 @@ class VehicleDriverController extends ChangeNotifier {
 
   List<VehicleDriver> vehicleDriverList = <VehicleDriver>[];
 
+  /// marked as deleted on the server: not selectable any more, but old
+  /// sightings still show them
+  List<VehicleDriver> deletedVehicleDrivers = <VehicleDriver>[];
+
   Future<int> addVehicleDriver({required VehicleDriver driver}) async {
     return await DBHelper.insertVehicleDriver(driver);
   }
@@ -17,6 +21,10 @@ class VehicleDriverController extends ChangeNotifier {
       VehicleDriver(id: 0, username: 'Unknown'),
       ...drivers.map((data) => VehicleDriver.fromJson(data)),
     ];
+    deletedVehicleDrivers = (await DBHelper.queryVehicleDriver(true))
+        .where((data) => data['isdeleted'] == 1)
+        .map((data) => VehicleDriver.fromJson(data))
+        .toList();
     notifyListeners();
   }
 }

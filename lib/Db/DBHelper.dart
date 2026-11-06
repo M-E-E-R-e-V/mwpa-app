@@ -371,9 +371,12 @@ class DBHelper {
     );
   }
 
-  /// insertVehicle
+  /// insertVehicle - with the server id: the local row id is what sightings
+  /// and the default tour store and send (AUTOINCREMENT would number rows
+  /// on its own and shift at any gap in the server ids). Same for drivers,
+  /// encounter categories and behavioural states.
   static Future<int> insertVehicle(Vehicle vehicle) async {
-    return await _db?.insert(_tableNameVehicle, vehicle.toJson(false)) ?? 1;
+    return await _db?.insert(_tableNameVehicle, vehicle.toJson(true)) ?? 1;
   }
 
   /// queryVehicle
@@ -417,7 +420,7 @@ class DBHelper {
 
   /// insertVehicleDriver
   static Future<int> insertVehicleDriver(VehicleDriver driver) async {
-    return await _db?.insert(_tableNameVehicleDriver, driver.toJson(false)) ?? 1;
+    return await _db?.insert(_tableNameVehicleDriver, driver.toJson(true)) ?? 1;
   }
 
   /// queryVehicleDriver
@@ -511,7 +514,7 @@ class DBHelper {
 
   /// insertEncounterCategorie
   static Future<int> insertEncounterCategorie(EncounterCategorie encCat) async {
-    return await _db?.insert(_tableNameEncCate, encCat.toJson(false)) ?? 1;
+    return await _db?.insert(_tableNameEncCate, encCat.toJson(true)) ?? 1;
   }
 
   /// queryEncounterCategorie
@@ -555,7 +558,7 @@ class DBHelper {
 
   /// insertBehaviouralState
   static Future<int> insertBehaviouralState(BehaviouralState behState) async {
-    return await _db?.insert(_tableNameBehState, behState.toJson(false)) ?? 1;
+    return await _db?.insert(_tableNameBehState, behState.toJson(true)) ?? 1;
   }
 
   /// queryBehaviouralState

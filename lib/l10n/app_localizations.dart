@@ -1420,6 +1420,12 @@ abstract class AppLocalizations {
   /// **'unknown by id: {id}'**
   String selectUnknownId(String id);
 
+  /// Select entry deleted on the server, shown only as the current value of an old sighting
+  ///
+  /// In en, this message translates to:
+  /// **'{label} (deleted)'**
+  String selectDeletedLabel(String label);
+
   /// No description provided for @serverTimeout.
   ///
   /// In en, this message translates to:
@@ -1893,6 +1899,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No boats and skippers loaded yet – please sync with the server.'**
   String get settingsNoData;
+
+  /// No description provided for @deletedEntriesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted on the server'**
+  String get deletedEntriesTitle;
+
+  /// No description provided for @deletedEntriesInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'This sighting is not synced yet. Please choose an active entry instead.'**
+  String get deletedEntriesInfo;
+
+  /// No description provided for @deletedEntryLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{field}: {name}'**
+  String deletedEntryLine(String field, String name);
+
+  /// No description provided for @stateDeletedEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted entry'**
+  String get stateDeletedEntry;
+
+  /// No description provided for @helpColorRedDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Red with \"Deleted entry\": the sighting is not synced yet and uses a boat, skipper, species etc. that was deleted on the server – choose an active one.'**
+  String get helpColorRedDeleted;
 }
 
 class _AppLocalizationsDelegate
