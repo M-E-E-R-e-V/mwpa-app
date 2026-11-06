@@ -145,5 +145,59 @@ void main() {
       expect(await api.saveSightingImage('u1', '/does/not/exist.jpg'), isFalse);
       expect(calls, 0);
     });
+    test('quickConnect returns the device token, null from an older server', () async {
+      final api = MwpaApi(server, client: MockClient((_) async => _json(
+          {'success': true, 'error': '', 'device_token': 'tok'}, headers: {'set-cookie': 'sid=qc'})));
+
+      expect(await api.quickConnect('otp'), 'tok');
+
+      final old = MwpaApi(server, client: MockClient((_) async => _json({'success': true, 'error': ''})));
+
+      expect(await old.quickConnect('otp'), isNull);
+    });
+
+    test('tokenLogin sends the token and keeps the session cookie', () async {
+      final requests = <http.Request>[];
+
+      final api = MwpaApi(server, client: MockClient((request) async {
+        requests.add(request);
+
+        return switch (request.url.path) {
+          '/mobile/login/token' => _json({'success': true, 'error': ''}, headers: {'set-cookie': 'sid=tok'}),
+          '/mobile/islogin' => _json({'status': true}),
+          _ => http.Response('not found', 404),
+        };
+      }));
+
+      expect(await api.tokenLogin('tok'), isTrue);
+      expect(await api.isLogin(), isTrue);
+
+      final body = jsonDecode(requests.first.body) as Map<String, dynamic>;
+      expect(body['token'], 'tok');
+      expect(body.containsKey('password'), isFalse);
+      expect(requests.first.headers.containsKey('cookie'), isFalse);
+      expect(requests[1].headers['cookie'], 'sid=tok');
+    });
+
+    test('a refused token login throws the server message', () async {
+      final api = MwpaApi(server, client: MockClient((_) async =>
+          _json({'success': false, 'error': 'Invalid or expired device token'})));
+
+      await expectLater(api.tokenLogin('tok'), throwsA(isA<MwpaException>()));
+    });
+
+    test('tokenLogout posts the token', () async {
+      late http.Request seen;
+
+      final api = MwpaApi(server, client: MockClient((request) async {
+        seen = request;
+        return _json({'success': true, 'error': ''});
+      }));
+
+      await api.tokenLogout('tok');
+
+      expect(seen.url.path, '/mobile/logout/token');
+      expect((jsonDecode(seen.body) as Map<String, dynamic>)['token'], 'tok');
+    });
   });
 }

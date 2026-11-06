@@ -43,6 +43,8 @@ class MwpaApi {
   static const URL_ISLOGIN = 'mobile/islogin';
   static const URL_LOGIN = 'mobile/login';
   static const URL_QUICKCONNECT = 'mobile/quickconnect';
+  static const URL_LOGIN_TOKEN = 'mobile/login/token';
+  static const URL_LOGOUT_TOKEN = 'mobile/logout/token';
   static const URL_USERINFO = 'mobile/user/info';
   static const URL_VEHICLE = 'mobile/vehicle/list';
   static const URL_VEHICLE_DRIVER = 'mobile/vehicledriver/list';
@@ -146,30 +148,68 @@ class MwpaApi {
   Future<bool> login(String email, String password) async {
     final deviceDetails = await _getDeviceDetails();
 
-    return _sessionLogin(MwpaApi.URL_LOGIN, <String, String>{
+    await _sessionLogin(MwpaApi.URL_LOGIN, <String, String>{
       'email': email,
       'password': password,
       'deviceIdentity': deviceDetails[2],
       'deviceDescription': "${deviceDetails[0]} - ${deviceDetails[1]}"
     });
+
+    return true;
   }
 
   /// quickConnect
   /// Exchange a single-use Quick Connect OTP (scanned from the web QR) for a
   /// mobile session. The backend resolves the user from the OTP itself, so we
   /// only send {otp, deviceIdentity, deviceDescription} — no email/password.
-  Future<bool> quickConnect(String otp) async {
+  /// Returns the device token for later logins of this device ([tokenLogin],
+  /// the password replacement), or null when the server doesn't issue one.
+  Future<String?> quickConnect(String otp) async {
     final deviceDetails = await _getDeviceDetails();
 
-    return _sessionLogin(MwpaApi.URL_QUICKCONNECT, <String, String>{
+    final response = await _sessionLogin(MwpaApi.URL_QUICKCONNECT, <String, String>{
       'otp': otp,
       'deviceIdentity': deviceDetails[2],
       'deviceDescription': "${deviceDetails[0]} - ${deviceDetails[1]}"
     });
+
+    return response.deviceToken;
+  }
+
+  /// tokenLogin - login of a Quick Connect device with its device token
+  /// (instead of a password)
+  Future<bool> tokenLogin(String token) async {
+    final deviceDetails = await _getDeviceDetails();
+
+    await _sessionLogin(MwpaApi.URL_LOGIN_TOKEN, <String, String>{
+      'token': token,
+      'deviceIdentity': deviceDetails[2],
+      'deviceDescription': "${deviceDetails[0]} - ${deviceDetails[1]}"
+    });
+
+    return true;
+  }
+
+  /// tokenLogout - revokes the device token on the server (app logout)
+  Future<void> tokenLogout(String token) async {
+    final deviceDetails = await _getDeviceDetails();
+
+    await _guard(() async {
+      final response = await _post(MwpaApi.URL_LOGOUT_TOKEN, <String, String>{
+        'token': token,
+        'deviceIdentity': deviceDetails[2],
+      }, withCookie: false);
+
+      final objResponse = LoginResponse.fromJson(jsonDecode(response.body));
+
+      if (!objResponse.success) {
+        throw MwpaException(objResponse.error ?? 'Response success false');
+      }
+    });
   }
 
   /// _sessionLogin - posts the login [body] and keeps the session cookie
-  Future<bool> _sessionLogin(String path, Map<String, String> body) {
+  Future<LoginResponse> _sessionLogin(String path, Map<String, String> body) {
     return _guard(() async {
       final response = await _post(path, body, withCookie: false);
       final objResponse = LoginResponse.fromJson(jsonDecode(response.body));
@@ -184,7 +224,7 @@ class MwpaApi {
         _cookie = cookie;
       }
 
-      return true;
+      return objResponse;
     });
   }
 

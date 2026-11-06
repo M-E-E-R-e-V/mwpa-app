@@ -6,8 +6,11 @@ import 'package:mwpaapp/Util/AppLog.dart';
 /// CredentialStore - keeps the login password in the platform's secure
 /// storage (Android Keystore / iOS Keychain) instead of plain
 /// shared_preferences. URL and username stay in shared_preferences.
+/// Quick Connect devices keep a device token instead of the password (issued
+/// by the server, replaces the password for the sync login).
 class CredentialStore {
   static const String _passwordKey = 'mwpa_password';
+  static const String _deviceTokenKey = 'mwpa_device_token';
 
   final FlutterSecureStorage _storage;
 
@@ -63,5 +66,32 @@ class CredentialStore {
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(Preference.PASSWORD);
+  }
+
+  /// readDeviceToken - the Quick Connect device token or null (also when the
+  /// secure storage can't be decrypted, the user then connects again)
+  Future<String?> readDeviceToken() async {
+    try {
+      return await _storage.read(key: _deviceTokenKey);
+    } catch (error) {
+      AppLog.e('Credentials', error);
+
+      return null;
+    }
+  }
+
+  /// writeDeviceToken
+  Future<void> writeDeviceToken(String token) async {
+    await _storage.write(key: _deviceTokenKey, value: token);
+  }
+
+  /// deleteDeviceToken - on logout and when a password login replaces the
+  /// Quick Connect session
+  Future<void> deleteDeviceToken() async {
+    try {
+      await _storage.delete(key: _deviceTokenKey);
+    } catch (error) {
+      AppLog.e('Credentials', error);
+    }
   }
 }

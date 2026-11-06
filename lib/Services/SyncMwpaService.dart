@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:http/http.dart' as http;
 import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Controllers/SpeciesController.dart';
 import 'package:mwpaapp/Db/DBHelper.dart';
@@ -80,6 +81,39 @@ class LoginRejectedException implements Exception {
 
 /// SyncMwpaService
 class SyncMwpaService {
+
+  /// timeout of the token revoke on logout (offline the logout must not
+  /// hang for the full request timeout)
+  static const Duration logoutTimeout = Duration(seconds: 5);
+
+  /// clearCredentials - logout: revokes a Quick Connect device token on the
+  /// server (best effort; offline it simply expires unused) and deletes the
+  /// stored password and token. [client] for tests.
+  static Future<void> clearCredentials({http.Client? client}) async {
+    final credentials = CredentialStore();
+    final token = await credentials.readDeviceToken();
+
+    if (token != null) {
+      final prefs = await SharedPreferences.getInstance();
+      final url = prefs.getString(Preference.URL);
+
+      if (url != null) {
+        final api = MwpaApi(url, client: client, timeout: logoutTimeout);
+
+        try {
+          await api.tokenLogout(token);
+          AppLog.i('Sync', 'device token revoked');
+        } catch (error) {
+          AppLog.w('Sync', 'device token not revoked', error);
+        } finally {
+          api.close();
+        }
+      }
+    }
+
+    await credentials.deleteDeviceToken();
+    await credentials.deletePassword();
+  }
 
   /// points per upload request
   static const int trackingBatchSize = 100;
@@ -173,10 +207,13 @@ class SyncMwpaService {
         throw const MissingCredentialsException("Preference field 'USERNAME' is not found!");
       }
 
-      final password = await CredentialStore().readPassword();
+      // password login, or the device token of a Quick Connect device
+      final credentials = CredentialStore();
+      final password = await credentials.readPassword();
+      final deviceToken = password == null ? await credentials.readDeviceToken() : null;
 
-      if (password == null) {
-        throw const MissingCredentialsException("No password stored, please sign in again!");
+      if (password == null && deviceToken == null) {
+        throw const MissingCredentialsException("No password or device token stored, please sign in again!");
       }
 
       String url = prefs.getString(Preference.URL)!;
@@ -201,7 +238,9 @@ class SyncMwpaService {
         bool loggedIn;
 
         try {
-          loggedIn = await api.login(username, password);
+          loggedIn = password != null
+              ? await api.login(username, password)
+              : await api.tokenLogin(deviceToken!);
         } on MwpaException catch (error) {
           // the server answered and refused the credentials
           AppLog.w('Sync', 'login refused by the server', error);

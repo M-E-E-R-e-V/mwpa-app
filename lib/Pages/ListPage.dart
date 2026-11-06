@@ -30,7 +30,6 @@ import 'package:mwpaapp/Controllers/SyncController.dart';
 import 'package:mwpaapp/Pages/List/ListSightingTile.dart';
 import 'package:mwpaapp/Pages/List/RunningSightings.dart';
 import 'package:mwpaapp/Services/SyncMwpaService.dart';
-import 'package:mwpaapp/Settings/CredentialStore.dart';
 import 'package:mwpaapp/Util/UtilDate.dart';
 import 'package:mwpaapp/Util/UtilDistanceCoast.dart';
 import 'package:mwpaapp/Util/UtilSighting.dart';
@@ -209,7 +208,7 @@ class _ListPageState extends State<ListPage>
     ConfirmDialog.show(context, context.l10n.logout, message, destructive: unsynced > 0, okLabel: context.l10n.logout, (p0) async {
       if (p0 == "ok") {
         AppLog.i('List', 'logout ($unsynced unsynced sightings)');
-        await CredentialStore().deletePassword();
+        await SyncMwpaService.clearCredentials();
         await _prefController.logout();
         _locationController.resetTour();
         _sync.reset();

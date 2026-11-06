@@ -97,10 +97,10 @@ class _LoginPageState extends State<LoginPage> {
   /// the embedded OTP for a mobile session, and persist enough preferences for
   /// the rest of the app to work.
   ///
-  /// We deliberately do NOT store the user's password — Quick Connect never
-  /// learns it. SyncMwpaService falls back to the login page when PASSWORD is
-  /// missing, so background sync will be inactive until the user signs in once
-  /// with email/password (acceptable for the MVP).
+  /// Quick Connect never learns the password: the server issues a device
+  /// token instead, which SyncMwpaService uses for its logins. An older
+  /// server without device tokens leaves the sync inactive until the user
+  /// signs in once with email/password.
   Future<void> quickConnect() async {
     final l10n = context.l10n;
     MwpaApi? api;
@@ -143,9 +143,8 @@ class _LoginPageState extends State<LoginPage> {
             '${apiInfo.version_api_login}', versionApiMobileLogin.join(', ')));
       }
 
-      if (await api.quickConnect(otp)) {
-        await _persistQuickConnect(api, server, username);
-      }
+      final deviceToken = await api.quickConnect(otp);
+      await _persistQuickConnect(api, server, username, deviceToken);
     } catch (error) {
       AppLog.w('Login', 'quick connect failed', error);
 
@@ -172,9 +171,10 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  /// Persist URL + username + ids for a Quick Connect session. Mirrors
-  /// _loadUser but skips the password — Quick Connect never receives it.
-  Future<void> _persistQuickConnect(MwpaApi api, String url, String username) async {
+  /// Persist URL + username + ids and the [deviceToken] for a Quick Connect
+  /// session. Mirrors _loadUser, with the device token in place of the
+  /// password.
+  Future<void> _persistQuickConnect(MwpaApi api, String url, String username, String? deviceToken) async {
     final l10n = context.l10n;
 
     if (await api.isLogin()) {
@@ -187,13 +187,28 @@ class _LoginPageState extends State<LoginPage> {
         await prefs.setString(Preference.USERNAME, username);
         // Wipe any stale password so SyncMwpaService doesn't reuse a previous
         // user's credentials against this session.
-        await CredentialStore().deletePassword();
+        final credentials = CredentialStore();
+        await credentials.deletePassword();
+
+        if (deviceToken != null) {
+          await credentials.writeDeviceToken(deviceToken);
+        } else {
+          await credentials.deleteDeviceToken();
+        }
+
         await prefs.setInt(Preference.USERID, userInfo.user!.id);
         await prefs.setInt(Preference.ORGID, userInfo.organization!.id);
 
-        AppLog.i('Login', 'quick connect: logged in, user ${userInfo.user!.id}');
+        AppLog.i('Login', 'quick connect: logged in, user ${userInfo.user!.id}, '
+            'device token ${deviceToken != null ? 'stored' : 'not issued'}');
 
         if (!mounted) return;
+
+        if (deviceToken != null) {
+          // boats, skippers, species etc. are needed right away
+          context.read<SyncController>().syncAfterLogin();
+        }
+
         Navigator.of(context).pushNamed('/List');
       } else {
         if (userInfo.organization == null) {
@@ -219,7 +234,10 @@ class _LoginPageState extends State<LoginPage> {
       if (userInfo.user != null && userInfo.organization != null) {
         await prefs.setString(Preference.URL, url);
         await prefs.setString(Preference.USERNAME, username);
-        await CredentialStore().writePassword(password);
+        final credentials = CredentialStore();
+        await credentials.writePassword(password);
+        // a token of an earlier Quick Connect is not needed any more
+        await credentials.deleteDeviceToken();
         await prefs.setInt(Preference.USERID, userInfo.user!.id);
         await prefs.setInt(Preference.ORGID, userInfo.organization!.id);
         AppLog.i('Login', 'logged in, user ${userInfo.user!.id}');
