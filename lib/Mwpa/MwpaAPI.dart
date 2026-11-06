@@ -285,11 +285,11 @@ class MwpaApi {
   }
 
   /// saveSighting - null when the server refuses the sighting
-  Future<SightingSaveResponse?> saveSighting(Sighting sigh, Species? Function(int id) speciesById) {
+  Future<SightingSaveResponse?> saveSighting(Sighting sigh) {
     return _guard(() async {
       final response = await _post(
         MwpaApi.URL_SIGHTING_SAVE,
-        sigh.toJson(false, false, true, speciesById: speciesById),
+        sigh.toJson(false, false),
       );
 
       final objResponse = SightingSaveResponse.fromJson(jsonDecode(response.body));

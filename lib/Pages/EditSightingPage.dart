@@ -768,8 +768,9 @@ class _EditSightingPageState extends State<EditSightingPage> {
               labelName = element.name!.split(",")[0];
             }
 
+            // server species id like the main species (#42)
             return DynInputSelectItem(
-                value: element.id!.toString(),
+                value: element.orgid!.toString(),
                 label: labelName
             );
           }).toList(),

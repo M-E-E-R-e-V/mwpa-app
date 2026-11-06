@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:mwpaapp/Models/BehaviouralState.dart';
 import 'package:mwpaapp/Models/EncounterCategorie.dart';
@@ -13,7 +15,7 @@ import 'package:mwpaapp/Util/AppLog.dart';
 /// DBHelper
 class DBHelper {
   static Database? _db;
-  static const int _version = 13;
+  static const int _version = 14;
   static const String _tableNameSighting = "sighting";
   static const String _tableNameTourTracking = "tour_tracking";
   static const String _tableNameVehicle = "vehicle";
@@ -79,6 +81,10 @@ class DBHelper {
             }
 
             await batch.commit();
+
+            if (oldVersion <= 13) {
+              await _updateTableSightingV13toV14(db);
+            }
           },
           onCreate: (db, version) {
             db.execute(
@@ -258,9 +264,63 @@ class DBHelper {
   }
 
 
+  /// _updateTableSightingV13toV14 - other_species held local species row ids
+  /// (translated to the server id only on upload, #42); the local ids are
+  /// renumbered by every species sync, so they are converted once to the
+  /// server ids (Species.orgid) with the current species table. Ids not in
+  /// the table are dropped (the upload dropped them as well).
+  static Future<void> _updateTableSightingV13toV14(Database db) async {
+    final orgIdByLocal = <String, String>{
+      for (final row in await db.query(_tableNameSpecies, columns: ['id', 'orgid']))
+        '${row['id']}': '${row['orgid']}',
+    };
+
+    final rows = await db.query(_tableNameSighting,
+        columns: ['id', 'other_species'],
+        where: "other_species IS NOT NULL AND other_species != ''");
+
+    var converted = 0;
+    var dropped = 0;
+
+    for (final row in rows) {
+      final Map<String, dynamic> old;
+
+      try {
+        old = jsonDecode(row['other_species'] as String) as Map<String, dynamic>;
+      } catch (error) {
+        AppLog.w('DB', 'v14: other_species of sighting ${row['id']} unreadable', error);
+        continue;
+      }
+
+      final updated = <String, String>{};
+
+      for (final value in old.values) {
+        if (value == null || '$value' == '') {
+          continue;
+        }
+
+        final orgId = orgIdByLocal['$value'];
+
+        if (orgId == null || orgId == 'null') {
+          dropped++;
+          continue;
+        }
+
+        updated['${updated.length}'] = orgId;
+      }
+
+      await db.update(_tableNameSighting, {'other_species': jsonEncode(updated)},
+          where: 'id = ?', whereArgs: [row['id']]);
+      converted++;
+    }
+
+    AppLog.i('DB', 'v14: other_species of $converted sightings converted to server ids'
+        '${dropped > 0 ? ', $dropped unknown ids dropped' : ''}');
+  }
+
   /// insertSighting
   static Future<int> insertSighting(Sighting newSighting) async {
-    return await _db?.insert(_tableNameSighting, newSighting.toJson(false, true, false)) ?? 1;
+    return await _db?.insert(_tableNameSighting, newSighting.toJson(false, true)) ?? 1;
   }
 
   /// querySighting
@@ -281,7 +341,7 @@ class DBHelper {
   /// the object may have been read before a (background) sync assigned it,
   /// an empty unid would upload the sighting a second time
   static Future<int> updateSighting(Sighting uSighting) async {
-    final data = uSighting.toJson(false, true, false);
+    final data = uSighting.toJson(false, true);
 
     if ((uSighting.unid ?? '').isEmpty) {
       data.remove('unid');

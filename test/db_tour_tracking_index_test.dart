@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -39,6 +40,39 @@ void main() {
   });
 
   tearDownAll(() => DBHelper.closeDb());
+
+  // #42: other_species held local species row ids; v14 converts them to
+  // the server ids (orgid), as the main species already uses
+  test('upgrade from v13 converts other_species to server species ids', () async {
+    final path = await _dbPath();
+    final old = await openDatabase(path, version: 13, onCreate: (db, _) async {
+      await db.execute('CREATE TABLE sighting(id INTEGER PRIMARY KEY AUTOINCREMENT, other_species STRING)');
+      await db.execute('CREATE TABLE species(id INTEGER PRIMARY KEY AUTOINCREMENT, orgid INTEGER, name STRING)');
+      await db.execute('CREATE TABLE tour_tracking('
+          'uuid STRING PRIMARY KEY, tour_fid STRING, location STRING, date STRING, synced INTEGER NOT NULL DEFAULT 0)');
+      await db.insert('species', {'id': 2, 'orgid': 101, 'name': 'Tursiops truncatus'});
+      await db.insert('species', {'id': 3, 'orgid': 202, 'name': 'Delphinus delphis'});
+      await db.insert('sighting', {'id': 1, 'other_species': jsonEncode({'0': '2', '1': '3'})});
+      // empty slot and an id no longer in the species table
+      await db.insert('sighting', {'id': 2, 'other_species': jsonEncode({'0': '', '1': '9', '2': '3'})});
+      await db.insert('sighting', {'id': 3, 'other_species': ''});
+      await db.insert('sighting', {'id': 4, 'other_species': null});
+      await db.insert('sighting', {'id': 5, 'other_species': 'not json'});
+    });
+    await old.close();
+
+    await DBHelper.initDb();
+
+    final rows = {
+      for (final r in await DBHelper.querySighting()) r['id']: r['other_species'],
+    };
+
+    expect(jsonDecode(rows[1] as String), {'0': '101', '1': '202'});
+    expect(jsonDecode(rows[2] as String), {'0': '202'});
+    expect(rows[3], '');
+    expect(rows[4], isNull);
+    expect(rows[5], 'not json');
+  });
 
   test('updateSighting never clears a unid set by the sync meanwhile', () async {
     await DBHelper.initDb();
@@ -85,7 +119,8 @@ void main() {
   test('upgrade from v11 adds the index and keeps existing rows', () async {
     final path = await _dbPath();
     final old = await openDatabase(path, version: 11, onCreate: (db, _) async {
-      await db.execute('CREATE TABLE sighting(id INTEGER PRIMARY KEY AUTOINCREMENT)');
+      await db.execute('CREATE TABLE sighting(id INTEGER PRIMARY KEY AUTOINCREMENT, other_species STRING)');
+      await db.execute('CREATE TABLE species(id INTEGER PRIMARY KEY AUTOINCREMENT, orgid INTEGER)');
       await db.execute('CREATE TABLE tour_tracking('
           'uuid STRING PRIMARY KEY, tour_fid STRING, location STRING, date STRING)');
       await db.insert('tour_tracking', {
@@ -150,7 +185,8 @@ void main() {
     test('upgrade from v12 adds the synced column, existing points unsynced', () async {
       final path = await _dbPath();
       final old = await openDatabase(path, version: 12, onCreate: (db, _) async {
-        await db.execute('CREATE TABLE sighting(id INTEGER PRIMARY KEY AUTOINCREMENT)');
+        await db.execute('CREATE TABLE sighting(id INTEGER PRIMARY KEY AUTOINCREMENT, other_species STRING)');
+        await db.execute('CREATE TABLE species(id INTEGER PRIMARY KEY AUTOINCREMENT, orgid INTEGER)');
         await db.execute('CREATE TABLE tour_tracking('
             'uuid STRING PRIMARY KEY, tour_fid STRING, location STRING, date STRING)');
         await db.insert('tour_tracking', {

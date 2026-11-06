@@ -19,16 +19,8 @@ class SpeciesController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Species? getSpeciesById(int id) {
-    for (var specie in speciesList) {
-      if (specie.id == id) {
-        return specie;
-      }
-    }
-
-    return null;
-  }
-
+  /// getSpeciesByOrgId - by server species id (what sightings store; the
+  /// local row id is renumbered by every sync)
   Species? getSpeciesByOrgId(int orgid) {
     for (var specie in speciesList) {
       if (specie.orgid == orgid) {

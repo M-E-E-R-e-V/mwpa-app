@@ -134,7 +134,7 @@ void main() async {
 
             return SyncController(
               prefs: context.read<PrefController>(),
-              runSync: (update) => SyncMwpaService(species).sync(update),
+              runSync: (update) => SyncMwpaService().sync(update),
               pendingCount: DBHelper.countPendingSync,
               // reference data and sightings changed on the server side
               afterSync: () async {

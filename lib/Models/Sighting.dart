@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -6,7 +5,6 @@ import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Util/UtilCheckJson.dart';
 import 'package:mwpaapp/Util/UtilTourFId.dart';
 
-import 'package:mwpaapp/Models/Species.dart';
 import 'package:mwpaapp/Util/AppLog.dart';
 
 /// Sighting
@@ -137,11 +135,9 @@ class Sighting {
     }
   }
 
-  /// toJson
-  ///
-  /// [speciesById] is required when [forSync] is true: other_species is stored
-  /// with local species ids and must be translated to the server org ids.
-  Map<String, dynamic> toJson(bool withId, bool withSyncStatus, bool? forSync, {Species? Function(int id)? speciesById}) {
+  /// toJson - for the DB and the server alike; species_id and other_species
+  /// hold server species ids (Species.orgid), never local row ids (#42)
+  Map<String, dynamic> toJson(bool withId, bool withSyncStatus) {
     final Map<String, dynamic> data = <String, dynamic>{};
 
     if (withId) {
@@ -194,30 +190,6 @@ class Sighting {
     data['freq_behaviour'] = freq_behaviour;
     data['recognizable_animals'] = recognizable_animals;
     data['other_species'] = other_species;
-
-    // only for repairing a bug
-    if (forSync != null) {
-      if (forSync && (other_species != "")) {
-        Map<String, dynamic> newdata = {};
-        Map<String, dynamic> olddata = jsonDecode(other_species!);
-        if (speciesById == null) {
-          throw ArgumentError('Sighting.toJson: speciesById is required for sync');
-        }
-
-        olddata.forEach((key, value) {
-          if (value != "") {
-            var species = speciesById(int.parse(value));
-
-            if (species != null) {
-              var orgid = species.orgid;
-              newdata[key] = "$orgid";
-            }
-          }
-        });
-
-        data['other_species'] = const JsonEncoder().convert(newdata);
-      }
-    }
 
     data['other'] = other;
     data['other_vehicle'] = other_vehicle;
