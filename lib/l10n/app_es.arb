@@ -215,7 +215,7 @@
   "sectionSettings": "Ajustes",
   "sectionTimePosition": "Hora y posición",
   "sectionDefaultTour": "Salida por defecto",
-  "sectionDefaultTourInfo": "Barco, patrón, viento y horas de la salida se copian en cada nuevo avistamiento y lo asignan a esta salida. Lo mejor es rellenarlo una vez al día antes de salir.",
+  "sectionDefaultTourInfo": "Barco, patrón y viento se copian en cada nuevo avistamiento. Lo mejor es rellenarlo una vez al día antes de salir.",
   "sectionTour": "Salida",
   "selectEmptyList": "<lista vacía>",
   "selectPlease": "<seleccione>",
@@ -292,5 +292,9 @@
   "waitForGps": "Espera la señal GPS.",
   "zoomIn": "Acercar",
   "zoomOut": "Alejar",
-  "runningMore": "+{count} más"
+  "runningMore": "+{count} más",
+  "sectionTourTimes": "Horario de la salida",
+  "sectionTourTimesInfo": "La fecha y el inicio de la salida asignan cada nuevo avistamiento a esta salida.",
+  "homeAreaHint": "Sal de la zona base y la fecha, el inicio y el fin de la salida se rellenan automáticamente.",
+  "homeAreaMissing": "Todavía no hay zona base cargada: sincroniza con el servidor."
 }

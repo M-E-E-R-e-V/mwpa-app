@@ -170,6 +170,25 @@ void main() {
     expect(find.text('9:05 AM'), findsOneWidget);
   });
 
+  testWidgets('disabled DateInput/TimeInput show the value but open no picker', (tester) async {
+    final date = DynInputValue()..dateValue = DateTime(2026, 6, 8);
+    final time = DynInputValue()..setTimeOfDy('09:05');
+
+    await pumpInput(tester, Column(children: [
+      DateInput(value: date, enabled: false),
+      TimeInput(value: time, enabled: false),
+    ]));
+
+    expect(find.text('6/8/2026'), findsOneWidget);
+
+    await tester.tap(find.text('6/8/2026'));
+    await tester.tap(find.text('9:05 AM'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(DatePickerDialog), findsNothing);
+    expect(find.byType(TimePickerDialog), findsNothing);
+  });
+
   group('LocationInput', () {
     late LocationController location;
 

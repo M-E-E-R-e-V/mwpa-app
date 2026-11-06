@@ -741,7 +741,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get sectionDefaultTourInfo =>
-      'Barco, patrón, viento y horas de la salida se copian en cada nuevo avistamiento y lo asignan a esta salida. Lo mejor es rellenarlo una vez al día antes de salir.';
+      'Barco, patrón y viento se copian en cada nuevo avistamiento. Lo mejor es rellenarlo una vez al día antes de salir.';
 
   @override
   String get sectionTour => 'Salida';
@@ -1034,4 +1034,19 @@ class AppLocalizationsEs extends AppLocalizations {
   String runningMore(int count) {
     return '+$count más';
   }
+
+  @override
+  String get sectionTourTimes => 'Horario de la salida';
+
+  @override
+  String get sectionTourTimesInfo =>
+      'La fecha y el inicio de la salida asignan cada nuevo avistamiento a esta salida.';
+
+  @override
+  String get homeAreaHint =>
+      'Sal de la zona base y la fecha, el inicio y el fin de la salida se rellenan automáticamente.';
+
+  @override
+  String get homeAreaMissing =>
+      'Todavía no hay zona base cargada: sincroniza con el servidor.';
 }

@@ -87,12 +87,13 @@ class InputSection extends StatelessWidget {
 }
 
 /// TapField - read-only field that shows [text] (or [hint]) and calls
-/// [onTap] when tapped anywhere; used by the picker inputs.
+/// [onTap] when tapped anywhere; used by the picker inputs. Without [onTap]
+/// the field is disabled (greyed out).
 class TapField extends StatelessWidget {
   final String text;
   final String hint;
   final IconData icon;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   const TapField({
     super.key,
@@ -105,13 +106,16 @@ class TapField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final enabled = onTap != null;
+    final disabledColor = scheme.onSurface.withValues(alpha: 0.38);
 
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: InputDecorator(
         decoration: InputDecoration(
-          suffixIcon: Icon(icon, color: inputAccentColor(context)),
+          enabled: enabled,
+          suffixIcon: Icon(icon, color: enabled ? inputAccentColor(context) : disabledColor),
         ),
         isEmpty: text.isEmpty,
         child: Text(
@@ -119,7 +123,11 @@ class TapField extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: text.isEmpty ? scheme.onSurfaceVariant : null,
+                color: !enabled
+                    ? disabledColor
+                    : text.isEmpty
+                        ? scheme.onSurfaceVariant
+                        : null,
               ),
         ),
       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mwpaapp/Components/HomeAreaMap.dart';
 import 'package:mwpaapp/Components/Inputs/Inputs.dart';
 import 'package:mwpaapp/Controllers/BeaufortController.dart';
 import 'package:mwpaapp/Controllers/LocationController.dart';
@@ -53,6 +54,8 @@ class _EditTourPageState extends State<EditTourPage> {
 
   bool isInit = false;
 
+  bool get _useHomeArea => sightUseHomeAreaValue.getIntValue() >= 1;
+
   /// _confirmClose - asks before leaving the page without saving; used by
   /// the app bar back button and the system back gesture/button
   void _confirmClose() {
@@ -85,13 +88,18 @@ class _EditTourPageState extends State<EditTourPage> {
 
   /// save the settings
   Future<void> _saveTourToPref() async {
+    // with home area the app sets date and times itself (maybe while this
+    // page was open): keep the stored ones instead of the read-only fields
+    final current = _prefController.prefToru;
+    final auto = _useHomeArea && current != null;
+
     TourPref tour = TourPref(
         vehicle_id: sightVehicleValue.getStrValueAsInt(),
         vehicle_driver_id: sightVehicleDriverValue.getStrValueAsInt(),
         beaufort_wind: sightBeaufortValue.getValue(),
-        date: sightDateValue.getDateTime(),
-        tour_start: sightTourStartValue.getTimeOfDay(),
-        tour_end: sightTourEndValue.getTimeOfDay(),
+        date: auto ? current.date : sightDateValue.getDateTime(),
+        tour_start: auto ? current.tour_start : sightTourStartValue.getTimeOfDay(),
+        tour_end: auto ? current.tour_end : sightTourEndValue.getTimeOfDay(),
         set_end_tour: sightSetEndTourValue.getIntValue(),
         use_home_area: sightUseHomeAreaValue.getIntValue()
     );
@@ -102,6 +110,41 @@ class _EditTourPageState extends State<EditTourPage> {
 
     if (!mounted) return;
     Navigator.of(context).pop();
+  }
+
+  /// _homeAreaHint - what to do for the automatic tour, with the home area
+  /// on a small map (or a note when it is not loaded yet)
+  Widget _homeAreaHint(BuildContext context) {
+    final theme = Theme.of(context);
+    final homeArea = _locationController.homeArea;
+    final loaded = homeArea.length >= 3;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              loaded ? Icons.info_outline : Icons.warning_amber_rounded,
+              size: 20,
+              color: loaded ? inputAccentColor(context) : theme.colorScheme.error,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                loaded ? context.l10n.homeAreaHint : context.l10n.homeAreaMissing,
+                style: theme.textTheme.bodyMedium,
+              ),
+            ),
+          ],
+        ),
+        if (loaded) ...[
+          const SizedBox(height: 10),
+          HomeAreaMap(homeArea: homeArea),
+        ],
+      ],
+    );
   }
 
   @override
@@ -166,19 +209,25 @@ class _EditTourPageState extends State<EditTourPage> {
           searchable: false,
       );
 
+      // with home area the app fills date and times itself
+      final manualTimes = !_useHomeArea;
+
       sightDate = DateInput(
         title: context.l10n.fieldDate,
         value: sightDateValue,
+        enabled: manualTimes,
       );
 
       sightTourStart = TimeInput(
         title: context.l10n.fieldTourStart,
         value: sightTourStartValue,
+        enabled: manualTimes,
       );
 
       sightTourEnd = TimeInput(
         title: context.l10n.fieldTourEnd,
         value: sightTourEndValue,
+        enabled: manualTimes,
       );
 
       sightSetEndTour = SwitchInput(
@@ -189,6 +238,7 @@ class _EditTourPageState extends State<EditTourPage> {
       sightUseHomeArea = SwitchInput(
         title: context.l10n.labelUseHomeArea,
         value: sightUseHomeAreaValue,
+        onChange: () => setState(() {}),
       );
 
       keepScreenOn = SwitchInput(
@@ -221,6 +271,18 @@ class _EditTourPageState extends State<EditTourPage> {
                       sightVehicle,
                       sightVehicleDriver,
                       sightBeaufort,
+                    ],
+                  ),
+                  InputSection(
+                    title: context.l10n.sectionTourTimes,
+                    icon: Icons.schedule,
+                    description: context.l10n.sectionTourTimesInfo,
+                    children: [
+                      sightUseHomeArea,
+                      if (_useHomeArea) ...[
+                        const SizedBox(height: 12),
+                        _homeAreaHint(context),
+                      ],
                       sightDate,
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -230,14 +292,14 @@ class _EditTourPageState extends State<EditTourPage> {
                           Expanded(child: sightTourEnd),
                         ],
                       ),
+                      // the "Tour End" button only exists without home area
+                      if (!_useHomeArea) sightSetEndTour,
                     ],
                   ),
                   InputSection(
                     title: context.l10n.sectionSettings,
                     icon: Icons.tune,
                     children: [
-                      sightSetEndTour,
-                      sightUseHomeArea,
                       keepScreenOn,
                     ],
                   ),

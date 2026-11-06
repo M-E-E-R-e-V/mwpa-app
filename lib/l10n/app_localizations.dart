@@ -1393,7 +1393,7 @@ abstract class AppLocalizations {
   /// No description provided for @sectionDefaultTourInfo.
   ///
   /// In en, this message translates to:
-  /// **'Boat, skipper, wind and tour times are copied into every new sighting and assign it to this tour. Best filled in once a day before setting out.'**
+  /// **'Boat, skipper and wind are copied into every new sighting. Best filled in once a day before setting out.'**
   String get sectionDefaultTourInfo;
 
   /// No description provided for @sectionTour.
@@ -1857,6 +1857,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'+{count} more'**
   String runningMore(int count);
+
+  /// No description provided for @sectionTourTimes.
+  ///
+  /// In en, this message translates to:
+  /// **'Tour times'**
+  String get sectionTourTimes;
+
+  /// No description provided for @sectionTourTimesInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Date and tour start assign every new sighting to this tour.'**
+  String get sectionTourTimesInfo;
+
+  /// No description provided for @homeAreaHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave the home area and date, tour start and tour end are filled in automatically.'**
+  String get homeAreaHint;
+
+  /// No description provided for @homeAreaMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'No home area loaded yet – please sync with the server.'**
+  String get homeAreaMissing;
 }
 
 class _AppLocalizationsDelegate

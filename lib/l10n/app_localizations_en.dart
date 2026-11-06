@@ -737,7 +737,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sectionDefaultTourInfo =>
-      'Boat, skipper, wind and tour times are copied into every new sighting and assign it to this tour. Best filled in once a day before setting out.';
+      'Boat, skipper and wind are copied into every new sighting. Best filled in once a day before setting out.';
 
   @override
   String get sectionTour => 'Tour';
@@ -1028,4 +1028,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String runningMore(int count) {
     return '+$count more';
   }
+
+  @override
+  String get sectionTourTimes => 'Tour times';
+
+  @override
+  String get sectionTourTimesInfo =>
+      'Date and tour start assign every new sighting to this tour.';
+
+  @override
+  String get homeAreaHint =>
+      'Leave the home area and date, tour start and tour end are filled in automatically.';
+
+  @override
+  String get homeAreaMissing =>
+      'No home area loaded yet – please sync with the server.';
 }

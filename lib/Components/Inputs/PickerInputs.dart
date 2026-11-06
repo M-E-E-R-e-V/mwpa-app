@@ -7,13 +7,15 @@ import 'package:mwpaapp/Util/UtilPosition.dart';
 import 'package:provider/provider.dart';
 import 'package:mwpaapp/l10n/l10n.dart';
 
-/// DateInput - date picked with the date picker (value.dateValue).
+/// DateInput - date picked with the date picker (value.dateValue);
+/// [enabled] false shows the value read-only (greyed out).
 class DateInput extends StatefulWidget {
   final String? title;
   final DynInputValue value;
   final VoidCallback? onChange;
+  final bool enabled;
 
-  const DateInput({super.key, this.title, required this.value, this.onChange});
+  const DateInput({super.key, this.title, required this.value, this.onChange, this.enabled = true});
 
   static final DateTime firstDate = DateTime(2015);
   static final DateTime lastDate = DateTime(2040);
@@ -52,19 +54,21 @@ class _DateInputState extends State<DateInput> {
       child: TapField(
         text: DateFormat.yMd().format(widget.value.dateValue),
         icon: Icons.calendar_today_outlined,
-        onTap: _pick,
+        onTap: widget.enabled ? _pick : null,
       ),
     );
   }
 }
 
-/// TimeInput - time of day picked with the time picker (value.timeValue).
+/// TimeInput - time of day picked with the time picker (value.timeValue);
+/// [enabled] false shows the value read-only (greyed out).
 class TimeInput extends StatefulWidget {
   final String? title;
   final DynInputValue value;
   final VoidCallback? onChange;
+  final bool enabled;
 
-  const TimeInput({super.key, this.title, required this.value, this.onChange});
+  const TimeInput({super.key, this.title, required this.value, this.onChange, this.enabled = true});
 
   @override
   State<TimeInput> createState() => _TimeInputState();
@@ -94,7 +98,7 @@ class _TimeInputState extends State<TimeInput> {
         text: widget.value.timeValue?.format(context) ?? '',
         hint: '--:--',
         icon: Icons.schedule,
-        onTap: _pick,
+        onTap: widget.enabled ? _pick : null,
       ),
     );
   }

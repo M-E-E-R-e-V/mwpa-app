@@ -742,7 +742,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get sectionDefaultTourInfo =>
-      'Boot, Skipper, Wind und Tourzeiten werden in jede neue Sichtung übernommen und ordnen sie dieser Tour zu. Am besten einmal am Tag vor der Ausfahrt ausfüllen.';
+      'Boot, Skipper und Wind werden in jede neue Sichtung übernommen. Am besten einmal am Tag vor der Ausfahrt ausfüllen.';
 
   @override
   String get sectionTour => 'Tour';
@@ -1034,4 +1034,19 @@ class AppLocalizationsDe extends AppLocalizations {
   String runningMore(int count) {
     return '+$count weitere';
   }
+
+  @override
+  String get sectionTourTimes => 'Tourzeiten';
+
+  @override
+  String get sectionTourTimesInfo =>
+      'Datum und Tourbeginn ordnen jede neue Sichtung dieser Tour zu.';
+
+  @override
+  String get homeAreaHint =>
+      'Fahr aus dem Heimatgebiet hinaus, dann werden Datum, Tourbeginn und Tourende automatisch ausgefüllt.';
+
+  @override
+  String get homeAreaMissing =>
+      'Noch kein Heimatgebiet geladen – bitte mit dem Server synchronisieren.';
 }

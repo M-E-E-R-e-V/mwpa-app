@@ -215,7 +215,7 @@
   "sectionSettings": "Einstellungen",
   "sectionTimePosition": "Zeit & Position",
   "sectionDefaultTour": "Standard-Tour",
-  "sectionDefaultTourInfo": "Boot, Skipper, Wind und Tourzeiten werden in jede neue Sichtung übernommen und ordnen sie dieser Tour zu. Am besten einmal am Tag vor der Ausfahrt ausfüllen.",
+  "sectionDefaultTourInfo": "Boot, Skipper und Wind werden in jede neue Sichtung übernommen. Am besten einmal am Tag vor der Ausfahrt ausfüllen.",
   "sectionTour": "Tour",
   "selectEmptyList": "<leere Liste>",
   "selectPlease": "<bitte wählen>",
@@ -292,5 +292,9 @@
   "waitForGps": "Bitte auf das GPS-Signal warten.",
   "zoomIn": "Vergrößern",
   "zoomOut": "Verkleinern",
-  "runningMore": "+{count} weitere"
+  "runningMore": "+{count} weitere",
+  "sectionTourTimes": "Tourzeiten",
+  "sectionTourTimesInfo": "Datum und Tourbeginn ordnen jede neue Sichtung dieser Tour zu.",
+  "homeAreaHint": "Fahr aus dem Heimatgebiet hinaus, dann werden Datum, Tourbeginn und Tourende automatisch ausgefüllt.",
+  "homeAreaMissing": "Noch kein Heimatgebiet geladen – bitte mit dem Server synchronisieren."
 }
