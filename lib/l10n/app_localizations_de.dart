@@ -346,7 +346,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'Geändert, wird mit dem nächsten Sync gesendet.';
 
   @override
-  String get helpColorBlue => 'Dunkelblau: Die Sichtung ist vollständig.';
+  String get helpColorBlue => 'Blau: Die Sichtung ist vollständig.';
 
   @override
   String get helpColorGreen => 'Grün: Schnelleintrag einer Schildkröte.';
@@ -357,7 +357,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get helpColorYellow =>
-      'Gelb: Nur das Ende fehlt (Tourende, Endposition) – wird meist später ergänzt.';
+      'Gelb: Nur das Ende fehlt (Tourende, Endposition) oder die Art ist der App unbekannt – wird meist später ergänzt.';
 
   @override
   String get helpColorsTitle => 'Farben und Symbole in der Liste';
@@ -368,7 +368,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get helpGpsIcon =>
-      'Das GPS-Symbol oben: grün = Position OK, orange = wird gesucht, rot = GPS aus. Bei ausgeschaltetem GPS wird die Route nicht aufgezeichnet.';
+      'Das GPS-Symbol oben: grün = Position OK, gelb = wird gesucht, rot = GPS aus. Bei ausgeschaltetem GPS wird die Route nicht aufgezeichnet.';
 
   @override
   String get helpGpsTitle => 'GPS, Akku und Bildschirm';
@@ -390,7 +390,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get helpScreen =>
-      '„Bildschirm anlassen“ in den Tour-Einstellungen hält das Display an, solange die App offen ist.';
+      '„Bildschirm anlassen“ in den Einstellungen hält das Display an, solange die App offen ist.';
 
   @override
   String get helpShowIntro => 'Einführung erneut anzeigen';
@@ -416,7 +416,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get helpTourDefault =>
-      'Boot, Skipper und Wind einmal am Tag unter Menü → „Standard-Tour festlegen“ eintragen. Neue Sichtungen übernehmen diese Werte.';
+      'Boot, Skipper und Wind einmal am Tag unter Menü → „Einstellungen“ eintragen. Neue Sichtungen übernehmen diese Werte.';
 
   @override
   String get helpTourEnd =>
@@ -451,7 +451,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get intro2Text =>
-      'Einmal am Tag die Standard-Tour festlegen. Die App zeichnet die Route auf der Karte auf – mit Heimatgebiet beginnt und endet die Tour sogar von selbst.';
+      'Einmal am Tag die Tour unter „Einstellungen“ festlegen. Die App zeichnet die Route auf der Karte auf – mit Heimatgebiet beginnt und endet die Tour sogar von selbst.';
 
   @override
   String get intro2Title => 'Tour und Route';
@@ -709,7 +709,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'Du kannst trotzdem speichern und später ergänzen.';
 
   @override
-  String get saveDefaultTour => 'Standard-Tour speichern';
+  String get saveSettings => 'Einstellungen speichern';
 
   @override
   String get saveSighting => 'Sichtung speichern';
@@ -738,6 +738,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get sectionTimePosition => 'Zeit & Position';
 
   @override
+  String get sectionDefaultTour => 'Standard-Tour';
+
+  @override
+  String get sectionDefaultTourInfo =>
+      'Boot, Skipper, Wind und Tourzeiten werden in jede neue Sichtung übernommen und ordnen sie dieser Tour zu. Am besten einmal am Tag vor der Ausfahrt ausfüllen.';
+
+  @override
   String get sectionTour => 'Tour';
 
   @override
@@ -763,11 +770,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get sessionNotStarted => 'Die Benutzersitzung wurde nicht gestartet!';
 
   @override
-  String get setDefaultTour => 'Standard-Tour festlegen';
-
-  @override
   String get setDefaultTourFirst =>
-      'Bitte zuerst die Standard-Tour mit Datum und Startzeit festlegen. Bis dahin kann kein Eintrag angelegt werden.';
+      'Bitte zuerst unter Menü → „Einstellungen“ Datum und Startzeit der Tour festlegen. Bis dahin kann kein Eintrag angelegt werden.';
 
   @override
   String get setEndLocation => 'Endposition setzen';
@@ -944,18 +948,18 @@ class AppLocalizationsDe extends AppLocalizations {
   String get toggleTorch => 'Taschenlampe ein/aus';
 
   @override
-  String get tourCloseQuestion =>
-      'Tour ohne Speichern schließen? Alle Änderungen gehen verloren!';
+  String get settingsCloseQuestion =>
+      'Einstellungen ohne Speichern schließen? Alle Änderungen gehen verloren!';
 
   @override
-  String get tourCloseTitle => 'Tour schließen';
+  String get settingsCloseTitle => 'Einstellungen schließen';
 
   @override
   String get tourDateNotCurrent =>
       'Das Tour-Datum ist nicht aktuell, bitte prüfen!';
 
   @override
-  String get tourDateNotSet => 'Tour: kein Standard-Datum gesetzt';
+  String get tourDateNotSet => 'Tour: kein Datum gesetzt';
 
   @override
   String get tourDateTitle => 'Tour-Datum';

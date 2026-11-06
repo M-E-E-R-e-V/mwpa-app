@@ -58,8 +58,8 @@ class _EditTourPageState extends State<EditTourPage> {
   void _confirmClose() {
     ConfirmDialog.show(
       context,
-      context.l10n.tourCloseTitle,
-      context.l10n.tourCloseQuestion,
+      context.l10n.settingsCloseTitle,
+      context.l10n.settingsCloseQuestion,
       (value) {
         if (value == 'ok' && mounted) {
           Navigator.of(context).pop();
@@ -214,8 +214,9 @@ class _EditTourPageState extends State<EditTourPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   InputSection(
-                    title: context.l10n.sectionTour,
+                    title: context.l10n.sectionDefaultTour,
                     icon: Icons.directions_boat_outlined,
+                    description: context.l10n.sectionDefaultTourInfo,
                     children: [
                       sightVehicle,
                       sightVehicleDriver,
@@ -244,7 +245,7 @@ class _EditTourPageState extends State<EditTourPage> {
                   FilledButton.icon(
                     onPressed: _saveTourToPref,
                     icon: const Icon(Icons.save_alt),
-                    label: Text(context.l10n.saveDefaultTour),
+                    label: Text(context.l10n.saveSettings),
                   ),
                 ],
               ),

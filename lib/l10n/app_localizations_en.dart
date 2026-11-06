@@ -344,7 +344,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get helpCloudUpload => 'Changed, will be sent with the next sync.';
 
   @override
-  String get helpColorBlue => 'Dark blue: the sighting is complete.';
+  String get helpColorBlue => 'Blue: the sighting is complete.';
 
   @override
   String get helpColorGreen => 'Green: quick entry of a turtle.';
@@ -355,7 +355,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get helpColorYellow =>
-      'Yellow: only the end is missing (end of tour, end position) – usually filled in later.';
+      'Yellow: only the end is missing (end of tour, end position) or the species is unknown in the app – usually completed later.';
 
   @override
   String get helpColorsTitle => 'Colors and symbols in the list';
@@ -366,7 +366,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get helpGpsIcon =>
-      'The GPS symbol at the top: green = position OK, orange = searching, red = GPS off. With GPS off, the route is not recorded.';
+      'The GPS symbol at the top: green = position OK, yellow = searching, red = GPS off. With GPS off, the route is not recorded.';
 
   @override
   String get helpGpsTitle => 'GPS, battery and screen';
@@ -388,7 +388,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get helpScreen =>
-      '\"Keep screen on\" in the tour settings keeps the display on while the app is open.';
+      '\"Keep screen on\" in the settings keeps the display on while the app is open.';
 
   @override
   String get helpShowIntro => 'Show introduction again';
@@ -414,7 +414,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get helpTourDefault =>
-      'Set boat, skipper and wind once per day under Menu → \"Set default tour\". New sightings take these values.';
+      'Set boat, skipper and wind once per day under Menu → \"Settings\". New sightings take these values.';
 
   @override
   String get helpTourEnd =>
@@ -449,7 +449,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get intro2Text =>
-      'Set the default tour once a day. The app records the route on the map – with home area even starting and ending the tour by itself.';
+      'Set the tour once a day under \"Settings\". The app records the route on the map – with home area even starting and ending the tour by itself.';
 
   @override
   String get intro2Title => 'Tour and route';
@@ -704,7 +704,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get saveAnywayHint => 'You can save anyway and complete it later.';
 
   @override
-  String get saveDefaultTour => 'Save default Tour';
+  String get saveSettings => 'Save settings';
 
   @override
   String get saveSighting => 'Save Sighting';
@@ -733,6 +733,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sectionTimePosition => 'Time & position';
 
   @override
+  String get sectionDefaultTour => 'Default tour';
+
+  @override
+  String get sectionDefaultTourInfo =>
+      'Boat, skipper, wind and tour times are copied into every new sighting and assign it to this tour. Best filled in once a day before setting out.';
+
+  @override
   String get sectionTour => 'Tour';
 
   @override
@@ -758,11 +765,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sessionNotStarted => 'User session is not started!';
 
   @override
-  String get setDefaultTour => 'Set default Tour';
-
-  @override
   String get setDefaultTourFirst =>
-      'Please set the default tour with date and start time beforehand. The entry cannot be added until then.';
+      'Please first set the date and start time of the tour under Menu → \"Settings\". The entry cannot be added until then.';
 
   @override
   String get setEndLocation => 'Set end location';
@@ -938,18 +942,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get toggleTorch => 'Toggle torch';
 
   @override
-  String get tourCloseQuestion =>
-      'Close tour without saving? All changes will be lost!';
+  String get settingsCloseQuestion =>
+      'Close settings without saving? All changes will be lost!';
 
   @override
-  String get tourCloseTitle => 'Tour close';
+  String get settingsCloseTitle => 'Close settings';
 
   @override
   String get tourDateNotCurrent =>
       'The tour date is not current, please check!';
 
   @override
-  String get tourDateNotSet => 'Tour: default date is not set';
+  String get tourDateNotSet => 'Tour: no date set';
 
   @override
   String get tourDateTitle => 'Tour date';

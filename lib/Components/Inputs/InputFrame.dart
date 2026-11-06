@@ -28,16 +28,19 @@ class InputFrame extends StatelessWidget {
   }
 }
 
-/// InputSection - titled card that groups related inputs of a form.
+/// InputSection - titled card that groups related inputs of a form;
+/// [description] is an optional info text below the title.
 class InputSection extends StatelessWidget {
   final String title;
   final IconData icon;
+  final String? description;
   final List<Widget> children;
 
   const InputSection({
     super.key,
     required this.title,
     required this.icon,
+    this.description,
     required this.children,
   });
 
@@ -65,6 +68,16 @@ class InputSection extends StatelessWidget {
                 ),
               ],
             ),
+            if (description != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  description!,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
+              ),
             ...children,
           ],
         ),

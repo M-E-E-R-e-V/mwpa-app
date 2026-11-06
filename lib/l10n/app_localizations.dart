@@ -679,7 +679,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpColorBlue.
   ///
   /// In en, this message translates to:
-  /// **'Dark blue: the sighting is complete.'**
+  /// **'Blue: the sighting is complete.'**
   String get helpColorBlue;
 
   /// No description provided for @helpColorGreen.
@@ -697,7 +697,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpColorYellow.
   ///
   /// In en, this message translates to:
-  /// **'Yellow: only the end is missing (end of tour, end position) – usually filled in later.'**
+  /// **'Yellow: only the end is missing (end of tour, end position) or the species is unknown in the app – usually completed later.'**
   String get helpColorYellow;
 
   /// No description provided for @helpColorsTitle.
@@ -715,7 +715,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpGpsIcon.
   ///
   /// In en, this message translates to:
-  /// **'The GPS symbol at the top: green = position OK, orange = searching, red = GPS off. With GPS off, the route is not recorded.'**
+  /// **'The GPS symbol at the top: green = position OK, yellow = searching, red = GPS off. With GPS off, the route is not recorded.'**
   String get helpGpsIcon;
 
   /// No description provided for @helpGpsTitle.
@@ -751,7 +751,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpScreen.
   ///
   /// In en, this message translates to:
-  /// **'\"Keep screen on\" in the tour settings keeps the display on while the app is open.'**
+  /// **'\"Keep screen on\" in the settings keeps the display on while the app is open.'**
   String get helpScreen;
 
   /// No description provided for @helpShowIntro.
@@ -793,7 +793,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpTourDefault.
   ///
   /// In en, this message translates to:
-  /// **'Set boat, skipper and wind once per day under Menu → \"Set default tour\". New sightings take these values.'**
+  /// **'Set boat, skipper and wind once per day under Menu → \"Settings\". New sightings take these values.'**
   String get helpTourDefault;
 
   /// No description provided for @helpTourEnd.
@@ -853,7 +853,7 @@ abstract class AppLocalizations {
   /// No description provided for @intro2Text.
   ///
   /// In en, this message translates to:
-  /// **'Set the default tour once a day. The app records the route on the map – with home area even starting and ending the tour by itself.'**
+  /// **'Set the tour once a day under \"Settings\". The app records the route on the map – with home area even starting and ending the tour by itself.'**
   String get intro2Text;
 
   /// No description provided for @intro2Title.
@@ -1330,11 +1330,11 @@ abstract class AppLocalizations {
   /// **'You can save anyway and complete it later.'**
   String get saveAnywayHint;
 
-  /// No description provided for @saveDefaultTour.
+  /// No description provided for @saveSettings.
   ///
   /// In en, this message translates to:
-  /// **'Save default Tour'**
-  String get saveDefaultTour;
+  /// **'Save settings'**
+  String get saveSettings;
 
   /// No description provided for @saveSighting.
   ///
@@ -1384,6 +1384,18 @@ abstract class AppLocalizations {
   /// **'Time & position'**
   String get sectionTimePosition;
 
+  /// No description provided for @sectionDefaultTour.
+  ///
+  /// In en, this message translates to:
+  /// **'Default tour'**
+  String get sectionDefaultTour;
+
+  /// No description provided for @sectionDefaultTourInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Boat, skipper, wind and tour times are copied into every new sighting and assign it to this tour. Best filled in once a day before setting out.'**
+  String get sectionDefaultTourInfo;
+
   /// No description provided for @sectionTour.
   ///
   /// In en, this message translates to:
@@ -1426,16 +1438,10 @@ abstract class AppLocalizations {
   /// **'User session is not started!'**
   String get sessionNotStarted;
 
-  /// No description provided for @setDefaultTour.
-  ///
-  /// In en, this message translates to:
-  /// **'Set default Tour'**
-  String get setDefaultTour;
-
   /// No description provided for @setDefaultTourFirst.
   ///
   /// In en, this message translates to:
-  /// **'Please set the default tour with date and start time beforehand. The entry cannot be added until then.'**
+  /// **'Please first set the date and start time of the tour under Menu → \"Settings\". The entry cannot be added until then.'**
   String get setDefaultTourFirst;
 
   /// No description provided for @setEndLocation.
@@ -1702,17 +1708,17 @@ abstract class AppLocalizations {
   /// **'Toggle torch'**
   String get toggleTorch;
 
-  /// No description provided for @tourCloseQuestion.
+  /// No description provided for @settingsCloseQuestion.
   ///
   /// In en, this message translates to:
-  /// **'Close tour without saving? All changes will be lost!'**
-  String get tourCloseQuestion;
+  /// **'Close settings without saving? All changes will be lost!'**
+  String get settingsCloseQuestion;
 
-  /// No description provided for @tourCloseTitle.
+  /// No description provided for @settingsCloseTitle.
   ///
   /// In en, this message translates to:
-  /// **'Tour close'**
-  String get tourCloseTitle;
+  /// **'Close settings'**
+  String get settingsCloseTitle;
 
   /// No description provided for @tourDateNotCurrent.
   ///
@@ -1723,7 +1729,7 @@ abstract class AppLocalizations {
   /// No description provided for @tourDateNotSet.
   ///
   /// In en, this message translates to:
-  /// **'Tour: default date is not set'**
+  /// **'Tour: no date set'**
   String get tourDateNotSet;
 
   /// No description provided for @tourDateTitle.
