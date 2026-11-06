@@ -11,8 +11,8 @@ const Set<String> versionApiMobileSync = {'1.0.2', '1.0.3'};
 
 // App version, shown on the About page. Must match `version:` in
 // pubspec.yaml (checked by test/app_version_test.dart) - no plugin needed.
-const String kAppVersion = '1.1.0';
-const int kAppBuild = 14;
+const String kAppVersion = '1.2.0';
+const int kAppBuild = 15;
 
 /// isDarkMode - true when the active theme of [context] is dark
 bool isDarkMode(BuildContext context) {
