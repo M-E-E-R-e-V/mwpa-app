@@ -375,7 +375,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get helpScreen =>
-      '«Mantener la pantalla encendida» en los ajustes de la salida mantiene la pantalla activa mientras la app está abierta.';
+      '«Mantener la pantalla encendida» en los ajustes mantiene la pantalla activa mientras la app está abierta.';
 
   @override
   String get helpShowIntro => 'Mostrar la introducción de nuevo';
@@ -401,7 +401,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get helpTourDefault =>
-      'Indica barco, patrón y viento una vez al día en Menú → «Definir salida por defecto». Los avistamientos nuevos toman estos valores.';
+      'Indica barco, patrón y viento una vez al día en Menú → «Ajustes». Los avistamientos nuevos toman estos valores.';
 
   @override
   String get helpTourEnd =>
@@ -436,7 +436,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get intro2Text =>
-      'Define la salida por defecto una vez al día. La app registra el recorrido en el mapa; con zona base, la salida incluso empieza y termina sola.';
+      'Define la salida una vez al día en «Ajustes». La app registra el recorrido en el mapa; con zona base, la salida incluso empieza y termina sola.';
 
   @override
   String get intro2Title => 'Salida y recorrido';
@@ -693,7 +693,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Puedes guardar igualmente y completarlo más tarde.';
 
   @override
-  String get saveDefaultTour => 'Guardar salida por defecto';
+  String get saveDefaultTour => 'Guardar ajustes';
 
   @override
   String get saveSighting => 'Guardar avistamiento';
@@ -747,11 +747,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String get sessionNotStarted => '¡La sesión de usuario no se ha iniciado!';
 
   @override
-  String get setDefaultTour => 'Definir salida por defecto';
-
-  @override
   String get setDefaultTourFirst =>
-      'Primero define la salida por defecto con fecha y hora de inicio. Hasta entonces no se puede añadir la entrada.';
+      'Primero indica la fecha y la hora de inicio de la salida en Menú → «Ajustes». Hasta entonces no se puede añadir la entrada.';
 
   @override
   String get setEndLocation => 'Fijar posición final';

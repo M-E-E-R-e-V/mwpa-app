@@ -375,7 +375,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get helpScreen =>
-      '„Bildschirm anlassen“ in den Tour-Einstellungen hält das Display an, solange die App offen ist.';
+      '„Bildschirm anlassen“ in den Einstellungen hält das Display an, solange die App offen ist.';
 
   @override
   String get helpShowIntro => 'Einführung erneut anzeigen';
@@ -401,7 +401,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get helpTourDefault =>
-      'Boot, Skipper und Wind einmal am Tag unter Menü → „Standard-Tour festlegen“ eintragen. Neue Sichtungen übernehmen diese Werte.';
+      'Boot, Skipper und Wind einmal am Tag unter Menü → „Einstellungen“ eintragen. Neue Sichtungen übernehmen diese Werte.';
 
   @override
   String get helpTourEnd =>
@@ -436,7 +436,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get intro2Text =>
-      'Einmal am Tag die Standard-Tour festlegen. Die App zeichnet die Route auf der Karte auf – mit Heimatgebiet beginnt und endet die Tour sogar von selbst.';
+      'Einmal am Tag die Tour unter „Einstellungen“ festlegen. Die App zeichnet die Route auf der Karte auf – mit Heimatgebiet beginnt und endet die Tour sogar von selbst.';
 
   @override
   String get intro2Title => 'Tour und Route';
@@ -694,7 +694,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'Du kannst trotzdem speichern und später ergänzen.';
 
   @override
-  String get saveDefaultTour => 'Standard-Tour speichern';
+  String get saveDefaultTour => 'Einstellungen speichern';
 
   @override
   String get saveSighting => 'Sichtung speichern';
@@ -748,11 +748,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get sessionNotStarted => 'Die Benutzersitzung wurde nicht gestartet!';
 
   @override
-  String get setDefaultTour => 'Standard-Tour festlegen';
-
-  @override
   String get setDefaultTourFirst =>
-      'Bitte zuerst die Standard-Tour mit Datum und Startzeit festlegen. Bis dahin kann kein Eintrag angelegt werden.';
+      'Bitte zuerst unter Menü → „Einstellungen“ Datum und Startzeit der Tour festlegen. Bis dahin kann kein Eintrag angelegt werden.';
 
   @override
   String get setEndLocation => 'Endposition setzen';

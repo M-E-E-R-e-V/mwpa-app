@@ -721,7 +721,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpScreen.
   ///
   /// In en, this message translates to:
-  /// **'\"Keep screen on\" in the tour settings keeps the display on while the app is open.'**
+  /// **'\"Keep screen on\" in the settings keeps the display on while the app is open.'**
   String get helpScreen;
 
   /// No description provided for @helpShowIntro.
@@ -763,7 +763,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpTourDefault.
   ///
   /// In en, this message translates to:
-  /// **'Set boat, skipper and wind once per day under Menu → \"Set default tour\". New sightings take these values.'**
+  /// **'Set boat, skipper and wind once per day under Menu → \"Settings\". New sightings take these values.'**
   String get helpTourDefault;
 
   /// No description provided for @helpTourEnd.
@@ -823,7 +823,7 @@ abstract class AppLocalizations {
   /// No description provided for @intro2Text.
   ///
   /// In en, this message translates to:
-  /// **'Set the default tour once a day. The app records the route on the map – with home area even starting and ending the tour by itself.'**
+  /// **'Set the tour once a day under \"Settings\". The app records the route on the map – with home area even starting and ending the tour by itself.'**
   String get intro2Text;
 
   /// No description provided for @intro2Title.
@@ -1303,7 +1303,7 @@ abstract class AppLocalizations {
   /// No description provided for @saveDefaultTour.
   ///
   /// In en, this message translates to:
-  /// **'Save default Tour'**
+  /// **'Save settings'**
   String get saveDefaultTour;
 
   /// No description provided for @saveSighting.
@@ -1396,16 +1396,10 @@ abstract class AppLocalizations {
   /// **'User session is not started!'**
   String get sessionNotStarted;
 
-  /// No description provided for @setDefaultTour.
-  ///
-  /// In en, this message translates to:
-  /// **'Set default Tour'**
-  String get setDefaultTour;
-
   /// No description provided for @setDefaultTourFirst.
   ///
   /// In en, this message translates to:
-  /// **'Please set the default tour with date and start time beforehand. The entry cannot be added until then.'**
+  /// **'Please first set the date and start time of the tour under Menu → \"Settings\". The entry cannot be added until then.'**
   String get setDefaultTourFirst;
 
   /// No description provided for @setEndLocation.

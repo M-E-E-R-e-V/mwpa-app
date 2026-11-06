@@ -70,7 +70,7 @@ class _EditTourPageState extends State<EditTourPage> {
 
   AppBar _appBar(BuildContext context) {
     return AppBar(
-      title: Text(context.l10n.setDefaultTour),
+      title: Text(context.l10n.settings),
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
         onPressed: _confirmClose,

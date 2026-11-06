@@ -373,7 +373,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get helpScreen =>
-      '\"Keep screen on\" in the tour settings keeps the display on while the app is open.';
+      '\"Keep screen on\" in the settings keeps the display on while the app is open.';
 
   @override
   String get helpShowIntro => 'Show introduction again';
@@ -399,7 +399,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get helpTourDefault =>
-      'Set boat, skipper and wind once per day under Menu → \"Set default tour\". New sightings take these values.';
+      'Set boat, skipper and wind once per day under Menu → \"Settings\". New sightings take these values.';
 
   @override
   String get helpTourEnd =>
@@ -434,7 +434,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get intro2Text =>
-      'Set the default tour once a day. The app records the route on the map – with home area even starting and ending the tour by itself.';
+      'Set the tour once a day under \"Settings\". The app records the route on the map – with home area even starting and ending the tour by itself.';
 
   @override
   String get intro2Title => 'Tour and route';
@@ -689,7 +689,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get saveAnywayHint => 'You can save anyway and complete it later.';
 
   @override
-  String get saveDefaultTour => 'Save default Tour';
+  String get saveDefaultTour => 'Save settings';
 
   @override
   String get saveSighting => 'Save Sighting';
@@ -743,11 +743,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sessionNotStarted => 'User session is not started!';
 
   @override
-  String get setDefaultTour => 'Set default Tour';
-
-  @override
   String get setDefaultTourFirst =>
-      'Please set the default tour with date and start time beforehand. The entry cannot be added until then.';
+      'Please first set the date and start time of the tour under Menu → \"Settings\". The entry cannot be added until then.';
 
   @override
   String get setEndLocation => 'Set end location';

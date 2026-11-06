@@ -310,8 +310,8 @@ class _ListPageState extends State<ListPage>
               value: 'settour',
               child: ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: Icon(Icons.event_note_outlined),
-                title: Text(context.l10n.setDefaultTour),
+                leading: Icon(Icons.settings_outlined),
+                title: Text(context.l10n.settings),
               ),
             ),
             PopupMenuItem(
