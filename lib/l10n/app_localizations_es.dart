@@ -1049,4 +1049,11 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get homeAreaMissing =>
       'Todavía no hay zona base cargada: sincroniza con el servidor.';
+
+  @override
+  String get settingsLoadingData => 'Cargando barcos y patrones del servidor…';
+
+  @override
+  String get settingsNoData =>
+      'Todavía no hay barcos ni patrones cargados: sincroniza con el servidor.';
 }

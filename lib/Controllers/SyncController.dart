@@ -158,6 +158,16 @@ class SyncController extends ChangeNotifier {
     await _run();
   }
 
+  /// syncAfterLogin - first sync of a new login: loads the reference data
+  /// (boats, skippers, species, home area, ...) right away instead of
+  /// waiting for the next automatic check. Runs in the background.
+  Future<Object?> syncAfterLogin() {
+    AppLog.i('Sync', 'after login');
+    _failures = 0;
+
+    return syncNow();
+  }
+
   /// syncNow - sync by hand; waits for a running sync instead of starting a
   /// second one. Returns the error or null.
   Future<Object?> syncNow() {

@@ -501,5 +501,7 @@
   "sectionTourTimes": "Tour times",
   "sectionTourTimesInfo": "Date and tour start assign every new sighting to this tour.",
   "homeAreaHint": "Leave the home area and date, tour start and tour end are filled in automatically.",
-  "homeAreaMissing": "No home area loaded yet – please sync with the server."
+  "homeAreaMissing": "No home area loaded yet – please sync with the server.",
+  "settingsLoadingData": "Boats and skippers are being loaded from the server …",
+  "settingsNoData": "No boats and skippers loaded yet – please sync with the server."
 }

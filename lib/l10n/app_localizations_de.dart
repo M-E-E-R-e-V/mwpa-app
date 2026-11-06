@@ -1049,4 +1049,12 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get homeAreaMissing =>
       'Noch kein Heimatgebiet geladen – bitte mit dem Server synchronisieren.';
+
+  @override
+  String get settingsLoadingData =>
+      'Boote und Skipper werden vom Server geladen …';
+
+  @override
+  String get settingsNoData =>
+      'Noch keine Boote und Skipper geladen – bitte mit dem Server synchronisieren.';
 }

@@ -296,5 +296,7 @@
   "sectionTourTimes": "Horario de la salida",
   "sectionTourTimesInfo": "La fecha y el inicio de la salida asignan cada nuevo avistamiento a esta salida.",
   "homeAreaHint": "Sal de la zona base y la fecha, el inicio y el fin de la salida se rellenan automáticamente.",
-  "homeAreaMissing": "Todavía no hay zona base cargada: sincroniza con el servidor."
+  "homeAreaMissing": "Todavía no hay zona base cargada: sincroniza con el servidor.",
+  "settingsLoadingData": "Cargando barcos y patrones del servidor…",
+  "settingsNoData": "Todavía no hay barcos ni patrones cargados: sincroniza con el servidor."
 }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:mwpaapp/Controllers/SyncController.dart';
 import 'package:mwpaapp/Components/LanguageSelector.dart';
 import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Controllers/PrefController.dart';
@@ -224,6 +225,8 @@ class _LoginPageState extends State<LoginPage> {
         AppLog.i('Login', 'logged in, user ${userInfo.user!.id}');
 
         if (!mounted) return;
+        // boats, skippers, species etc. are needed right away
+        context.read<SyncController>().syncAfterLogin();
         Navigator.of(context).pushNamed('/List');
       } else {
         if (userInfo.organization == null) {

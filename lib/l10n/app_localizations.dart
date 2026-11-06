@@ -1881,6 +1881,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No home area loaded yet – please sync with the server.'**
   String get homeAreaMissing;
+
+  /// No description provided for @settingsLoadingData.
+  ///
+  /// In en, this message translates to:
+  /// **'Boats and skippers are being loaded from the server …'**
+  String get settingsLoadingData;
+
+  /// No description provided for @settingsNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'No boats and skippers loaded yet – please sync with the server.'**
+  String get settingsNoData;
 }
 
 class _AppLocalizationsDelegate

@@ -144,4 +144,17 @@ void main() {
     expect(f.runs, 1);
     f.controller.dispose();
   });
+
+  test('syncAfterLogin syncs right away, also before the login flag is loaded', () async {
+    // right after the login the PrefController is not reloaded yet and the
+    // previous user stopped the automatic sync
+    final f = _Fake()..pending = 0;
+    f.prefs.isLogin = false;
+    f.controller.autoStopped = true;
+
+    expect(await f.controller.syncAfterLogin(), isNull);
+    expect(f.runs, 1);
+    expect(f.controller.autoStopped, isFalse);
+    expect(f.controller.lastSync, f.now);
+  });
 }

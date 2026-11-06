@@ -4,6 +4,7 @@ import 'package:mwpaapp/Components/Inputs/Inputs.dart';
 import 'package:mwpaapp/Controllers/BeaufortController.dart';
 import 'package:mwpaapp/Controllers/LocationController.dart';
 import 'package:mwpaapp/Controllers/PrefController.dart';
+import 'package:mwpaapp/Controllers/SyncController.dart';
 import 'package:mwpaapp/Controllers/VehicleController.dart';
 import 'package:mwpaapp/Controllers/VehicleDriverController.dart';
 import 'package:mwpaapp/Dialog/ConfirmDialog.dart';
@@ -24,6 +25,7 @@ class _EditTourPageState extends State<EditTourPage> {
   late final VehicleController _vehicleController = context.read<VehicleController>();
   late final VehicleDriverController _vehicleDriverController = context.read<VehicleDriverController>();
   late final LocationController _locationController = context.read<LocationController>();
+  late final SyncController _sync = context.read<SyncController>();
 
   late Widget sightVehicle;
   DynInputValue sightVehicleValue = DynInputValue();
@@ -112,6 +114,29 @@ class _EditTourPageState extends State<EditTourPage> {
     Navigator.of(context).pop();
   }
 
+  /// _referenceDataHint - boats/skippers not loaded yet: loading (sync
+  /// running) or a note to sync
+  Widget _referenceDataHint(BuildContext context) {
+    final theme = Theme.of(context);
+    final loading = _sync.running;
+
+    return Row(
+      children: [
+        if (loading)
+          const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2.5))
+        else
+          Icon(Icons.warning_amber_rounded, size: 20, color: theme.colorScheme.error),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            loading ? context.l10n.settingsLoadingData : context.l10n.settingsNoData,
+            style: theme.textTheme.bodyMedium,
+          ),
+        ),
+      ],
+    );
+  }
+
   /// _homeAreaHint - what to do for the automatic tour, with the home area
   /// on a small map (or a note when it is not loaded yet)
   Widget _homeAreaHint(BuildContext context) {
@@ -178,7 +203,7 @@ class _EditTourPageState extends State<EditTourPage> {
     }
 
     return ListenableBuilder(
-      listenable: Listenable.merge([_vehicleController, _vehicleDriverController]),
+      listenable: Listenable.merge([_vehicleController, _vehicleDriverController, _sync]),
       builder: (_, __) {
       sightVehicle = SelectInput(
         title: context.l10n.labelBoat,
@@ -268,6 +293,12 @@ class _EditTourPageState extends State<EditTourPage> {
                     icon: Icons.directions_boat_outlined,
                     description: context.l10n.sectionDefaultTourInfo,
                     children: [
+                      // first login: the lists come with the first sync
+                      if (_vehicleController.vehicleList.isEmpty ||
+                          _vehicleDriverController.vehicleDriverList.isEmpty) ...[
+                        const SizedBox(height: 12),
+                        _referenceDataHint(context),
+                      ],
                       sightVehicle,
                       sightVehicleDriver,
                       sightBeaufort,

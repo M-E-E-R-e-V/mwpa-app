@@ -296,5 +296,7 @@
   "sectionTourTimes": "Tourzeiten",
   "sectionTourTimesInfo": "Datum und Tourbeginn ordnen jede neue Sichtung dieser Tour zu.",
   "homeAreaHint": "Fahr aus dem Heimatgebiet hinaus, dann werden Datum, Tourbeginn und Tourende automatisch ausgefüllt.",
-  "homeAreaMissing": "Noch kein Heimatgebiet geladen – bitte mit dem Server synchronisieren."
+  "homeAreaMissing": "Noch kein Heimatgebiet geladen – bitte mit dem Server synchronisieren.",
+  "settingsLoadingData": "Boote und Skipper werden vom Server geladen …",
+  "settingsNoData": "Noch keine Boote und Skipper geladen – bitte mit dem Server synchronisieren."
 }

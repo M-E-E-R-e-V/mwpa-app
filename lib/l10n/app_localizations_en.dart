@@ -1043,4 +1043,12 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get homeAreaMissing =>
       'No home area loaded yet – please sync with the server.';
+
+  @override
+  String get settingsLoadingData =>
+      'Boats and skippers are being loaded from the server …';
+
+  @override
+  String get settingsNoData =>
+      'No boats and skippers loaded yet – please sync with the server.';
 }
