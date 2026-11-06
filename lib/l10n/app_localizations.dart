@@ -106,6 +106,12 @@ abstract class AppLocalizations {
   /// **'About'**
   String get about;
 
+  /// No description provided for @aboutAllContributors.
+  ///
+  /// In en, this message translates to:
+  /// **'All contributors on GitHub'**
+  String get aboutAllContributors;
+
   /// No description provided for @aboutAppSource.
   ///
   /// In en, this message translates to:
@@ -118,11 +124,29 @@ abstract class AppLocalizations {
   /// **'Connection'**
   String get aboutConnection;
 
+  /// No description provided for @aboutContributors.
+  ///
+  /// In en, this message translates to:
+  /// **'Contributors'**
+  String get aboutContributors;
+
   /// No description provided for @aboutDevelopment.
   ///
   /// In en, this message translates to:
   /// **'Software development'**
   String get aboutDevelopment;
+
+  /// No description provided for @aboutImprint.
+  ///
+  /// In en, this message translates to:
+  /// **'Imprint'**
+  String get aboutImprint;
+
+  /// No description provided for @aboutLegal.
+  ///
+  /// In en, this message translates to:
+  /// **'Legal'**
+  String get aboutLegal;
 
   /// No description provided for @aboutLocalData.
   ///
@@ -148,6 +172,12 @@ abstract class AppLocalizations {
   /// **'Not synced yet'**
   String get aboutNotSynced;
 
+  /// No description provided for @aboutPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy policy'**
+  String get aboutPrivacy;
+
   /// No description provided for @aboutProject.
   ///
   /// In en, this message translates to:
@@ -159,6 +189,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'MWPA collects and analyses data of whale and dolphin watching. This app records sightings and tour tracks, also offline, and syncs them with an MWPA server. A project of M.E.E.R. e.V.'**
   String get aboutProjectText;
+
+  /// No description provided for @aboutRoleDevelopment.
+  ///
+  /// In en, this message translates to:
+  /// **'Software development'**
+  String get aboutRoleDevelopment;
 
   /// No description provided for @aboutServer.
   ///
@@ -649,7 +685,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpColorBlue.
   ///
   /// In en, this message translates to:
-  /// **'Blue: the sighting is complete.'**
+  /// **'Dark blue: the sighting is complete.'**
   String get helpColorBlue;
 
   /// No description provided for @helpColorGreen.
@@ -667,7 +703,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpColorYellow.
   ///
   /// In en, this message translates to:
-  /// **'Yellow: only the end is missing (end of tour, end position) or the species is unknown in the app – usually completed later.'**
+  /// **'Yellow: only the end is missing (end of tour, end position) – usually filled in later.'**
   String get helpColorYellow;
 
   /// No description provided for @helpColorsTitle.
@@ -685,7 +721,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpGpsIcon.
   ///
   /// In en, this message translates to:
-  /// **'The GPS symbol at the top: green = position OK, yellow = searching, red = GPS off. With GPS off, the route is not recorded.'**
+  /// **'The GPS symbol at the top: green = position OK, orange = searching, red = GPS off. With GPS off, the route is not recorded.'**
   String get helpGpsIcon;
 
   /// No description provided for @helpGpsTitle.
@@ -721,7 +757,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpScreen.
   ///
   /// In en, this message translates to:
-  /// **'\"Keep screen on\" in the settings keeps the display on while the app is open.'**
+  /// **'\"Keep screen on\" in the tour settings keeps the display on while the app is open.'**
   String get helpScreen;
 
   /// No description provided for @helpShowIntro.
@@ -763,7 +799,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpTourDefault.
   ///
   /// In en, this message translates to:
-  /// **'Set boat, skipper and wind once per day under Menu → \"Settings\". New sightings take these values.'**
+  /// **'Set boat, skipper and wind once per day under Menu → \"Set default tour\". New sightings take these values.'**
   String get helpTourDefault;
 
   /// No description provided for @helpTourEnd.
@@ -823,7 +859,7 @@ abstract class AppLocalizations {
   /// No description provided for @intro2Text.
   ///
   /// In en, this message translates to:
-  /// **'Set the tour once a day under \"Settings\". The app records the route on the map – with home area even starting and ending the tour by itself.'**
+  /// **'Set the default tour once a day. The app records the route on the map – with home area even starting and ending the tour by itself.'**
   String get intro2Text;
 
   /// No description provided for @intro2Title.
@@ -1303,7 +1339,7 @@ abstract class AppLocalizations {
   /// No description provided for @saveDefaultTour.
   ///
   /// In en, this message translates to:
-  /// **'Save settings'**
+  /// **'Save default Tour'**
   String get saveDefaultTour;
 
   /// No description provided for @saveSighting.
@@ -1396,10 +1432,16 @@ abstract class AppLocalizations {
   /// **'User session is not started!'**
   String get sessionNotStarted;
 
+  /// No description provided for @setDefaultTour.
+  ///
+  /// In en, this message translates to:
+  /// **'Set default Tour'**
+  String get setDefaultTour;
+
   /// No description provided for @setDefaultTourFirst.
   ///
   /// In en, this message translates to:
-  /// **'Please first set the date and start time of the tour under Menu → \"Settings\". The entry cannot be added until then.'**
+  /// **'Please set the default tour with date and start time beforehand. The entry cannot be added until then.'**
   String get setDefaultTourFirst;
 
   /// No description provided for @setEndLocation.

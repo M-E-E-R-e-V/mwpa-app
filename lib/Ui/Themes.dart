@@ -18,10 +18,15 @@ class Themes {
     secondary: kButtonBackgroundColor,
   );
 
+  /// buttons/links on the dark background: the brand blues are too dark
+  /// there (same value as inputAccentColor)
+  static const Color darkAccent = Color(0xff9ec3ff);
+
   static final light = _build(_lightScheme);
   static final dark = _build(_darkScheme);
 
   static ThemeData _build(ColorScheme scheme) {
+    final dark = scheme.brightness == Brightness.dark;
     final base = ThemeData(
       colorScheme: scheme,
       useMaterial3: true,
@@ -95,13 +100,13 @@ class Themes {
             fontWeight: FontWeight.w700,
             fontSize: 16,
           ),
-          side: const BorderSide(color: kPrimaryColor, width: 1.4),
-          foregroundColor: kPrimaryColor,
+          side: BorderSide(color: dark ? darkAccent : kPrimaryColor, width: 1.4),
+          foregroundColor: dark ? darkAccent : kPrimaryColor,
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: scheme.primary,
+          foregroundColor: dark ? darkAccent : scheme.primary,
           textStyle: latoStyle(fontWeight: FontWeight.w600),
         ),
       ),

@@ -12,13 +12,25 @@ class AppLocalizationsEs extends AppLocalizations {
   String get about => 'Acerca de';
 
   @override
+  String get aboutAllContributors => 'Todos los colaboradores en GitHub';
+
+  @override
   String get aboutAppSource => 'Código fuente de la app';
 
   @override
   String get aboutConnection => 'Conexión';
 
   @override
+  String get aboutContributors => 'Colaboradores';
+
+  @override
   String get aboutDevelopment => 'Desarrollo de software';
+
+  @override
+  String get aboutImprint => 'Aviso legal';
+
+  @override
+  String get aboutLegal => 'Información legal';
 
   @override
   String get aboutLocalData => 'Datos en este dispositivo';
@@ -33,11 +45,17 @@ class AppLocalizationsEs extends AppLocalizations {
   String get aboutNotSynced => 'Aún sin sincronizar';
 
   @override
+  String get aboutPrivacy => 'Política de privacidad';
+
+  @override
   String get aboutProject => 'Proyecto';
 
   @override
   String get aboutProjectText =>
       'MWPA recoge y analiza datos de la observación de ballenas y delfines. Esta app registra avistamientos y recorridos, también sin conexión, y los sincroniza con un servidor MWPA. Un proyecto de M.E.E.R. e.V.';
+
+  @override
+  String get aboutRoleDevelopment => 'Desarrollo de software';
 
   @override
   String get aboutServer => 'Servidor';
@@ -331,7 +349,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Modificado, se enviará con la próxima sincronización.';
 
   @override
-  String get helpColorBlue => 'Azul: el avistamiento está completo.';
+  String get helpColorBlue => 'Azul oscuro: el avistamiento está completo.';
 
   @override
   String get helpColorGreen => 'Verde: entrada rápida de una tortuga.';
@@ -342,7 +360,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get helpColorYellow =>
-      'Amarillo: solo falta el final (fin de la salida, posición final) o la especie no es conocida en la app; suele completarse más tarde.';
+      'Amarillo: solo falta el final (fin de la salida, posición final); suele completarse más tarde.';
 
   @override
   String get helpColorsTitle => 'Colores y símbolos de la lista';
@@ -353,7 +371,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get helpGpsIcon =>
-      'El símbolo de GPS arriba: verde = posición correcta, amarillo = buscando, rojo = GPS apagado. Con el GPS apagado no se registra el recorrido.';
+      'El símbolo de GPS arriba: verde = posición correcta, naranja = buscando, rojo = GPS apagado. Con el GPS apagado no se registra el recorrido.';
 
   @override
   String get helpGpsTitle => 'GPS, batería y pantalla';
@@ -375,7 +393,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get helpScreen =>
-      '«Mantener la pantalla encendida» en los ajustes mantiene la pantalla activa mientras la app está abierta.';
+      '«Mantener la pantalla encendida» en los ajustes de la salida mantiene la pantalla activa mientras la app está abierta.';
 
   @override
   String get helpShowIntro => 'Mostrar la introducción de nuevo';
@@ -401,11 +419,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get helpTourDefault =>
-      'Indica barco, patrón y viento una vez al día en Menú → «Ajustes». Los avistamientos nuevos toman estos valores.';
+      'Indica barco, patrón y viento una vez al día en Menú → «Fijar salida predeterminada». Los avistamientos nuevos toman estos valores.';
 
   @override
   String get helpTourEnd =>
-      'Sin zona base, termina la salida con el botón «Fin de la salida»; después verás un resumen.';
+      'Sin zona base, termina la salida con el botón «Fin de salida»; después verás un resumen.';
 
   @override
   String get helpTourHomeArea =>
@@ -436,7 +454,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get intro2Text =>
-      'Define la salida una vez al día en «Ajustes». La app registra el recorrido en el mapa; con zona base, la salida incluso empieza y termina sola.';
+      'Fija la salida predeterminada una vez al día. La app registra el recorrido en el mapa; con zona base, la salida incluso empieza y termina sola.';
 
   @override
   String get intro2Title => 'Salida y recorrido';
@@ -693,7 +711,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Puedes guardar igualmente y completarlo más tarde.';
 
   @override
-  String get saveDefaultTour => 'Guardar ajustes';
+  String get saveDefaultTour => 'Guardar salida por defecto';
 
   @override
   String get saveSighting => 'Guardar avistamiento';
@@ -747,8 +765,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get sessionNotStarted => '¡La sesión de usuario no se ha iniciado!';
 
   @override
+  String get setDefaultTour => 'Definir salida por defecto';
+
+  @override
   String get setDefaultTourFirst =>
-      'Primero indica la fecha y la hora de inicio de la salida en Menú → «Ajustes». Hasta entonces no se puede añadir la entrada.';
+      'Primero define la salida por defecto con fecha y hora de inicio. Hasta entonces no se puede añadir la entrada.';
 
   @override
   String get setEndLocation => 'Fijar posición final';

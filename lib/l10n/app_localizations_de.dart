@@ -12,13 +12,25 @@ class AppLocalizationsDe extends AppLocalizations {
   String get about => 'Über';
 
   @override
+  String get aboutAllContributors => 'Alle Mitwirkenden auf GitHub';
+
+  @override
   String get aboutAppSource => 'Quellcode der App';
 
   @override
   String get aboutConnection => 'Verbindung';
 
   @override
+  String get aboutContributors => 'Mitwirkende';
+
+  @override
   String get aboutDevelopment => 'Softwareentwicklung';
+
+  @override
+  String get aboutImprint => 'Impressum';
+
+  @override
+  String get aboutLegal => 'Rechtliches';
 
   @override
   String get aboutLocalData => 'Daten auf diesem Gerät';
@@ -33,11 +45,17 @@ class AppLocalizationsDe extends AppLocalizations {
   String get aboutNotSynced => 'Noch nicht synchronisiert';
 
   @override
+  String get aboutPrivacy => 'Datenschutzerklärung';
+
+  @override
   String get aboutProject => 'Projekt';
 
   @override
   String get aboutProjectText =>
       'MWPA erfasst und analysiert Daten aus der Wal- und Delfinbeobachtung. Diese App zeichnet Sichtungen und Tourverläufe auf – auch offline – und synchronisiert sie mit einem MWPA-Server. Ein Projekt von M.E.E.R. e.V.';
+
+  @override
+  String get aboutRoleDevelopment => 'Softwareentwicklung';
 
   @override
   String get aboutServer => 'Server';
@@ -331,7 +349,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'Geändert, wird mit dem nächsten Sync gesendet.';
 
   @override
-  String get helpColorBlue => 'Blau: Die Sichtung ist vollständig.';
+  String get helpColorBlue => 'Dunkelblau: Die Sichtung ist vollständig.';
 
   @override
   String get helpColorGreen => 'Grün: Schnelleintrag einer Schildkröte.';
@@ -342,7 +360,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get helpColorYellow =>
-      'Gelb: Nur das Ende fehlt (Tourende, Endposition) oder die Art ist der App unbekannt – wird meist später ergänzt.';
+      'Gelb: Nur das Ende fehlt (Tourende, Endposition) – wird meist später ergänzt.';
 
   @override
   String get helpColorsTitle => 'Farben und Symbole in der Liste';
@@ -353,7 +371,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get helpGpsIcon =>
-      'Das GPS-Symbol oben: grün = Position OK, gelb = wird gesucht, rot = GPS aus. Bei ausgeschaltetem GPS wird die Route nicht aufgezeichnet.';
+      'Das GPS-Symbol oben: grün = Position OK, orange = wird gesucht, rot = GPS aus. Bei ausgeschaltetem GPS wird die Route nicht aufgezeichnet.';
 
   @override
   String get helpGpsTitle => 'GPS, Akku und Bildschirm';
@@ -375,7 +393,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get helpScreen =>
-      '„Bildschirm anlassen“ in den Einstellungen hält das Display an, solange die App offen ist.';
+      '„Bildschirm anlassen“ in den Tour-Einstellungen hält das Display an, solange die App offen ist.';
 
   @override
   String get helpShowIntro => 'Einführung erneut anzeigen';
@@ -401,7 +419,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get helpTourDefault =>
-      'Boot, Skipper und Wind einmal am Tag unter Menü → „Einstellungen“ eintragen. Neue Sichtungen übernehmen diese Werte.';
+      'Boot, Skipper und Wind einmal am Tag unter Menü → „Standard-Tour festlegen“ eintragen. Neue Sichtungen übernehmen diese Werte.';
 
   @override
   String get helpTourEnd =>
@@ -436,7 +454,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get intro2Text =>
-      'Einmal am Tag die Tour unter „Einstellungen“ festlegen. Die App zeichnet die Route auf der Karte auf – mit Heimatgebiet beginnt und endet die Tour sogar von selbst.';
+      'Einmal am Tag die Standard-Tour festlegen. Die App zeichnet die Route auf der Karte auf – mit Heimatgebiet beginnt und endet die Tour sogar von selbst.';
 
   @override
   String get intro2Title => 'Tour und Route';
@@ -694,7 +712,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'Du kannst trotzdem speichern und später ergänzen.';
 
   @override
-  String get saveDefaultTour => 'Einstellungen speichern';
+  String get saveDefaultTour => 'Standard-Tour speichern';
 
   @override
   String get saveSighting => 'Sichtung speichern';
@@ -748,8 +766,11 @@ class AppLocalizationsDe extends AppLocalizations {
   String get sessionNotStarted => 'Die Benutzersitzung wurde nicht gestartet!';
 
   @override
+  String get setDefaultTour => 'Standard-Tour festlegen';
+
+  @override
   String get setDefaultTourFirst =>
-      'Bitte zuerst unter Menü → „Einstellungen“ Datum und Startzeit der Tour festlegen. Bis dahin kann kein Eintrag angelegt werden.';
+      'Bitte zuerst die Standard-Tour mit Datum und Startzeit festlegen. Bis dahin kann kein Eintrag angelegt werden.';
 
   @override
   String get setEndLocation => 'Endposition setzen';

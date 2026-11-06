@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mwpaapp/Ui/Themes.dart';
 
 /// InputFrame - common layout of every form input: optional [title] above
 /// the input [child], with the standard spacing to the previous input.
@@ -119,7 +120,7 @@ Color inputAccentColor(BuildContext context) {
   final theme = Theme.of(context);
 
   return theme.brightness == Brightness.dark
-      ? const Color(0xff9ec3ff)
+      ? Themes.darkAccent
       : theme.colorScheme.primary;
 }
 

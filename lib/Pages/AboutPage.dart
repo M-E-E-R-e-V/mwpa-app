@@ -24,6 +24,15 @@ class AboutPage extends StatefulWidget {
   static const String developerName = 'Pegenau GmbH & Co. KG';
   static const String osmCopyrightUrl = 'https://www.openstreetmap.org/copyright';
   static const String developerUrl = 'https://www.pegenau.de/';
+  static const String imprintUrl = 'https://m-e-e-r.de/impressum/';
+  static const String privacyUrl = 'https://m-e-e-r.de/datenschutz/';
+  static const String contributorsUrl = 'https://github.com/M-E-E-R-e-V/mwpa-app/graphs/contributors';
+
+  /// people named on the page: name, role (null: development), link
+  static const List<(String, String?, String)> contributors = [
+    ('Stefan Werfling', null, 'https://github.com/stefanwerfling'),
+    ('Tina Sommer', 'M.E.E.R. e.V.', 'https://m-e-e-r.de/verein/team/'),
+  ];
 
   @override
   State<AboutPage> createState() => _AboutPageState();
@@ -216,6 +225,47 @@ class _AboutPageState extends State<AboutPage> {
                   label: context.l10n.aboutDevelopment,
                   value: '${AboutPage.developerName}\n${AboutPage.developerUrl}',
                   onTap: () => _copy(AboutPage.developerUrl),
+                ),
+              ],
+            ),
+
+            // contributors --------------------------------------------------
+            InputSection(
+              title: context.l10n.aboutContributors,
+              icon: Icons.people_outline,
+              children: [
+                for (final (name, role, url) in AboutPage.contributors)
+                  _InfoTile(
+                    icon: Icons.person_outline,
+                    label: name,
+                    value: '${role ?? context.l10n.aboutRoleDevelopment}\n$url',
+                    onTap: () => _copy(url),
+                  ),
+                _InfoTile(
+                  icon: Icons.groups_outlined,
+                  label: context.l10n.aboutAllContributors,
+                  value: AboutPage.contributorsUrl,
+                  onTap: () => _copy(AboutPage.contributorsUrl),
+                ),
+              ],
+            ),
+
+            // legal (provider of the app: M.E.E.R. e.V.) ----------------------
+            InputSection(
+              title: context.l10n.aboutLegal,
+              icon: Icons.gavel_outlined,
+              children: [
+                _InfoTile(
+                  icon: Icons.badge_outlined,
+                  label: context.l10n.aboutImprint,
+                  value: AboutPage.imprintUrl,
+                  onTap: () => _copy(AboutPage.imprintUrl),
+                ),
+                _InfoTile(
+                  icon: Icons.privacy_tip_outlined,
+                  label: context.l10n.aboutPrivacy,
+                  value: AboutPage.privacyUrl,
+                  onTap: () => _copy(AboutPage.privacyUrl),
                 ),
               ],
             ),
