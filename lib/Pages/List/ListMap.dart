@@ -8,6 +8,7 @@ import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Controllers/LocationController.dart';
 import 'package:mwpaapp/Controllers/SightingController.dart';
 import 'package:mwpaapp/Util/UtilPosition.dart';
+import 'package:mwpaapp/Ui/MapStyle.dart';
 import 'package:mwpaapp/Util/UtilTileServer.dart';
 import 'package:provider/provider.dart';
 import 'package:mwpaapp/Util/AppLog.dart';
@@ -181,6 +182,7 @@ class _ListMapState extends State<ListMap> {
                 TileLayer(
                   urlTemplate: UtilTileServer.openStreetMapUrlTemplate,
                   userAgentPackageName: UtilTileServer.userAgentPackageName,
+                  tileBuilder: MapStyle.tileBuilder,
                 ),
 
                 // Home Area Polygon -------------------------------------------

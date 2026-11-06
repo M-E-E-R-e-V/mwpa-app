@@ -3,6 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:mwpaapp/Controllers/LocationController.dart';
 import 'package:mwpaapp/Util/UtilLocation.dart';
+import 'package:mwpaapp/Ui/MapStyle.dart';
 import 'package:mwpaapp/Util/UtilTileServer.dart';
 import 'package:provider/provider.dart';
 
@@ -39,6 +40,7 @@ class HomeAreaMap extends StatelessWidget {
                 TileLayer(
                   urlTemplate: UtilTileServer.openStreetMapUrlTemplate,
                   userAgentPackageName: UtilTileServer.userAgentPackageName,
+                  tileBuilder: MapStyle.tileBuilder,
                 ),
                 PolygonLayer(
                   polygons: [
