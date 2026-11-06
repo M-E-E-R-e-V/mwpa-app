@@ -40,6 +40,27 @@ class Themes {
           .apply(fontFamily: kFontFamily),
     );
 
+    final inputTheme = InputDecorationTheme(
+      filled: true,
+      fillColor: scheme.brightness == Brightness.dark
+          ? scheme.surfaceContainerHighest
+          : Colors.white,
+      contentPadding:
+          const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: scheme.outlineVariant),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: scheme.outlineVariant),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: scheme.primary, width: 1.6),
+      ),
+    );
+
     return base.copyWith(
       appBarTheme: AppBarTheme(
         backgroundColor: kPrimaryHeaderColor,
@@ -56,26 +77,10 @@ class Themes {
         ),
         iconTheme: const IconThemeData(color: kButtonFontColor),
       ),
-      inputDecorationTheme: InputDecorationTheme(
-        filled: true,
-        fillColor: scheme.brightness == Brightness.dark
-            ? scheme.surfaceContainerHighest
-            : Colors.white,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: scheme.outlineVariant),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: scheme.outlineVariant),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: scheme.primary, width: 1.6),
-        ),
-      ),
+      inputDecorationTheme: inputTheme,
+      // DropdownMenu ignores inputDecorationTheme and is unfilled by
+      // default - without this the select boxes look disabled
+      dropdownMenuTheme: DropdownMenuThemeData(inputDecorationTheme: inputTheme),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
