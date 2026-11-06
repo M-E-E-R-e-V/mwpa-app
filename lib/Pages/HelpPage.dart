@@ -23,73 +23,77 @@ class HelpPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.help)),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
-        children: [
-          _Section(
-            icon: Icons.palette_outlined,
-            title: l10n.helpColorsTitle,
-            initiallyExpanded: true,
-            children: [
-              _Stripe(color: scheme.error, text: l10n.helpColorRed),
-              _Stripe(color: _warningColor, text: l10n.helpColorYellow),
-              _Stripe(color: _turtleColor, text: l10n.helpColorGreen),
-              _Stripe(color: inputAccentColor(context), text: l10n.helpColorBlue),
-              const Divider(height: 24),
-              _Item(icon: Icons.cloud_off_outlined, text: l10n.helpCloudOff),
-              _Item(icon: Icons.cloud_upload_outlined, color: _warningColor, text: l10n.helpCloudUpload),
-              _Item(icon: Icons.cloud_done_outlined, color: _turtleColor, text: l10n.helpCloudDone),
-              const Divider(height: 24),
-              _Item(icon: Icons.info_outline, text: l10n.helpMissingHints),
-            ],
-          ),
-          _Section(
-            icon: Icons.directions_boat_outlined,
-            title: l10n.helpTourTitle,
-            children: [
-              _Item(icon: Icons.event_note_outlined, text: l10n.helpTourDefault),
-              _Item(icon: Icons.home_outlined, text: l10n.helpTourHomeArea),
-              _Item(icon: Icons.flag_outlined, text: l10n.helpTourEnd),
-              _Item(icon: Icons.route_outlined, color: kButtonBackgroundColor, text: l10n.helpTourRoute),
-            ],
-          ),
-          _Section(
-            icon: Icons.sync,
-            title: l10n.helpSyncTitle,
-            children: [
-              _Item(icon: Icons.phone_android, text: l10n.helpSyncOffline),
-              _Item(icon: Icons.cloud_sync_outlined, text: l10n.helpSyncAuto),
-              _Item(icon: Icons.sync, text: l10n.helpSyncManual),
-              _Item(icon: Icons.map_outlined, text: l10n.helpSyncMap),
-            ],
-          ),
-          _Section(
-            icon: Icons.gps_fixed,
-            title: l10n.helpGpsTitle,
-            children: [
-              _Item(icon: Icons.gps_fixed, color: _gpsOkColor, text: l10n.helpGpsIcon),
-              _Item(icon: Icons.notifications_outlined, text: l10n.helpGpsBackground),
-              _Item(icon: Icons.battery_alert_outlined, color: scheme.error, text: l10n.helpBattery),
-              _Item(icon: Icons.light_mode_outlined, text: l10n.helpScreen),
-            ],
-          ),
-          _Section(
-            icon: Icons.bolt_outlined,
-            title: l10n.helpQuickTitle,
-            children: [
-              _Item(icon: AppIcons.tortoise, color: _turtleColor, text: l10n.helpQuick),
-              _Item(icon: Icons.add_location_alt_outlined, text: l10n.helpQuickEnd),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Center(
-            child: OutlinedButton.icon(
-              icon: const Icon(Icons.slideshow_outlined),
-              label: Text(l10n.helpShowIntro),
-              onPressed: () => IntroPage.show(context),
+      // edge-to-edge (Android 15+): keep the last button clear of the navigation bar
+      body: SafeArea(
+        top: false,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
+          children: [
+            _Section(
+              icon: Icons.palette_outlined,
+              title: l10n.helpColorsTitle,
+              initiallyExpanded: true,
+              children: [
+                _Stripe(color: scheme.error, text: l10n.helpColorRed),
+                _Stripe(color: _warningColor, text: l10n.helpColorYellow),
+                _Stripe(color: _turtleColor, text: l10n.helpColorGreen),
+                _Stripe(color: inputAccentColor(context), text: l10n.helpColorBlue),
+                const Divider(height: 24),
+                _Item(icon: Icons.cloud_off_outlined, text: l10n.helpCloudOff),
+                _Item(icon: Icons.cloud_upload_outlined, color: _warningColor, text: l10n.helpCloudUpload),
+                _Item(icon: Icons.cloud_done_outlined, color: _turtleColor, text: l10n.helpCloudDone),
+                const Divider(height: 24),
+                _Item(icon: Icons.info_outline, text: l10n.helpMissingHints),
+              ],
             ),
-          ),
-        ],
+            _Section(
+              icon: Icons.directions_boat_outlined,
+              title: l10n.helpTourTitle,
+              children: [
+                _Item(icon: Icons.event_note_outlined, text: l10n.helpTourDefault),
+                _Item(icon: Icons.home_outlined, text: l10n.helpTourHomeArea),
+                _Item(icon: Icons.flag_outlined, text: l10n.helpTourEnd),
+                _Item(icon: Icons.route_outlined, color: kButtonBackgroundColor, text: l10n.helpTourRoute),
+              ],
+            ),
+            _Section(
+              icon: Icons.sync,
+              title: l10n.helpSyncTitle,
+              children: [
+                _Item(icon: Icons.phone_android, text: l10n.helpSyncOffline),
+                _Item(icon: Icons.cloud_sync_outlined, text: l10n.helpSyncAuto),
+                _Item(icon: Icons.sync, text: l10n.helpSyncManual),
+                _Item(icon: Icons.map_outlined, text: l10n.helpSyncMap),
+              ],
+            ),
+            _Section(
+              icon: Icons.gps_fixed,
+              title: l10n.helpGpsTitle,
+              children: [
+                _Item(icon: Icons.gps_fixed, color: _gpsOkColor, text: l10n.helpGpsIcon),
+                _Item(icon: Icons.notifications_outlined, text: l10n.helpGpsBackground),
+                _Item(icon: Icons.battery_alert_outlined, color: scheme.error, text: l10n.helpBattery),
+                _Item(icon: Icons.light_mode_outlined, text: l10n.helpScreen),
+              ],
+            ),
+            _Section(
+              icon: Icons.bolt_outlined,
+              title: l10n.helpQuickTitle,
+              children: [
+                _Item(icon: AppIcons.tortoise, color: _turtleColor, text: l10n.helpQuick),
+                _Item(icon: Icons.add_location_alt_outlined, text: l10n.helpQuickEnd),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Center(
+              child: OutlinedButton.icon(
+                icon: const Icon(Icons.slideshow_outlined),
+                label: Text(l10n.helpShowIntro),
+                onPressed: () => IntroPage.show(context),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

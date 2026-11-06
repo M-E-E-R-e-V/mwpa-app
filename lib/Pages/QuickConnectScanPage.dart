@@ -82,7 +82,8 @@ class _QuickConnectScanPageState extends State<QuickConnectScanPage> {
           Positioned(
             left: 0,
             right: 0,
-            bottom: 40,
+            // edge-to-edge: above the navigation bar
+            bottom: 40 + MediaQuery.viewPaddingOf(context).bottom,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32),
               child: Text(
