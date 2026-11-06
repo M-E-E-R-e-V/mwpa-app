@@ -381,7 +381,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get helpQuickEnd =>
-      'When the animals are gone, tap the pin button on the sighting in the list to set the end position and time.';
+      'Sightings of the running tour without end position are shown as small labels on the map. When the animals are gone, tap the pin button there (or on the sighting in the list) to set the end position and time.';
 
   @override
   String get helpQuickTitle => 'Quick entry';
@@ -1023,4 +1023,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get zoomOut => 'Zoom out';
+
+  @override
+  String runningMore(int count) {
+    return '+$count more';
+  }
 }

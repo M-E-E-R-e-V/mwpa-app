@@ -106,7 +106,7 @@
   "helpGpsTitle": "GPS, Akku und Bildschirm",
   "helpMissingHints": "Im Formular zeigt oben eine Karte die leeren Pflichtfelder und auffällige Werte. Ein Tipp auf einen Hinweis springt zum Feld. Speichern geht immer.",
   "helpQuick": "„Schildkröte“ speichert eine Schildkröte mit aktueller Position und Uhrzeit mit zwei Tipps. „Sichtung“ öffnet das vollständige Formular.",
-  "helpQuickEnd": "Sind die Tiere weg, setzt der Stecknadel-Knopf an der Sichtung in der Liste Endposition und -zeit.",
+  "helpQuickEnd": "Sichtungen der laufenden Tour ohne Endposition stehen als kleine Labels auf der Karte. Sind die Tiere weg, setzt der Stecknadel-Knopf dort (oder an der Sichtung in der Liste) Endposition und -zeit.",
   "helpQuickTitle": "Schnelleintrag",
   "helpScreen": "„Bildschirm anlassen“ in den Einstellungen hält das Display an, solange die App offen ist.",
   "helpShowIntro": "Einführung erneut anzeigen",
@@ -291,5 +291,6 @@
   "versionLabel": "Version {version}",
   "waitForGps": "Bitte auf das GPS-Signal warten.",
   "zoomIn": "Vergrößern",
-  "zoomOut": "Verkleinern"
+  "zoomOut": "Verkleinern",
+  "runningMore": "+{count} weitere"
 }

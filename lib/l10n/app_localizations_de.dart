@@ -383,7 +383,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get helpQuickEnd =>
-      'Sind die Tiere weg, setzt der Stecknadel-Knopf an der Sichtung in der Liste Endposition und -zeit.';
+      'Sichtungen der laufenden Tour ohne Endposition stehen als kleine Labels auf der Karte. Sind die Tiere weg, setzt der Stecknadel-Knopf dort (oder an der Sichtung in der Liste) Endposition und -zeit.';
 
   @override
   String get helpQuickTitle => 'Schnelleintrag';
@@ -1029,4 +1029,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get zoomOut => 'Verkleinern';
+
+  @override
+  String runningMore(int count) {
+    return '+$count weitere';
+  }
 }

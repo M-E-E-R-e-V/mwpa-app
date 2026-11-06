@@ -21,12 +21,15 @@ import 'package:mwpaapp/l10n/l10n.dart';
 ///
 /// The map fills the whole widget; [top] and [bottom] float above it (e.g.
 /// the tour card and the quick actions). Empty space between them passes the
-/// gestures through to the map.
+/// gestures through to the map. [side] sits at the left edge of the free
+/// area between them (next to the map buttons) and gets its height as
+/// constraint (e.g. the running sightings).
 class ListMap extends StatefulWidget {
   final Widget? top;
   final Widget? bottom;
+  final Widget? side;
 
-  const ListMap({super.key, this.top, this.bottom});
+  const ListMap({super.key, this.top, this.bottom, this.side});
 
   @override
   State<ListMap> createState() => _ListMapState();
@@ -240,25 +243,36 @@ class _ListMapState extends State<ListMap> {
                       alignment: AlignmentDirectional.centerEnd,
                       child: _MapAttribution(key: _attributionKey),
                     ),
-                    const Spacer(),
-                    // map buttons at the right edge
-                    Align(
-                      alignment: AlignmentDirectional.centerEnd,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
+                    Expanded(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          _ZoomButtons(
-                            onZoomIn: () => _zoomBy(1),
-                            onZoomOut: () => _zoomBy(-1),
+                          // e.g. running sightings, top left of the free area
+                          Expanded(
+                            child: Align(
+                              alignment: AlignmentDirectional.topStart,
+                              child: widget.side ?? const SizedBox.shrink(),
+                            ),
                           ),
-                          const SizedBox(height: 12),
-                          FloatingActionButton(
-                            heroTag: null,
-                            onPressed: _gotoDefault,
-                            tooltip: context.l10n.myLocation,
-                            backgroundColor: kButtonBackgroundColor,
-                            foregroundColor: kButtonFontColor,
-                            child: Icon(_followPosition ? Icons.my_location : Icons.location_searching),
+                          const SizedBox(width: 12),
+                          // map buttons at the right edge, at the bottom
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              _ZoomButtons(
+                                onZoomIn: () => _zoomBy(1),
+                                onZoomOut: () => _zoomBy(-1),
+                              ),
+                              const SizedBox(height: 12),
+                              FloatingActionButton(
+                                heroTag: null,
+                                onPressed: _gotoDefault,
+                                tooltip: context.l10n.myLocation,
+                                backgroundColor: kButtonBackgroundColor,
+                                foregroundColor: kButtonFontColor,
+                                child: Icon(_followPosition ? Icons.my_location : Icons.location_searching),
+                              ),
+                            ],
                           ),
                         ],
                       ),

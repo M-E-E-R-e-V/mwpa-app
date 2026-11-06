@@ -383,7 +383,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get helpQuickEnd =>
-      'Cuando los animales se hayan ido, toca el botón de chincheta del avistamiento en la lista para fijar la posición y la hora finales.';
+      'Los avistamientos de la salida en curso sin posición final aparecen como pequeñas etiquetas en el mapa. Cuando los animales se hayan ido, toca allí el botón de chincheta (o en el avistamiento de la lista) para fijar la posición y la hora finales.';
 
   @override
   String get helpQuickTitle => 'Entrada rápida';
@@ -1029,4 +1029,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get zoomOut => 'Alejar';
+
+  @override
+  String runningMore(int count) {
+    return '+$count más';
+  }
 }

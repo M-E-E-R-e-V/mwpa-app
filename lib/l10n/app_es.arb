@@ -106,7 +106,7 @@
   "helpGpsTitle": "GPS, batería y pantalla",
   "helpMissingHints": "En el formulario, una tarjeta arriba muestra los campos obligatorios vacíos y los valores que parecen incorrectos. Toca un aviso para ir al campo. Siempre puedes guardar.",
   "helpQuick": "«Tortuga» guarda una tortuga con la posición y la hora actuales en dos toques. «Avistamiento» abre el formulario completo.",
-  "helpQuickEnd": "Cuando los animales se hayan ido, toca el botón de chincheta del avistamiento en la lista para fijar la posición y la hora finales.",
+  "helpQuickEnd": "Los avistamientos de la salida en curso sin posición final aparecen como pequeñas etiquetas en el mapa. Cuando los animales se hayan ido, toca allí el botón de chincheta (o en el avistamiento de la lista) para fijar la posición y la hora finales.",
   "helpQuickTitle": "Entrada rápida",
   "helpScreen": "«Mantener la pantalla encendida» en los ajustes mantiene la pantalla activa mientras la app está abierta.",
   "helpShowIntro": "Mostrar la introducción de nuevo",
@@ -291,5 +291,6 @@
   "versionLabel": "Versión {version}",
   "waitForGps": "Espera la señal GPS.",
   "zoomIn": "Acercar",
-  "zoomOut": "Alejar"
+  "zoomOut": "Alejar",
+  "runningMore": "+{count} más"
 }

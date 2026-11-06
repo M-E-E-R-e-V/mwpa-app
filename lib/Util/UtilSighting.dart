@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:mwpaapp/Controllers/SightingController.dart';
 import 'package:mwpaapp/Models/Sighting.dart';
 import 'package:mwpaapp/Models/TourPref.dart';
+import 'package:mwpaapp/Util/UtilTourFId.dart';
 
 /// Sighting Helper
 class UtilSighting {
@@ -81,5 +82,45 @@ class UtilSighting {
     }
 
     return tour;
+  }
+
+  /// runningSightings - sightings of the tour [tourFid] that are still going
+  /// on (no end position yet), in list order (newest first). Empty without
+  /// a tour.
+  static List<Sighting> runningSightings(List<Sighting> sightings, String? tourFid) {
+    if (tourFid == null) {
+      return const [];
+    }
+
+    bool isSet(String? v) => v != null && v.trim() != '' && v.trim() != 'null';
+
+    return [
+      for (final s in sightings)
+        if (!isSet(s.location_end) && _tourFidOf(s) == tourFid) s,
+    ];
+  }
+
+  static String? _tourFidOf(Sighting s) {
+    try {
+      return UtilTourFid.createSTourFId(s);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// currentTourFid - tour id of the running tour (default tour, or the
+  /// home-area tour in home-area mode), null when there is none
+  static String? currentTourFid({TourPref? prefTour, TourPref? homeAreaTour}) {
+    final tour = shortSightingTour(prefTour: prefTour, homeAreaTour: homeAreaTour);
+
+    if (tour == null) {
+      return null;
+    }
+
+    try {
+      return UtilTourFid.createTTourFId(tour);
+    } catch (_) {
+      return null;
+    }
   }
 }

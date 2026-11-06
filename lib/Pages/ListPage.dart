@@ -28,6 +28,7 @@ import 'package:mwpaapp/Pages/List/TourSummaryCard.dart';
 import 'package:mwpaapp/Util/UtilTourSummary.dart';
 import 'package:mwpaapp/Controllers/SyncController.dart';
 import 'package:mwpaapp/Pages/List/ListSightingTile.dart';
+import 'package:mwpaapp/Pages/List/RunningSightings.dart';
 import 'package:mwpaapp/Services/SyncMwpaService.dart';
 import 'package:mwpaapp/Settings/CredentialStore.dart';
 import 'package:mwpaapp/Util/UtilDate.dart';
@@ -696,6 +697,17 @@ class _ListPageState extends State<ListPage>
     return ListMap(
       top: _statusCard(context),
       bottom: _actionRow(context),
+      // sightings of the running tour without end position
+      side: RunningSightings(
+        tourFid: _waitingInHomeArea
+            ? null
+            : UtilSighting.currentTourFid(
+                prefTour: _prefController.prefToru,
+                homeAreaTour: _locationController.homeAreaToru,
+              ),
+        onOpen: (sighting) => _openSighting(context, sighting),
+        onShowAll: () => _tabController.animateTo(1),
+      ),
     );
   }
 
@@ -787,6 +799,14 @@ class _ListPageState extends State<ListPage>
   }
 
   /// _showBottomSheet
+  /// _openSighting - edit page of [sighting], reloads the list afterwards
+  Future<void> _openSighting(BuildContext context, Sighting sighting) async {
+    await Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => EditSightingPage(sighting: sighting),
+    ));
+    _sightingController.getSightings();
+  }
+
   void _showBottomSheet(BuildContext context, Sighting sighting) {
     final theme = Theme.of(context);
 
@@ -818,12 +838,9 @@ class _ListPageState extends State<ListPage>
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                onTap: () async {
+                onTap: () {
                   Navigator.of(sheetContext).pop();
-                  await Navigator.of(context).push(MaterialPageRoute(
-                    builder: (_) => EditSightingPage(sighting: sighting),
-                  ));
-                  _sightingController.getSightings();
+                  _openSighting(context, sighting);
                 },
               ),
               ListTile(

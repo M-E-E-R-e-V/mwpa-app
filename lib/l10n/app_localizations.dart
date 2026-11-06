@@ -739,7 +739,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpQuickEnd.
   ///
   /// In en, this message translates to:
-  /// **'When the animals are gone, tap the pin button on the sighting in the list to set the end position and time.'**
+  /// **'Sightings of the running tour without end position are shown as small labels on the map. When the animals are gone, tap the pin button there (or on the sighting in the list) to set the end position and time.'**
   String get helpQuickEnd;
 
   /// No description provided for @helpQuickTitle.
@@ -1851,6 +1851,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Zoom out'**
   String get zoomOut;
+
+  /// Map label when not all running sightings fit
+  ///
+  /// In en, this message translates to:
+  /// **'+{count} more'**
+  String runningMore(int count);
 }
 
 class _AppLocalizationsDelegate

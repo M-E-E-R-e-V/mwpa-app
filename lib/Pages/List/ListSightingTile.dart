@@ -40,10 +40,12 @@ class ListSightingTile extends StatelessWidget {
 
   const ListSightingTile(this.sighting, {super.key, this.onTap});
 
-  static const Color _warningColor = Color(0xffe0a200);
-  static const Color _turtleColor = Color(0xff2e9e48);
+  static const Color warningColor = Color(0xffe0a200);
+  static const Color turtleColor = Color(0xff2e9e48);
 
-  void _setEndLocation(BuildContext context) {
+  /// setEndLocation - asks, then sets end position (current GPS) and end
+  /// time (now, if empty) of [sighting]; also used by the map labels
+  static void setEndLocation(BuildContext context, Sighting sighting) {
     final LocationController locationController = context.read<LocationController>();
     final SightingController sightingController = context.read<SightingController>();
 
@@ -128,8 +130,8 @@ class ListSightingTile extends StatelessWidget {
 
     final stateColor = switch (state) {
       SightingState.incomplete => scheme.error,
-      SightingState.endMissing || SightingState.unknownSpecies => _warningColor,
-      SightingState.complete => isTurtle ? _turtleColor : inputAccentColor(context),
+      SightingState.endMissing || SightingState.unknownSpecies => warningColor,
+      SightingState.complete => isTurtle ? turtleColor : inputAccentColor(context),
     };
 
     final stateLabel = switch (state) {
@@ -165,7 +167,7 @@ class ListSightingTile extends StatelessWidget {
                       Row(
                         children: [
                           if (isTurtle) ...[
-                            const Icon(AppIcons.tortoise, size: 20, color: _turtleColor),
+                            const Icon(AppIcons.tortoise, size: 20, color: turtleColor),
                             const SizedBox(width: 6),
                           ],
                           Expanded(
@@ -228,7 +230,7 @@ class ListSightingTile extends StatelessWidget {
                     child: IconButton.filledTonal(
                       icon: const Icon(Icons.add_location_alt_outlined),
                       tooltip: context.l10n.setEndLocation,
-                      onPressed: () => _setEndLocation(context),
+                      onPressed: () => setEndLocation(context, sighting),
                     ),
                   ),
                 ),
@@ -259,8 +261,8 @@ class _SyncIcon extends StatelessWidget {
     final (icon, color, tooltip) = sighting.unid == ''
         ? (Icons.cloud_off_outlined, scheme.onSurfaceVariant, context.l10n.syncNotYet)
         : sighting.syncStatus == Sighting.SYNC_STATUS_OPEN
-            ? (Icons.cloud_upload_outlined, ListSightingTile._warningColor, context.l10n.syncChanged)
-            : (Icons.cloud_done_outlined, ListSightingTile._turtleColor, context.l10n.syncDone);
+            ? (Icons.cloud_upload_outlined, ListSightingTile.warningColor, context.l10n.syncChanged)
+            : (Icons.cloud_done_outlined, ListSightingTile.turtleColor, context.l10n.syncDone);
 
     return Tooltip(
       message: tooltip,

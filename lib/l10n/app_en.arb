@@ -199,7 +199,7 @@
   "helpGpsTitle": "GPS, battery and screen",
   "helpMissingHints": "In the form, a card at the top lists the empty required fields and values that look wrong. Tap a hint to jump to the field. You can always save anyway.",
   "helpQuick": "\"Add Tortoise\" saves a turtle with the current position and time in two taps. \"Add Sighting\" opens the full form.",
-  "helpQuickEnd": "When the animals are gone, tap the pin button on the sighting in the list to set the end position and time.",
+  "helpQuickEnd": "Sightings of the running tour without end position are shown as small labels on the map. When the animals are gone, tap the pin button there (or on the sighting in the list) to set the end position and time.",
   "helpQuickTitle": "Quick entry",
   "helpScreen": "\"Keep screen on\" in the settings keeps the display on while the app is open.",
   "helpShowIntro": "Show introduction again",
@@ -488,5 +488,14 @@
   },
   "waitForGps": "Please wait for the GPS signal.",
   "zoomIn": "Zoom in",
-  "zoomOut": "Zoom out"
+  "zoomOut": "Zoom out",
+  "runningMore": "+{count} more",
+  "@runningMore": {
+    "description": "Map label when not all running sightings fit",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }
