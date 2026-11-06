@@ -55,9 +55,6 @@ class AppLocalizationsDe extends AppLocalizations {
       'MWPA erfasst und analysiert Daten aus der Wal- und Delfinbeobachtung. Diese App zeichnet Sichtungen und Tourverläufe auf – auch offline – und synchronisiert sie mit einem MWPA-Server. Ein Projekt von M.E.E.R. e.V.';
 
   @override
-  String get aboutRoleDevelopment => 'Softwareentwicklung';
-
-  @override
   String get aboutServer => 'Server';
 
   @override

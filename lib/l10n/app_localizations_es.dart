@@ -55,9 +55,6 @@ class AppLocalizationsEs extends AppLocalizations {
       'MWPA recoge y analiza datos de la observación de ballenas y delfines. Esta app registra avistamientos y recorridos, también sin conexión, y los sincroniza con un servidor MWPA. Un proyecto de M.E.E.R. e.V.';
 
   @override
-  String get aboutRoleDevelopment => 'Desarrollo de software';
-
-  @override
   String get aboutServer => 'Servidor';
 
   @override

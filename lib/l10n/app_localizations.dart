@@ -190,12 +190,6 @@ abstract class AppLocalizations {
   /// **'MWPA collects and analyses data of whale and dolphin watching. This app records sightings and tour tracks, also offline, and syncs them with an MWPA server. A project of M.E.E.R. e.V.'**
   String get aboutProjectText;
 
-  /// No description provided for @aboutRoleDevelopment.
-  ///
-  /// In en, this message translates to:
-  /// **'Software development'**
-  String get aboutRoleDevelopment;
-
   /// No description provided for @aboutServer.
   ///
   /// In en, this message translates to:

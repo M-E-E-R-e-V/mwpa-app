@@ -28,9 +28,9 @@ class AboutPage extends StatefulWidget {
   static const String privacyUrl = 'https://m-e-e-r.de/datenschutz/';
   static const String contributorsUrl = 'https://github.com/M-E-E-R-e-V/mwpa-app/graphs/contributors';
 
-  /// people named on the page: name, role (null: development), link
-  static const List<(String, String?, String)> contributors = [
-    ('Stefan Werfling', null, 'https://github.com/stefanwerfling'),
+  /// people named on the page: name, organization, link
+  static const List<(String, String, String)> contributors = [
+    ('Stefan Werfling', developerName, 'https://github.com/stefanwerfling'),
     ('Tina Sommer', 'M.E.E.R. e.V.', 'https://m-e-e-r.de/verein/team/'),
   ];
 
@@ -238,7 +238,7 @@ class _AboutPageState extends State<AboutPage> {
                   _InfoTile(
                     icon: Icons.person_outline,
                     label: name,
-                    value: '${role ?? context.l10n.aboutRoleDevelopment}\n$url',
+                    value: '$role\n$url',
                     onTap: () => _copy(url),
                   ),
                 _InfoTile(
