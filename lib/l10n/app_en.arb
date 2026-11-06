@@ -1,0 +1,491 @@
+{
+  "@@locale": "en",
+  "about": "About",
+  "aboutAllContributors": "All contributors on GitHub",
+  "aboutAppSource": "App source code",
+  "aboutConnection": "Connection",
+  "aboutContributors": "Contributors",
+  "aboutDevelopment": "Software development",
+  "aboutImprint": "Imprint",
+  "aboutLegal": "Legal",
+  "aboutLocalData": "Data on this device",
+  "aboutMapData": "Map data",
+  "aboutMwpaProject": "MWPA project",
+  "aboutNotSynced": "Not synced yet",
+  "aboutPrivacy": "Privacy policy",
+  "aboutProject": "Project",
+  "aboutProjectText": "MWPA collects and analyses data of whale and dolphin watching. This app records sightings and tour tracks, also offline, and syncs them with an MWPA server. A project of M.E.E.R. e.V.",
+  "aboutServer": "Server",
+  "aboutSightings": "Sightings",
+  "aboutSupport": "Support",
+  "aboutSupportText": "If something does not work, share the app log with the MWPA team (e.g. by mail). It contains the app events and errors, but no passwords.",
+  "aboutSupportedApi": "Supported server API",
+  "aboutUser": "User",
+  "accuracyMeters": "Accuracy: {meters} m",
+  "@accuracyMeters": {
+    "placeholders": {
+      "meters": {
+        "type": "int"
+      }
+    }
+  },
+  "add": "Add",
+  "addSighting": "Add Sighting",
+  "addSightingHint": "Full form",
+  "addSightingTitle": "Add Sighting",
+  "addTagHint": "Add tag ...",
+  "addTortoise": "Add Tortoise",
+  "addTortoiseHint": "Quick entry",
+  "addTortoiseTitle": "Add tortoise sighting",
+  "addedSnack": "Added: {name}",
+  "@addedSnack": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "allRequiredFilled": "All required fields are filled in",
+  "animalsCount": "{count, plural, =1{1 animal} other{{count} animals}}",
+  "@animalsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "apiLoginChanged": "The API for login has changed (server reports '{server}', app accepts {accepted}). Please update your app, the data will not be lost.",
+  "@apiLoginChanged": {
+    "placeholders": {
+      "server": {
+        "type": "String"
+      },
+      "accepted": {
+        "type": "String"
+      }
+    }
+  },
+  "apiSyncChanged": "The API for syncing has changed (server reports '{server}', app accepts {accepted}). Please update your app, the data will not be lost.",
+  "@apiSyncChanged": {
+    "placeholders": {
+      "server": {
+        "type": "String"
+      },
+      "accepted": {
+        "type": "String"
+      }
+    }
+  },
+  "appTagline": "Mammal watching. Processing. Analysing.",
+  "atEndOfSighting": "At the end of the sighting",
+  "back": "Back",
+  "badgeCalves": "Calves/newborns",
+  "badgePicture": "Picture",
+  "badgeSubgroups": "Subgroups",
+  "batteryLowBanner": "Battery low ({level} %) – connect a charger, the route recording stops when the phone switches off.",
+  "@batteryLowBanner": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "camera": "Camera",
+  "cancel": "Cancel",
+  "checkBeginAfterTourEnd": "The sighting starts after the tour end.",
+  "checkBeginBeforeTourStart": "The sighting starts before the tour start.",
+  "checkBeginFarFromTrack": "The start position is {distance} away from the recorded route at that time.",
+  "@checkBeginFarFromTrack": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "checkDateInFuture": "The date is in the future.",
+  "checkEndBeforeBegin": "The sighting ends before it starts.",
+  "checkEndFarFromTrack": "The end position is {distance} away from the recorded route at that time.",
+  "@checkEndFarFromTrack": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "checkTitle": "Please check",
+  "checkTourEndBeforeStart": "The tour ends before it starts (over midnight?).",
+  "choiceNo": "No",
+  "choiceUnknown": "Unknown",
+  "choiceYes": "Yes",
+  "close": "Close",
+  "copiedToClipboard": "Copied to clipboard",
+  "currentTour": "Current tour",
+  "delete": "Delete",
+  "deleteSightingQuestion": "Delete this sighting from the device? Already synced data stays on the server.",
+  "deleteSightingTitle": "Delete sighting",
+  "disclosureAccept": "Ok, sure and save",
+  "disclosureHeading": "How we use your location",
+  "disclosureReject": "No, thanks and close",
+  "disclosureText1": "The MWPA app collects location data to auto-fill sighting data and track routes for movement activated even if the app is closed or not in use.",
+  "disclosureText2": "The app can only be used with position/location determination, otherwise the recorded data is useless. The data is only sent to the portal that is entered during login. For further questions you can contact or view the source code:",
+  "disclosureTitle": "MWPA Disclosure",
+  "distanceNm": "{distance} nm",
+  "@distanceNm": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "durationHoursMinutes": "{hours} h {minutes} min",
+  "@durationHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "durationMinutes": "{minutes} min",
+  "@durationMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "edit": "Edit",
+  "editSightingTitle": "Edit Sighting",
+  "error": "Error",
+  "fieldBeginPosition": "Position begin",
+  "fieldBeginTime": "Sighting from",
+  "fieldCount": "Number of animals",
+  "fieldDate": "Date",
+  "fieldEndPosition": "Position end",
+  "fieldTourEnd": "End of trip",
+  "fieldTourStart": "Start of trip",
+  "fieldsStillEmpty": "{count, plural, =1{1 field still empty} other{{count} fields still empty}}",
+  "@fieldsStillEmpty": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "gallery": "Gallery",
+  "gpsOff": "GPS is off: no position and no route recording.",
+  "gpsOffBanner": "GPS is off - no position, the route is not recorded.",
+  "gpsOk": "GPS is running, the route is recorded.",
+  "gpsSearching": "GPS is running, but there is no current position fix (e.g. indoors).",
+  "gpsStatus": "GPS status",
+  "groupDispersed": "dispersed",
+  "groupLoose": "loose",
+  "groupTight": "tight",
+  "groupWidelyDispersed": "widely dispersed",
+  "help": "Help",
+  "helpBattery": "Below 20 % battery a warning appears during a tour – connect a charger, otherwise the recording stops when the phone switches off.",
+  "helpCloudDone": "On the server.",
+  "helpCloudOff": "Not synced yet.",
+  "helpCloudUpload": "Changed, will be sent with the next sync.",
+  "helpColorBlue": "Dark blue: the sighting is complete.",
+  "helpColorGreen": "Green: quick entry of a turtle.",
+  "helpColorRed": "Red: a required field is still empty (e.g. number of animals).",
+  "helpColorYellow": "Yellow: only the end is missing (end of tour, end position) – usually filled in later.",
+  "helpColorsTitle": "Colors and symbols in the list",
+  "helpGpsBackground": "The route is also recorded when the app is in the background; the notification shows that tracking is running.",
+  "helpGpsIcon": "The GPS symbol at the top: green = position OK, orange = searching, red = GPS off. With GPS off, the route is not recorded.",
+  "helpGpsTitle": "GPS, battery and screen",
+  "helpMissingHints": "In the form, a card at the top lists the empty required fields and values that look wrong. Tap a hint to jump to the field. You can always save anyway.",
+  "helpQuick": "\"Add Tortoise\" saves a turtle with the current position and time in two taps. \"Add Sighting\" opens the full form.",
+  "helpQuickEnd": "When the animals are gone, tap the pin button on the sighting in the list to set the end position and time.",
+  "helpQuickTitle": "Quick entry",
+  "helpScreen": "\"Keep screen on\" in the tour settings keeps the display on while the app is open.",
+  "helpShowIntro": "Show introduction again",
+  "helpSyncAuto": "The app syncs by itself when the network is back and every 15 minutes. The line at the top of the sightings tab shows the last sync and what is still open.",
+  "helpSyncManual": "To sync right away: pull the list down, tap the sync button or use Menu → \"Sync with server\".",
+  "helpSyncMap": "Map areas you have looked at are kept and also shown offline.",
+  "helpSyncOffline": "Everything is stored on the phone first. You can record sightings without network – nothing is lost.",
+  "helpSyncTitle": "Sync and working offline",
+  "helpTourDefault": "Set boat, skipper and wind once per day under Menu → \"Set default tour\". New sightings take these values.",
+  "helpTourEnd": "Without home area, end the tour with the \"Tour End\" button – you then see a summary of the tour.",
+  "helpTourHomeArea": "With \"home area\" switched on, the tour starts automatically when the boat leaves the harbour area and ends when it comes back.",
+  "helpTourRoute": "The orange line on the map is the route recorded on this tour. The sightings tab groups the sightings by tour with duration, distance and species.",
+  "helpTourTitle": "Tour and home area",
+  "imageNotFound": "Image not found",
+  "info": "Info",
+  "internalError": "Internal Error",
+  "intro1Text": "\"Add Sighting\" opens the full form, \"Add Tortoise\" saves a turtle in two taps. Colors in the list show what is still missing.",
+  "intro1Title": "Record sightings",
+  "intro2Text": "Set the default tour once a day. The app records the route on the map – with home area even starting and ending the tour by itself.",
+  "intro2Title": "Tour and route",
+  "intro3Text": "Everything is saved on the phone and synced automatically as soon as there is network. You find this and more under Menu → Help.",
+  "intro3Title": "Works offline",
+  "introDone": "Let's go",
+  "introNext": "Next",
+  "introSkip": "Skip",
+  "labelAllowTourEnd": "Allow tour end time button for all sightings",
+  "labelBeaufort": "Wind/Sea-state (Beaufort)",
+  "labelBehaviour": "Behaviour",
+  "labelBoat": "Boat",
+  "labelCalves": "Calves",
+  "labelDistanceCoast": "Distance to nearest coast",
+  "labelEstimationNoGps": "Estimation without GPS",
+  "labelFreqBehaviour": "Frequent behaviours of individuals",
+  "labelGroupStructure": "Group Structure",
+  "labelJuveniles": "Juveniles",
+  "labelKeepScreenOn": "Keep screen on",
+  "labelNewborns": "Newborns",
+  "labelNote": "Note",
+  "labelOther": "Other",
+  "labelOtherBoats": "Other boats present",
+  "labelOtherSpecies": "Other Species",
+  "labelPassword": "Password",
+  "labelPhotosTaken": "Photos taken",
+  "labelReaction": "Reaction",
+  "labelRecAnimals": "Recognizable animals",
+  "labelSightingFrom": "Sighting duration: from",
+  "labelSkipper": "Skipper",
+  "labelSpecies": "Species",
+  "labelSubgroups": "Subgroups",
+  "labelUntil": "until",
+  "labelUrl": "URL MWPA",
+  "labelUseHomeArea": "Use Home Area auto-tracking tour start and end",
+  "labelUsername": "Username / Email",
+  "language": "Language",
+  "locationPermissionText": "Please go to the system settings and allow the app access to the location.",
+  "locationPermissionTitle": "Location permission required",
+  "logShareFailed": "Log could not be shared: {error}",
+  "@logShareFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "loginServerTimeout": "The server did not respond in time. Please try again later.",
+  "loginServerUnreachable": "No connection to the server. Please check the network and the MWPA URL.",
+  "loginTitle": "MWPA Login",
+  "logout": "Logout",
+  "logoutQuestion": "Do you want to logout?",
+  "logoutUnsynced": "{count} sighting(s) are not synced yet. Please sync before you logout, otherwise they are uploaded with the next login.\n\nLogout anyway?",
+  "@logoutUnsynced": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapAttribution": "Map attribution",
+  "mapPositionPoints": "{position} / Points: {count}",
+  "@mapPositionPoints": {
+    "placeholders": {
+      "position": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapWaitForGps": "wait for GPS ...",
+  "menu": "Menu",
+  "myLocation": "My Location",
+  "nauticalMilesUnit": "nm",
+  "noGpsPositionYet": "No GPS position available yet",
+  "noImageSelected": "No image selected",
+  "noPosition": "No position",
+  "noPositionLower": "no position",
+  "noSightingsHint": "Tap \"Add Sighting\" to record one.",
+  "noSightingsYet": "No sightings yet",
+  "noUserInfo": "No user information response from server!",
+  "notAMember": "Not a Member? ",
+  "notAValidNumber": "Not a valid number",
+  "notLoggedIn": "not logged in",
+  "notSelected": "not selected",
+  "notSet": "not set",
+  "ok": "Ok",
+  "openSettings": "Open settings",
+  "openSourceLicenses": "Open source licenses",
+  "positionFoundQuestion": "At this time a position was found for the current tour. Should this be used as the position?",
+  "positionFoundTitle": "Position is found",
+  "projectOfMeer": "A project of the M.E.E.R. e.V. association.",
+  "qcIncomplete": "Quick Connect payload is incomplete.",
+  "qcInvalidPayload": "QR code is not a valid Quick Connect payload.",
+  "qcPointAtCode": "Point at the QR code in the MWPA web portal.",
+  "qcUnsupportedVersion": "Unsupported Quick Connect version. Please update the app.",
+  "quickConnect": "Quick Connect",
+  "registerOnPortal": "Register on your MWPA Portal!",
+  "remove": "Remove",
+  "removeImage": "Remove image",
+  "required": "Required",
+  "save": "Save",
+  "saveAnywayHint": "You can save anyway and complete it later.",
+  "saveDefaultTour": "Save default Tour",
+  "saveSighting": "Save Sighting",
+  "savedStillEmpty": "Saved. Still empty: {fields}",
+  "@savedStillEmpty": {
+    "placeholders": {
+      "fields": {
+        "type": "String"
+      }
+    }
+  },
+  "sectionAnimals": "Animals",
+  "sectionBehaviour": "Behaviour & identification",
+  "sectionNotes": "Further notes",
+  "sectionPicture": "Picture",
+  "sectionSettings": "Settings",
+  "sectionTimePosition": "Time & position",
+  "sectionTour": "Tour",
+  "selectEmptyList": "<empty list>",
+  "selectPlease": "<please select>",
+  "selectUnknownId": "unknown by id: {id}",
+  "@selectUnknownId": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "serverTimeout": "The server did not respond in time. Please try again later. Your data stays on the device and is synced later.",
+  "serverUnreachable": "No connection to the server. Please check the network and the server URL. Your data stays on the device and is synced later.",
+  "sessionNotStarted": "User session is not started!",
+  "setDefaultTour": "Set default Tour",
+  "setDefaultTourFirst": "Please set the default tour with date and start time beforehand. The entry cannot be added until then.",
+  "setEndLocation": "Set end location",
+  "setEndLocationQuestion": "Do you want to set the end location/duration time for this sighting?",
+  "setEndLocationTitle": "Set end location/duration",
+  "settings": "Settings",
+  "shareAppLog": "Share app log",
+  "sightingCloseQuestion": "Close sighting without saving? All changes will be lost!",
+  "sightingCloseTitle": "Sighting close",
+  "sightingsCount": "{count, plural, =1{1 sighting} other{{count} sightings}}",
+  "@sightingsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "signIn": "Sign In",
+  "speciesNotFound": "Species not found",
+  "stateEndMissing": "End missing",
+  "stateIncomplete": "Incomplete",
+  "stateUnknownSpecies": "Unknown species",
+  "stillOpenAtEnd": "Still open - fill in at the end",
+  "switchCamera": "Switch camera",
+  "switchToDarkTheme": "Switch to dark theme",
+  "switchToLightTheme": "Switch to light theme",
+  "syncAutoStopped": "Automatic sync stopped – tap for details",
+  "syncChanged": "Changed, waiting for sync",
+  "syncConnecting": "Connecting ...",
+  "syncDone": "Synced",
+  "syncFailedRetry": "Sync failed, retrying automatically – tap for details",
+  "syncLastDate": "Last synced {date}",
+  "@syncLastDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "syncLastHours": "{hours, plural, =1{Synced 1 hour ago} other{Synced {hours} hours ago}}",
+  "@syncLastHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "syncLastJustNow": "Synced just now",
+  "syncLastMinutes": "{minutes, plural, =1{Synced 1 minute ago} other{Synced {minutes} minutes ago}}",
+  "@syncLastMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "syncLoginRejected": "The server rejected the login (password changed?). Please log out and sign in again. Your data stays on the device.",
+  "syncNotYet": "Not synced yet",
+  "syncOpenCount": "{count, plural, =1{1 open} other{{count} open}}",
+  "@syncOpenCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncRunning": "Syncing …",
+  "syncSignInAgain": "No login data stored for the sync. Please log out and sign in again with your password.",
+  "syncStepBehaviouralStates": "Behavioural states",
+  "syncStepEncounterCategories": "Encounter categories",
+  "syncStepFinish": "Finished",
+  "syncStepImages": "Uploading photos",
+  "syncStepSightings": "Uploading sightings",
+  "syncStepSpecies": "Species",
+  "syncStepTracking": "Uploading tour track {detail}",
+  "@syncStepTracking": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "syncStepVehicles": "Boats and skippers",
+  "syncTitle": "Syncing with server",
+  "syncWithServer": "Sync with Server",
+  "tabSightings": "Sightings",
+  "tabTour": "Tour",
+  "toggleTorch": "Toggle torch",
+  "tourCloseQuestion": "Close tour without saving? All changes will be lost!",
+  "tourCloseTitle": "Tour close",
+  "tourDateNotCurrent": "The tour date is not current, please check!",
+  "tourDateNotSet": "Tour: default date is not set",
+  "tourDateTitle": "Tour date",
+  "tourEnd": "Tour End",
+  "tourEndQuestion": "Update the tour end time for all sighting entries from the current tour?",
+  "tourFinishedTitle": "Tour finished",
+  "tourLabel": "Tour: {date} - {start}",
+  "@tourLabel": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "start": {
+        "type": "String"
+      }
+    }
+  },
+  "tourNotStartedHomeArea": "The tour has not started yet (still in the home area). The entry cannot be added until then.",
+  "tourSince": "since {time}",
+  "@tourSince": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "tourWaitingHomeArea": "Tour: In Home-Area, wait for start",
+  "turtleGreen": "Green sea turtle",
+  "turtleHawksbill": "Hawksbill sea turtle",
+  "turtleLeatherback": "Leatherback sea turtle",
+  "turtleLoggerhead": "Loggerhead sea turtle",
+  "turtleSeaTurtle": "Sea turtle",
+  "turtleUnknown": "Unknown",
+  "useCurrentPosition": "Use current position",
+  "userNeedsOrganization": "Please update the user, all users need an organization.",
+  "versionLabel": "Version {version}",
+  "@versionLabel": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "waitForGps": "Please wait for the GPS signal.",
+  "zoomIn": "Zoom in",
+  "zoomOut": "Zoom out"
+}

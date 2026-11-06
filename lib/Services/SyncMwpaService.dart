@@ -1,6 +1,6 @@
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:mwpaapp/Constants.dart';
+import 'package:mwpaapp/Controllers/SpeciesController.dart';
 import 'package:mwpaapp/Db/DBHelper.dart';
 import 'package:mwpaapp/Models/BehaviouralState.dart';
 import 'package:mwpaapp/Models/EncounterCategorie.dart';
@@ -13,18 +13,150 @@ import 'package:mwpaapp/Models/VehicleDriver.dart';
 import 'package:mwpaapp/Mwpa/Models/Info.dart';
 import 'package:mwpaapp/Mwpa/Models/SightingTourTrackingCheck.dart';
 import 'package:mwpaapp/Mwpa/Models/TrackingAreaHomeData.dart';
+import 'package:mwpaapp/Settings/CredentialStore.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
 import 'package:mwpaapp/Util/UtilTourFId.dart';
+import 'package:mwpaapp/Util/UtilTourTracking.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import '../Mwpa/Models/SightingSaveResponse.dart';
 import '../Mwpa/MwpaAPI.dart';
+import '../Mwpa/MwpaException.dart';
+import 'package:mwpaapp/Util/AppLog.dart';
+
+/// SyncStep - the phase a running sync reports; the UI shows it in the
+/// user's language (the service itself has no BuildContext)
+enum SyncStep {
+  vehicles,
+  species,
+  encounterCategories,
+  behaviouralStates,
+  sightings,
+  sightingImages,
+  tracking,
+  finish,
+}
+
+/// SyncUpdate - progress callback: [percent] 0..100, the current [step] and
+/// an optional [detail] (e.g. "120/450" while uploading tracking points)
+typedef SyncUpdate = Future<void> Function(int percent, SyncStep step, [String? detail]);
+
+/// ApiVersionException - the server's mobile API version is not accepted
+/// by this app build ([sync] false = login API, true = sync API)
+class ApiVersionException implements Exception {
+  final bool sync;
+  final String server;
+  final List<String> accepted;
+
+  const ApiVersionException({required this.sync, required this.server, required this.accepted});
+
+  @override
+  String toString() =>
+      "The API for ${sync ? 'syncing' : 'login'} has changed (server reports '$server', "
+      "app accepts ${accepted.join(', ')}). Please update your app, the data will not be lost.";
+}
+
+/// MissingCredentialsException - URL, username or password is not stored
+/// (e.g. after a Quick Connect login); the user has to sign in again
+class MissingCredentialsException implements Exception {
+  final String message;
+
+  const MissingCredentialsException(this.message);
+
+  @override
+  String toString() => message;
+}
+
+/// LoginRejectedException - the server refused the stored credentials
+/// (password changed, user disabled); the user has to sign in again
+class LoginRejectedException implements Exception {
+  final String username;
+
+  const LoginRejectedException(this.username);
+
+  @override
+  String toString() => "Login to MWPA failed by Username: '$username' !";
+}
 
 /// SyncMwpaService
 class SyncMwpaService {
 
+  /// points per upload request
+  static const int trackingBatchSize = 100;
+
+  /// uploadTourTracking - uploads the tracking points of [tourFId] that were
+  /// not sent yet (synced = 0) in batches through [save] and flags each
+  /// uploaded batch; returns the number of points sent.
+  ///
+  /// Called when the server reports the tour as incomplete. If every local
+  /// point is already flagged, the server lost points we sent before (e.g.
+  /// restored database) - then the whole tour is sent again; the server
+  /// skips points it already has (by uuid).
+  ///
+  /// A batch the server does not accept stays unflagged and the upload stops;
+  /// it is retried with the next sync.
+  static Future<int> uploadTourTracking(
+    String tourFId,
+    Future<bool> Function(List<TourTracking> tracks) save, {
+    Future<void> Function(int sent, int total)? progress,
+  }) async {
+    if (await DBHelper.countUnsyncedTourTracking(tourFId) == 0) {
+      await DBHelper.setTourTrackingSynced(tourFId, false);
+    }
+
+    final total = await DBHelper.countUnsyncedTourTracking(tourFId);
+    var sent = 0;
+
+    while (sent < total) {
+      await progress?.call(sent, total);
+
+      final rows = await DBHelper.queryUnsyncedTourTracking(tourFId, trackingBatchSize);
+
+      if (rows.isEmpty) {
+        break;
+      }
+
+      final tracks = rows.map((data) => TourTracking.fromJson(data)).toList();
+
+      if (!await save(tracks)) {
+        AppLog.i('Sync', 'uploadTourTracking: batch not accepted for $tourFId, retry with next sync');
+
+        break;
+      }
+
+      await DBHelper.markTourTrackingSynced(rows.map((r) => r['uuid'] as String).toList());
+      sent += rows.length;
+    }
+
+    return sent;
+  }
+
+
+  /// species lookup for translating local species ids (other_species)
+  final SpeciesController speciesController;
+
+  SyncMwpaService(this.speciesController);
+
   /// sync
-  Future<void> sync(Function(int, String)? update) async {
+  Future<void> sync(SyncUpdate? update) async {
+    MwpaApi? opened;
+    final watch = Stopwatch()..start();
+    AppLog.i('Sync', 'start');
+
+    try {
+      await _sync(update, (api) => opened = api);
+      AppLog.i('Sync', 'finished in ${watch.elapsedMilliseconds} ms');
+    } catch (error) {
+      AppLog.e('Sync', 'aborted after ${watch.elapsedMilliseconds} ms', error);
+      rethrow;
+    } finally {
+      // release the kept-alive connection to the server
+      opened?.close();
+    }
+  }
+
+  /// _sync - the sync steps; [onApi] receives the API client once created
+  Future<void> _sync(SyncUpdate? update, void Function(MwpaApi api) onApi) async {
     MwpaApi api;
 
     // load userdata and login
@@ -34,51 +166,54 @@ class SyncMwpaService {
       final prefs = await SharedPreferences.getInstance();
 
       if (!prefs.containsKey(Preference.URL)) {
-        throw Exception("Preference field 'URL' is not found!");
+        throw const MissingCredentialsException("Preference field 'URL' is not found!");
       }
 
       if (!prefs.containsKey(Preference.USERNAME)) {
-        throw Exception("Preference field 'USERNAME' is not found!");
+        throw const MissingCredentialsException("Preference field 'USERNAME' is not found!");
       }
 
-      if (!prefs.containsKey(Preference.PASSWORD)) {
-        throw Exception("Preference field 'PASSWORD' is not found!");
+      final password = await CredentialStore().readPassword();
+
+      if (password == null) {
+        throw const MissingCredentialsException("No password stored, please sign in again!");
       }
 
       String url = prefs.getString(Preference.URL)!;
       String username = prefs.getString(Preference.USERNAME)!;
-      String password = prefs.getString(Preference.PASSWORD)!;
 
       api = MwpaApi(url);
+      onApi(api);
 
       Info apiInfo = await api.getInfo();
 
       if (!versionApiMobileLogin.contains(apiInfo.version_api_login)) {
-        throw Exception(
-            "The API for login has changed (server reports '${apiInfo.version_api_login}', "
-            "app accepts ${versionApiMobileLogin.join(', ')}). Please update your app, "
-            "the data will not be lost.");
+        throw ApiVersionException(
+            sync: false, server: '${apiInfo.version_api_login}', accepted: versionApiMobileLogin.toList());
       }
 
       if (!versionApiMobileSync.contains(apiInfo.version_api_sync)) {
-        throw Exception(
-            "The API for syncing has changed (server reports '${apiInfo.version_api_sync}', "
-            "app accepts ${versionApiMobileSync.join(', ')}). Please update your app, "
-            "the data will not be lost.");
+        throw ApiVersionException(
+            sync: true, server: '${apiInfo.version_api_sync}', accepted: versionApiMobileSync.toList());
       }
 
       if (!await api.isLogin()) {
-        if (await api.login(username, password)) {
-          if (!await api.isLogin()) {
-            throw Exception("Login to MWPA failed by Username: '$username' !");
-          }
+        bool loggedIn;
+
+        try {
+          loggedIn = await api.login(username, password);
+        } on MwpaException catch (error) {
+          // the server answered and refused the credentials
+          AppLog.w('Sync', 'login refused by the server', error);
+          throw LoginRejectedException(username);
+        }
+
+        if (loggedIn && !await api.isLogin()) {
+          throw LoginRejectedException(username);
         }
       }
     } catch(e) {
-      if (kDebugMode) {
-        print('SyncMwpaService::sync:login:');
-        print(e);
-      }
+      AppLog.e('Sync', 'login failed', e);
 
       rethrow;
     }
@@ -95,10 +230,7 @@ class SyncMwpaService {
         await prefs.setInt(Preference.ORGID, userInfo.organization!.id);
       }
     } catch(e) {
-      if (kDebugMode) {
-        print('SyncMwpaService::sync:userdata:');
-        print(e);
-      }
+      AppLog.e('Sync', 'userdata failed', e);
 
       rethrow;
     }
@@ -119,17 +251,14 @@ class SyncMwpaService {
         }
       }
     } catch(e) {
-      if (kDebugMode) {
-        print('SyncMwpaService::sync:vehicle:');
-        print(e);
-      }
+      AppLog.e('Sync', 'vehicle failed', e);
 
       rethrow;
     }
 
 
     if (update != null) {
-      await update(5, 'vehicle driver sync');
+      await update(5, SyncStep.vehicles);
     }
 
     // vehicle driver sync
@@ -148,16 +277,13 @@ class SyncMwpaService {
         }
       }
     } catch(e) {
-      if (kDebugMode) {
-        print('SyncMwpaService::sync:vehicleDriver:');
-        print(e);
-      }
+      AppLog.e('Sync', 'vehicleDriver failed', e);
 
       rethrow;
     }
 
     if (update != null) {
-      await update(10, 'species sync');
+      await update(10, SyncStep.species);
     }
 
     // species
@@ -180,16 +306,13 @@ class SyncMwpaService {
         }
       }
     } catch(e) {
-      if (kDebugMode) {
-        print('SyncMwpaService::sync:species:');
-        print(e);
-      }
+      AppLog.e('Sync', 'species failed', e);
 
       rethrow;
     }
 
     if (update != null) {
-      await update(15, 'encounter categories sync');
+      await update(15, SyncStep.encounterCategories);
     }
 
     // encounter categories
@@ -208,16 +331,13 @@ class SyncMwpaService {
         }
       }
     } catch(e) {
-      if (kDebugMode) {
-        print('SyncMwpaService::sync:encounterCategorie:');
-        print(e);
-      }
+      AppLog.e('Sync', 'encounterCategorie failed', e);
 
       rethrow;
     }
 
     if (update != null) {
-      await update(20, 'behavioural state sync');
+      await update(20, SyncStep.behaviouralStates);
     }
 
     // behavioural state
@@ -236,16 +356,13 @@ class SyncMwpaService {
         }
       }
     } catch(e) {
-      if (kDebugMode) {
-        print('SyncMwpaService::sync:BehaviouralState:');
-        print(e);
-      }
+      AppLog.e('Sync', 'BehaviouralState failed', e);
 
       rethrow;
     }
 
     if (update != null) {
-      await update(25, 'sightings sync');
+      await update(25, SyncStep.sightings);
     }
 
     /// home tracking area
@@ -297,10 +414,7 @@ class SyncMwpaService {
         }
       }
     } catch(e) {
-      if (kDebugMode) {
-        print('SyncMwpaService::sync:TrackingAreaHomeData:');
-        print(e);
-      }
+      AppLog.e('Sync', 'TrackingAreaHomeData failed', e);
 
       rethrow;
     }
@@ -322,13 +436,13 @@ class SyncMwpaService {
         if (update != null) {
           var percentStep = 100*(index*2-1)/(count*2);
           var percentUpdate = (percentStep*75)/100;
-          await update(percentUpdate.toInt(), 'sightings sync');
+          await update(percentUpdate.toInt(), SyncStep.sightings);
         }
 
         SightingSaveResponse? saveResponse;
 
         try {
-          saveResponse = await api.saveSighting(sighting);
+          saveResponse = await api.saveSighting(sighting, speciesController.getSpeciesById);
 
           if (saveResponse != null) {
             sighting.unid = saveResponse.unid;
@@ -341,13 +455,15 @@ class SyncMwpaService {
             }
 
             sighting.syncStatus = Sighting.SYNC_STATUS_FINISH;
-            await DBHelper.updateSighting(sighting);
+
+            if (sighting.id != null && (sighting.unid ?? '').isNotEmpty) {
+              // only unid/status/creator: the UI may have changed the row
+              // meanwhile (the sync runs in the background)
+              await DBHelper.markSightingUploaded(sighting.id!, sighting.unid!, sighting.creater_id);
+            }
           }
         } catch(ei) {
-          if (kDebugMode) {
-            print('SyncMwpaService::sync:sightingUpdate: ');
-            print(sighting.id);
-          }
+          AppLog.e('Sync', 'sightingUpdate failed for sighting ${sighting.id}', ei);
 
           rethrow;
         }
@@ -355,7 +471,7 @@ class SyncMwpaService {
         if (update != null) {
           var percentStep2 = 100*(index*2)/(count*2);
           var percentUpdate2 = (percentStep2*75)/100;
-          await update(percentUpdate2.toInt(), 'sightings image sync');
+          await update(percentUpdate2.toInt(), SyncStep.sightingImages);
         }
 
         if (sighting.image != null && sighting.image != "") {
@@ -364,10 +480,7 @@ class SyncMwpaService {
               await api.saveSightingImage(sighting.unid!, sighting.image!);
             }
           } catch(ei) {
-            if (kDebugMode) {
-              print('SyncMwpaService::sync:image: ');
-              print(ei);
-            }
+            AppLog.w('Sync', 'image upload failed', ei);
           }
         }
 
@@ -378,40 +491,27 @@ class SyncMwpaService {
             if (saveResponse.canDelete != null) {
               if (saveResponse.canDelete!) {
                 if (sighting.image != null && sighting.image != "") {
-                  if (kDebugMode) {
-                    print('SyncMwpaService::sync:tracking: delete image from sighting: ${sighting.image}');
-                  }
+                  AppLog.i('Sync', 'tracking: delete image from sighting: ${sighting.image}');
 
                   File(sighting.image!).delete();
                 }
 
-                if (kDebugMode) {
-                  print('SyncMwpaService::sync:tracking: delete sighting: ${sighting.unid}');
-                }
+                AppLog.i('Sync', 'tracking: delete sighting: ${sighting.unid}');
 
                 DBHelper.deleteSighting(sighting);
               }
             } else {
-              if (kDebugMode) {
-                print('SyncMwpaService::sync:tracking: SightingSaveResponse canDelete is empty');
-              }
+              AppLog.d('Sync', 'sighting ${sighting.unid}: canDelete not set');
             }
           } else {
-            if (kDebugMode) {
-              print('SyncMwpaService::sync:tracking: SightingSaveResponse unid is empty');
-            }
+            AppLog.i('Sync', 'tracking: SightingSaveResponse unid is empty');
           }
         } else {
-          if (kDebugMode) {
-            print('SyncMwpaService::sync:tracking: SightingSaveResponse is empty');
-          }
+          AppLog.i('Sync', 'tracking: SightingSaveResponse is empty');
         }
       }
     } catch(e) {
-      if (kDebugMode) {
-        print('SyncMwpaService::sync:');
-        print(e);
-      }
+      AppLog.e('Sync', 'sightings upload failed', e);
 
       rethrow;
     }
@@ -434,53 +534,41 @@ class SyncMwpaService {
           var isComplete = checkResponse.isComplete ?? false;
 
           if (! isComplete) {
-            var limitSteps = 100;
-            var offset = 0;
-
-            while (offset<trackingCount) {
-              if (update != null) {
-                await update(90, 'sightings tracking sync $offset/$trackingCount');
-              }
-
-              List<Map<String, dynamic>> tracks = await DBHelper.queryTourTracking(tourFId, offset, limitSteps);
-              List<TourTracking> trackList = tracks.map((data) => TourTracking.fromJson(data)).toList();
-
-              await api.saveSightingTourTracking(trackList);
-
-              offset += limitSteps;
-            }
-          } else {
-            if (kDebugMode) {
-              print('SyncMwpaService::sync:tracking: SightingTourTrackingCheck isComplete: $isComplete');
-            }
-
-            if (checkResponse.canDelete != null) {
-              var canDelete = checkResponse.canDelete ?? false;
-
-              if (canDelete) {
-                if (kDebugMode) {
-                  print('SyncMwpaService::sync:tracking: delete tracking entries by tourFId: $tourFId');
+            await uploadTourTracking(
+              tourFId,
+              api.saveSightingTourTracking,
+              progress: (sent, total) async {
+                if (update != null) {
+                  await update(90, SyncStep.tracking, '$sent/$total');
                 }
+              },
+            );
+          } else {
+            AppLog.d('Sync', 'tracking $tourFId: isComplete $isComplete');
 
-                await DBHelper.deleteTourTrackingEntries(tourFId);
-              }
-            }
-            else {
-              if (kDebugMode) {
-                print('SyncMwpaService::sync:tracking: checkSightingTourTracking canDelete is empty');
-              }
+            await DBHelper.setTourTrackingSynced(tourFId, true);
+
+            // Delete the local copy once the server has all points and either
+            // allows it (canDelete) or the tour is older than the local
+            // retention - the server only sets canDelete for very old tours.
+            var canDeleteLocal = UtilTourTracking.canDeleteLocal(
+              isComplete: isComplete,
+              canDelete: checkResponse.canDelete,
+              latestDate: await DBHelper.latestTourTrackingDate(tourFId),
+              now: DateTime.now(),
+            );
+
+            if (canDeleteLocal) {
+              AppLog.i('Sync', 'tracking: delete tracking entries by tourFId: $tourFId');
+
+              await DBHelper.deleteTourTrackingEntries(tourFId);
             }
           }
         } else {
-          if (kDebugMode) {
-            print('SyncMwpaService::sync:tracking: SightingTourTrackingCheck return null');
-          }
+          AppLog.i('Sync', 'tracking: SightingTourTrackingCheck return null');
         }
       } catch(e) {
-        if (kDebugMode) {
-          print('SyncMwpaService::sync:tracking:');
-          print(e);
-        }
+        AppLog.e('Sync', 'tracking failed', e);
 
         rethrow;
       }
@@ -489,7 +577,7 @@ class SyncMwpaService {
     /// ------------------------------------------------------------------------
 
     if (update != null) {
-      await update(100, 'finish');
+      await update(100, SyncStep.finish);
     }
   }
 }

@@ -1,0 +1,4 @@
+Material Design Icons (https://pictogrammers.com/library/mdi/)
+Pictogrammers Free License: icons under Apache License 2.0,
+webfont under SIL Open Font License 1.1.
+Only the glyphs referenced by the app are shipped (Flutter icon tree shaking).

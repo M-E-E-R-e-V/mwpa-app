@@ -1,18 +1,21 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:mwpaapp/Components/LanguageSelector.dart';
 import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Controllers/PrefController.dart';
 import 'package:mwpaapp/Dialog/InfoDialog.dart';
 import 'package:mwpaapp/Mwpa/Models/Info.dart';
 import 'package:mwpaapp/Pages/QuickConnectScanPage.dart';
+import 'package:mwpaapp/Settings/CredentialStore.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Mwpa/MwpaAPI.dart';
 import '../Mwpa/MwpaException.dart';
+import 'package:mwpaapp/Util/AppLog.dart';
+import 'package:mwpaapp/l10n/l10n.dart';
 
 /// LoginPage
 class LoginPage extends StatefulWidget {
@@ -24,7 +27,7 @@ class LoginPage extends StatefulWidget {
 
 /// _LoginPageState
 class _LoginPageState extends State<LoginPage> {
-  final PrefController _prefController = Get.find<PrefController>();
+  late final PrefController _prefController = context.read<PrefController>();
   final _urlController = TextEditingController();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -42,17 +45,17 @@ class _LoginPageState extends State<LoginPage> {
     var url = _urlController.text.trim();
     var username = _usernameController.text.trim();
     var password = _passwordController.text.trim();
+    final l10n = context.l10n;
+    MwpaApi? api;
 
     try {
-      var api = MwpaApi(url);
+      api = MwpaApi(url);
 
       Info apiInfo = await api.getInfo();
 
       if (!versionApiMobileLogin.contains(apiInfo.version_api_login)) {
-        throw Exception(
-            "The API for login has changed (server reports '${apiInfo.version_api_login}', "
-            "app accepts ${versionApiMobileLogin.join(', ')}). Please update your app, "
-            "the data will not be lost.");
+        throw Exception(l10n.apiLoginChanged(
+            '${apiInfo.version_api_login}', versionApiMobileLogin.join(', ')));
       }
 
       if (!await api.isLogin()) {
@@ -63,19 +66,28 @@ class _LoginPageState extends State<LoginPage> {
         await _loadUser(api, url, username, password);
       }
     } catch(error) {
-      if (kDebugMode) {
-        print(error);
-      }
+      AppLog.w('Login', 'sign in failed', error);
 
-      if (error is MwpaException) {
+      if (!mounted) return;
+
+      if (error is MwpaConnectionException) {
+        InfoDialog.show(
+          context,
+          l10n.error,
+          error.timeout ? l10n.loginServerTimeout : l10n.loginServerUnreachable,
+          isError: true,
+        );
+      } else if (error is MwpaException) {
         setState(() {
-          InfoDialog.show(context, 'Error', error.toString());
+          InfoDialog.show(context, l10n.error, error.toString(), isError: true);
         });
       } else {
         setState(() {
-          InfoDialog.show(context, 'Internal Error', error.toString());
+          InfoDialog.show(context, l10n.internalError, error.toString(), isError: true);
         });
       }
+    } finally {
+      api?.close();
     }
   }
 
@@ -89,6 +101,9 @@ class _LoginPageState extends State<LoginPage> {
   /// missing, so background sync will be inactive until the user signs in once
   /// with email/password (acceptable for the MVP).
   Future<void> quickConnect() async {
+    final l10n = context.l10n;
+    MwpaApi? api;
+
     try {
       final scanned = await Navigator.of(context).push<String>(
         MaterialPageRoute(builder: (_) => const QuickConnectScanPage()),
@@ -102,7 +117,7 @@ class _LoginPageState extends State<LoginPage> {
       try {
         payload = jsonDecode(scanned) as Map<String, dynamic>;
       } catch (_) {
-        throw MwpaException('QR code is not a valid Quick Connect payload.');
+        throw MwpaException(l10n.qcInvalidPayload);
       }
 
       final version = payload['version'];
@@ -111,47 +126,56 @@ class _LoginPageState extends State<LoginPage> {
       final otp = payload['otp'] as String?;
 
       if (version != 1) {
-        throw MwpaException('Unsupported Quick Connect version. Please update the app.');
+        throw MwpaException(l10n.qcUnsupportedVersion);
       }
 
       if (server == null || server.isEmpty || otp == null || otp.isEmpty || username == null) {
-        throw MwpaException('Quick Connect payload is incomplete.');
+        throw MwpaException(l10n.qcIncomplete);
       }
 
-      var api = MwpaApi(server);
+      api = MwpaApi(server);
 
       Info apiInfo = await api.getInfo();
 
       if (!versionApiMobileLogin.contains(apiInfo.version_api_login)) {
-        throw Exception(
-            "The API for login has changed (server reports '${apiInfo.version_api_login}', "
-            "app accepts ${versionApiMobileLogin.join(', ')}). Please update your app, "
-            "the data will not be lost.");
+        throw Exception(l10n.apiLoginChanged(
+            '${apiInfo.version_api_login}', versionApiMobileLogin.join(', ')));
       }
 
       if (await api.quickConnect(otp)) {
         await _persistQuickConnect(api, server, username);
       }
     } catch (error) {
-      if (kDebugMode) {
-        print(error);
-      }
+      AppLog.w('Login', 'quick connect failed', error);
 
-      if (error is MwpaException) {
+      if (!mounted) return;
+
+      if (error is MwpaConnectionException) {
+        InfoDialog.show(
+          context,
+          l10n.error,
+          error.timeout ? l10n.loginServerTimeout : l10n.loginServerUnreachable,
+          isError: true,
+        );
+      } else if (error is MwpaException) {
         setState(() {
-          InfoDialog.show(context, 'Error', error.toString());
+          InfoDialog.show(context, l10n.error, error.toString(), isError: true);
         });
       } else {
         setState(() {
-          InfoDialog.show(context, 'Internal Error', error.toString());
+          InfoDialog.show(context, l10n.internalError, error.toString(), isError: true);
         });
       }
+    } finally {
+      api?.close();
     }
   }
 
   /// Persist URL + username + ids for a Quick Connect session. Mirrors
   /// _loadUser but skips the password — Quick Connect never receives it.
   Future<void> _persistQuickConnect(MwpaApi api, String url, String username) async {
+    final l10n = context.l10n;
+
     if (await api.isLogin()) {
       final prefs = await SharedPreferences.getInstance();
 
@@ -162,25 +186,30 @@ class _LoginPageState extends State<LoginPage> {
         await prefs.setString(Preference.USERNAME, username);
         // Wipe any stale password so SyncMwpaService doesn't reuse a previous
         // user's credentials against this session.
-        await prefs.remove(Preference.PASSWORD);
+        await CredentialStore().deletePassword();
         await prefs.setInt(Preference.USERID, userInfo.user!.id);
         await prefs.setInt(Preference.ORGID, userInfo.organization!.id);
 
-        Get.toNamed('/List');
+        AppLog.i('Login', 'quick connect: logged in, user ${userInfo.user!.id}');
+
+        if (!mounted) return;
+        Navigator.of(context).pushNamed('/List');
       } else {
         if (userInfo.organization == null) {
-          throw Exception('Please update the user, all user need a organization.');
+          throw Exception(l10n.userNeedsOrganization);
         }
 
-        throw Exception('No user information response from server!');
+        throw Exception(l10n.noUserInfo);
       }
     } else {
-      throw Exception('User session is not started!');
+      throw Exception(l10n.sessionNotStarted);
     }
   }
 
   /// Load User
   Future<void> _loadUser(MwpaApi api, String url, String username, String password) async {
+    final l10n = context.l10n;
+
     if (await api.isLogin()) {
       final prefs = await SharedPreferences.getInstance();
 
@@ -189,26 +218,30 @@ class _LoginPageState extends State<LoginPage> {
       if (userInfo.user != null && userInfo.organization != null) {
         await prefs.setString(Preference.URL, url);
         await prefs.setString(Preference.USERNAME, username);
-        await prefs.setString(Preference.PASSWORD, password);
+        await CredentialStore().writePassword(password);
         await prefs.setInt(Preference.USERID, userInfo.user!.id);
         await prefs.setInt(Preference.ORGID, userInfo.organization!.id);
+        AppLog.i('Login', 'logged in, user ${userInfo.user!.id}');
 
-        Get.toNamed('/List');
+        if (!mounted) return;
+        Navigator.of(context).pushNamed('/List');
       } else {
         if (userInfo.organization == null) {
-          throw Exception("Please update the user, all user need a organization.");
+          throw Exception(l10n.userNeedsOrganization);
         }
 
-        throw Exception("No user information response from server!");
+        throw Exception(l10n.noUserInfo);
       }
     } else {
-      throw Exception("User session is not started!");
+      throw Exception(l10n.sessionNotStarted);
     }
   }
 
   /// _loadPref
   Future<void> _loadPref() async {
     final prefs = await SharedPreferences.getInstance();
+
+    if (!mounted) return;
 
     setState(() {
       if (prefs.containsKey(Preference.URL)) {
@@ -223,11 +256,14 @@ class _LoginPageState extends State<LoginPage> {
         _usernameController.text = const String.fromEnvironment('USERNAME', defaultValue: '');
       }
 
-      if (prefs.containsKey(Preference.PASSWORD)) {
-        _passwordController.text = prefs.getString(Preference.PASSWORD)!;
-      } else {
-        _passwordController.text = const String.fromEnvironment('PASSWORD', defaultValue: '');
-      }
+    });
+
+    final password = await CredentialStore().readPassword();
+
+    if (!mounted) return;
+
+    setState(() {
+      _passwordController.text = password ?? const String.fromEnvironment('PASSWORD', defaultValue: '');
     });
   }
 
@@ -235,13 +271,15 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _isLogin() async {
     await _prefController.load();
 
+    if (!mounted) return;
+
     if (_prefController.prominentDisclosureConfirmed == false) {
-      Get.toNamed('/ProminentDisclosure');
+      Navigator.of(context).pushNamed('/ProminentDisclosure');
       return;
     }
 
     if (_prefController.isLogin) {
-      Get.toNamed('/List');
+      Navigator.of(context).pushNamed('/List');
     }
 
     return;
@@ -252,6 +290,12 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        backgroundColor: Colors.transparent,
+        scrolledUnderElevation: 0,
+        actions: const [LanguageSelector()],
+      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -268,7 +312,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   const SizedBox(height: 40),
                   Text(
-                    'MWPA Login',
+                    context.l10n.loginTitle,
                     textAlign: TextAlign.center,
                     style: theme.textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.w700,
@@ -276,7 +320,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Mammal watching. Processing. Analysing.',
+                    context.l10n.appTagline,
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
@@ -288,9 +332,9 @@ class _LoginPageState extends State<LoginPage> {
                     keyboardType: TextInputType.url,
                     autocorrect: false,
                     textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(
-                      labelText: 'URL MWPA',
-                      prefixIcon: Icon(Icons.link),
+                    decoration: InputDecoration(
+                      labelText: context.l10n.labelUrl,
+                      prefixIcon: const Icon(Icons.link),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -299,9 +343,9 @@ class _LoginPageState extends State<LoginPage> {
                     keyboardType: TextInputType.emailAddress,
                     autocorrect: false,
                     textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(
-                      labelText: 'Username / Email',
-                      prefixIcon: Icon(Icons.person_outline),
+                    decoration: InputDecoration(
+                      labelText: context.l10n.labelUsername,
+                      prefixIcon: const Icon(Icons.person_outline),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -310,22 +354,22 @@ class _LoginPageState extends State<LoginPage> {
                     obscureText: true,
                     textInputAction: TextInputAction.done,
                     onSubmitted: (_) => signIn(),
-                    decoration: const InputDecoration(
-                      labelText: 'Password',
-                      prefixIcon: Icon(Icons.lock_outline),
+                    decoration: InputDecoration(
+                      labelText: context.l10n.labelPassword,
+                      prefixIcon: const Icon(Icons.lock_outline),
                     ),
                   ),
                   const SizedBox(height: 24),
                   FilledButton.icon(
                     onPressed: signIn,
                     icon: const Icon(Icons.login),
-                    label: const Text('Sign In'),
+                    label: Text(context.l10n.signIn),
                   ),
                   const SizedBox(height: 12),
                   OutlinedButton.icon(
                     onPressed: quickConnect,
                     icon: const Icon(Icons.qr_code_scanner),
-                    label: const Text('Quick Connect'),
+                    label: Text(context.l10n.quickConnect),
                   ),
                   const SizedBox(height: 28),
                   Text.rich(
@@ -333,12 +377,12 @@ class _LoginPageState extends State<LoginPage> {
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
-                      children: const [
+                      children: [
                         TextSpan(
-                          text: 'Not a Member? ',
-                          style: TextStyle(fontWeight: FontWeight.w600),
+                          text: context.l10n.notAMember,
+                          style: const TextStyle(fontWeight: FontWeight.w600),
                         ),
-                        TextSpan(text: 'Register on your MWPA Portal!'),
+                        TextSpan(text: context.l10n.registerOnPortal),
                       ],
                     ),
                     textAlign: TextAlign.center,

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:mwpaapp/Components/DynInput.dart';
+import 'package:mwpaapp/Components/Inputs/Inputs.dart';
 import 'package:mwpaapp/Controllers/BeaufortController.dart';
 import 'package:mwpaapp/Controllers/LocationController.dart';
 import 'package:mwpaapp/Controllers/PrefController.dart';
@@ -8,6 +7,8 @@ import 'package:mwpaapp/Controllers/VehicleController.dart';
 import 'package:mwpaapp/Controllers/VehicleDriverController.dart';
 import 'package:mwpaapp/Dialog/ConfirmDialog.dart';
 import 'package:mwpaapp/Models/TourPref.dart';
+import 'package:provider/provider.dart';
+import 'package:mwpaapp/l10n/l10n.dart';
 
 class EditTourPage extends StatefulWidget {
 
@@ -18,54 +19,61 @@ class EditTourPage extends StatefulWidget {
 }
 
 class _EditTourPageState extends State<EditTourPage> {
-  final PrefController _prefController = Get.find<PrefController>();
-  final VehicleController _vehicleController = Get.find<VehicleController>();
-  final VehicleDriverController _vehicleDriverController = Get.find<VehicleDriverController>();
-  final LocationController _locationController = Get.find<LocationController>();
+  late final PrefController _prefController = context.read<PrefController>();
+  late final VehicleController _vehicleController = context.read<VehicleController>();
+  late final VehicleDriverController _vehicleDriverController = context.read<VehicleDriverController>();
+  late final LocationController _locationController = context.read<LocationController>();
 
-  late DynInput sightVehicle;
+  late Widget sightVehicle;
   DynInputValue sightVehicleValue = DynInputValue();
 
-  late DynInput sightVehicleDriver;
+  late Widget sightVehicleDriver;
   DynInputValue sightVehicleDriverValue = DynInputValue();
 
-  late DynInput sightBeaufort;
+  late Widget sightBeaufort;
   DynInputValue sightBeaufortValue = DynInputValue();
 
-  late DynInput sightDate;
+  late Widget sightDate;
   DynInputValue sightDateValue = DynInputValue();
 
-  late DynInput sightTourStart;
+  late Widget sightTourStart;
   DynInputValue sightTourStartValue = DynInputValue();
 
-  late DynInput sightTourEnd;
+  late Widget sightTourEnd;
   DynInputValue sightTourEndValue = DynInputValue();
 
-  late DynInput sightSetEndTour;
+  late Widget sightSetEndTour;
   DynInputValue sightSetEndTourValue = DynInputValue();
 
-  late DynInput sightUseHomeArea;
+  late Widget sightUseHomeArea;
   DynInputValue sightUseHomeAreaValue = DynInputValue();
+
+  late Widget keepScreenOn;
+  DynInputValue keepScreenOnValue = DynInputValue();
 
   bool isInit = false;
 
-  _appBar(BuildContext context) {
+  /// _confirmClose - asks before leaving the page without saving; used by
+  /// the app bar back button and the system back gesture/button
+  void _confirmClose() {
+    ConfirmDialog.show(
+      context,
+      context.l10n.tourCloseTitle,
+      context.l10n.tourCloseQuestion,
+      (value) {
+        if (value == 'ok' && mounted) {
+          Navigator.of(context).pop();
+        }
+      },
+    );
+  }
+
+  AppBar _appBar(BuildContext context) {
     return AppBar(
-      title: const Text('Set default Tour'),
+      title: Text(context.l10n.settings),
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
-        onPressed: () async {
-          ConfirmDialog.show(
-            context,
-            'Tour close',
-            'Close tour without saving? All changes will be lost!',
-            (value) {
-              if (value == 'ok') {
-                Get.back();
-              }
-            },
-          );
-        },
+        onPressed: _confirmClose,
       ),
     );
   }
@@ -76,29 +84,31 @@ class _EditTourPageState extends State<EditTourPage> {
   }
 
   /// save the settings
-  _saveTourToPref() async {
+  Future<void> _saveTourToPref() async {
     TourPref tour = TourPref(
-        vehicle_id: sightVehicle.dynValue?.getStrValueAsInt(),
-        vehicle_driver_id: sightVehicleDriver.dynValue
-            ?.getStrValueAsInt(),
-        beaufort_wind: sightBeaufort.dynValue?.getValue(),
-        date: sightDate.dynValue?.getDateTime(),
-        tour_start: sightTourStart.dynValue?.getTimeOfDay(),
-        tour_end: sightTourEnd.dynValue?.getTimeOfDay(),
-        set_end_tour: sightSetEndTour.dynValue?.getIntValue(),
-        use_home_area: sightUseHomeArea.dynValue?.getIntValue()
+        vehicle_id: sightVehicleValue.getStrValueAsInt(),
+        vehicle_driver_id: sightVehicleDriverValue.getStrValueAsInt(),
+        beaufort_wind: sightBeaufortValue.getValue(),
+        date: sightDateValue.getDateTime(),
+        tour_start: sightTourStartValue.getTimeOfDay(),
+        tour_end: sightTourEndValue.getTimeOfDay(),
+        set_end_tour: sightSetEndTourValue.getIntValue(),
+        use_home_area: sightUseHomeAreaValue.getIntValue()
     );
 
     await _prefController.saveTour(tour);
+    await _prefController.setKeepScreenOn(keepScreenOnValue.getIntValue() >= 1);
     await _locationController.reloadSettings();
 
-    Get.back();
+    if (!mounted) return;
+    Navigator.of(context).pop();
   }
 
   @override
   Widget build(BuildContext context) {
     if (!isInit) {
       isInit = true;
+      keepScreenOnValue.setIntValue(_prefController.keepScreenOn ? 1 : 0);
 
       if (_prefController.prefToru != null) {
         //  vehicle
@@ -124,14 +134,13 @@ class _EditTourPageState extends State<EditTourPage> {
       }
     }
 
-    return Obx(() {
-      sightVehicle = DynInput(
-        context: context,
-        title: "Boat",
-        hint: "",
-        inputType: DynInputType.select,
-        dynValue: sightVehicleValue,
-        selectList: _vehicleController.vehicleList.map((element) {
+    return ListenableBuilder(
+      listenable: Listenable.merge([_vehicleController, _vehicleDriverController]),
+      builder: (_, __) {
+      sightVehicle = SelectInput(
+        title: context.l10n.labelBoat,
+        value: sightVehicleValue,
+        items: _vehicleController.vehicleList.map((element) {
           return DynInputSelectItem(
               value: element.id!.toString(),
               label: element.name!
@@ -139,13 +148,10 @@ class _EditTourPageState extends State<EditTourPage> {
         }).toList(),
       );
 
-      sightVehicleDriver = DynInput(
-        context: context,
-        title: "Skipper",
-        hint: "",
-        inputType: DynInputType.select,
-        dynValue: sightVehicleDriverValue,
-        selectList: _vehicleDriverController.vehicleDriverList.map((element) {
+      sightVehicleDriver = SelectInput(
+        title: context.l10n.labelSkipper,
+        value: sightVehicleDriverValue,
+        items: _vehicleDriverController.vehicleDriverList.map((element) {
           return DynInputSelectItem(
               value: element.id!.toString(),
               label: element.username!
@@ -153,86 +159,95 @@ class _EditTourPageState extends State<EditTourPage> {
         }).toList(),
       );
 
-      sightBeaufort = DynInput(
-          context: context,
-          title: "Wind/Sea-state (Beaufort)",
-          hint: "",
-          inputType: DynInputType.select,
-          dynValue: sightBeaufortValue,
-          selectList: BeaufortController.beaufortSelectList
+      sightBeaufort = SelectInput(
+        title: context.l10n.labelBeaufort,
+        value: sightBeaufortValue,
+        items: BeaufortController.selectList(context.l10n.notSelected),
+          searchable: false,
       );
 
-      sightDate = DynInput(
-        context: context,
-        title: "Date",
-        hint: "",
-        inputType: DynInputType.date,
-        dynValue: sightDateValue,
+      sightDate = DateInput(
+        title: context.l10n.fieldDate,
+        value: sightDateValue,
       );
 
-      sightTourStart = DynInput(
-        context: context,
-        title: "Start of trip",
-        hint: "",
-        inputType: DynInputType.time,
-        dynValue: sightTourStartValue,
+      sightTourStart = TimeInput(
+        title: context.l10n.fieldTourStart,
+        value: sightTourStartValue,
       );
 
-      sightTourEnd = DynInput(
-        context: context,
-        title: "End of trip",
-        hint: "",
-        inputType: DynInputType.time,
-        dynValue: sightTourEndValue,
+      sightTourEnd = TimeInput(
+        title: context.l10n.fieldTourEnd,
+        value: sightTourEndValue,
       );
 
-      sightSetEndTour = DynInput(
-        context: context,
-        hint: "",
-        inputType: DynInputType.switcher,
-        title: 'Allow tour end time button for all sightings',
-        dynValue: sightSetEndTourValue,
+      sightSetEndTour = SwitchInput(
+        title: context.l10n.labelAllowTourEnd,
+        value: sightSetEndTourValue,
       );
 
-      sightUseHomeArea = DynInput(
-        context: context,
-        hint: "",
-        inputType: DynInputType.switcher,
-        title: 'Use Home Area auto-tracking tour start and end',
-        dynValue: sightUseHomeAreaValue,
+      sightUseHomeArea = SwitchInput(
+        title: context.l10n.labelUseHomeArea,
+        value: sightUseHomeAreaValue,
+      );
+
+      keepScreenOn = SwitchInput(
+        title: context.l10n.labelKeepScreenOn,
+        value: keepScreenOnValue,
       );
 
       return PopScope(
         canPop: false,
+        // system back (button or gesture) asks like the app bar arrow
+        onPopInvokedWithResult: (didPop, _) {
+          if (!didPop) {
+            _confirmClose();
+          }
+        },
         child: Scaffold(
           appBar: _appBar(context),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                sightVehicle,
-                sightVehicleDriver,
-                sightBeaufort,
-                sightDate,
-                Row(
-                  children: [
-                    Expanded(child: sightTourStart),
-                    const SizedBox(width: 12),
-                    Expanded(child: sightTourEnd),
-                  ],
-                ),
-                sightSetEndTour,
-                const SizedBox(height: 16),
-                sightUseHomeArea,
-                const SizedBox(height: 24),
-                FilledButton.icon(
-                  onPressed: _saveTourToPref,
-                  icon: const Icon(Icons.save_alt),
-                  label: const Text('Save default Tour'),
-                ),
-                const SizedBox(height: 24),
-              ],
+          body: SafeArea(
+            top: false,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  InputSection(
+                    title: context.l10n.sectionTour,
+                    icon: Icons.directions_boat_outlined,
+                    children: [
+                      sightVehicle,
+                      sightVehicleDriver,
+                      sightBeaufort,
+                      sightDate,
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(child: sightTourStart),
+                          const SizedBox(width: 12),
+                          Expanded(child: sightTourEnd),
+                        ],
+                      ),
+                    ],
+                  ),
+                  InputSection(
+                    title: context.l10n.sectionSettings,
+                    icon: Icons.tune,
+                    children: [
+                      sightSetEndTour,
+                      sightUseHomeArea,
+                      keepScreenOn,
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  FilledButton.icon(
+                    onPressed: _saveTourToPref,
+                    icon: const Icon(Icons.save_alt),
+                    label: Text(context.l10n.saveDefaultTour),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

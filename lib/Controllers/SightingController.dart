@@ -1,19 +1,12 @@
 import 'package:flutter/foundation.dart';
-import 'package:get/get.dart';
 import 'package:mwpaapp/Db/DBHelper.dart';
 import 'package:mwpaapp/Models/Sighting.dart';
+import 'package:mwpaapp/Util/AppLog.dart';
 
 /// SightingController
-class SightingController extends GetxController {
+class SightingController extends ChangeNotifier {
 
-  /// onReady
-  @override
-  void onReady() {
-    super.onReady();
-    getSightings();
-  }
-
-  var sightingList = <Sighting>[].obs;
+  List<Sighting> sightingList = <Sighting>[];
 
   /// addSighting
   Future<int> addSighting({required Sighting newSighting}) async {
@@ -21,31 +14,30 @@ class SightingController extends GetxController {
   }
 
   /// getSightings
-  void getSightings() async {
+  Future<void> getSightings() async {
     List<Map<String, dynamic>> sightings = await DBHelper.querySighting();
-    sightingList.assignAll(sightings.map((data) => Sighting.fromJson(data)).toList());
+    sightingList = sightings.map((data) => Sighting.fromJson(data)).toList();
+    notifyListeners();
   }
 
   /// delete
   Future<void> delete(Sighting oldSighting) async {
-    var val = await DBHelper.deleteSighting(oldSighting);
+    await DBHelper.deleteSighting(oldSighting);
 
-    if (kDebugMode) {
-      print(val);
-    }
+    AppLog.i('Sightings', 'deleted sighting ${oldSighting.id}');
   }
 
   /// updateSighting
   Future<int> updateSighting({required Sighting tSighting}) async {
     var result = await DBHelper.updateSighting(tSighting);
-    update();
+    notifyListeners();
     return result;
   }
 
   /// updateSightingEndtour
   Future<int> updateSightingEndtour(String tourFid, String tourend) async {
     var result = await DBHelper.updateSightingEndTour(tourFid, tourend);
-    update();
+    notifyListeners();
     return result;
   }
 }

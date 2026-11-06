@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:mwpaapp/Ui/Fonts.dart';
 import 'package:mwpaapp/Constants.dart';
 
 class Themes {
@@ -18,10 +18,15 @@ class Themes {
     secondary: kButtonBackgroundColor,
   );
 
+  /// buttons/links on the dark background: the brand blues are too dark
+  /// there (same value as inputAccentColor)
+  static const Color darkAccent = Color(0xff9ec3ff);
+
   static final light = _build(_lightScheme);
   static final dark = _build(_darkScheme);
 
   static ThemeData _build(ColorScheme scheme) {
+    final dark = scheme.brightness == Brightness.dark;
     final base = ThemeData(
       colorScheme: scheme,
       useMaterial3: true,
@@ -29,9 +34,10 @@ class Themes {
       scaffoldBackgroundColor: scheme.brightness == Brightness.dark
           ? kPrimaryDarkBackgroundColor
           : kPrimaryBackgroundColor,
-      textTheme: GoogleFonts.latoTextTheme(
-        ThemeData(brightness: scheme.brightness).textTheme,
-      ),
+      fontFamily: kFontFamily,
+      textTheme: ThemeData(brightness: scheme.brightness)
+          .textTheme
+          .apply(fontFamily: kFontFamily),
     );
 
     return base.copyWith(
@@ -41,7 +47,7 @@ class Themes {
         elevation: 0,
         scrolledUnderElevation: 2,
         centerTitle: false,
-        titleTextStyle: GoogleFonts.lato(
+        titleTextStyle: latoStyle(
           textStyle: const TextStyle(
             color: kButtonFontColor,
             fontSize: 20,
@@ -76,7 +82,7 @@ class Themes {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: GoogleFonts.lato(
+          textStyle: latoStyle(
             fontWeight: FontWeight.w700,
             fontSize: 16,
           ),
@@ -90,18 +96,18 @@ class Themes {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: GoogleFonts.lato(
+          textStyle: latoStyle(
             fontWeight: FontWeight.w700,
             fontSize: 16,
           ),
-          side: const BorderSide(color: kPrimaryColor, width: 1.4),
-          foregroundColor: kPrimaryColor,
+          side: BorderSide(color: dark ? darkAccent : kPrimaryColor, width: 1.4),
+          foregroundColor: dark ? darkAccent : kPrimaryColor,
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: scheme.primary,
-          textStyle: GoogleFonts.lato(fontWeight: FontWeight.w600),
+          foregroundColor: dark ? darkAccent : scheme.primary,
+          textStyle: latoStyle(fontWeight: FontWeight.w600),
         ),
       ),
       cardTheme: CardThemeData(

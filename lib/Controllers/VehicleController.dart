@@ -1,16 +1,11 @@
-import 'package:get/get.dart';
+import 'package:flutter/foundation.dart';
 import 'package:mwpaapp/Db/DBHelper.dart';
 import 'package:mwpaapp/Models/Vehicle.dart';
 
-class VehicleController extends GetxController {
+/// VehicleController
+class VehicleController extends ChangeNotifier {
 
-  @override
-  void onReady() {
-    super.onReady();
-    getVehicle();
-  }
-
-  var vehicleList = <Vehicle>[].obs;
+  List<Vehicle> vehicleList = <Vehicle>[];
 
   Future<int> addVehicle({required Vehicle vehicle}) async {
     return await DBHelper.insertVehicle(vehicle);
@@ -19,7 +14,10 @@ class VehicleController extends GetxController {
   Future<void> getVehicle() async {
     List<Map<String, dynamic>> vehicles = await DBHelper.queryVehicle(false);
 
-    vehicleList.assignAll(vehicles.map((data) => Vehicle.fromJson(data)).toList());
-    vehicleList.insert(0, Vehicle(id: 0, name: 'Unknown'));
+    vehicleList = [
+      Vehicle(id: 0, name: 'Unknown'),
+      ...vehicles.map((data) => Vehicle.fromJson(data)),
+    ];
+    notifyListeners();
   }
 }

@@ -6,7 +6,7 @@ import 'package:mwpaapp/Models/TourPref.dart';
 class UtilTourFid {
 
   /// createTTourFId
-  static createTTourFId(TourPref tour) {
+  static String createTTourFId(TourPref tour) {
     DateTime tDate = DateTime.parse("${tour.date}");
     var date = DateFormat("yyyy-MM-dd").format(tDate.toLocal());
 
@@ -14,7 +14,7 @@ class UtilTourFid {
   }
 
   /// createSTourFId
-  static createSTourFId(Sighting sighting) {
+  static String createSTourFId(Sighting sighting) {
     DateTime tDate = DateTime.parse("${sighting.date}");
     var date = DateFormat("yyyy-MM-dd").format(tDate.toLocal());
 
@@ -22,7 +22,7 @@ class UtilTourFid {
   }
 
   /// convertTourFid
-  static convertTourFid(String fTourId) {
+  static String convertTourFid(String fTourId) {
     if (fTourId.contains(' ')) {
       var parts = fTourId.split(' ');
 

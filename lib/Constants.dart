@@ -1,7 +1,6 @@
 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:mwpaapp/Ui/Fonts.dart';
 
 // Accepted backend API versions. The mobile app refuses to talk to a server
 // that returns a value outside these sets, because the wire shape may have
@@ -9,6 +8,16 @@ import 'package:google_fonts/google_fonts.dart';
 // version string here when the server bumps but stays wire-compatible.
 const Set<String> versionApiMobileLogin = {'1.0.1'};
 const Set<String> versionApiMobileSync = {'1.0.2', '1.0.3'};
+
+// App version, shown on the About page. Must match `version:` in
+// pubspec.yaml (checked by test/app_version_test.dart) - no plugin needed.
+const String kAppVersion = '1.1.0';
+const int kAppBuild = 14;
+
+/// isDarkMode - true when the active theme of [context] is dark
+bool isDarkMode(BuildContext context) {
+  return Theme.of(context).brightness == Brightness.dark;
+}
 
 // primary
 const kPrimaryColor = Color(0xff022b55);
@@ -22,8 +31,8 @@ const kPrimaryDarkFontColor = Color(0xffffffff);
 const kButtonBackgroundColor = Color(0xfff9901c);
 const kButtonFontColor = Color(0xffffffff);
 
-TextStyle get subHeadingStyle {
-  return GoogleFonts.lato(
+TextStyle subHeadingStyle(BuildContext context) {
+  return latoStyle(
     textStyle: TextStyle(
       fontSize: 24,
       fontWeight: FontWeight.bold,
@@ -32,32 +41,32 @@ TextStyle get subHeadingStyle {
   );
 }
 
-TextStyle get headingStyle {
-  return GoogleFonts.lato(
+TextStyle headingStyle(BuildContext context) {
+  return latoStyle(
     textStyle: TextStyle(
       fontSize: 30,
       fontWeight: FontWeight.bold,
-      color: Get.isDarkMode ? kPrimaryDarkFontColor : kPrimaryFontColor
+      color: isDarkMode(context) ? kPrimaryDarkFontColor : kPrimaryFontColor
     )
   );
 }
 
-TextStyle get titleStyle {
-  return GoogleFonts.lato(
+TextStyle titleStyle(BuildContext context) {
+  return latoStyle(
     textStyle: TextStyle(
       fontSize: 16,
       fontWeight: FontWeight.w400,
-      color: Get.isDarkMode ? kPrimaryDarkFontColor : kPrimaryFontColor
+      color: isDarkMode(context) ? kPrimaryDarkFontColor : kPrimaryFontColor
     )
   );
 }
 
-TextStyle get subTitleStyle {
-  return GoogleFonts.lato(
+TextStyle subTitleStyle(BuildContext context) {
+  return latoStyle(
       textStyle: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w400,
-          color: Get.isDarkMode ? kPrimaryDarkFontColor : kPrimaryFontColor,
+          color: isDarkMode(context) ? kPrimaryDarkFontColor : kPrimaryFontColor,
       )
   );
 }

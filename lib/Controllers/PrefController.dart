@@ -1,28 +1,31 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:get/get.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
+import 'package:mwpaapp/Util/UtilDevice.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Models/TourPref.dart';
+import 'package:mwpaapp/Util/AppLog.dart';
 
 /// PrefController
-class PrefController extends GetxController {
+class PrefController extends ChangeNotifier {
 
   bool isLogin = false;
   bool prominentDisclosureConfirmed = false;
   TourPref? prefToru;
 
-  /// onReady
-  @override
-  void onReady() {
-    super.onReady();
-    load();
-  }
+  /// running tour of the home-area mode, see Preference.HOME_AREA_TOUR
+  TourPref? homeAreaTour;
+
+  /// display stays on while the app is in front, see Preference.KEEP_SCREEN_ON
+  bool keepScreenOn = false;
+
+  /// the introduction was shown once, see Preference.INTRO_SEEN
+  bool introSeen = false;
 
   /// load
-  load() async {
+  Future<void> load() async {
     try {
       final prefs = await SharedPreferences.getInstance();
 
@@ -52,44 +55,120 @@ class PrefController extends GetxController {
           prefToru = TourPref.fromJson(jsonDecode(pTourStr));
         }
       }
-    } catch(e) {
-      if (kDebugMode) {
-        print("PrefController:load");
-        print(e);
+
+      // read running home area tour -------------------------------------------
+
+      final homeAreaTourStr = prefs.getString(Preference.HOME_AREA_TOUR);
+
+      if (homeAreaTourStr != null) {
+        homeAreaTour = TourPref.fromJson(jsonDecode(homeAreaTourStr));
       }
+
+      introSeen = prefs.getBool(Preference.INTRO_SEEN) ?? false;
+      keepScreenOn = prefs.getBool(Preference.KEEP_SCREEN_ON) ?? false;
+      await UtilDevice.setKeepScreenOn(keepScreenOn);
+    } catch(e) {
+      AppLog.e('Pref', 'load failed', e);
     }
 
-    update();
+    notifyListeners();
   }
 
   /// saveTour
-  saveTour(TourPref tour) async {
+  Future<void> saveTour(TourPref tour) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(Preference.TOUR, jsonEncode(tour.toJson()));
     } catch(e) {
-      if (kDebugMode) {
-        print("PrefController:saveTour");
-        print(e);
-      }
+      AppLog.e('Pref', 'saveTour failed', e);
     }
 
     prefToru = tour;
-    update();
+    notifyListeners();
+  }
+
+  /// setIntroSeen - the introduction was shown (or skipped)
+  Future<void> setIntroSeen() async {
+    introSeen = true;
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(Preference.INTRO_SEEN, true);
+    } catch(e) {
+      AppLog.e('Pref', 'setIntroSeen failed', e);
+    }
+
+    notifyListeners();
+  }
+
+  /// setKeepScreenOn - stores the setting and applies it right away
+  Future<void> setKeepScreenOn(bool on) async {
+    keepScreenOn = on;
+    await UtilDevice.setKeepScreenOn(on);
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(Preference.KEEP_SCREEN_ON, on);
+    } catch(e) {
+      AppLog.e('Pref', 'setKeepScreenOn failed', e);
+    }
+
+    notifyListeners();
+  }
+
+  /// saveHomeAreaTour - store the running home area tour, null removes it
+  Future<void> saveHomeAreaTour(TourPref? tour) async {
+    homeAreaTour = tour;
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      if (tour == null) {
+        await prefs.remove(Preference.HOME_AREA_TOUR);
+      } else {
+        await prefs.setString(Preference.HOME_AREA_TOUR, jsonEncode(tour.toJson()));
+      }
+    } catch(e) {
+      AppLog.e('Pref', 'saveHomeAreaTour failed', e);
+    }
+  }
+
+  /// logout - removes the session and everything that belongs to the user
+  /// or its organization (default tour with boat/skipper ids, running home
+  /// area tour); URL and username stay to prefill the login. The password
+  /// is removed by CredentialStore.
+  Future<void> logout() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      for (final key in [
+        Preference.USERID,
+        Preference.ORGID,
+        Preference.TOUR,
+        Preference.HOME_AREA_TOUR,
+        Preference.LAST_SYNC,
+      ]) {
+        await prefs.remove(key);
+      }
+    } catch(e) {
+      AppLog.e('Pref', 'logout failed', e);
+    }
+
+    isLogin = false;
+    prefToru = null;
+    homeAreaTour = null;
+    notifyListeners();
   }
 
   /// saveProminentDisclosureConfirmed
-  saveProminentDisclosureConfirmed(bool confirmed) async {
+  Future<void> saveProminentDisclosureConfirmed(bool confirmed) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(Preference.PROMINENT_DISCLOSURE_CONFIRMED, confirmed);
 
       prominentDisclosureConfirmed = confirmed;
     } catch(e) {
-      if (kDebugMode) {
-        print("PrefController:saveProminentDisclosureConfirmed");
-        print(e);
-      }
+      AppLog.e('Pref', 'saveProminentDisclosureConfirmed failed', e);
     }
   }
 }

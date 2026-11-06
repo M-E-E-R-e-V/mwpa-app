@@ -1,6 +1,6 @@
-import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:mwpaapp/Util/UtilCheckJson.dart';
+import 'package:mwpaapp/Util/AppLog.dart';
 
 class TourPref {
   int? vehicle_id;
@@ -51,10 +51,7 @@ class TourPref {
       DateTime tDate = DateTime.parse(date!);
       date = DateFormat("yyyy-MM-dd").format(tDate.toLocal());
     } catch(e) {
-      if (kDebugMode) {
-        print('TourPref::toJson: date parsing error:');
-        print(e);
-      }
+      AppLog.w('TourPref', 'toJson: date parsing error', e);
     }
 
     data['date'] = date;

@@ -1,7 +1,7 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:mwpaapp/Models/BehaviouralState.dart';
@@ -34,6 +34,7 @@ import 'package:mwpaapp/Mwpa/MwpaException.dart';
 import 'package:path/path.dart' as p;
 
 import '../Models/TourTracking.dart';
+import 'package:mwpaapp/Util/AppLog.dart';
 
 /// MwpaApi
 class MwpaApi {
@@ -55,13 +56,36 @@ class MwpaApi {
   static const URL_SIGHTING_TOUR_TRACKING_SAVE = 'mobile/sighting/tourtracking/save';
   static const URL_TRACKINGAREA_HOME = 'mobile/trackingarea/homearea';
 
+  /// timeout of a single request; a sync in a dead spot must fail instead of
+  /// hanging forever
+  static const Duration requestTimeout = Duration(seconds: 30);
+
+  /// timeout of an image upload (larger body over a slow mobile connection)
+  static const Duration uploadTimeout = Duration(minutes: 2);
+
   String _url = "";
   String _cookie = "";
   bool _isLogin = false;
 
-  /// MwpaApi
-  MwpaApi(String url) {
+  /// one client per API instance: keeps the connection (and TLS session) to
+  /// the server open across the many requests of a sync instead of a new
+  /// handshake per request
+  final http.Client _client;
+
+  /// timeout of the JSON requests ([requestTimeout] unless set by a test)
+  final Duration _timeout;
+
+  /// MwpaApi - [client] and [timeout] for tests, default a new [http.Client]
+  /// and [requestTimeout]
+  MwpaApi(String url, {http.Client? client, Duration timeout = requestTimeout})
+      : _client = client ?? http.Client(),
+        _timeout = timeout {
     _url = url;
+  }
+
+  /// close - releases the connection; the instance can't be used afterwards
+  void close() {
+    _client.close();
   }
 
   /// getUrl
@@ -71,16 +95,10 @@ class MwpaApi {
 
   /// isLogin
   Future<bool> isLogin() async {
-    var url = getUrl(MwpaApi.URL_ISLOGIN);
-    var response = await http.get(
-      Uri.parse(url),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-        'cookie': _cookie
-      },
-    );
-
-    var isLogin = IsLogin.fromJson(jsonDecode(response.body));
+    final isLogin = await _guard(() async {
+      final response = await _get(MwpaApi.URL_ISLOGIN);
+      return IsLogin.fromJson(jsonDecode(response.body));
+    });
 
     _isLogin = isLogin.status;
     return isLogin.status;
@@ -97,108 +115,43 @@ class MwpaApi {
     try {
       if (Platform.isAndroid) {
         var build = await deviceInfoPlugin.androidInfo;
-        deviceName = build.model ?? '';
+        deviceName = build.model;
         deviceVersion = build.version.toString();
-        identifier = build.id ?? '';  //UUID for Android
+        identifier = build.id;  //UUID for Android
       } else if (Platform.isIOS) {
         var data = await deviceInfoPlugin.iosInfo;
-        deviceName = data.name ?? '';
-        deviceVersion = data.systemVersion ?? '';
+        deviceName = data.name;
+        deviceVersion = data.systemVersion;
 
         if (data.identifierForVendor != null) {
           identifier = data.identifierForVendor!; //UUID for iOS
         }
       }
     } on PlatformException {
-      if (kDebugMode) {
-        print('Failed to get platform version');
-      }
+      AppLog.w('Api', 'device details not available');
     }
 
     return [deviceName, deviceVersion, identifier];
   }
 
-  /// getInfo
-  Future<Info> getInfo() async {
-    try {
-      var url = getUrl(MwpaApi.URL_INFO);
-
-      var response = await http.get(
-        Uri.parse(url),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-      );
-
-      var objResponse = Info.fromJson(jsonDecode(response.body));
-
-      if (objResponse.statusCode == StatusCodes.OK) {
-        return objResponse;
-      } else {
-        if (objResponse.msg != null) {
-          throw MwpaException(objResponse.msg!);
-        }
-
-        throw MwpaException('Response success false');
-      }
-    }
-    on MwpaException {
-      rethrow;
-    } catch(error) {
-      if (kDebugMode) {
-        print(error);
-      }
-
-      throw Exception('Connection error');
-    }
+  /// getInfo - public endpoint, sent without the session cookie
+  Future<Info> getInfo() {
+    return _guard(() async {
+      final response = await _get(MwpaApi.URL_INFO, withCookie: false);
+      return _checked(Info.fromJson(jsonDecode(response.body)));
+    });
   }
 
   /// login
   Future<bool> login(String email, String password) async {
-    try {
-      var deviceDetails = await _getDeviceDetails();
+    final deviceDetails = await _getDeviceDetails();
 
-      var url = getUrl(MwpaApi.URL_LOGIN);
-      var postBody = jsonEncode(<String, String>{
-        'email': email,
-        'password': password,
-        'deviceIdentity': deviceDetails[2],
-        'deviceDescription': "${deviceDetails[0]} - ${deviceDetails[1]}"
-      });
-
-      var response = await http.post(
-        Uri.parse(url),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: postBody,
-      );
-
-      var objResponse = LoginResponse.fromJson(jsonDecode(response.body));
-
-      if (objResponse.success) {
-        if (response.headers.containsKey('set-cookie')) {
-          _cookie = response.headers['set-cookie']!;
-        }
-
-        return true;
-      } else {
-        if (objResponse.error != null) {
-          throw MwpaException(objResponse.error!);
-        }
-
-        throw MwpaException('Response success false');
-      }
-    }
-    on MwpaException {
-      rethrow;
-    } catch(error) {
-      if (kDebugMode) {
-        print(error);
-      }
-
-      throw Exception('Connection error');
-    }
+    return _sessionLogin(MwpaApi.URL_LOGIN, <String, String>{
+      'email': email,
+      'password': password,
+      'deviceIdentity': deviceDetails[2],
+      'deviceDescription': "${deviceDetails[0]} - ${deviceDetails[1]}"
+    });
   }
 
   /// quickConnect
@@ -206,541 +159,247 @@ class MwpaApi {
   /// mobile session. The backend resolves the user from the OTP itself, so we
   /// only send {otp, deviceIdentity, deviceDescription} — no email/password.
   Future<bool> quickConnect(String otp) async {
-    try {
-      var deviceDetails = await _getDeviceDetails();
+    final deviceDetails = await _getDeviceDetails();
 
-      var url = getUrl(MwpaApi.URL_QUICKCONNECT);
-      var postBody = jsonEncode(<String, String>{
-        'otp': otp,
-        'deviceIdentity': deviceDetails[2],
-        'deviceDescription': "${deviceDetails[0]} - ${deviceDetails[1]}"
-      });
+    return _sessionLogin(MwpaApi.URL_QUICKCONNECT, <String, String>{
+      'otp': otp,
+      'deviceIdentity': deviceDetails[2],
+      'deviceDescription': "${deviceDetails[0]} - ${deviceDetails[1]}"
+    });
+  }
 
-      var response = await http.post(
-        Uri.parse(url),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: postBody,
-      );
+  /// _sessionLogin - posts the login [body] and keeps the session cookie
+  Future<bool> _sessionLogin(String path, Map<String, String> body) {
+    return _guard(() async {
+      final response = await _post(path, body, withCookie: false);
+      final objResponse = LoginResponse.fromJson(jsonDecode(response.body));
 
-      var objResponse = LoginResponse.fromJson(jsonDecode(response.body));
-
-      if (objResponse.success) {
-        if (response.headers.containsKey('set-cookie')) {
-          _cookie = response.headers['set-cookie']!;
-        }
-
-        return true;
-      } else {
-        if (objResponse.error != null) {
-          throw MwpaException(objResponse.error!);
-        }
-
-        throw MwpaException('Response success false');
-      }
-    }
-    on MwpaException {
-      rethrow;
-    } catch(error) {
-      if (kDebugMode) {
-        print(error);
+      if (!objResponse.success) {
+        throw MwpaException(objResponse.error ?? 'Response success false');
       }
 
-      throw Exception('Connection error');
-    }
+      final cookie = response.headers['set-cookie'];
+
+      if (cookie != null) {
+        _cookie = cookie;
+      }
+
+      return true;
+    });
   }
 
   /// getUserInfo
   Future<UserInfo> getUserInfo() async {
-    if (!_isLogin) {
-      throw MwpaException('Please login first!');
-    }
+    _requireLogin();
 
-    try {
-      var url = getUrl(MwpaApi.URL_USERINFO);
-
-      var response = await http.get(
-        Uri.parse(url),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'cookie': _cookie
-        },
-      );
-
-      var objResponse = UserInfoResponse.fromJson(jsonDecode(response.body));
-
-      if (objResponse.statusCode == StatusCodes.OK) {
-        return objResponse.data!;
-      } else {
-        if (objResponse.msg != null) {
-          throw MwpaException(objResponse.msg!);
-        }
-
-        throw MwpaException('Response success false');
-      }
-    }
-    on MwpaException {
-      rethrow;
-    } catch(error) {
-      if (kDebugMode) {
-        print(error);
-      }
-
-      throw Exception('Connection error');
-    }
+    final response = await _getChecked(MwpaApi.URL_USERINFO, UserInfoResponse.fromJson);
+    return response.data!;
   }
 
   /// getVehicleList
   Future<List<Vehicle>> getVehicleList() async {
-    if (!_isLogin) {
-      throw MwpaException('Please login first!');
-    }
+    _requireLogin();
 
-    try {
-      var url = getUrl(MwpaApi.URL_VEHICLE);
-
-      var response = await http.get(
-        Uri.parse(url),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'cookie': _cookie
-        },
-      );
-
-      var objResponse = VehicleResponse.fromJson(jsonDecode(response.body));
-
-      if (objResponse.statusCode == StatusCodes.OK) {
-        return objResponse.list!;
-      } else {
-        if (objResponse.msg != null) {
-          throw MwpaException(objResponse.msg!);
-        }
-
-        throw MwpaException('Response success false');
-      }
-    }
-    on MwpaException {
-      rethrow;
-    } catch(error) {
-      if (kDebugMode) {
-        print(error);
-      }
-
-      throw Exception('Connection error');
-    }
+    final response = await _getChecked(MwpaApi.URL_VEHICLE, VehicleResponse.fromJson);
+    return response.list!;
   }
 
   /// getVehicleDriverList
   Future<List<VehicleDriver>> getVehicleDriverList() async {
-    if (!_isLogin) {
-      throw MwpaException('Please login first!');
-    }
+    _requireLogin();
 
-    try {
-      var url = getUrl(MwpaApi.URL_VEHICLE_DRIVER);
-
-      var response = await http.get(
-        Uri.parse(url),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'cookie': _cookie
-        },
-      );
-
-      var objResponse = VehicleDriverResponse.fromJson(jsonDecode(response.body));
-
-      if (objResponse.statusCode == StatusCodes.OK) {
-        return objResponse.list!;
-      } else {
-        if (objResponse.msg != null) {
-          throw MwpaException(objResponse.msg!);
-        }
-
-        throw MwpaException('Response success false');
-      }
-    }
-    on MwpaException {
-      rethrow;
-    } catch(error) {
-      if (kDebugMode) {
-        print(error);
-      }
-
-      throw Exception('Connection error');
-    }
+    final response = await _getChecked(MwpaApi.URL_VEHICLE_DRIVER, VehicleDriverResponse.fromJson);
+    return response.list!;
   }
 
   /// getSpeciesList
   Future<List<Species>> getSpeciesList() async {
-    if (!_isLogin) {
-      throw MwpaException('Please login first!');
-    }
+    _requireLogin();
 
-    try {
-      var url = getUrl(MwpaApi.URL_SPECIES);
-
-      var response = await http.get(
-        Uri.parse(url),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'cookie': _cookie
-        },
-      );
-
-      var objResponse = SpeciesListResponse.fromJson(jsonDecode(response.body));
-
-      if (objResponse.statusCode == StatusCodes.OK) {
-        return objResponse.list!;
-      } else {
-        if (objResponse.msg != null) {
-          throw MwpaException(objResponse.msg!);
-        }
-
-        throw MwpaException('Response success false');
-      }
-    }
-    on MwpaException {
-      rethrow;
-    } catch(error) {
-      if (kDebugMode) {
-        print(error);
-      }
-
-      throw Exception('Connection error');
-    }
+    final response = await _getChecked(MwpaApi.URL_SPECIES, SpeciesListResponse.fromJson);
+    return response.list!;
   }
 
   /// getEncounterCategorieList
   Future<List<EncounterCategorie>> getEncounterCategorieList() async {
-    if (!_isLogin) {
-      throw MwpaException('Please login first!');
-    }
+    _requireLogin();
 
-    try {
-      var url = getUrl(MwpaApi.URL_ENC_CATE);
-
-      var response = await http.get(
-        Uri.parse(url),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'cookie': _cookie
-        },
-      );
-
-      var objResponse = EncounterCategoriesResponse.fromJson(jsonDecode(response.body));
-
-      if (objResponse.statusCode == StatusCodes.OK) {
-        return objResponse.list!;
-      } else {
-        if (objResponse.msg != null) {
-          throw MwpaException(objResponse.msg!);
-        }
-
-        throw MwpaException('Response success false');
-      }
-    }
-    on MwpaException {
-      rethrow;
-    } catch(error) {
-      if (kDebugMode) {
-        print(error);
-      }
-
-      throw Exception('Connection error');
-    }
+    final response = await _getChecked(MwpaApi.URL_ENC_CATE, EncounterCategoriesResponse.fromJson);
+    return response.list!;
   }
 
   /// getBehaviouralStateList
   Future<List<BehaviouralState>> getBehaviouralStateList() async {
-    if (!_isLogin) {
-      throw MwpaException('Please login first!');
-    }
+    _requireLogin();
 
-    try {
-      var url = getUrl(MwpaApi.URL_BEH_STATE);
-
-      var response = await http.get(
-        Uri.parse(url),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'cookie': _cookie
-        },
-      );
-
-      var objResponse = BehaviouralStatesResponse.fromJson(jsonDecode(response.body));
-
-      if (objResponse.statusCode == StatusCodes.OK) {
-        return objResponse.list!;
-      } else {
-        if (objResponse.msg != null) {
-          throw MwpaException(objResponse.msg!);
-        }
-
-        throw MwpaException('Response success false');
-      }
-    }
-    on MwpaException {
-      rethrow;
-    } catch(error) {
-      if (kDebugMode) {
-        print(error);
-      }
-
-      throw Exception('Connection error');
-    }
-  }
-
-  /// saveSighting
-  Future<SightingSaveResponse?> saveSighting(Sighting sigh) async {
-    try {
-      var url = getUrl(MwpaApi.URL_SIGHTING_SAVE);
-
-      var postBody = jsonEncode(sigh.toJson(false, false, true));
-
-      var response = await http.post(
-        Uri.parse(url),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'cookie': _cookie
-        },
-        body: postBody,
-      );
-
-      var objResponse = SightingSaveResponse.fromJson(jsonDecode(response.body));
-
-      if (objResponse.statusCode == StatusCodes.OK) {
-        return objResponse;
-      }
-    }
-    on MwpaException {
-      rethrow;
-    } catch(error) {
-      if (kDebugMode) {
-        print(error);
-      }
-
-      throw Exception('Connection error');
-    }
-
-    return null;
-  }
-
-  /// saveSightingImage
-  Future<bool> saveSightingImage(String unid, String imgFile) async {
-    try {
-      if ( File(imgFile).existsSync()) {
-        String filename = p.basename(imgFile);
-
-        try {
-          final file = await File(imgFile).open(mode: FileMode.read);
-          var fileSize = file.lengthSync();
-          var url = getUrl(MwpaApi.URL_SIGHTING_IMAGE_SAVE);
-
-          var request = http.MultipartRequest('POST', Uri.parse(url));
-
-          request.headers.addAll(<String, String>{
-            'cookie': _cookie
-          });
-
-          request.fields['unid'] = unid;
-          request.fields['filename'] = filename;
-          request.fields['size'] = fileSize.toString();
-
-          http.MultipartFile multipartFile = await http.MultipartFile.fromPath('file', imgFile);
-
-          request.files.add(multipartFile);
-
-          http.StreamedResponse response = await request.send();
-
-          final res = await http.Response.fromStream(response);
-          var objResponse = DefaultReturn.fromJson(jsonDecode(res.body));
-
-          if (objResponse.statusCode != StatusCodes.OK) {
-            throw Exception('Image can not update!');
-          }
-
-          return true;
-        } catch(te) {
-          if (kDebugMode) {
-            print(te);
-          }
-        }
-      }
-    }
-    on MwpaException {
-      rethrow;
-    } catch(error) {
-      if (kDebugMode) {
-        print(error);
-      }
-
-      throw Exception('Connection error');
-    }
-
-    return false;
-  }
-
-  /// existSightingImage
-  Future<bool> existSightingImage(String unid, String imgFile) async {
-    try {
-      if ( File(imgFile).existsSync()) {
-        String filename = p.basename(imgFile);
-
-        try {
-          final file = await File(imgFile).open(mode: FileMode.read);
-          var fileSize = file.lengthSync();
-
-          var url = getUrl(MwpaApi.URL_SIGHTING_IMAGE_EXIST);
-          var ie = ImageExist(unid: unid, filename: filename, size: fileSize.toString());
-          var postBody = jsonEncode(ie.toJson());
-
-          var response = await http.post(
-            Uri.parse(url),
-            headers: <String, String>{
-              'Content-Type': 'application/json; charset=UTF-8',
-              'cookie': _cookie
-            },
-            body: postBody,
-          );
-
-          var objResponse = ImageExistResponse.fromJson(jsonDecode(response.body));
-
-          if (objResponse.statusCode == StatusCodes.OK) {
-            if (objResponse.isExist != null) {
-              return objResponse.isExist!;
-            }
-          }
-        } catch(te) {
-          if (kDebugMode) {
-            print(te);
-          }
-        }
-      }
-    }
-    on MwpaException {
-      rethrow;
-    } catch(error) {
-      if (kDebugMode) {
-        print(error);
-      }
-
-      throw Exception('Connection error');
-    }
-
-    return false;
-  }
-
-  /// checkSightingTourTracking
-  Future<SightingTourTrackingCheckResponse?> checkSightingTourTracking(SightingTourTrackingCheck trackCheck) async {
-    try {
-      var url = getUrl(MwpaApi.URL_SIGHTING_TOUR_TRACKING_CHECK);
-
-      var postBody = jsonEncode(trackCheck.toJson());
-
-      var response = await http.post(
-        Uri.parse(url),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'cookie': _cookie
-        },
-        body: postBody,
-      );
-
-      var objResponse = SightingTourTrackingCheckResponse.fromJson(jsonDecode(response.body));
-
-      if (objResponse.statusCode == StatusCodes.OK) {
-        return objResponse;
-      }
-    }
-    on MwpaException {
-      rethrow;
-    } catch(error) {
-      if (kDebugMode) {
-        print(error);
-      }
-
-      throw Exception('Connection error');
-    }
-
-    return null;
-  }
-
-  /// saveSightingTourTracking
-  Future<bool> saveSightingTourTracking(List<TourTracking> trackList) async {
-    try {
-      var save = SightingTourTrackingSave.fromTrackingList(trackList);
-
-      var url = getUrl(MwpaApi.URL_SIGHTING_TOUR_TRACKING_SAVE);
-
-      var postBody = jsonEncode(save.toJson());
-
-      var response = await http.post(
-        Uri.parse(url),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'cookie': _cookie
-        },
-        body: postBody,
-      );
-
-      var objResponse = DefaultReturn.fromJson(jsonDecode(response.body));
-
-      if (objResponse.statusCode == StatusCodes.OK) {
-        return true;
-      }
-    }
-    on MwpaException {
-      rethrow;
-    } catch(error) {
-      if (kDebugMode) {
-        print(error);
-      }
-
-      throw Exception('Connection error');
-    }
-
-    return false;
+    final response = await _getChecked(MwpaApi.URL_BEH_STATE, BehaviouralStatesResponse.fromJson);
+    return response.list!;
   }
 
   /// getHomeAreaTrackingArea
   Future<TrackingAreaHomeData?> getHomeAreaTrackingArea() async {
-    if (!_isLogin) {
-      throw MwpaException('Please login first!');
+    _requireLogin();
+
+    final response = await _getChecked(MwpaApi.URL_TRACKINGAREA_HOME, TrackingAreaHomeResponse.fromJson);
+    return response.data;
+  }
+
+  /// saveSighting - null when the server refuses the sighting
+  Future<SightingSaveResponse?> saveSighting(Sighting sigh, Species? Function(int id) speciesById) {
+    return _guard(() async {
+      final response = await _post(
+        MwpaApi.URL_SIGHTING_SAVE,
+        sigh.toJson(false, false, true, speciesById: speciesById),
+      );
+
+      final objResponse = SightingSaveResponse.fromJson(jsonDecode(response.body));
+      return objResponse.statusCode == StatusCodes.OK ? objResponse : null;
+    });
+  }
+
+  /// saveSightingImage - uploads the image file; false when the file is
+  /// missing or the upload fails (an image never aborts the sync)
+  Future<bool> saveSightingImage(String unid, String imgFile) async {
+    final file = File(imgFile);
+
+    if (!file.existsSync()) {
+      return false;
     }
 
     try {
-      var url = getUrl(MwpaApi.URL_TRACKINGAREA_HOME);
+      final request = http.MultipartRequest('POST', Uri.parse(getUrl(MwpaApi.URL_SIGHTING_IMAGE_SAVE)));
 
-      var response = await http.get(
-        Uri.parse(url),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'cookie': _cookie
-        },
+      request.headers['cookie'] = _cookie;
+      request.fields['unid'] = unid;
+      request.fields['filename'] = p.basename(imgFile);
+      request.fields['size'] = file.lengthSync().toString();
+      request.files.add(await http.MultipartFile.fromPath('file', imgFile));
+
+      final response = await http.Response.fromStream(
+        await _client.send(request).timeout(uploadTimeout),
+      ).timeout(uploadTimeout);
+
+      final objResponse = DefaultReturn.fromJson(jsonDecode(response.body));
+      return objResponse.statusCode == StatusCodes.OK;
+    } catch (error) {
+      AppLog.w('Api', 'image upload failed: ${p.basename(imgFile)}', error);
+    }
+
+    return false;
+  }
+
+  /// existSightingImage - true when the server already has this image;
+  /// false when the file is missing or the check fails
+  Future<bool> existSightingImage(String unid, String imgFile) async {
+    final file = File(imgFile);
+
+    if (!file.existsSync()) {
+      return false;
+    }
+
+    try {
+      final ie = ImageExist(
+        unid: unid,
+        filename: p.basename(imgFile),
+        size: file.lengthSync().toString(),
       );
 
-      /// https://pub.dev/documentation/point_in_polygon/latest/
-      var objResponse = TrackingAreaHomeResponse.fromJson(jsonDecode(response.body));
+      final response = await _post(MwpaApi.URL_SIGHTING_IMAGE_EXIST, ie.toJson());
+      final objResponse = ImageExistResponse.fromJson(jsonDecode(response.body));
 
       if (objResponse.statusCode == StatusCodes.OK) {
-        return objResponse.data;
-      } else {
-        if (objResponse.msg != null) {
-          throw MwpaException(objResponse.msg!);
-        }
-
-        throw MwpaException('Response success false');
+        return objResponse.isExist ?? false;
       }
+    } catch (error) {
+      AppLog.w('Api', 'image exist check failed: ${p.basename(imgFile)}', error);
     }
-    on MwpaException {
-      rethrow;
-    } catch(error) {
-      if (kDebugMode) {
-        print(error);
-      }
 
-      throw Exception('Connection error');
+    return false;
+  }
+
+  /// checkSightingTourTracking - null when the server refuses the check
+  Future<SightingTourTrackingCheckResponse?> checkSightingTourTracking(SightingTourTrackingCheck trackCheck) {
+    return _guard(() async {
+      final response = await _post(MwpaApi.URL_SIGHTING_TOUR_TRACKING_CHECK, trackCheck.toJson());
+      final objResponse = SightingTourTrackingCheckResponse.fromJson(jsonDecode(response.body));
+
+      return objResponse.statusCode == StatusCodes.OK ? objResponse : null;
+    });
+  }
+
+  /// saveSightingTourTracking
+  Future<bool> saveSightingTourTracking(List<TourTracking> trackList) {
+    return _guard(() async {
+      final save = SightingTourTrackingSave.fromTrackingList(trackList);
+      final response = await _post(MwpaApi.URL_SIGHTING_TOUR_TRACKING_SAVE, save.toJson());
+
+      return DefaultReturn.fromJson(jsonDecode(response.body)).statusCode == StatusCodes.OK;
+    });
+  }
+
+  // request helpers -----------------------------------------------------------
+
+  void _requireLogin() {
+    if (!_isLogin) {
+      throw MwpaException('Please login first!');
+    }
+  }
+
+  Map<String, String> _headers(bool withCookie) {
+    return <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+      if (withCookie) 'cookie': _cookie,
+    };
+  }
+
+  Future<http.Response> _get(String path, {bool withCookie = true}) {
+    return _client
+        .get(Uri.parse(getUrl(path)), headers: _headers(withCookie))
+        .timeout(_timeout);
+  }
+
+  Future<http.Response> _post(String path, Object body, {bool withCookie = true}) {
+    return _client
+        .post(Uri.parse(getUrl(path)), headers: _headers(withCookie), body: jsonEncode(body))
+        .timeout(_timeout);
+  }
+
+  /// _getChecked - GET [path] and parse it with [fromJson]; throws the
+  /// server message when the status code is not OK
+  Future<T> _getChecked<T extends DefaultReturn>(
+      String path, T Function(Map<String, dynamic> json) fromJson) {
+    return _guard(() async {
+      final response = await _get(path);
+      return _checked(fromJson(jsonDecode(response.body)));
+    });
+  }
+
+  /// _checked - [response] when OK, otherwise a [MwpaException] with the
+  /// server message
+  static T _checked<T extends DefaultReturn>(T response) {
+    if (response.statusCode != StatusCodes.OK) {
+      throw MwpaException(response.msg ?? 'Response success false');
+    }
+
+    return response;
+  }
+
+  /// _guard - runs [request]; server-side errors ([MwpaException]) pass
+  /// through, a timeout and every other failure (no network, refused, broken
+  /// JSON, ...) become a connection exception
+  static Future<T> _guard<T>(Future<T> Function() request) async {
+    try {
+      return await request();
+    } on MwpaException {
+      rethrow;
+    } on TimeoutException catch (error) {
+      AppLog.w('Api', 'request timeout', error);
+
+      throw const MwpaConnectionException(timeout: true);
+    } catch (error) {
+      AppLog.w('Api', 'connection error', error);
+
+      throw const MwpaConnectionException();
     }
   }
 

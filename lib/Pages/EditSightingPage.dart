@@ -1,27 +1,34 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:get/get.dart';
 import 'package:mwpaapp/Components/DefaultButton.dart';
-import 'package:mwpaapp/Components/DynInput.dart';
+import 'package:mwpaapp/Components/Inputs/Inputs.dart';
 import 'package:mwpaapp/Controllers/BeaufortController.dart';
 import 'package:mwpaapp/Controllers/BehaviouralStateController.dart';
 import 'package:mwpaapp/Controllers/EncounterCategoriesController.dart';
 import 'package:mwpaapp/Controllers/LocationController.dart';
 import 'package:mwpaapp/Controllers/PrefController.dart';
 import 'package:mwpaapp/Controllers/SightingController.dart';
+import 'package:mwpaapp/Controllers/SyncController.dart';
 import 'package:mwpaapp/Controllers/SpeciesController.dart';
 import 'package:mwpaapp/Controllers/VehicleController.dart';
 import 'package:mwpaapp/Controllers/VehicleDriverController.dart';
 import 'package:mwpaapp/Dialog/ConfirmDialog.dart';
 import 'package:mwpaapp/Models/Sighting.dart';
+import 'package:mwpaapp/Pages/EditSighting/MissingFields.dart';
+import 'package:mwpaapp/Pages/EditSighting/PlausibilityHints.dart';
+import 'package:mwpaapp/Util/UtilLocation.dart';
+import 'package:mwpaapp/Util/UtilPlausibility.dart';
 import 'package:mwpaapp/Models/TourPref.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
 import 'package:mwpaapp/Util/UtilDistanceCoast.dart';
+import 'package:mwpaapp/Util/UtilImage.dart';
 import 'package:mwpaapp/Util/UtilTourFId.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
+import 'package:mwpaapp/Util/AppLog.dart';
+import 'package:mwpaapp/l10n/l10n.dart';
 
 /// EditSightingPage
 class EditSightingPage extends StatefulWidget {
@@ -35,124 +42,127 @@ class EditSightingPage extends StatefulWidget {
 
 /// _EditSightingPageState
 class _EditSightingPageState extends State<EditSightingPage> {
-  final PrefController _prefController = Get.find<PrefController>();
-  final LocationController _locationController = Get.find<LocationController>();
-  final SightingController _sightingController = Get.find<SightingController>();
-  final VehicleController _vehicleController = Get.find<VehicleController>();
-  final VehicleDriverController _vehicleDriverController = Get.find<VehicleDriverController>();
-  final SpeciesController _speciesController = Get.find<SpeciesController>();
-  final EncounterCategoriesController _encounterCategoriesController = Get.find<EncounterCategoriesController>();
-  final BehaviouralStateController _behaviouralStateController = Get.find<BehaviouralStateController>();
+  late final PrefController _prefController = context.read<PrefController>();
+  late final LocationController _locationController = context.read<LocationController>();
+  late final SightingController _sightingController = context.read<SightingController>();
+  late final VehicleController _vehicleController = context.read<VehicleController>();
+  late final VehicleDriverController _vehicleDriverController = context.read<VehicleDriverController>();
+  late final SpeciesController _speciesController = context.read<SpeciesController>();
+  late final EncounterCategoriesController _encounterCategoriesController = context.read<EncounterCategoriesController>();
+  late final BehaviouralStateController _behaviouralStateController = context.read<BehaviouralStateController>();
 
   bool isInit = false;
 
-  String title = "";
 
-  late DynInput sightVehicle;
+  late Widget sightVehicle;
   DynInputValue sightVehicleValue = DynInputValue();
 
-  late DynInput sightVehicleDriver;
+  late Widget sightVehicleDriver;
   DynInputValue sightVehicleDriverValue = DynInputValue();
 
-  late DynInput sightBeaufort;
+  late Widget sightBeaufort;
   DynInputValue sightBeaufortValue = DynInputValue();
 
-  late DynInput sightDate;
+  late Widget sightDate;
   DynInputValue sightDateValue = DynInputValue();
 
-  late DynInput sightTourStart;
+  late Widget sightTourStart;
   DynInputValue sightTourStartValue = DynInputValue();
 
-  late DynInput sightTourEnd;
+  late Widget sightTourEnd;
   DynInputValue sightTourEndValue = DynInputValue();
 
-  late DynInput sightDurationFrom;
+  late Widget sightDurationFrom;
   DynInputValue sightDurationFromValue = DynInputValue();
 
-  late DynInput sightDurationUntil;
+  late Widget sightDurationUntil;
   DynInputValue sightDurationUntilValue = DynInputValue();
 
-  late DynInput sightLocationBegin;
+  late Widget sightLocationBegin;
   DynInputValue sightLocationBeginValue = DynInputValue();
 
-  late DynInput sightLocationEnd;
+  late Widget sightLocationEnd;
   DynInputValue sightLocationEndValue = DynInputValue();
 
-  late DynInput sightPhotoTaken;
+  late Widget sightPhotoTaken;
   DynInputValue sightPhotoTakenValue = DynInputValue();
 
-  late DynInput sightDistanceCoast;
+  late Widget sightDistanceCoast;
   DynInputValue sightDistanceCoastValue = DynInputValue();
 
-  late DynInput sightDistanceCoastEstimationGps;
+  late Widget sightDistanceCoastEstimationGps;
   DynInputValue sightDistanceCoastEstimationGpsValue = DynInputValue();
 
-  late DynInput sightSpecies;
+  late Widget sightSpecies;
   DynInputValue sightSpeciesValue = DynInputValue();
 
-  late DynInput sightSpeciesNum;
+  late Widget sightSpeciesNum;
   DynInputValue sightSpeciesNumValue = DynInputValue();
 
-  late DynInput sightJuveniles;
+  late Widget sightJuveniles;
   DynInputValue sightJuvenilesValue = DynInputValue();
 
-  late DynInput sightCalves;
+  late Widget sightCalves;
   DynInputValue sightCalvesValue = DynInputValue();
 
-  late DynInput sightNewborns;
+  late Widget sightNewborns;
   DynInputValue sightNewbornsValue = DynInputValue();
 
-  late DynInput sightBehaviour;
+  late Widget sightBehaviour;
   DynInputValue sightBehaviourValue = DynInputValue();
 
-  late DynInput sightSubgroups;
+  late Widget sightSubgroups;
   DynInputValue sightSubgroupsValue = DynInputValue();
 
-  late DynInput sightGroupStructure;
+  late Widget sightGroupStructure;
   DynInputValue sightGroupStructureValue = DynInputValue();
 
-  late DynInput sightReaction;
+  late Widget sightReaction;
   DynInputValue sightReactionValue = DynInputValue();
 
-  late DynInput sightFreqBehaviour;
+  late Widget sightFreqBehaviour;
   DynInputValue sightFreqBehaviourValue = DynInputValue();
 
-  late DynInput sightRecAnimals;
+  late Widget sightRecAnimals;
   DynInputValue sightRecAnimalsValue = DynInputValue();
 
-  late DynInput sightOtherSpecies;
+  late Widget sightOtherSpecies;
   DynInputValue sightOtherSpeciesValue = DynInputValue();
 
-  late DynInput sightOther;
+  late Widget sightOther;
   DynInputValue sightOtherValue = DynInputValue();
 
-  late DynInput sightOtherVehicle;
+  late Widget sightOtherVehicle;
   DynInputValue sightOtherVehicleValue = DynInputValue();
 
-  late DynInput sightNote;
+  late Widget sightNote;
   DynInputValue sightNoteValue = DynInputValue();
 
-  late DynInput sightImage;
+  late Widget sightImage;
   DynInputValue sightImageValue = DynInputValue();
 
+  /// _confirmClose - asks before leaving the page without saving; used by
+  /// the app bar back button and the system back gesture/button
+  void _confirmClose() {
+    ConfirmDialog.show(
+      context,
+      context.l10n.sightingCloseTitle,
+      context.l10n.sightingCloseQuestion,
+      (value) {
+        if (value == 'ok' && mounted) {
+          Navigator.of(context).pop();
+        }
+      },
+    );
+  }
+
   /// _appBar
-  _appBar(BuildContext context) {
+  AppBar _appBar(BuildContext context) {
     return AppBar(
-      title: Text(title.isEmpty ? 'Sighting' : title),
+      title: Text(widget.sighting == null ? context.l10n.addSightingTitle : context.l10n.editSightingTitle),
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
-        onPressed: () async {
-          ConfirmDialog.show(
-            context,
-            'Sighting close',
-            'Close sighting without saving? All changes will be lost!',
-            (value) {
-              if (value == 'ok') {
-                Get.back();
-              }
-            },
-          );
-        },
+        onPressed: _confirmClose,
       ),
       actions: [
         Padding(
@@ -160,7 +170,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
           child: DefaultButton(
             buttonIcon: Icons.save_alt,
             height: 40,
-            label: 'Save',
+            label: context.l10n.save,
             onTab: _saveSightingToDb,
           ),
         ),
@@ -168,8 +178,132 @@ class _EditSightingPageState extends State<EditSightingPage> {
     );
   }
 
-  /// _saveSightingToDb
-  _saveSightingToDb() async {
+  /// _formSighting - the sighting as currently entered in the form (image
+  /// path not yet persisted)
+  Sighting _formSighting({String unid = ''}) {
+    return Sighting(
+      unid: unid,
+      vehicle_id: sightVehicleValue.getStrValueAsInt(),
+      vehicle_driver_id: sightVehicleDriverValue.getStrValueAsInt(),
+      beaufort_wind: sightBeaufortValue.getValue(),
+      date: sightDateValue.getDateTime(),
+      tour_start: sightTourStartValue.getTimeOfDay(),
+      tour_end: sightTourEndValue.getTimeOfDay(),
+      duration_from: sightDurationFromValue.getTimeOfDay(),
+      duration_until: sightDurationUntilValue.getTimeOfDay(),
+      location_begin: sightLocationBeginValue.getPosition(),
+      location_end: sightLocationEndValue.getPosition(),
+      photo_taken: sightPhotoTakenValue.getIntValue(),
+      distance_coast: sightDistanceCoastValue.getValue(),
+      distance_coast_estimation_gps: sightDistanceCoastEstimationGpsValue
+          .getIntValue(),
+      species_id: sightSpeciesValue.getStrValueAsInt(),
+      species_count: sightSpeciesNumValue.getStrValueAsInt(),
+      juveniles: sightJuvenilesValue.getIntValue(),
+      calves: sightCalvesValue.getIntValue(),
+      newborns: sightNewbornsValue.getIntValue(),
+      behaviours: sightBehaviourValue.getMultiValue(),
+      subgroups: sightSubgroupsValue.getIntValue(),
+      group_structure_id: sightGroupStructureValue.getStrValueAsInt(),
+      reaction_id: sightReactionValue.getStrValueAsInt(),
+      freq_behaviour: sightFreqBehaviourValue.getValue(),
+      recognizable_animals: sightRecAnimalsValue.getValue(),
+      other_species: sightOtherSpeciesValue.getMultiValue(),
+      other: sightOtherValue.getValue(),
+      other_vehicle: sightOtherVehicleValue.getValue(),
+      note: sightNoteValue.getValue(),
+      image: sightImageValue.getImagePath(),
+      syncStatus: Sighting.SYNC_STATUS_OPEN
+    );
+  }
+
+  /// one key per required field, to scroll to it from the summary
+  final Map<SightingField, GlobalKey> _fieldKeys = {
+    for (final field in SightingField.values) field: GlobalKey(),
+  };
+
+  void _scrollTo(SightingField field) {
+    final target = _fieldKeys[field]?.currentContext;
+
+    if (target != null) {
+      Scrollable.ensureVisible(
+        target,
+        duration: const Duration(milliseconds: 300),
+        alignment: 0.2,
+      );
+    }
+  }
+
+  /// positions compared with the recorded route (async, see
+  /// _scheduleTrackCheck)
+  List<SightingCheckResult> _trackResults = const [];
+
+  /// input values the [_trackResults] belong to
+  String? _trackSignature;
+
+  /// _scheduleTrackCheck - re-checks the positions against the tour route
+  /// when times, positions or the tour changed
+  void _scheduleTrackCheck(Sighting s) {
+    String? tourFid;
+
+    try {
+      tourFid = UtilTourFid.createSTourFId(s);
+    } catch (_) {
+      tourFid = null;
+    }
+
+    final signature = [tourFid, s.date, s.duration_from, s.duration_until, s.location_begin, s.location_end].join('|');
+
+    if (signature == _trackSignature) {
+      return;
+    }
+
+    _trackSignature = signature;
+
+    if (tourFid == null) {
+      _trackResults = const [];
+      return;
+    }
+
+    final fid = tourFid;
+
+    Future<UtilLocationDouble?> trackAt(DateTime minute) async {
+      final pos = await _locationController.getLocationBy(fid, minute);
+      return pos == null ? null : UtilLocationDouble.positionToLocationDouble(pos);
+    }
+
+    Future.wait([
+      UtilPlausibility.checkTrack(
+        check: SightingCheck.beginFarFromTrack,
+        positionJson: s.location_begin,
+        at: UtilPlausibility.timeOn(s.date, s.duration_from),
+        trackAt: trackAt,
+      ),
+      UtilPlausibility.checkTrack(
+        check: SightingCheck.endFarFromTrack,
+        positionJson: s.location_end,
+        at: UtilPlausibility.timeOn(s.date, s.duration_until),
+        trackAt: trackAt,
+      ),
+    ]).then((results) {
+      if (!mounted || _trackSignature != signature) return;
+
+      setState(() => _trackResults = results.whereType<SightingCheckResult>().toList());
+    });
+  }
+
+  /// _mark - input of a required field with the "missing" hint
+  Widget _mark(SightingField field, List<SightingField> missing, Widget input) {
+    return MissingFieldMark(
+      key: _fieldKeys[field],
+      field: field,
+      missing: missing.contains(field),
+      child: input,
+    );
+  }
+
+  /// _saveSightingToDb - saves also when required fields are missing
+  Future<void> _saveSightingToDb() async {
     var mUnid = "";
 
     if (widget.sighting != null) {
@@ -179,58 +313,35 @@ class _EditSightingPageState extends State<EditSightingPage> {
     var pref = Preference();
     await pref.load();
 
-    Sighting tSigh = Sighting(
-      unid: mUnid,
-      creater_id: pref.getUserId(),
-      vehicle_id: sightVehicle.dynValue?.getStrValueAsInt(),
-      vehicle_driver_id: sightVehicleDriver.dynValue
-          ?.getStrValueAsInt(),
-      beaufort_wind: sightBeaufort.dynValue?.getValue(),
-      date: sightDate.dynValue?.getDateTime(),
-      tour_start: sightTourStart.dynValue?.getTimeOfDay(),
-      tour_end: sightTourEnd.dynValue?.getTimeOfDay(),
-      duration_from: sightDurationFrom.dynValue?.getTimeOfDay(),
-      duration_until: sightDurationUntil.dynValue?.getTimeOfDay(),
-      location_begin: sightLocationBegin.dynValue?.getPosition(),
-      location_end: sightLocationEnd.dynValue?.getPosition(),
-      photo_taken: sightPhotoTaken.dynValue?.getIntValue(),
-      distance_coast: sightDistanceCoast.dynValue?.getValue(),
-      distance_coast_estimation_gps: sightDistanceCoastEstimationGps
-          .dynValue?.getIntValue(),
-      species_id: sightSpecies.dynValue?.getStrValueAsInt(),
-      species_count: sightSpeciesNum.dynValue?.getStrValueAsInt(),
-      juveniles: sightJuveniles.dynValue?.getIntValue(),
-      calves: sightCalves.dynValue?.getIntValue(),
-      newborns: sightNewborns.dynValue?.getIntValue(),
-      behaviours: sightBehaviour.dynValue?.getMultiValue(),
-      subgroups: sightSubgroups.dynValue?.getIntValue(),
-      group_structure_id: sightGroupStructure.dynValue?.getStrValueAsInt(),
-      reaction_id: sightReaction.dynValue?.getStrValueAsInt(),
-      freq_behaviour: sightFreqBehaviour.dynValue?.getValue(),
-      recognizable_animals: sightRecAnimals.dynValue?.getValue(),
-      other_species: sightOtherSpecies.dynValue?.getMultiValue(),
-      other: sightOther.dynValue?.getValue(),
-      other_vehicle: sightOtherVehicle.dynValue?.getValue(),
-      note: sightNote.dynValue?.getValue(),
-      image: sightImage.dynValue?.getImagePath(),
-      syncStatus: Sighting.SYNC_STATUS_OPEN
-    );
+    Sighting tSigh = _formSighting(unid: mUnid)
+      ..creater_id = pref.getUserId()
+      // older sightings may still point into the cache directory
+      ..image = await UtilImage.persist(sightImageValue.getImagePath());
 
     tSigh.tour_fid = UtilTourFid.createSTourFId(tSigh);
 
     if (widget.sighting != null) {
       tSigh.id = widget.sighting?.id!;
 
-      var result = await _sightingController.updateSighting(tSighting: tSigh);
-
-      if (kDebugMode) {
-        print(result);
-      }
+      await _sightingController.updateSighting(tSighting: tSigh);
+      AppLog.i('EditSighting', 'updated sighting ${tSigh.id}');
     } else {
       await _sightingController.addSighting(newSighting: tSigh);
+      AppLog.i('EditSighting', 'added sighting');
     }
 
-    Get.back();
+    if (!mounted) return;
+
+    // saved anyway - remind which fields are still open
+    final missing = tSigh.missingFields();
+
+    if (missing.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(context.l10n.savedStillEmpty(missing.map((f) => f.localizedLabel(context)).join(', '))),
+      ));
+    }
+
+    Navigator.of(context).pop();
   }
 
   /// _loadPref
@@ -264,14 +375,12 @@ class _EditSightingPageState extends State<EditSightingPage> {
         }
       });
     } catch(e) {
-      if (kDebugMode) {
-        print(e);
-      }
+      AppLog.w('EditSighting', 'loading the tour defaults failed', e);
     }
   }
 
   /// _setLocationByTime
-  _setLocationByTime(BuildContext context, TimeOfDay aTimeOfDay, Function onSet) async {
+  Future<void> _setLocationByTime(BuildContext context, TimeOfDay aTimeOfDay, Function onSet) async {
     if (widget.sighting == null) {
       return;
     }
@@ -285,17 +394,26 @@ class _EditSightingPageState extends State<EditSightingPage> {
           aTimeOfDay.minute
       );
 
+      final watch = Stopwatch()..start();
+
       Position? aPos = await _locationController.getLocationBy(
           UtilTourFid.createTTourFId(_prefController.prefToru!),
           tDate
       );
 
-      if (aPos != null) {
-        // TODO (do not use BuildContexts across async gaps)
+      // field report: the confirm dialog sometimes came late / the position
+      // was not taken - log the lookup time and the user's answer
+      AppLog.i('EditSighting',
+          'position lookup for ${aTimeOfDay.hour}:${aTimeOfDay.minute.toString().padLeft(2, '0')}: '
+          '${aPos == null ? 'none' : 'found'} in ${watch.elapsedMilliseconds} ms');
+
+      if (aPos != null && context.mounted) {
         ConfirmDialog.show(
           context,
-          "Position is found", "At this time a position was found for the current tour. Should this be used as the position?",
+          context.l10n.positionFoundTitle, context.l10n.positionFoundQuestion,
               (p0) {
+            AppLog.i('EditSighting', 'position by time: ${p0 ?? 'dismissed'}');
+
             if (p0 == "ok") {
               onSet(aPos);
             }
@@ -304,10 +422,33 @@ class _EditSightingPageState extends State<EditSightingPage> {
     }
   }
 
+  /// _pair - two inputs side by side
+  Widget _pair(Widget left, Widget right) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: left),
+        const SizedBox(width: 12),
+        Expanded(child: right),
+      ],
+    );
+  }
+
+  /// no automatic sync while the sighting is edited (the page keeps its
+  /// copy; see SyncController.hold)
+  late final SyncController _syncController = context.read<SyncController>();
+
   /// initState
   @override
   void initState() {
     super.initState();
+    _syncController.hold();
+  }
+
+  @override
+  void dispose() {
+    _syncController.release();
+    super.dispose();
   }
 
   /// build
@@ -317,10 +458,8 @@ class _EditSightingPageState extends State<EditSightingPage> {
       isInit = true;
       Sighting? sighting = widget.sighting;
 
-      title = "Add Sighting";
 
       if (sighting != null) {
-        title = "Edit Sighting";
         sightVehicleValue.setStrValueByInt(sighting.vehicle_id!);
         sightVehicleDriverValue.setStrValueByInt(sighting.vehicle_driver_id!);
         sightBeaufortValue.setValue(sighting.beaufort_wind!);
@@ -383,28 +522,39 @@ class _EditSightingPageState extends State<EditSightingPage> {
       }
     }
 
-    return Obx(() {
-        sightVehicle = DynInput(
-           context: context,
-           title: "Boat",
-           hint: "",
-           inputType: DynInputType.select,
-           dynValue: sightVehicleValue,
-           selectList: _vehicleController.vehicleList.map((element) {
+    return ListenableBuilder(
+      listenable: Listenable.merge([
+        _vehicleController,
+        _vehicleDriverController,
+        _speciesController,
+        _encounterCategoriesController,
+        _behaviouralStateController,
+      ]),
+      builder: (_, __) {
+        final formSighting = _formSighting();
+        final missing = formSighting.missingFields();
+        final checks = [
+          for (final c in UtilPlausibility.checkTimes(formSighting, DateTime.now())) SightingCheckResult(c),
+          ..._trackResults,
+        ];
+        _scheduleTrackCheck(formSighting);
+        void refresh() => setState(() {});
+
+        sightVehicle = SelectInput(
+          title: context.l10n.labelBoat,
+          value: sightVehicleValue,
+          items: _vehicleController.vehicleList.map((element) {
              return DynInputSelectItem(
                  value: element.id!.toString(),
                  label: element.name!
              );
            }).toList(),
-         );
+        );
 
-         sightVehicleDriver = DynInput(
-           context: context,
-           title: "Skipper",
-           hint: "",
-           inputType: DynInputType.select,
-           dynValue: sightVehicleDriverValue,
-           selectList: _vehicleDriverController.vehicleDriverList.map((element) {
+         sightVehicleDriver = SelectInput(
+           title: context.l10n.labelSkipper,
+           value: sightVehicleDriverValue,
+           items: _vehicleDriverController.vehicleDriverList.map((element) {
              return DynInputSelectItem(
                  value: element.id!.toString(),
                  label: element.username!
@@ -412,50 +562,47 @@ class _EditSightingPageState extends State<EditSightingPage> {
            }).toList(),
          );
 
-        sightBeaufort = DynInput(
-          context: context,
-          title: "Wind/Sea-state (Beaufort)",
-          hint: "",
-          inputType: DynInputType.select,
-          dynValue: sightBeaufortValue,
-          selectList: BeaufortController.beaufortSelectList
+        sightBeaufort = SelectInput(
+          title: context.l10n.labelBeaufort,
+          value: sightBeaufortValue,
+          items: BeaufortController.selectList(context.l10n.notSelected),
+          searchable: false,
         );
 
-        sightDate = DynInput(
-          context: context,
-          title: "Date",
-          hint: "",
-          inputType: DynInputType.date,
-          dynValue: sightDateValue,
+        sightDate = DateInput(
+          title: context.l10n.fieldDate,
+          value: sightDateValue,
+          // plausibility hints (date in the future, route lookup)
+          onChange: refresh,
         );
 
-         sightTourStart = DynInput(
-           context: context,
-           title: "Start of trip",
-           hint: "",
-           inputType: DynInputType.time,
-           dynValue: sightTourStartValue,
-         );
+         sightTourStart = _mark(SightingField.tourStart, missing, TimeInput(
+           title: context.l10n.fieldTourStart,
+           value: sightTourStartValue,
+           onChange: refresh,
+         ));
 
-         sightTourEnd = DynInput(
-           context: context,
-           title: "End of trip",
-           hint: "",
-           inputType: DynInputType.time,
-           dynValue: sightTourEndValue,
-         );
+         sightTourEnd = _mark(SightingField.tourEnd, missing, TimeInput(
+           title: context.l10n.fieldTourEnd,
+           value: sightTourEndValue,
+           onChange: refresh,
+         ));
 
-         sightDurationFrom = DynInput(
-           context: context,
-           title: "Sighting duration: from",
-           hint: "",
-           inputType: DynInputType.time,
-           dynValue: sightDurationFromValue,
+         sightDurationFrom = _mark(SightingField.beginTime, missing, TimeInput(
+           title: context.l10n.labelSightingFrom,
+           value: sightDurationFromValue,
            onChange: () {
+             refresh();
+
              if (sightLocationBeginValue.posValue == null) {
-               setState(() {
-                 sightLocationBeginValue.posValue = _locationController.currentPosition!;
-               });
+               final current = _locationController.currentPosition;
+
+               if (current != null) {
+                 setState(() {
+                   sightLocationBeginValue.posValue = current;
+                   sightDistanceCoastValue.setValue("${UtilDistanceCoast.getDistance(current)}");
+                 });
+               }
              } else {
                _setLocationByTime(
                    context,
@@ -468,15 +615,13 @@ class _EditSightingPageState extends State<EditSightingPage> {
                );
              }
            },
-         );
+         ));
 
-         sightDurationUntil = DynInput(
-           context: context,
-           title: "until",
-           hint: "",
-           inputType: DynInputType.time,
-           dynValue: sightDurationUntilValue,
+         sightDurationUntil = TimeInput(
+           title: context.l10n.labelUntil,
+           value: sightDurationUntilValue,
            onChange: () async {
+             refresh();
              _setLocationByTime(
                  context,
                  sightDurationUntilValue.timeValue!,
@@ -489,75 +634,45 @@ class _EditSightingPageState extends State<EditSightingPage> {
            },
          );
 
-         sightLocationBegin = DynInput(
-           context: context,
-           title: "Position begin",
-           hint: "",
-           inputType: DynInputType.location,
-           dynValue: sightLocationBeginValue,
+         sightLocationBegin = _mark(SightingField.beginPosition, missing, LocationInput(
+           title: context.l10n.fieldBeginPosition,
+           value: sightLocationBeginValue,
            onChange: () {
              if (sightLocationBeginValue.posValue != null) {
                var distance = UtilDistanceCoast.getDistance(sightLocationBeginValue.posValue!);
-               sightDistanceCoastValue.setValue("$distance");
+               // rebuild, so the distance field shows the new value
+               setState(() => sightDistanceCoastValue.setValue("$distance"));
+             } else {
+               refresh();
              }
            },
+         ));
+
+         sightLocationEnd = _mark(SightingField.endPosition, missing, LocationInput(
+           title: context.l10n.fieldEndPosition,
+           value: sightLocationEndValue,
+           onChange: refresh,
+         ));
+
+         sightPhotoTaken = SwitchInput(
+           title: context.l10n.labelPhotosTaken,
+           value: sightPhotoTakenValue,
          );
 
-         sightLocationEnd = DynInput(
-           context: context,
-           title: "Position end",
-           hint: "",
-           inputType: DynInputType.location,
-           dynValue: sightLocationEndValue,
+         sightDistanceCoast = DistanceInput(
+           title: context.l10n.labelDistanceCoast,
+           value: sightDistanceCoastValue,
          );
 
-         sightPhotoTaken = DynInput(
-           context: context,
-           title: "Photos taken",
-           hint: "",
-           inputType: DynInputType.switcher,
-           dynValue: sightPhotoTakenValue,
+         sightDistanceCoastEstimationGps = SwitchInput(
+           title: context.l10n.labelEstimationNoGps,
+           value: sightDistanceCoastEstimationGpsValue,
          );
 
-         sightDistanceCoast = DynInput(
-           context: context,
-           title: "Distance to nearest coast (nm)",
-           hint: "",
-           inputType: DynInputType.numberdecimal,
-           dynValue: sightDistanceCoastValue,
-           onFormat: (value) {
-             try {
-               if (value != null) {
-                 var fValue = double.parse(value.strValue.replaceAll(RegExp(r'[^0-9.]'), ''));
-                 fValue = 0.5399568035 * (fValue / 1000);
-
-                 return "${fValue.toPrecision(2)}";
-               }
-             } catch(e) {
-               if (kDebugMode) {
-                 print(e);
-               }
-             }
-
-             return "0.0";
-           },
-         );
-
-         sightDistanceCoastEstimationGps = DynInput(
-           context: context,
-           title: "Estimation without GPS",
-           hint: "",
-           inputType: DynInputType.switcher,
-           dynValue: sightDistanceCoastEstimationGpsValue,
-         );
-
-         sightSpecies = DynInput(
-           context: context,
-           title: "Species",
-           hint: "",
-           inputType: DynInputType.select,
-           dynValue: sightSpeciesValue,
-           selectList: _speciesController.speciesList.map((element) {
+         sightSpecies = SelectInput(
+           title: context.l10n.labelSpecies,
+           value: sightSpeciesValue,
+           items: _speciesController.speciesList.map((element) {
              var labelName = element.name!;
 
              if (element.name!.indexOf(',') > 0) {
@@ -571,111 +686,82 @@ class _EditSightingPageState extends State<EditSightingPage> {
            }).toList(),
          );
 
-         sightSpeciesNum = DynInput(
-           context: context,
-           title: "Number of animals",
-           hint: "",
-           inputType: DynInputType.numberchars,
-           dynValue: sightSpeciesNumValue,
+         sightSpeciesNum = _mark(SightingField.count, missing, TextValueInput(
+           title: context.l10n.fieldCount,
+           value: sightSpeciesNumValue,
+           kind: TextValueKind.digits,
+           onChange: refresh,
+         ));
+
+         sightJuveniles = YesNoUnknownInput(
+           title: context.l10n.labelJuveniles,
+           value: sightJuvenilesValue,
          );
 
-         sightJuveniles = DynInput(
-           context: context,
-           title: 'Juveniles',
-           hint: '',
-           inputType: DynInputType.nyntogglebtn,
-           dynValue: sightJuvenilesValue,
+         sightCalves = YesNoUnknownInput(
+           title: context.l10n.labelCalves,
+           value: sightCalvesValue,
          );
 
-         sightCalves = DynInput(
-           context: context,
-           title: 'Calves',
-           hint: '',
-           inputType: DynInputType.nyntogglebtn,
-           dynValue: sightCalvesValue,
+         sightNewborns = YesNoUnknownInput(
+           title: context.l10n.labelNewborns,
+           value: sightNewbornsValue,
          );
 
-         sightNewborns = DynInput(
-           context: context,
-           title: 'Newborns',
-           hint: '',
-           inputType: DynInputType.nyntogglebtn,
-           dynValue: sightNewbornsValue,
-         );
-
-         sightBehaviour = DynInput(
-           context: context,
-           title: 'Behaviour',
-           hint: '',
-           inputType: DynInputType.multiselect,
-           dynValue: sightBehaviourValue,
-           selectList: _behaviouralStateController.behaviouralStateList.map((element) {
+         sightBehaviour = MultiSelectInput(
+           title: context.l10n.labelBehaviour,
+           value: sightBehaviourValue,
+           items: _behaviouralStateController.behaviouralStateList.map((element) {
              return DynInputSelectItem(
                  value: element.id!.toString(),
                  label: element.name!
              );
-           }).toList()
+           }).toList(),
          );
 
-         sightSubgroups = DynInput(
-           context: context,
-           title: 'Subgroups',
-           hint: '',
-           inputType: DynInputType.nyntogglebtn,
-           dynValue: sightSubgroupsValue,
+         sightSubgroups = YesNoUnknownInput(
+           title: context.l10n.labelSubgroups,
+           value: sightSubgroupsValue,
          );
 
-        sightGroupStructure = DynInput(
-          context: context,
-          title: 'Group Structure',
-          hint: '',
-          inputType: DynInputType.select,
-          dynValue:sightGroupStructureValue,
-          selectList: [
-            DynInputSelectItem(value: "1", label: "widely dispersed"),
-            DynInputSelectItem(value: "2", label: "dispersed"),
-            DynInputSelectItem(value: "3", label: "loose"),
-            DynInputSelectItem(value: "4", label: "tight"),
+        sightGroupStructure = SelectInput(
+          title: context.l10n.labelGroupStructure,
+          value: sightGroupStructureValue,
+          items: [
+            DynInputSelectItem(value: "1", label: context.l10n.groupWidelyDispersed),
+            DynInputSelectItem(value: "2", label: context.l10n.groupDispersed),
+            DynInputSelectItem(value: "3", label: context.l10n.groupLoose),
+            DynInputSelectItem(value: "4", label: context.l10n.groupTight),
           ],
         );
 
-         sightReaction = DynInput(
-          context: context,
-          title: 'Reaction',
-          hint: '',
-          inputType: DynInputType.select,
-          dynValue: sightReactionValue,
-          selectList: _encounterCategoriesController.encounterCategorieList.map((element) {
+         sightReaction = SelectInput(
+           title: context.l10n.labelReaction,
+           value: sightReactionValue,
+           items: _encounterCategoriesController.encounterCategorieList.map((element) {
             return DynInputSelectItem(
               value: element.id!.toString(),
               label: element.name!
             );
-          }).toList()
+          }).toList(),
          );
 
-        sightFreqBehaviour = DynInput(
-          context: context,
-          title: "Frequent behaviours of individuals",
-          hint: "",
-          inputType: DynInputType.tags,
-          dynValue: sightFreqBehaviourValue,
-          supportedTagList: const ['Test', 'SLP', 'SPY'],
+        sightFreqBehaviour = TagInput(
+          title: context.l10n.labelFreqBehaviour,
+          value: sightFreqBehaviourValue,
+          suggestions: const ['Test', 'SLP', 'SPY'],
         );
 
-        sightRecAnimals = DynInput(
-          context: context,
-          title: "Recognizable animals",
-          hint: "",
-          inputType: DynInputType.textarea,
-          dynValue: sightRecAnimalsValue,
+        sightRecAnimals = TextValueInput(
+          title: context.l10n.labelRecAnimals,
+          value: sightRecAnimalsValue,
+          kind: TextValueKind.textarea,
         );
 
-        sightOtherSpecies = DynInput(
-          context: context,
-          title: 'Other Species',
-          hint: '',
-          inputType: DynInputType.multiselect,
-          selectList: _speciesController.speciesList.map((element) {
+        sightOtherSpecies = MultiSelectInput(
+          title: context.l10n.labelOtherSpecies,
+          value: sightOtherSpeciesValue,
+          items: _speciesController.speciesList.map((element) {
             var labelName = element.name!;
 
             if (element.name!.indexOf(',') > 0) {
@@ -687,102 +773,120 @@ class _EditSightingPageState extends State<EditSightingPage> {
                 label: labelName
             );
           }).toList(),
-          dynValue: sightOtherSpeciesValue,
         );
 
-        sightOther = DynInput(
-          context: context,
-          title: "Other",
-          hint: "",
-          inputType: DynInputType.textarea,
-          dynValue: sightOtherValue,
+        sightOther = TextValueInput(
+          title: context.l10n.labelOther,
+          value: sightOtherValue,
+          kind: TextValueKind.textarea,
+          // a tortoise name here makes the count optional
+          onChange: refresh,
         );
 
-        sightOtherVehicle = DynInput(
-          context: context,
-          title: "Other boats present",
-          hint: "",
-          inputType: DynInputType.textarea,
-          dynValue: sightOtherVehicleValue,
+        sightOtherVehicle = TextValueInput(
+          title: context.l10n.labelOtherBoats,
+          value: sightOtherVehicleValue,
+          kind: TextValueKind.textarea,
         );
 
-        sightNote = DynInput(
-          context: context,
-          title: "Note",
-          hint: "",
-          inputType: DynInputType.textarea,
-          dynValue: sightNoteValue,
+        sightNote = TextValueInput(
+          title: context.l10n.labelNote,
+          value: sightNoteValue,
+          kind: TextValueKind.textarea,
         );
 
-        sightImage = DynInput(
-          context: context,
-          title: "Picture",
-          hint: "",
-          inputType: DynInputType.image,
-          dynValue: sightImageValue,
+        sightImage = ImageInput(
+          value: sightImageValue,
         );
 
          return PopScope(
            canPop: false,
+           // system back (button or gesture) asks like the app bar arrow
+           onPopInvokedWithResult: (didPop, _) {
+             if (!didPop) {
+               _confirmClose();
+             }
+           },
            child: Scaffold(
              appBar: _appBar(context),
-             body: SingleChildScrollView(
-               padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-               child: Column(
-                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                 children: [
-                   sightVehicle,
-                   sightVehicleDriver,
-                   sightBeaufort,
-                   sightDate,
-                   Row(
-                     children: [
-                       Expanded(child: sightTourStart),
-                       const SizedBox(width: 12),
-                       Expanded(child: sightTourEnd),
-                     ],
-                   ),
-                   Row(
-                     children: [
-                       Expanded(child: sightDurationFrom),
-                       const SizedBox(width: 12),
-                       Expanded(child: sightDurationUntil),
-                     ],
-                   ),
-                   sightLocationBegin,
-                   sightLocationEnd,
-                   sightDistanceCoast,
-                   Row(
-                     children: [
-                       Expanded(child: sightPhotoTaken),
-                       const SizedBox(width: 12),
-                       Expanded(child: sightDistanceCoastEstimationGps),
-                     ],
-                   ),
-                   sightSpecies,
-                   sightSpeciesNum,
-                   sightJuveniles,
-                   sightCalves,
-                   sightNewborns,
-                   sightBehaviour,
-                   sightSubgroups,
-                   sightGroupStructure,
-                   sightReaction,
-                   sightFreqBehaviour,
-                   sightRecAnimals,
-                   sightOtherSpecies,
-                   sightOther,
-                   sightOtherVehicle,
-                   sightNote,
-                   sightImage,
-                   const SizedBox(height: 24),
-                   FilledButton.icon(
-                     onPressed: _saveSightingToDb,
-                     icon: const Icon(Icons.save_alt),
-                     label: const Text('Save Sighting'),
-                   ),
-                   const SizedBox(height: 24),
-                 ],
+             body: SafeArea(
+               top: false,
+               child: SingleChildScrollView(
+                 padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
+                 child: Column(
+                   crossAxisAlignment: CrossAxisAlignment.stretch,
+                   children: [
+                     MissingFieldsSummary(missing: missing, onTap: _scrollTo),
+                     PlausibilityHints(results: checks, onTap: _scrollTo),
+                     InputSection(
+                       title: context.l10n.sectionTour,
+                       icon: Icons.directions_boat_outlined,
+                       children: [
+                         sightVehicle,
+                         sightVehicleDriver,
+                         sightBeaufort,
+                         sightDate,
+                         _pair(sightTourStart, sightTourEnd),
+                       ],
+                     ),
+                     InputSection(
+                       title: context.l10n.sectionTimePosition,
+                       icon: Icons.place_outlined,
+                       children: [
+                         _pair(sightDurationFrom, sightDurationUntil),
+                         sightLocationBegin,
+                         sightLocationEnd,
+                         sightDistanceCoast,
+                         sightDistanceCoastEstimationGps,
+                         sightPhotoTaken,
+                       ],
+                     ),
+                     InputSection(
+                       title: context.l10n.sectionAnimals,
+                       icon: Icons.pets_outlined,
+                       children: [
+                         sightSpecies,
+                         sightSpeciesNum,
+                         sightJuveniles,
+                         sightCalves,
+                         sightNewborns,
+                         sightSubgroups,
+                         sightGroupStructure,
+                       ],
+                     ),
+                     InputSection(
+                       title: context.l10n.sectionBehaviour,
+                       icon: Icons.waves_outlined,
+                       children: [
+                         sightBehaviour,
+                         sightReaction,
+                         sightFreqBehaviour,
+                         sightRecAnimals,
+                       ],
+                     ),
+                     InputSection(
+                       title: context.l10n.sectionNotes,
+                       icon: Icons.notes_outlined,
+                       children: [
+                         sightOtherSpecies,
+                         sightOther,
+                         sightOtherVehicle,
+                         sightNote,
+                       ],
+                     ),
+                     InputSection(
+                       title: context.l10n.sectionPicture,
+                       icon: Icons.photo_camera_outlined,
+                       children: [sightImage],
+                     ),
+                     const SizedBox(height: 8),
+                     FilledButton.icon(
+                       onPressed: _saveSightingToDb,
+                       icon: const Icon(Icons.save_alt),
+                       label: Text(context.l10n.saveSighting),
+                     ),
+                   ],
+                 ),
                ),
              ),
            ),

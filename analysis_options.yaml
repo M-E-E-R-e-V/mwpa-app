@@ -7,6 +7,11 @@
 
 # The following line activates a set of recommended lints for Flutter apps,
 # packages, and plugins designed to encourage good coding practices.
+analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
 include: package:flutter_lints/flutter.yaml
 
 linter:
@@ -22,8 +27,13 @@ linter:
   # `// ignore_for_file: name_of_lint` syntax on the line or in the file
   # producing the lint.
   rules:
-    # avoid_print: false  # Uncomment to disable the `avoid_print` rule
-    # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
+    # Project conventions (deliberate, not errors):
+    # - PascalCase file names (lib/Pages/ListPage.dart, ...)
+    # - snake_case fields that mirror DB columns / API JSON keys (tour_fid, ...)
+    # - UPPER_CASE constants (Preference.URL, Sighting.SYNC_STATUS_OPEN, ...)
+    file_names: false
+    non_constant_identifier_names: false
+    constant_identifier_names: false
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options

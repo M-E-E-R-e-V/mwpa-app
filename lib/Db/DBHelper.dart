@@ -8,11 +8,12 @@ import 'package:mwpaapp/Models/TrackingAreaHome.dart';
 import 'package:mwpaapp/Models/Vehicle.dart';
 import 'package:mwpaapp/Models/VehicleDriver.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:mwpaapp/Util/AppLog.dart';
 
 /// DBHelper
 class DBHelper {
   static Database? _db;
-  static const int _version = 11;
+  static const int _version = 13;
   static const String _tableNameSighting = "sighting";
   static const String _tableNameTourTracking = "tour_tracking";
   static const String _tableNameVehicle = "vehicle";
@@ -34,6 +35,7 @@ class DBHelper {
           path,
           version: _version,
           onUpgrade: (db, oldVersion, newVersion) async {
+            AppLog.i('DB', 'upgrade from v$oldVersion to v$newVersion');
             var batch = db.batch();
 
             if (oldVersion <= 1) {
@@ -66,6 +68,14 @@ class DBHelper {
 
             if (oldVersion <= 8 ) {
               _updateTableSightingV8toV9(batch);
+            }
+
+            if (oldVersion <= 11) {
+              _updateTableTourTrackingV11toV12(batch);
+            }
+
+            if (oldVersion <= 12) {
+              _updateTableTourTrackingV12toV13(batch);
             }
 
             await batch.commit();
@@ -119,9 +129,12 @@ class DBHelper {
                   "uuid STRING PRIMARY KEY,"
                   "tour_fid STRING,"
                   "location STRING,"
-                  "date STRING"
+                  "date STRING,"
+                  "synced INTEGER NOT NULL DEFAULT 0"
               ")"
             );
+
+            db.execute(_createIndexTourTrackingTourDate);
 
             db.execute(
                 "CREATE TABLE IF NOT EXISTS $_tableNameVehicle("
@@ -176,10 +189,15 @@ class DBHelper {
           }
       );
     } catch (e) {
-      if (kDebugMode) {
-        print(e);
-      }
+      AppLog.e('DB', 'open/upgrade database failed', e);
     }
+  }
+
+  /// closeDb - only for tests, so initDb can open a fresh database.
+  @visibleForTesting
+  static Future<void> closeDb() async {
+    await _db?.close();
+    _db = null;
   }
 
   /// _updateTableSightingV1toV2
@@ -222,6 +240,24 @@ class DBHelper {
   static void _updateTableSightingV8toV9(Batch batch) {
   }
 
+  /// Index for the position lookup by tour + time (readTourTracking); without
+  /// it every lookup scans the whole, steadily growing tracking table.
+  static const String _createIndexTourTrackingTourDate =
+      'CREATE INDEX IF NOT EXISTS idx_tour_tracking_tour_date '
+      'ON $_tableNameTourTracking(tour_fid, date)';
+
+  /// _updateTableTourTrackingV11toV12
+  static void _updateTableTourTrackingV11toV12(Batch batch) {
+    batch.execute(_createIndexTourTrackingTourDate);
+  }
+  /// _updateTableTourTrackingV12toV13 - upload flag per tracking point, so
+  /// a sync only sends points the server has not received yet
+  static void _updateTableTourTrackingV12toV13(Batch batch) {
+    batch.execute(
+        'ALTER TABLE $_tableNameTourTracking ADD COLUMN synced INTEGER NOT NULL DEFAULT 0');
+  }
+
+
   /// insertSighting
   static Future<int> insertSighting(Sighting newSighting) async {
     return await _db?.insert(_tableNameSighting, newSighting.toJson(false, true, false)) ?? 1;
@@ -241,11 +277,23 @@ class DBHelper {
         _tableNameSighting, where: 'id=?', whereArgs: [oldSighting.id]);
   }
 
-  /// updateSighting
+  /// updateSighting - a missing unid/creator never clears the stored one:
+  /// the object may have been read before a (background) sync assigned it,
+  /// an empty unid would upload the sighting a second time
   static Future<int> updateSighting(Sighting uSighting) async {
+    final data = uSighting.toJson(false, true, false);
+
+    if ((uSighting.unid ?? '').isEmpty) {
+      data.remove('unid');
+    }
+
+    if (uSighting.creater_id == null || uSighting.creater_id == 0) {
+      data.remove('creater_id');
+    }
+
     return await _db!.update(
         _tableNameSighting,
-        uSighting.toJson(false, true, false),
+        data,
         where: 'id=?',
         whereArgs: [uSighting.id]
     );
@@ -494,12 +542,18 @@ class DBHelper {
     return await _db?.insert(_tableNameTourTracking, behState.toJson()) ?? 1;
   }
 
-  /// readTourTracking
+  /// readTourTracking - first tracking entry of the tour whose date starts
+  /// with [searchDate] (e.g. "2026-06-08 10:05").
+  ///
+  /// Uses a prefix range instead of `LIKE 'prefix%'` so SQLite can use the
+  /// (tour_fid, date) index - LIKE is not index-optimized here.
   static Future<Map<String, dynamic>> readTourTracking(String tourFId, String searchDate) async {
     List<Map<String, dynamic>> list = await _db!.query(
         _tableNameTourTracking,
-        where: "tour_fid = ? AND date LIKE ?",
-        whereArgs: [tourFId, "$searchDate%"]
+        where: "tour_fid = ? AND date >= ? AND date < ?",
+        whereArgs: [tourFId, searchDate, "$searchDate\uffff"],
+        orderBy: "date",
+        limit: 1
     );
 
     if (list.isNotEmpty) {
@@ -530,6 +584,98 @@ class DBHelper {
     );
   }
 
+  /// markSightingUploaded - only the fields the sync sets; changes the user
+  /// made while the sync was running stay (they are uploaded with the next
+  /// sync, which sends all local sightings)
+  static Future<int> markSightingUploaded(int id, String unid, int? createrId) async {
+    return await _db!.update(
+      _tableNameSighting,
+      {
+        'unid': unid,
+        'syncStatus': Sighting.SYNC_STATUS_FINISH,
+        if (createrId != null) 'creater_id': createrId,
+      },
+      where: 'id=?',
+      whereArgs: [id],
+    );
+  }
+
+  /// countPendingSync - sightings not confirmed by the server plus tracking
+  /// points not uploaded yet (decides whether an automatic sync is needed)
+  static Future<int> countPendingSync() async {
+    final sightings = Sqflite.firstIntValue(await _db!.rawQuery(
+        "SELECT COUNT(*) FROM $_tableNameSighting "
+        "WHERE unid IS NULL OR unid = '' OR syncStatus IS NULL OR syncStatus = 0")) ?? 0;
+    final points = Sqflite.firstIntValue(await _db!.rawQuery(
+        "SELECT COUNT(*) FROM $_tableNameTourTracking WHERE synced = 0")) ?? 0;
+
+    return sightings + points;
+  }
+
+  /// queryTourTrackingLocations - location JSON of all points of a tour,
+  /// oldest first (route on the map)
+  static Future<List<String>> queryTourTrackingLocations(String tourFId) async {
+    final rows = await _db!.query(
+      _tableNameTourTracking,
+      columns: ['location'],
+      where: "tour_fid = ?",
+      whereArgs: [tourFId],
+      orderBy: "date",
+    );
+
+    return [
+      for (final row in rows)
+        if (row['location'] is String) row['location'] as String,
+    ];
+  }
+
+  /// queryUnsyncedTourTracking - oldest [limit] points of the tour that
+  /// were not uploaded yet
+  static Future<List<Map<String, dynamic>>> queryUnsyncedTourTracking(String tourFId, int limit) async {
+    return await _db!.query(
+      _tableNameTourTracking,
+      where: "tour_fid = ? AND synced = 0",
+      whereArgs: [tourFId],
+      orderBy: "date",
+      limit: limit
+    );
+  }
+
+  /// countUnsyncedTourTracking
+  static Future<int> countUnsyncedTourTracking(String tourFId) async {
+    return Sqflite.firstIntValue(await _db!.query(
+        _tableNameTourTracking,
+        columns: ['COUNT(*)'],
+        where: "tour_fid = ? AND synced = 0",
+        whereArgs: [tourFId]
+    )) ?? 0;
+  }
+
+  /// markTourTrackingSynced - flags the points [uuids] as uploaded
+  static Future<int> markTourTrackingSynced(List<String> uuids) async {
+    if (uuids.isEmpty) {
+      return 0;
+    }
+
+    return await _db!.update(
+      _tableNameTourTracking,
+      {'synced': 1},
+      where: "uuid IN (${List.filled(uuids.length, '?').join(',')})",
+      whereArgs: uuids
+    );
+  }
+
+  /// setTourTrackingSynced - flags all points of a tour as uploaded
+  /// ([synced] true) or as still to upload (false)
+  static Future<int> setTourTrackingSynced(String tourFId, bool synced) async {
+    return await _db!.update(
+      _tableNameTourTracking,
+      {'synced': synced ? 1 : 0},
+      where: "tour_fid = ?",
+      whereArgs: [tourFId]
+    );
+  }
+
   /// countTourTracking
   static Future<int> countTourTracking(String tourFId) async {
     return Sqflite.firstIntValue(await _db!.query(
@@ -538,6 +684,18 @@ class DBHelper {
         where: "tour_fid = ?",
         whereArgs: [tourFId]
     )) ?? 0;
+  }
+
+  /// latestTourTrackingDate - date of the newest tracking point of a tour
+  static Future<String?> latestTourTrackingDate(String tourFId) async {
+    final rows = await _db!.query(
+        _tableNameTourTracking,
+        columns: ['MAX(date) AS latest'],
+        where: "tour_fid = ?",
+        whereArgs: [tourFId]
+    );
+
+    return rows.isEmpty ? null : rows.first['latest'] as String?;
   }
 
   /// deleteTourTrackingEntries

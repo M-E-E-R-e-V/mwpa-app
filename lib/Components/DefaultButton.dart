@@ -1,4 +1,3 @@
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:mwpaapp/Constants.dart';
 
@@ -42,7 +41,7 @@ class DefaultButton extends StatelessWidget {
                 const SizedBox(width: 6),
               ],
               Flexible(
-                child: AutoSizeText(
+                child: Text(
                   label!,
                   style: const TextStyle(
                     color: kButtonFontColor,
@@ -50,8 +49,8 @@ class DefaultButton extends StatelessWidget {
                     fontSize: 13,
                   ),
                   textAlign: TextAlign.center,
-                  minFontSize: 6,
                   maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
@@ -63,7 +62,13 @@ class DefaultButton extends StatelessWidget {
         backgroundColor: background,
         foregroundColor: kButtonFontColor,
         disabledBackgroundColor: background.withValues(alpha: 0.5),
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+        // icon-only buttons are often narrow (e.g. 44 px): no M3 minimum size
+        // and padding, otherwise the icon gets clipped
+        padding: label == null
+            ? EdgeInsets.zero
+            : const EdgeInsets.symmetric(horizontal: 12),
+        minimumSize: label == null ? Size.zero : null,
+        tapTargetSize: label == null ? MaterialTapTargetSize.shrinkWrap : null,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),

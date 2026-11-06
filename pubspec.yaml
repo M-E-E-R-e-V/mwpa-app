@@ -15,7 +15,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.12+13
+version: 1.1.0+14
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
@@ -29,40 +29,26 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   sqflite:
   path:
-  get:
-  get_storage:
   shared_preferences:
-  cupertino_icons: ^1.0.2
-  flutter_svg: ^1.0.3
+  provider: ^6.1.2
   http:
   intl:
-  google_fonts:
-  flutter_map:
-  device_info_plus:
-  switcher: any
-  geolocator: ^13.0.1
-  latlong_to_osgrid: ^1.3.2
+  device_info_plus: ^13.3.0
+  geolocator: ^14.1.2
   uuid: ^4.4.0
-  flutter_timezone: ^3.0.0
-  flutter_staggered_animations:
-  gpx:
-  flutter_easyloading:
-  textfield_tags: ^3.0.1
-  map: ^2.0.2
-  cached_network_image: ^3.2.0
-  connectivity_plus: ^6.0.5
+  connectivity_plus: ^7.3.1
   image_picker:
-  app_settings: ^5.1.1
-  auto_size_text: ^3.0.0
-  flutter_icons_null_safety: ^1.1.0
-
-  latlng: any
-  mobile_scanner: ^5.0.0
+  mobile_scanner: ^7.5.0
+  flutter_map: ^8.3.2
+  latlong2: ^0.10.1
+  path_provider: ^2.1.6
+  flutter_secure_storage: ^11.2.0
 dev_dependencies:
-  flutter_launcher_icons: ^0.11.0
-  flutter_app_name: ^0.1.1
+  flutter_launcher_icons: ^0.14.4
   flutter_test:
     sdk: flutter
 
@@ -71,7 +57,9 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^4.0.0
+  flutter_lints: ^6.0.0
+  sqflite_common_ffi: ^2.4.5
+  flutter_native_splash: ^2.4.8
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -80,9 +68,28 @@ dev_dependencies:
 flutter:
 
   uses-material-design: true
+  # UI texts from lib/l10n/*.arb (see l10n.yaml)
+  generate: true
   assets:
     - assets/images/
     - assets/icons/
+    - assets/fonts/OFL.txt
+    - assets/fonts/MaterialDesignIcons-LICENSE.txt
+
+  fonts:
+    - family: Lato
+      fonts:
+        - asset: assets/fonts/Lato-Regular.ttf
+        - asset: assets/fonts/Lato-Italic.ttf
+          style: italic
+        - asset: assets/fonts/Lato-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Lato-BoldItalic.ttf
+          weight: 700
+          style: italic
+    - family: MaterialDesignIcons
+      fonts:
+        - asset: assets/fonts/MaterialDesignIcons.ttf
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
@@ -110,14 +117,24 @@ flutter:
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
 
-flutter_icons:
+flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
   min_sdk_android: 21 # android min sdk min:16, default 21
-  image_path: "assets/images/logo.png"
-  # optionally, as transparency is not allowed on app store
-  # remove_alpha_ios: true
+  # legacy icon (Android < 8) and iOS: opaque white square with the logo
+  image_path: "assets/images/logo_512.png"
+  remove_alpha_ios: true
+  # adaptive icon (Android 8+), monochrome for themed icons (Android 13+)
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/splash/launcher_foreground.png"
+  adaptive_icon_monochrome: "assets/splash/launcher_monochrome.png"
+  adaptive_icon_foreground_inset: 8
 
-flutter_app_name:
-  name: "MWPA"
-  id: "com.meer.mwpaapp"
+# native launch screen - regenerate with: dart run flutter_native_splash:create
+flutter_native_splash:
+  color: "#0b4297"
+  image: assets/splash/splash_logo.png
+  android_12:
+    color: "#0b4297"
+    image: assets/splash/splash_logo_android12.png
+  web: false
