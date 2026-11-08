@@ -429,7 +429,7 @@ class _ListPageState extends State<ListPage>
     DynInputValue tOD = DynInputValue();
     tOD.timeValue = TimeOfDay.now();
     String location = jsonEncode(pos.toJson());
-    var distance = UtilDistanceCoast.getDistance(pos);
+    final distance = UtilDistanceCoast.distanceText(pos);
 
     await _sightingController.addSighting(newSighting: Sighting(
       unid: '',
@@ -444,7 +444,7 @@ class _ListPageState extends State<ListPage>
       duration_until: tOD.getTimeOfDay(),
       location_begin: location,
       location_end: location,
-      distance_coast: "$distance",
+      distance_coast: distance,
       species_count: 1,
       other: otherName,
       note: "Short insert",

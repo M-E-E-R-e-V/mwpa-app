@@ -26,6 +26,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Rolf Ahlers (Oceano Barcos S.L.) on the About page contributors.
 
 ### Changed
+- The distance to the coast is computed from the coast lines of the
+  organization's area (OpenStreetMap, loaded by the server for the home
+  area plus 60 km and kept on the phone for offline use) and measured to the
+  coast line instead of the nearest of a few points. Before, only the
+  south-west coast of La Gomera was known: north and east of the island and
+  near other islands the distance was much too large (e.g. off Hermigua
+  9.96 nm instead of 0.72 nm). Outside the loaded area the field stays empty.
+  Needs the updated MWPA backend; until then the old points are used.
 - A sync starts right after the login, so boats, skippers and species are
   there at once; the settings page shows a hint while they are loading.
 - Map tiles are tinted to the app colors (inverted dark map in dark mode).

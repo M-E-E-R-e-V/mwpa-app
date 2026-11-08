@@ -552,9 +552,8 @@ class _EditSightingPageState extends State<EditSightingPage> {
           sightLocationBeginValue.setPosition(
               _locationController.currentPosition!);
 
-          var distance = UtilDistanceCoast.getDistance(
-              _locationController.currentPosition!);
-          sightDistanceCoastValue.setValue("$distance");
+          sightDistanceCoastValue.setValue(
+              UtilDistanceCoast.distanceText(_locationController.currentPosition!));
         }
       }
     }
@@ -651,7 +650,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
                if (current != null) {
                  setState(() {
                    sightLocationBeginValue.posValue = current;
-                   sightDistanceCoastValue.setValue("${UtilDistanceCoast.getDistance(current)}");
+                   sightDistanceCoastValue.setValue(UtilDistanceCoast.distanceText(current));
                  });
                }
              } else {
@@ -690,9 +689,9 @@ class _EditSightingPageState extends State<EditSightingPage> {
            value: sightLocationBeginValue,
            onChange: () {
              if (sightLocationBeginValue.posValue != null) {
-               var distance = UtilDistanceCoast.getDistance(sightLocationBeginValue.posValue!);
+               final distance = UtilDistanceCoast.distanceText(sightLocationBeginValue.posValue!);
                // rebuild, so the distance field shows the new value
-               setState(() => sightDistanceCoastValue.setValue("$distance"));
+               setState(() => sightDistanceCoastValue.setValue(distance));
              } else {
                refresh();
              }

@@ -1,7 +1,166 @@
 
+import 'dart:convert';
+import 'dart:io';
+import 'dart:math' as math;
+import 'dart:typed_data';
+
 import 'package:geolocator/geolocator.dart';
+import 'package:mwpaapp/Mwpa/Models/CoastlineResponse.dart';
+import 'package:mwpaapp/Util/AppLog.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
+
+/// CoastLines - the coast lines of the organization's area in memory
+/// (from the server, `mobile/coastline`) for distance lookups
+class CoastLines {
+  static const double metersPerDegree = 111320.0;
+
+  final CoastlineData data;
+  final List<Float64List> _lines;
+
+  /// per line: south, west, north, east
+  final List<Float64List> _boxes;
+
+  CoastLines(this.data)
+      : _lines = [for (final l in data.lines) Float64List.fromList(l)],
+        _boxes = [for (final l in data.lines) _boxOf(l)];
+
+  static Float64List _boxOf(List<double> line) {
+    var south = double.infinity, west = double.infinity;
+    var north = -double.infinity, east = -double.infinity;
+
+    for (var i = 0; i + 1 < line.length; i += 2) {
+      south = math.min(south, line[i]);
+      north = math.max(north, line[i]);
+      west = math.min(west, line[i + 1]);
+      east = math.max(east, line[i + 1]);
+    }
+
+    return Float64List.fromList([south, west, north, east]);
+  }
+
+  /// distanceMeters - meters from [lat]/[lon] to the nearest coast line;
+  /// null when the point is outside the loaded box or a coast outside the
+  /// box could be nearer than the nearest one inside
+  double? distanceMeters(double lat, double lon) {
+    if (lat < data.south || lat > data.north || lon < data.west || lon > data.east) {
+      return null;
+    }
+
+    // local metric projection around the point (error < 0.5 % within 100 km)
+    final mx = metersPerDegree * math.cos(lat * math.pi / 180);
+    const my = metersPerDegree;
+
+    final toEdge = [
+      (lat - data.south) * my,
+      (data.north - lat) * my,
+      (lon - data.west) * mx,
+      (data.east - lon) * mx,
+    ].reduce(math.min);
+
+    var best = double.infinity;
+
+    for (var n = 0; n < _lines.length; n++) {
+      final box = _boxes[n];
+      final dx = lon < box[1] ? (box[1] - lon) * mx : (lon > box[3] ? (lon - box[3]) * mx : 0.0);
+      final dy = lat < box[0] ? (box[0] - lat) * my : (lat > box[2] ? (lat - box[2]) * my : 0.0);
+
+      if (dx * dx + dy * dy >= best * best) {
+        continue;
+      }
+
+      final line = _lines[n];
+      var ax = (line[1] - lon) * mx;
+      var ay = (line[0] - lat) * my;
+
+      if (line.length == 2) {
+        best = math.min(best, math.sqrt(ax * ax + ay * ay));
+        continue;
+      }
+
+      for (var i = 2; i + 1 < line.length; i += 2) {
+        final bx = (line[i + 1] - lon) * mx;
+        final by = (line[i] - lat) * my;
+        final sx = bx - ax, sy = by - ay;
+        final len = sx * sx + sy * sy;
+        var t = len == 0 ? 0.0 : -(ax * sx + ay * sy) / len;
+        t = t < 0 ? 0 : (t > 1 ? 1 : t);
+        final px = ax + t * sx, py = ay + t * sy;
+        final d = math.sqrt(px * px + py * py);
+
+        if (d < best) {
+          best = d;
+        }
+
+        ax = bx;
+        ay = by;
+      }
+    }
+
+    return best <= toEdge ? best : null;
+  }
+}
 
 class UtilDistanceCoast {
+
+  /// file in the app support dir with the coast lines of the last sync
+  static const String fileName = 'coastline.json';
+
+  /// the server is asked at most once per interval (pending: every sync)
+  static const int checkIntervalSec = 24 * 60 * 60;
+
+  static CoastLines? _coast;
+  static int _checkedAt = 0;
+  static File? _file;
+
+  /// coast lines from the server, null until the first successful sync
+  static CoastLines? get coast => _coast;
+
+  /// init - loads the coast lines of the last sync (main, before runApp);
+  /// [dir] for tests
+  static Future<void> init({Directory? dir}) async {
+    _coast = null;
+    _checkedAt = 0;
+
+    try {
+      _file = File(p.join((dir ?? await getApplicationSupportDirectory()).path, fileName));
+
+      if (!await _file!.exists()) {
+        return;
+      }
+
+      final json = jsonDecode(await _file!.readAsString()) as Map<String, dynamic>;
+      _checkedAt = (json['checked_at'] as num?)?.toInt() ?? 0;
+
+      if (json['data'] != null) {
+        _coast = CoastLines(CoastlineData.fromJson(json['data'] as Map<String, dynamic>));
+      }
+    } catch (error) {
+      AppLog.w('Coast', 'coast lines not loaded', error);
+    }
+  }
+
+  /// needsCheck - ask the server for the coast lines (again)
+  static bool needsCheck(int nowSec) => nowSec - _checkedAt >= checkIntervalSec;
+
+  /// store - remember the check at [nowSec]; new coast lines when [data] is
+  /// given (old ones stay when the server has none)
+  static Future<void> store(int nowSec, [CoastlineData? data]) async {
+    _checkedAt = nowSec;
+
+    if (data != null) {
+      _coast = CoastLines(data);
+    }
+
+    try {
+      await _file?.writeAsString(jsonEncode({
+        'checked_at': _checkedAt,
+        'data': _coast?.data.toJson(),
+      }));
+    } catch (error) {
+      AppLog.w('Coast', 'coast lines not saved', error);
+    }
+  }
 
   /// meters per nautical mile
   static const double metersPerNm = 1852.0;
@@ -40,8 +199,9 @@ class UtilDistanceCoast {
   // https://www.geoplaner.de/
   // https://pub.dev/packages/gpx
 
-  /// Coast line points (lat, lon) the distance is measured against
-  /// (formerly an inline GPX file with 368 waypoints).
+  /// Fallback until the server delivers coast lines: points (lat, lon) of
+  /// the south-west coast of La Gomera only (Valle Gran Rey - Playa
+  /// Santiago; formerly an inline GPX file with 368 waypoints).
   static const List<(double, double)> coastPoints = [
     (28.08153, -17.33033),
     (28.081, -17.32985),
@@ -413,8 +573,24 @@ class UtilDistanceCoast {
     (28.12131, -17.34571),
   ];
 
-  /// getDistance - meters from [pos] to the nearest coast point
-  static double getDistance(Position pos) {
+  /// distanceText - [getDistance] as the stored text (meters), '' when it
+  /// is not known at [pos]
+  static String distanceText(Position pos) {
+    final meters = getDistance(pos);
+    return meters == null ? '' : '$meters';
+  }
+
+  /// getDistance - meters from [pos] to the nearest coast. With coast lines
+  /// from the server: null outside their area (no value is better than a
+  /// wrong one). Without (older server, before the first sync): the nearest
+  /// point of [coastPoints].
+  static double? getDistance(Position pos) {
+    final coast = _coast;
+
+    if (coast != null) {
+      return coast.distanceMeters(pos.latitude, pos.longitude);
+    }
+
     var result = double.infinity;
 
     for (final (lat, lon) in coastPoints) {

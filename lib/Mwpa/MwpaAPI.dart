@@ -10,6 +10,7 @@ import 'package:mwpaapp/Models/Sighting.dart';
 import 'package:mwpaapp/Models/Species.dart';
 import 'package:mwpaapp/Models/Vehicle.dart';
 import 'package:mwpaapp/Models/VehicleDriver.dart';
+import 'package:mwpaapp/Mwpa/Models/CoastlineResponse.dart';
 import 'package:mwpaapp/Mwpa/Models/BehaviouralStatesResponse.dart';
 import 'package:mwpaapp/Mwpa/Models/DefaultReturn.dart';
 import 'package:mwpaapp/Mwpa/Models/EncounterCategoriesResponse.dart';
@@ -57,6 +58,7 @@ class MwpaApi {
   static const URL_SIGHTING_TOUR_TRACKING_CHECK = 'mobile/sighting/tourtracking/check';
   static const URL_SIGHTING_TOUR_TRACKING_SAVE = 'mobile/sighting/tourtracking/save';
   static const URL_TRACKINGAREA_HOME = 'mobile/trackingarea/homearea';
+  static const URL_COASTLINE = 'mobile/coastline';
 
   /// timeout of a single request; a sync in a dead spot must fail instead of
   /// hanging forever
@@ -282,6 +284,26 @@ class MwpaApi {
 
     final response = await _getChecked(MwpaApi.URL_TRACKINGAREA_HOME, TrackingAreaHomeResponse.fromJson);
     return response.data;
+  }
+
+  /// getCoastline - coast lines around the home area of the organization
+  /// (without home area around [latitude]/[longitude]); null when the server
+  /// does not know the endpoint yet (older backend)
+  Future<CoastlineData?> getCoastline({double? latitude, double? longitude}) {
+    _requireLogin();
+
+    return _guard(() async {
+      final response = await _post(MwpaApi.URL_COASTLINE, {
+        if (latitude != null) 'latitude': latitude,
+        if (longitude != null) 'longitude': longitude,
+      });
+
+      if (response.statusCode == 404) {
+        return null;
+      }
+
+      return _checked(CoastlineResponse.fromJson(jsonDecode(response.body))).data;
+    });
   }
 
   /// saveSighting - null when the server refuses the sighting

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:mwpaapp/Constants.dart';
 import 'package:mwpaapp/Db/DBHelper.dart';
@@ -10,11 +11,13 @@ import 'package:mwpaapp/Models/TourTracking.dart';
 import 'package:mwpaapp/Models/TrackingAreaHome.dart';
 import 'package:mwpaapp/Models/Vehicle.dart';
 import 'package:mwpaapp/Models/VehicleDriver.dart';
+import 'package:mwpaapp/Mwpa/Models/CoastlineResponse.dart';
 import 'package:mwpaapp/Mwpa/Models/Info.dart';
 import 'package:mwpaapp/Mwpa/Models/SightingTourTrackingCheck.dart';
 import 'package:mwpaapp/Mwpa/Models/TrackingAreaHomeData.dart';
 import 'package:mwpaapp/Settings/CredentialStore.dart';
 import 'package:mwpaapp/Settings/Preference.dart';
+import 'package:mwpaapp/Util/UtilDistanceCoast.dart';
 import 'package:mwpaapp/Util/UtilTourFId.dart';
 import 'package:mwpaapp/Util/UtilTourTracking.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -164,6 +167,50 @@ class SyncMwpaService {
     return sent;
   }
 
+
+  /// syncCoastline - fetch the coast lines of the organization's area at
+  /// most once a day (every sync while the server is still loading them).
+  /// Never fails the sync: without new lines the old ones stay.
+  /// [lastPosition] is sent for organizations without home area.
+  static Future<void> syncCoastline(
+    MwpaApi api, {
+    Future<Position?> Function()? lastPosition,
+    int? nowSec,
+  }) async {
+    final now = nowSec ?? DateTime.now().millisecondsSinceEpoch ~/ 1000;
+
+    if (!UtilDistanceCoast.needsCheck(now)) {
+      return;
+    }
+
+    try {
+      Position? position;
+
+      try {
+        position = await (lastPosition ?? Geolocator.getLastKnownPosition)();
+      } catch (_) {
+        position = null;
+      }
+
+      final data = await api.getCoastline(latitude: position?.latitude, longitude: position?.longitude);
+
+      if (data == null) {
+        AppLog.i('Sync', 'coast lines: not supported by the server');
+        await UtilDistanceCoast.store(now);
+      } else if (data.status == CoastlineData.statusPending) {
+        AppLog.i('Sync', 'coast lines: server is loading them');
+      } else if (data.status == CoastlineData.statusOk) {
+        final points = data.lines.fold<int>(0, (sum, l) => sum + l.length ~/ 2);
+        AppLog.i('Sync', 'coast lines: ${data.lines.length} lines, $points points');
+        await UtilDistanceCoast.store(now, data);
+      } else {
+        AppLog.w('Sync', 'coast lines: ${data.status}');
+        await UtilDistanceCoast.store(now);
+      }
+    } catch (error) {
+      AppLog.w('Sync', 'coast lines failed', error);
+    }
+  }
 
   SyncMwpaService();
 
@@ -453,6 +500,11 @@ class SyncMwpaService {
 
       rethrow;
     }
+
+    /// coast lines for the distance to the coast (best effort)
+    /// ------------------------------------------------------------------------
+
+    await syncCoastline(api);
 
     /// sightings
     /// ------------------------------------------------------------------------
