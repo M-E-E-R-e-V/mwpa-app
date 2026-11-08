@@ -3,6 +3,44 @@
 All notable changes to the MWPA app are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+- Quick Connect logins can sync: the server issues a device token with the
+  QR login, which the app uses instead of a password (valid 180 days from
+  the last use, bound to the device). Logout revokes it. Needs the updated
+  MWPA backend; with an older server Quick Connect behaves as before.
+- Sightings of the running tour without end position are shown as compact
+  labels on the map, with the button for the end position.
+- The settings page has its own card for the tour times; with the home area
+  switched on, date and times are read-only and the home area is shown on a
+  small map.
+- A sighting that is not synced yet and uses a boat, skipper, species etc.
+  deleted on the server gets a red error card on Edit Sighting and the list
+  state "Deleted entry".
+- Rolf Ahlers (Oceano Barcos S.L.) on the About page contributors.
+
+### Changed
+- A sync starts right after the login, so boats, skippers and species are
+  there at once; the settings page shows a hint while they are loading.
+- Map tiles are tinted to the app colors (inverted dark map in dark mode).
+- Select boxes have the white input background like the other fields.
+- Entries deleted on the server are still shown on old sightings
+  ("(deleted)") but can no longer be selected.
+- Software development credit: Pegenau GmbH & Co. KG.
+
+### Fixed
+- Other species were stored with local ids that change with every species
+  sync and could be sent as the wrong species (#42); they now use the
+  server id, existing sightings are converted once (database v14).
+- Boats, skippers, encounter categories and behavioural states are stored
+  under the server id; with gaps in the server ids an old sighting could
+  show the wrong entry.
+- Settings texts ("Close settings", "Save settings") and help texts that had
+  been reverted by mistake.
+- The last button of the help page and the QR scanner hint were hidden
+  behind the navigation bar (Android 15).
+
 ## [1.2.0] (build 15) – 2026-11-06
 
 All changes since 1.0.12. Version 1.1.0 (build 14) was only an internal
