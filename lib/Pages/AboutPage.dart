@@ -32,6 +32,7 @@ class AboutPage extends StatefulWidget {
   static const List<(String, String, String)> contributors = [
     ('Stefan Werfling', developerName, 'https://github.com/stefanwerfling'),
     ('Tina Sommer', 'M.E.E.R. e.V.', 'https://m-e-e-r.de/verein/team/'),
+    ('Rolf Ahlers', 'Oceano Barcos S.L.', 'https://whalewatching-gomera.com/'),
   ];
 
   @override
