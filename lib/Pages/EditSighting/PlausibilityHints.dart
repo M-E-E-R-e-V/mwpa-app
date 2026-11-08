@@ -6,7 +6,8 @@ import 'package:mwpaapp/Util/UtilTourSummary.dart';
 import 'package:mwpaapp/l10n/l10n.dart';
 
 /// PlausibilityHints - card below the missing-fields summary: values that
-/// look wrong (times, date, positions far from the recorded route). Tapping
+/// look wrong (times, date, positions far from the recorded route, counts, distance
+/// to the coast, a species new for the area). Tapping
 /// a hint scrolls to the field. Only a hint, saving is not blocked.
 class PlausibilityHints extends StatelessWidget {
   final List<SightingCheckResult> results;
@@ -29,6 +30,11 @@ class PlausibilityHints extends StatelessWidget {
       SightingCheck.dateInFuture => l10n.checkDateInFuture,
       SightingCheck.beginFarFromTrack => l10n.checkBeginFarFromTrack(distance),
       SightingCheck.endFarFromTrack => l10n.checkEndFarFromTrack(distance),
+      SightingCheck.youngButSingleAnimal => l10n.checkYoungButSingleAnimal,
+      SightingCheck.subgroupsButSingleAnimal => l10n.checkSubgroupsButSingleAnimal,
+      SightingCheck.longSighting => l10n.checkLongSighting,
+      SightingCheck.distanceCoastDiffers => l10n.checkDistanceCoastDiffers(distance),
+      SightingCheck.unusualSpeciesInArea => l10n.checkUnusualSpeciesInArea,
     };
   }
 

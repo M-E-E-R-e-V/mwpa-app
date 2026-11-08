@@ -1080,4 +1080,24 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get helpColorRedDeleted =>
       'Rojo con «Entrada eliminada»: el avistamiento aún no está sincronizado y usa un barco, patrón, especie, etc. eliminado en el servidor – elige uno activo.';
+
+  @override
+  String get checkYoungButSingleAnimal =>
+      'Se han marcado crías, juveniles o recién nacidos, pero el número de animales es 1.';
+
+  @override
+  String get checkSubgroupsButSingleAnimal =>
+      'Se han marcado subgrupos, pero el número de animales es 1.';
+
+  @override
+  String get checkLongSighting => 'El avistamiento dura más de 3 horas.';
+
+  @override
+  String checkDistanceCoastDiffers(String distance) {
+    return 'La distancia a la costa no coincide con la de la posición inicial ($distance). Si la has estimado, activa «Estimación sin GPS».';
+  }
+
+  @override
+  String get checkUnusualSpeciesInArea =>
+      'Esta especie no aparece en ningún avistamiento anterior de este teléfono en un radio de 20 km. Por favor, revisa la especie.';
 }

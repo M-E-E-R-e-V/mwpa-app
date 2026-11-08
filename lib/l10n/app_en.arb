@@ -527,5 +527,17 @@
     }
   },
   "stateDeletedEntry": "Deleted entry",
-  "helpColorRedDeleted": "Red with \"Deleted entry\": the sighting is not synced yet and uses a boat, skipper, species etc. that was deleted on the server – choose an active one."
+  "helpColorRedDeleted": "Red with \"Deleted entry\": the sighting is not synced yet and uses a boat, skipper, species etc. that was deleted on the server – choose an active one.",
+  "checkYoungButSingleAnimal": "Calves, juveniles or newborns are marked, but the number of animals is 1.",
+  "checkSubgroupsButSingleAnimal": "Subgroups are marked, but the number of animals is 1.",
+  "checkLongSighting": "The sighting lasts more than 3 hours.",
+  "checkDistanceCoastDiffers": "The distance to the coast differs from the one of the begin position ({distance}). If you estimated it, switch on \"Estimation without GPS\".",
+  "@checkDistanceCoastDiffers": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "checkUnusualSpeciesInArea": "This species is not in any of the earlier sightings on this phone within 20 km. Please check the species."
 }

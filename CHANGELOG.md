@@ -18,6 +18,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - A sighting that is not synced yet and uses a boat, skipper, species etc.
   deleted on the server gets a red error card on Edit Sighting and the list
   state "Deleted entry".
+- More plausibility hints in Edit Sighting: calves, juveniles, newborns or
+  subgroups with only one animal, a sighting longer than 3 hours, a typed
+  distance to the coast that does not match the begin position, and a
+  species that none of the earlier sightings on the phone within 20 km
+  has (with at least 30 of them). Hints only, saving is never blocked.
 - Rolf Ahlers (Oceano Barcos S.L.) on the About page contributors.
 
 ### Changed

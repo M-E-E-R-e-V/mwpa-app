@@ -1081,4 +1081,24 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get helpColorRedDeleted =>
       'Rot mit „Gelöschter Eintrag“: Die Sichtung ist noch nicht synchronisiert und verwendet ein Boot, einen Skipper, eine Art o. Ä., das auf dem Server gelöscht wurde – wähle einen aktiven Eintrag.';
+
+  @override
+  String get checkYoungButSingleAnimal =>
+      'Kälber, Jungtiere oder Neugeborene sind angegeben, aber die Anzahl der Tiere ist 1.';
+
+  @override
+  String get checkSubgroupsButSingleAnimal =>
+      'Untergruppen sind angegeben, aber die Anzahl der Tiere ist 1.';
+
+  @override
+  String get checkLongSighting => 'Die Sichtung dauert länger als 3 Stunden.';
+
+  @override
+  String checkDistanceCoastDiffers(String distance) {
+    return 'Die Entfernung zur Küste weicht von der der Startposition ab ($distance). Wenn du sie geschätzt hast, schalte „Schätzung ohne GPS“ ein.';
+  }
+
+  @override
+  String get checkUnusualSpeciesInArea =>
+      'Diese Art kommt in keiner früheren Sichtung auf diesem Handy im Umkreis von 20 km vor. Bitte prüfe die Art.';
 }

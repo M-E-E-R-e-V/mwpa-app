@@ -1929,6 +1929,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Red with \"Deleted entry\": the sighting is not synced yet and uses a boat, skipper, species etc. that was deleted on the server – choose an active one.'**
   String get helpColorRedDeleted;
+
+  /// No description provided for @checkYoungButSingleAnimal.
+  ///
+  /// In en, this message translates to:
+  /// **'Calves, juveniles or newborns are marked, but the number of animals is 1.'**
+  String get checkYoungButSingleAnimal;
+
+  /// No description provided for @checkSubgroupsButSingleAnimal.
+  ///
+  /// In en, this message translates to:
+  /// **'Subgroups are marked, but the number of animals is 1.'**
+  String get checkSubgroupsButSingleAnimal;
+
+  /// No description provided for @checkLongSighting.
+  ///
+  /// In en, this message translates to:
+  /// **'The sighting lasts more than 3 hours.'**
+  String get checkLongSighting;
+
+  /// No description provided for @checkDistanceCoastDiffers.
+  ///
+  /// In en, this message translates to:
+  /// **'The distance to the coast differs from the one of the begin position ({distance}). If you estimated it, switch on \"Estimation without GPS\".'**
+  String checkDistanceCoastDiffers(String distance);
+
+  /// No description provided for @checkUnusualSpeciesInArea.
+  ///
+  /// In en, this message translates to:
+  /// **'This species is not in any of the earlier sightings on this phone within 20 km. Please check the species.'**
+  String get checkUnusualSpeciesInArea;
 }
 
 class _AppLocalizationsDelegate

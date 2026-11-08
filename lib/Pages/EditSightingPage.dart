@@ -261,6 +261,23 @@ class _EditSightingPageState extends State<EditSightingPage> {
   /// input values the [_trackResults] belong to
   String? _trackSignature;
 
+  /// species check against the earlier sightings, recomputed only when
+  /// species, begin position or the sighting list change
+  String? _speciesSignature;
+  SightingCheckResult? _speciesResult;
+
+  SightingCheckResult? _speciesAreaCheck(Sighting s) {
+    final others = _sightingController.sightingList;
+    final signature = [s.species_id, s.location_begin, others.length].join('|');
+
+    if (signature != _speciesSignature) {
+      _speciesSignature = signature;
+      _speciesResult = UtilPlausibility.checkSpeciesArea(s, others, excludeId: widget.sighting?.id);
+    }
+
+    return _speciesResult;
+  }
+
   /// _scheduleTrackCheck - re-checks the positions against the tour route
   /// when times, positions or the tour changed
   void _scheduleTrackCheck(Sighting s) {
@@ -556,6 +573,13 @@ class _EditSightingPageState extends State<EditSightingPage> {
         final checks = [
           for (final c in UtilPlausibility.checkTimes(formSighting, DateTime.now())) SightingCheckResult(c),
           ..._trackResults,
+          ...UtilPlausibility.checkValues(
+            formSighting,
+            coastMetersAtBegin: sightLocationBeginValue.posValue == null
+                ? null
+                : UtilDistanceCoast.getDistance(sightLocationBeginValue.posValue!),
+          ),
+          if (_speciesAreaCheck(formSighting) case final species?) species,
         ];
         _scheduleTrackCheck(formSighting);
         // only a sighting still to be sent must not use deleted entries
@@ -644,7 +668,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
            },
          ));
 
-         sightDurationUntil = TimeInput(
+         sightDurationUntil = _mark(SightingField.endTime, missing, TimeInput(
            title: context.l10n.labelUntil,
            value: sightDurationUntilValue,
            onChange: () async {
@@ -659,7 +683,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
                  }
                );
            },
-         );
+         ));
 
          sightLocationBegin = _mark(SightingField.beginPosition, missing, LocationInput(
            title: context.l10n.fieldBeginPosition,
@@ -686,17 +710,19 @@ class _EditSightingPageState extends State<EditSightingPage> {
            value: sightPhotoTakenValue,
          );
 
-         sightDistanceCoast = DistanceInput(
+         sightDistanceCoast = _mark(SightingField.distanceCoast, missing, DistanceInput(
            title: context.l10n.labelDistanceCoast,
            value: sightDistanceCoastValue,
-         );
+           onChange: refresh,
+         ));
 
          sightDistanceCoastEstimationGps = SwitchInput(
            title: context.l10n.labelEstimationNoGps,
            value: sightDistanceCoastEstimationGpsValue,
+           onChange: refresh,
          );
 
-         sightSpecies = KeyedSubtree(key: _entryKeys[DeletedEntryKind.species], child: SelectInput(
+         sightSpecies = _mark(SightingField.species, missing, KeyedSubtree(key: _entryKeys[DeletedEntryKind.species], child: SelectInput(
            title: context.l10n.labelSpecies,
            value: sightSpeciesValue,
            onChange: refresh,
@@ -712,7 +738,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
                  label: labelName
              );
            }),
-         ));
+         )));
 
          sightSpeciesNum = _mark(SightingField.count, missing, TextValueInput(
            title: context.l10n.fieldCount,
@@ -724,16 +750,19 @@ class _EditSightingPageState extends State<EditSightingPage> {
          sightJuveniles = YesNoUnknownInput(
            title: context.l10n.labelJuveniles,
            value: sightJuvenilesValue,
+           onChange: refresh,
          );
 
          sightCalves = YesNoUnknownInput(
            title: context.l10n.labelCalves,
            value: sightCalvesValue,
+           onChange: refresh,
          );
 
          sightNewborns = YesNoUnknownInput(
            title: context.l10n.labelNewborns,
            value: sightNewbornsValue,
+           onChange: refresh,
          );
 
          sightBehaviour = KeyedSubtree(key: _entryKeys[DeletedEntryKind.behaviour], child: MultiSelectInput(
@@ -751,6 +780,7 @@ class _EditSightingPageState extends State<EditSightingPage> {
          sightSubgroups = YesNoUnknownInput(
            title: context.l10n.labelSubgroups,
            value: sightSubgroupsValue,
+           onChange: refresh,
          );
 
         sightGroupStructure = SelectInput(

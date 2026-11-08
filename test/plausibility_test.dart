@@ -85,4 +85,70 @@ void main() {
     expect(UtilPlausibility.timeOn('2026-11-05', ''), isNull);
     expect(UtilPlausibility.timeOn(null, '10:15'), isNull);
   });
+  group('checkValues', () {
+    List<SightingCheck> run(Sighting s, {double? coast}) =>
+        UtilPlausibility.checkValues(s, coastMetersAtBegin: coast).map((r) => r.check).toList();
+
+    test('plausible values: no hint', () {
+      expect(run(Sighting(unid: '', species_count: 3, calves: 1, subgroups: 1, duration_from: '10:00', duration_until: '11:30')), isEmpty);
+      expect(run(Sighting(unid: '')), isEmpty);
+    });
+
+    test('young or subgroups with a single animal', () {
+      expect(run(Sighting(unid: '', species_count: 1, newborns: 1)), [SightingCheck.youngButSingleAnimal]);
+      expect(run(Sighting(unid: '', species_count: 1, subgroups: 1)), [SightingCheck.subgroupsButSingleAnimal]);
+      // no / unknown are fine
+      expect(run(Sighting(unid: '', species_count: 1, calves: 0, juveniles: -1, subgroups: -1)), isEmpty);
+    });
+
+    test('sighting longer than 3 hours', () {
+      expect(run(Sighting(unid: '', duration_from: '09:00', duration_until: '12:01')), [SightingCheck.longSighting]);
+      expect(run(Sighting(unid: '', duration_from: '09:00', duration_until: '12:00')), isEmpty);
+      // end before begin is the time check's hint
+      expect(run(Sighting(unid: '', duration_from: '12:00', duration_until: '08:00')), isEmpty);
+    });
+
+    test('typed distance to the coast differs from the begin position', () {
+      final results = UtilPlausibility.checkValues(Sighting(unid: '', distance_coast: '9000'), coastMetersAtBegin: 3000);
+      expect(results.single.check, SightingCheck.distanceCoastDiffers);
+      expect(results.single.meters, 3000);
+      // within 1 nm or 50 %
+      expect(run(Sighting(unid: '', distance_coast: '1500'), coast: 3000), isEmpty);
+      expect(run(Sighting(unid: '', distance_coast: '25000'), coast: 20000), isEmpty);
+      // estimated on purpose, no begin position, no value
+      expect(run(Sighting(unid: '', distance_coast: '9000', distance_coast_estimation_gps: 1), coast: 3000), isEmpty);
+      expect(run(Sighting(unid: '', distance_coast: '9000')), isEmpty);
+      expect(run(Sighting(unid: ''), coast: 3000), isEmpty);
+    });
+  });
+
+  group('checkSpeciesArea', () {
+    String pos(double lat, double lon) => '{"latitude": $lat, "longitude": $lon}';
+
+    // earlier sightings near 28.0 / -17.3, all species 5
+    List<Sighting> others(int n, {int species = 5, double lat = 28.0}) => [
+          for (var i = 0; i < n; i++)
+            Sighting(unid: '', id: i + 100, species_id: species, location_begin: pos(lat + i * 0.0001, -17.3)),
+        ];
+
+    Sighting s(int species, {double lat = 28.0}) => Sighting(unid: '', species_id: species, location_begin: pos(lat, -17.3));
+
+    test('species never recorded among enough nearby sightings', () {
+      expect(UtilPlausibility.checkSpeciesArea(s(7), others(30))?.check, SightingCheck.unusualSpeciesInArea);
+    });
+
+    test('known species, too few nearby sightings or far away: no hint', () {
+      expect(UtilPlausibility.checkSpeciesArea(s(5), others(30)), isNull);
+      expect(UtilPlausibility.checkSpeciesArea(s(7), others(29)), isNull);
+      // ~33 km north
+      expect(UtilPlausibility.checkSpeciesArea(s(7, lat: 28.3), others(30)), isNull);
+      expect(UtilPlausibility.checkSpeciesArea(Sighting(unid: '', species_id: 7), others(30)), isNull);
+    });
+
+    test('the edited sighting itself does not count', () {
+      final list = [...others(30), Sighting(unid: '', id: 1, species_id: 7, location_begin: pos(28.0, -17.3))];
+      expect(UtilPlausibility.checkSpeciesArea(s(7), list), isNull);
+      expect(UtilPlausibility.checkSpeciesArea(s(7), list, excludeId: 1)?.check, SightingCheck.unusualSpeciesInArea);
+    });
+  });
 }

@@ -13,7 +13,12 @@ enum SightingCheck {
   endBeforeBegin(SightingField.beginTime),
   dateInFuture(SightingField.date),
   beginFarFromTrack(SightingField.beginPosition),
-  endFarFromTrack(SightingField.endPosition);
+  endFarFromTrack(SightingField.endPosition),
+  youngButSingleAnimal(SightingField.count),
+  subgroupsButSingleAnimal(SightingField.count),
+  longSighting(SightingField.endTime),
+  distanceCoastDiffers(SightingField.distanceCoast),
+  unusualSpeciesInArea(SightingField.species);
 
   final SightingField field;
 
@@ -37,6 +42,93 @@ class UtilPlausibility {
 
   /// minutes around the sighting time searched for a tracking point
   static const List<int> trackSearchOffsets = [0, -1, 1, -2, 2];
+
+  /// a sighting longer than this is unusual (typing error in a time?)
+  static const int longSightingMinutes = 180;
+
+  /// a typed distance to the coast differs from the one of the begin
+  /// position by more than this (and [coastDiffRatio] of it)
+  static const double coastDiffMinMeters = 1852;
+  static const double coastDiffRatio = 0.5;
+
+  /// species check: earlier sightings within this radius, at least
+  /// [speciesAreaMinSightings] of them, none of the species
+  static const double speciesAreaRadiusMeters = 20000;
+  static const int speciesAreaMinSightings = 30;
+
+  /// checkValues - counts, duration and distance to the coast (no DB
+  /// needed); [coastMetersAtBegin] is the distance to the coast of the begin
+  /// position, null without one
+  static List<SightingCheckResult> checkValues(Sighting s, {double? coastMetersAtBegin}) {
+    final results = <SightingCheckResult>[];
+
+    // YesNoUnknown: 1 = yes
+    if (s.species_count == 1) {
+      if (s.calves == 1 || s.juveniles == 1 || s.newborns == 1) {
+        results.add(const SightingCheckResult(SightingCheck.youngButSingleAnimal));
+      }
+
+      if (s.subgroups == 1) {
+        results.add(const SightingCheckResult(SightingCheck.subgroupsButSingleAnimal));
+      }
+    }
+
+    final begin = UtilTourSummary.minutesOfDay(s.duration_from);
+    final end = UtilTourSummary.minutesOfDay(s.duration_until);
+
+    // end before begin is its own hint
+    if (begin != null && end != null && end >= begin && end - begin > longSightingMinutes) {
+      results.add(const SightingCheckResult(SightingCheck.longSighting));
+    }
+
+    // switch "estimation (no GPS)" on = the observer estimated it on purpose
+    final typed = double.tryParse(s.distance_coast ?? '');
+
+    if (s.distance_coast_estimation_gps != 1 && coastMetersAtBegin != null && typed != null) {
+      final limit = coastMetersAtBegin * coastDiffRatio;
+
+      if ((typed - coastMetersAtBegin).abs() > (limit > coastDiffMinMeters ? limit : coastDiffMinMeters)) {
+        results.add(SightingCheckResult(SightingCheck.distanceCoastDiffers, coastMetersAtBegin.round()));
+      }
+    }
+
+    return results;
+  }
+
+  /// checkSpeciesArea - the species of [s] was never recorded in the earlier
+  /// sightings around its begin position, although there are enough of them
+  /// ([excludeId] = the sighting itself when it is edited). Species ids are
+  /// server ids (orgid) on both sides.
+  static SightingCheckResult? checkSpeciesArea(Sighting s, Iterable<Sighting> others, {int? excludeId}) {
+    final species = s.species_id;
+    final position = positionOf(s.location_begin);
+
+    if (species == null || species <= 0 || position == null) {
+      return null;
+    }
+
+    var nearby = 0;
+
+    for (final other in others) {
+      if (other.species_id == null || (excludeId != null && other.id == excludeId)) {
+        continue;
+      }
+
+      final p = positionOf(other.location_begin);
+
+      if (p == null || UtilTourSummary.distanceMeters(position, p) > speciesAreaRadiusMeters) {
+        continue;
+      }
+
+      if (other.species_id == species) {
+        return null;
+      }
+
+      nearby++;
+    }
+
+    return nearby >= speciesAreaMinSightings ? const SightingCheckResult(SightingCheck.unusualSpeciesInArea) : null;
+  }
 
   /// checkTimes - date and time checks (no DB needed)
   static List<SightingCheck> checkTimes(Sighting s, DateTime now) {

@@ -1075,4 +1075,24 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get helpColorRedDeleted =>
       'Red with \"Deleted entry\": the sighting is not synced yet and uses a boat, skipper, species etc. that was deleted on the server – choose an active one.';
+
+  @override
+  String get checkYoungButSingleAnimal =>
+      'Calves, juveniles or newborns are marked, but the number of animals is 1.';
+
+  @override
+  String get checkSubgroupsButSingleAnimal =>
+      'Subgroups are marked, but the number of animals is 1.';
+
+  @override
+  String get checkLongSighting => 'The sighting lasts more than 3 hours.';
+
+  @override
+  String checkDistanceCoastDiffers(String distance) {
+    return 'The distance to the coast differs from the one of the begin position ($distance). If you estimated it, switch on \"Estimation without GPS\".';
+  }
+
+  @override
+  String get checkUnusualSpeciesInArea =>
+      'This species is not in any of the earlier sightings on this phone within 20 km. Please check the species.';
 }

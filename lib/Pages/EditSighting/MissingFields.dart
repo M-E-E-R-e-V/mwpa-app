@@ -19,6 +19,9 @@ extension SightingFieldL10n on SightingField {
       SightingField.beginPosition => l10n.fieldBeginPosition,
       SightingField.endPosition => l10n.fieldEndPosition,
       SightingField.count => l10n.fieldCount,
+      SightingField.endTime => l10n.labelUntil,
+      SightingField.distanceCoast => l10n.labelDistanceCoast,
+      SightingField.species => l10n.labelSpecies,
     };
   }
 }

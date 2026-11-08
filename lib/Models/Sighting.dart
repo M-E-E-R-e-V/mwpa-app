@@ -266,7 +266,11 @@ enum SightingField {
   beginTime('Sighting from'),
   beginPosition('Position begin'),
   endPosition('Position end', atEnd: true),
-  count('Number of animals');
+  count('Number of animals'),
+  // not required, only targets of plausibility hints
+  endTime('Sighting until'),
+  distanceCoast('Distance to coast'),
+  species('Species');
 
   final String label;
   final bool atEnd;

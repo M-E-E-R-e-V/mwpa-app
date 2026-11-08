@@ -304,5 +304,10 @@
   "deletedEntriesInfo": "Este avistamiento aún no está sincronizado. Elige una entrada activa en su lugar.",
   "deletedEntryLine": "{field}: {name}",
   "stateDeletedEntry": "Entrada eliminada",
-  "helpColorRedDeleted": "Rojo con «Entrada eliminada»: el avistamiento aún no está sincronizado y usa un barco, patrón, especie, etc. eliminado en el servidor – elige uno activo."
+  "helpColorRedDeleted": "Rojo con «Entrada eliminada»: el avistamiento aún no está sincronizado y usa un barco, patrón, especie, etc. eliminado en el servidor – elige uno activo.",
+  "checkYoungButSingleAnimal": "Se han marcado crías, juveniles o recién nacidos, pero el número de animales es 1.",
+  "checkSubgroupsButSingleAnimal": "Se han marcado subgrupos, pero el número de animales es 1.",
+  "checkLongSighting": "El avistamiento dura más de 3 horas.",
+  "checkDistanceCoastDiffers": "La distancia a la costa no coincide con la de la posición inicial ({distance}). Si la has estimado, activa «Estimación sin GPS».",
+  "checkUnusualSpeciesInArea": "Esta especie no aparece en ningún avistamiento anterior de este teléfono en un radio de 20 km. Por favor, revisa la especie."
 }
